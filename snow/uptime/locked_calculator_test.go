@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package uptime
@@ -12,8 +12,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
 )
 
 func TestLockedCalculator(t *testing.T) {
@@ -28,13 +28,13 @@ func TestLockedCalculator(t *testing.T) {
 	nodeID := ids.GenerateTestNodeID()
 	subnetID := ids.GenerateTestID()
 	_, _, err := lc.CalculateUptime(nodeID, subnetID)
-	require.ErrorIs(err, errNotReady)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	_, err = lc.CalculateUptimePercent(nodeID, subnetID)
-	require.ErrorIs(err, errNotReady)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	_, err = lc.CalculateUptimePercentFrom(nodeID, subnetID, time.Now())
-	require.ErrorIs(err, errNotReady)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	var isBootstrapped utils.Atomic[bool]
 	mockCalc := NewMockCalculator(ctrl)
@@ -42,13 +42,13 @@ func TestLockedCalculator(t *testing.T) {
 	// Should still error because ctx is not bootstrapped
 	lc.SetCalculator(&isBootstrapped, &sync.Mutex{}, mockCalc)
 	_, _, err = lc.CalculateUptime(nodeID, subnetID)
-	require.ErrorIs(err, errNotReady)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	_, err = lc.CalculateUptimePercent(nodeID, subnetID)
-	require.ErrorIs(err, errNotReady)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	_, err = lc.CalculateUptimePercentFrom(nodeID, subnetID, time.Now())
-	require.EqualValues(errNotReady, err)
+	require.ErrorIs(err, errStillBootstrapping)
 
 	isBootstrapped.Set(true)
 

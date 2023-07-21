@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -11,15 +11,15 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/vms/proposervm/block"
-	"github.com/dioneprotocol/dionego/vms/proposervm/state"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/state"
 )
 
 func TestHeightBlockIndexPostFork(t *testing.T) {
@@ -94,7 +94,7 @@ func TestHeightBlockIndexPostFork(t *testing.T) {
 	// check that height index is fully built
 	loadedForkHeight, err := storedState.GetForkHeight()
 	require.NoError(err)
-	require.True(loadedForkHeight == 1)
+	require.Equal(uint64(1), loadedForkHeight)
 	for height := uint64(1); height <= blkNumber; height++ {
 		_, err := storedState.GetBlockIDAtHeight(height)
 		require.NoError(err)
@@ -174,10 +174,10 @@ func TestHeightBlockIndexAcrossFork(t *testing.T) {
 	// check that height index is fully built
 	loadedForkHeight, err := storedState.GetForkHeight()
 	require.NoError(err)
-	require.True(loadedForkHeight == forkHeight)
+	require.Equal(forkHeight, loadedForkHeight)
 	for height := uint64(0); height < forkHeight; height++ {
 		_, err := storedState.GetBlockIDAtHeight(height)
-		require.Error(err, database.ErrNotFound)
+		require.ErrorIs(err, database.ErrNotFound)
 	}
 	for height := forkHeight; height <= blkNumber; height++ {
 		_, err := storedState.GetBlockIDAtHeight(height)
@@ -270,7 +270,7 @@ func TestHeightBlockIndexResumeFromCheckPoint(t *testing.T) {
 	// check that height index is fully built
 	loadedForkHeight, err := storedState.GetForkHeight()
 	require.NoError(err)
-	require.True(loadedForkHeight == forkHeight)
+	require.Equal(forkHeight, loadedForkHeight)
 	for height := forkHeight; height <= checkpointBlk.Height(); height++ {
 		_, err := storedState.GetBlockIDAtHeight(height)
 		require.NoError(err)

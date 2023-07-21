@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package throttling
@@ -10,9 +10,9 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/metric"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 // See inbound_msg_throttler.go
@@ -57,8 +57,9 @@ type inboundMsgBufferThrottler struct {
 // buffer so that we can read a message from [nodeID].
 // The returned release function must be called (!) when done processing the message
 // (or when we give up trying to read the message.)
+//
 // invariant: There should be a maximum of 1 blocking call to Acquire for a
-//            given nodeID. Callers must enforce this invariant.
+// given nodeID. Callers must enforce this invariant.
 func (t *inboundMsgBufferThrottler) Acquire(ctx context.Context, nodeID ids.NodeID) ReleaseFunc {
 	startTime := time.Now()
 	defer func() {

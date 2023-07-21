@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package secp256k1
@@ -10,14 +10,14 @@ import (
 
 	stdecdsa "crypto/ecdsa"
 
-	"github.com/decred/dcrd/dcrec/secp256k1/v3/ecdsa"
+	"github.com/decred/dcrd/dcrec/secp256k1/v4/ecdsa"
 
-	secp256k1 "github.com/decred/dcrd/dcrec/secp256k1/v3"
+	secp256k1 "github.com/decred/dcrd/dcrec/secp256k1/v4"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/cb58"
-	"github.com/dioneprotocol/dionego/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/cb58"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 const (
@@ -44,6 +44,7 @@ const (
 )
 
 var (
+	ErrInvalidSig              = errors.New("invalid signature")
 	errCompressed              = errors.New("wasn't expecting a compressed key")
 	errMissingQuotes           = errors.New("first and last characters should be quotes")
 	errMissingKeyPrefix        = fmt.Errorf("private key missing %s prefix", PrivateKeyPrefix)
@@ -108,7 +109,7 @@ func (f *Factory) RecoverHashPublicKey(hash, sig []byte) (*PublicKey, error) {
 
 	rawPubkey, compressed, err := ecdsa.RecoverCompact(sig, hash)
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidSig
 	}
 
 	if compressed {

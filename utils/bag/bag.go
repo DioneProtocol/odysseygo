@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package bag
@@ -9,7 +9,8 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 const minBagSize = 16
@@ -154,10 +155,10 @@ func (b *Bag[T]) Remove(elt T) {
 	b.size -= count
 }
 
-func (b *Bag[_]) PrefixedString(prefix string) string {
+func (b *Bag[T]) PrefixedString(prefix string) string {
 	sb := strings.Builder{}
 
-	sb.WriteString(fmt.Sprintf("Bag: (Size = %d)", b.Len()))
+	sb.WriteString(fmt.Sprintf("Bag[%T]: (Size = %d)", utils.Zero[T](), b.Len()))
 	for elt, count := range b.counts {
 		sb.WriteString(fmt.Sprintf("\n%s    %v: %d", prefix, elt, count))
 	}

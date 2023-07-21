@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
@@ -11,20 +11,20 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/utils/timer"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/timer"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/mempool"
 
-	blockexecutor "github.com/dioneprotocol/dionego/vms/platformvm/blocks/executor"
-	txbuilder "github.com/dioneprotocol/dionego/vms/platformvm/txs/builder"
-	txexecutor "github.com/dioneprotocol/dionego/vms/platformvm/txs/executor"
+	blockexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/blocks/executor"
+	txbuilder "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/builder"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
 )
 
 // targetBlockSize is maximum number of transaction bytes to place into a
@@ -34,9 +34,9 @@ const targetBlockSize = 128 * units.KiB
 var (
 	_ Builder = (*builder)(nil)
 
-	errEndOfTime       = errors.New("program time is suspiciously far in the future")
-	errNoPendingBlocks = errors.New("no pending blocks")
-	errChainNotSynced  = errors.New("chain not synced")
+	ErrEndOfTime       = errors.New("program time is suspiciously far in the future")
+	ErrNoPendingBlocks = errors.New("no pending blocks")
+	ErrChainNotSynced  = errors.New("chain not synced")
 )
 
 type Builder interface {
@@ -126,7 +126,7 @@ func (b *builder) Preferred() (snowman.Block, error) {
 // AddUnverifiedTx verifies a transaction and attempts to add it to the mempool
 func (b *builder) AddUnverifiedTx(tx *txs.Tx) error {
 	if !b.txExecutorBackend.Bootstrapped.Get() {
-		return errChainNotSynced
+		return ErrChainNotSynced
 	}
 
 	txID := tx.ID()
@@ -143,7 +143,7 @@ func (b *builder) AddUnverifiedTx(tx *txs.Tx) error {
 		Tx:            tx,
 	}
 	if err := tx.Unsigned.Visit(&verifier); err != nil {
-		b.MarkDropped(txID, err.Error())
+		b.MarkDropped(txID, err)
 		return err
 	}
 
@@ -205,7 +205,7 @@ func (b *builder) buildBlock() (blocks.Block, error) {
 	}
 
 	// timeWasCapped means that [timestamp] was reduced to
-	// [nextStakerChangeTime]. It is used as a flag for [buildApricotBlock] to
+	// [nextStakerChangeTime]. It is used as a flag for [buildOdysseyBlock] to
 	// be willing to issue an advanceTimeTx. It is also used as a flag for
 	// [buildBanffBlock] to force the issuance of an empty block to advance
 	// the time forward; if there are no available transactions.
@@ -240,7 +240,7 @@ func (b *builder) ResetBlockTimer() {
 	b.timer.SetTimeoutIn(0)
 }
 
-// dropExpiredStakerTxs drops add validator/delegator transactions in the
+// dropExpiredStakerTxs drops add validator transactions in the
 // mempool whose start time is not sufficiently far in the future
 // (i.e. within local time plus [MaxFutureStartFrom]).
 func (b *builder) dropExpiredStakerTxs(timestamp time.Time) {
@@ -255,17 +255,17 @@ func (b *builder) dropExpiredStakerTxs(timestamp time.Time) {
 		}
 
 		txID := tx.ID()
-		errMsg := fmt.Sprintf(
+		err := fmt.Errorf(
 			"synchrony bound (%s) is later than staker start time (%s)",
 			minStartTime,
 			startTime,
 		)
 
 		b.Mempool.Remove([]*txs.Tx{tx})
-		b.Mempool.MarkDropped(txID, errMsg) // cache tx as dropped
+		b.Mempool.MarkDropped(txID, err) // cache tx as dropped
 		b.txExecutorBackend.Ctx.Log.Debug("dropping tx",
-			zap.String("reason", errMsg),
 			zap.Stringer("txID", txID),
+			zap.Error(err),
 		)
 	}
 }
@@ -291,7 +291,7 @@ func (b *builder) setNextBuildBlockTime() {
 		return
 	}
 
-	// Wake up when it's time to add/remove the next validator/delegator
+	// Wake up when it's time to add/remove the next validator
 	preferredState, ok := b.blkManager.GetState(b.preferredBlockID)
 	if !ok {
 		// The preferred block should always be a decision block
@@ -369,7 +369,7 @@ func buildBlock(
 	// If there is no reason to build a block, don't.
 	if !builder.Mempool.HasTxs() && !forceAdvanceTime {
 		builder.txExecutorBackend.Ctx.Log.Debug("no pending txs to issue into a block")
-		return nil, errNoPendingBlocks
+		return nil, ErrNoPendingBlocks
 	}
 
 	// Issue a block with as many transactions as possible.
@@ -394,7 +394,7 @@ func getNextStakerToReward(
 	preferredState state.Chain,
 ) (ids.ID, bool, error) {
 	if !chainTimestamp.Before(mockable.MaxTime) {
-		return ids.Empty, false, errEndOfTime
+		return ids.Empty, false, ErrEndOfTime
 	}
 
 	currentStakerIterator, err := preferredState.GetCurrentStakerIterator()

@@ -1,14 +1,14 @@
 # Shared Memory
 
-Shared memory creates a way for blockchains in the Dione Ecosystem to communicate with each other by using a shared database to create a bidirectional communication channel between any two blockchains in the same subnet.
+Shared memory creates a way for blockchains in the Odyssey Ecosystem to communicate with each other by using a shared database to create a bidirectional communication channel between any two blockchains in the same subnet.
 
 ## Shared Database
 
 ### Using Shared Base Database
 
-DioneGo uses a single base database (typically leveldb). This database is partitioned using the `prefixdb` package, so that each recipient of a `prefixdb` can treat it as if it were its own unique database.
+OdysseyGo uses a single base database (typically leveldb). This database is partitioned using the `prefixdb` package, so that each recipient of a `prefixdb` can treat it as if it were its own unique database.
 
-Each blockchain in the Dione Ecosystem has its own `prefixdb` passed in via `vm.Initialize(...)`, which means that the `prefixdb`s that are given to each blockchain share the same base level database.
+Each blockchain in the Odyssey Ecosystem has its own `prefixdb` passed in via `vm.Initialize(...)`, which means that the `prefixdb`s that are given to each blockchain share the same base level database.
 
 Shared Memory, which also uses the same underlying database, leverages this fact to support the ability to combine a database batch performed on shared memory with any other batches that are performed on the same underlying database.
 

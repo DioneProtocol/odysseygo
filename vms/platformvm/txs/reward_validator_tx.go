@@ -1,13 +1,13 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 import (
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var _ UnsignedTx = (*RewardValidatorTx)(nil)
@@ -23,7 +23,7 @@ var _ UnsignedTx = (*RewardValidatorTx)(nil)
 // block, the validator is removed and the address that the validator specified
 // receives the staked DIONE but no reward.
 type RewardValidatorTx struct {
-	// ID of the tx that created the delegator/validator being removed/rewarded
+	// ID of the tx that created the validator being removed/rewarded
 	TxID ids.ID `serialize:"true" json:"txID"`
 
 	// Marks if this validator should be rewarded according to this node.

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
@@ -8,20 +8,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/config"
-	"github.com/dioneprotocol/dionego/vms/platformvm/fx"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/utxo"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // Max number of items allowed in a page
@@ -30,7 +29,7 @@ const MaxPageSize = 1024
 var (
 	_ Builder = (*builder)(nil)
 
-	errNoFunds = errors.New("no spendable funds were found")
+	ErrNoFunds = errors.New("no spendable funds were found")
 )
 
 type Builder interface {
@@ -101,28 +100,9 @@ type ProposalTxBuilder interface {
 	// endTime: unix time they stop validating
 	// nodeID: ID of the node we want to validate with
 	// rewardAddress: address to send reward to, if applicable
-	// shares: 10,000 times percentage of reward taken from delegators
 	// keys: Keys providing the staked tokens
 	// changeAddr: Address to send change to, if there is any
 	NewAddValidatorTx(
-		stakeAmount,
-		startTime,
-		endTime uint64,
-		nodeID ids.NodeID,
-		rewardAddress ids.ShortID,
-		shares uint32,
-		keys []*secp256k1.PrivateKey,
-		changeAddr ids.ShortID,
-	) (*txs.Tx, error)
-
-	// stakeAmount: amount the delegator stakes
-	// startTime: unix time they start delegating
-	// endTime: unix time they stop delegating
-	// nodeID: ID of the node we are delegating to
-	// rewardAddress: address to send reward to, if applicable
-	// keys: keys providing the staked tokens
-	// changeAddr: address to send change to, if there is any
-	NewAddDelegatorTx(
 		stakeAmount,
 		startTime,
 		endTime uint64,
@@ -133,8 +113,8 @@ type ProposalTxBuilder interface {
 	) (*txs.Tx, error)
 
 	// weight: sampling weight of the new validator
-	// startTime: unix time they start delegating
-	// endTime:  unix time they top delegating
+	// startTime: unix time they start validating
+	// endTime:  unix time they top validating
 	// nodeID: ID of the node validating
 	// subnetID: ID of the subnet the validator will validate
 	// keys: keys to use for adding the validator
@@ -242,7 +222,7 @@ func (b *builder) NewImportTx(
 	dione.SortTransferableInputsWithSigners(importedInputs, signers)
 
 	if len(importedAmounts) == 0 {
-		return nil, errNoFunds // No imported UTXOs were spendable
+		return nil, ErrNoFunds // No imported UTXOs were spendable
 	}
 
 	importedDIONE := importedAmounts[b.ctx.DIONEAssetID]
@@ -432,7 +412,6 @@ func (b *builder) NewAddValidatorTx(
 	endTime uint64,
 	nodeID ids.NodeID,
 	rewardAddress ids.ShortID,
-	shares uint32,
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
@@ -448,7 +427,7 @@ func (b *builder) NewAddValidatorTx(
 			Ins:          ins,
 			Outs:         unstakedOuts,
 		}},
-		Validator: validator.Validator{
+		Validator: txs.Validator{
 			NodeID: nodeID,
 			Start:  startTime,
 			End:    endTime,
@@ -456,48 +435,6 @@ func (b *builder) NewAddValidatorTx(
 		},
 		StakeOuts: stakedOuts,
 		RewardsOwner: &secp256k1fx.OutputOwners{
-			Locktime:  0,
-			Threshold: 1,
-			Addrs:     []ids.ShortID{rewardAddress},
-		},
-		DelegationShares: shares,
-	}
-	tx, err := txs.NewSigned(utx, txs.Codec, signers)
-	if err != nil {
-		return nil, err
-	}
-	return tx, tx.SyntacticVerify(b.ctx)
-}
-
-func (b *builder) NewAddDelegatorTx(
-	stakeAmount,
-	startTime,
-	endTime uint64,
-	nodeID ids.NodeID,
-	rewardAddress ids.ShortID,
-	keys []*secp256k1.PrivateKey,
-	changeAddr ids.ShortID,
-) (*txs.Tx, error) {
-	ins, unlockedOuts, lockedOuts, signers, err := b.Spend(b.state, keys, stakeAmount, b.cfg.AddPrimaryNetworkDelegatorFee, changeAddr)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
-	}
-	// Create the tx
-	utx := &txs.AddDelegatorTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    b.ctx.NetworkID,
-			BlockchainID: b.ctx.ChainID,
-			Ins:          ins,
-			Outs:         unlockedOuts,
-		}},
-		Validator: validator.Validator{
-			NodeID: nodeID,
-			Start:  startTime,
-			End:    endTime,
-			Wght:   stakeAmount,
-		},
-		StakeOuts: lockedOuts,
-		DelegationRewardsOwner: &secp256k1fx.OutputOwners{
 			Locktime:  0,
 			Threshold: 1,
 			Addrs:     []ids.ShortID{rewardAddress},
@@ -538,8 +475,8 @@ func (b *builder) NewAddSubnetValidatorTx(
 			Ins:          ins,
 			Outs:         outs,
 		}},
-		Validator: validator.SubnetValidator{
-			Validator: validator.Validator{
+		SubnetValidator: txs.SubnetValidator{
+			Validator: txs.Validator{
 				NodeID: nodeID,
 				Start:  startTime,
 				End:    endTime,

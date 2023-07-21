@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package cache
@@ -6,94 +6,60 @@ package cache
 import (
 	"testing"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/set"
 	"github.com/stretchr/testify/require"
+
+	"github.com/DioneProtocol/odysseygo/ids"
 )
 
 func TestLRU(t *testing.T) {
-	cache := &LRU[ids.ID, int]{Size: 1}
+	cache := &LRU[ids.ID, TestSizedInt]{Size: 1}
 
 	TestBasic(t, cache)
 }
 
 func TestLRUEviction(t *testing.T) {
-	cache := &LRU[ids.ID, int]{Size: 2}
+	cache := &LRU[ids.ID, TestSizedInt]{Size: 2}
 
 	TestEviction(t, cache)
 }
 
 func TestLRUResize(t *testing.T) {
-	cache := LRU[ids.ID, int]{Size: 2}
+	require := require.New(t)
+	cache := LRU[ids.ID, TestSizedInt]{Size: 2}
 
 	id1 := ids.ID{1}
 	id2 := ids.ID{2}
 
-	cache.Put(id1, 1)
-	cache.Put(id2, 2)
+	expectedVal1 := TestSizedInt{i: 1}
+	expectedVal2 := TestSizedInt{i: 2}
+	cache.Put(id1, expectedVal1)
+	cache.Put(id2, expectedVal2)
 
-	if val, found := cache.Get(id1); !found {
-		t.Fatalf("Failed to retrieve value when one exists")
-	} else if val != 1 {
-		t.Fatalf("Retrieved wrong value")
-	} else if val, found := cache.Get(id2); !found {
-		t.Fatalf("Failed to retrieve value when one exists")
-	} else if val != 2 {
-		t.Fatalf("Retrieved wrong value")
-	}
+	val, found := cache.Get(id1)
+	require.True(found)
+	require.Equal(expectedVal1, val)
+
+	val, found = cache.Get(id2)
+	require.True(found)
+	require.Equal(expectedVal2, val)
 
 	cache.Size = 1
+	// id1 evicted
 
-	if _, found := cache.Get(id1); found {
-		t.Fatalf("Retrieve value when none exists")
-	} else if val, found := cache.Get(id2); !found {
-		t.Fatalf("Failed to retrieve value when one exists")
-	} else if val != 2 {
-		t.Fatalf("Retrieved wrong value")
-	}
+	_, found = cache.Get(id1)
+	require.False(found)
+
+	val, found = cache.Get(id2)
+	require.True(found)
+	require.Equal(expectedVal2, val)
 
 	cache.Size = 0
+	// We reset the size to 1 in resize
 
-	if _, found := cache.Get(id1); found {
-		t.Fatalf("Retrieve value when none exists")
-	} else if val, found := cache.Get(id2); !found {
-		t.Fatalf("Failed to retrieve value when one exists")
-	} else if val != 2 {
-		t.Fatalf("Retrieved wrong value")
-	}
-}
+	_, found = cache.Get(id1)
+	require.False(found)
 
-func TestLRUOnEviction(t *testing.T) {
-	require := require.New(t)
-
-	shouldEvict := set.NewSet[int](1)
-	cache := LRU[int, int]{
-		Size: 2,
-		OnEviction: func(i int) {
-			require.Contains(shouldEvict, i)
-			shouldEvict.Remove(i)
-		},
-	}
-
-	cache.Put(11, 1)
-	cache.Put(22, 2)
-
-	shouldEvict.Add(1)
-	cache.Put(33, 3)
-	require.Empty(shouldEvict)
-
-	shouldEvict.Add(2)
-	cache.Size = 1
-	cache.resize()
-	require.Empty(shouldEvict)
-
-	shouldEvict.Add(3)
-	cache.Flush()
-	require.Empty(shouldEvict)
-
-	cache.Put(44, 4)
-
-	shouldEvict.Add(4)
-	cache.Evict(44)
-	require.Empty(shouldEvict)
+	val, found = cache.Get(id2)
+	require.True(found)
+	require.Equal(expectedVal2, val)
 }

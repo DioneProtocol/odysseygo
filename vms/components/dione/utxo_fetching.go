@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dione
@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 
-	safemath "github.com/dioneprotocol/dionego/utils/math"
+	safemath "github.com/DioneProtocol/odysseygo/utils/math"
 )
 
 // GetBalance returns the current balance of [addrs]

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package router
@@ -13,14 +13,15 @@ import (
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/message"
-	"github.com/dioneprotocol/dionego/snow/networking/handler"
-	"github.com/dioneprotocol/dionego/snow/networking/timeout"
-	"github.com/dioneprotocol/dionego/trace"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow/networking/handler"
+	"github.com/DioneProtocol/odysseygo/snow/networking/timeout"
+	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 var _ Router = (*tracedRouter)(nil)
@@ -43,7 +44,7 @@ func (r *tracedRouter) Initialize(
 	timeoutManager timeout.Manager,
 	closeTimeout time.Duration,
 	criticalChains set.Set[ids.ID],
-	stakingEnabled bool,
+	sybilProtectionEnabled bool,
 	trackedSubnets set.Set[ids.ID],
 	onFatal func(exitCode int),
 	healthConfig HealthConfig,
@@ -56,7 +57,7 @@ func (r *tracedRouter) Initialize(
 		timeoutManager,
 		closeTimeout,
 		criticalChains,
-		stakingEnabled,
+		sybilProtectionEnabled,
 		trackedSubnets,
 		onFatal,
 		healthConfig,
@@ -73,6 +74,7 @@ func (r *tracedRouter) RegisterRequest(
 	requestID uint32,
 	op message.Op,
 	failedMsg message.InboundMessage,
+	engineType p2p.EngineType,
 ) {
 	r.router.RegisterRequest(
 		ctx,
@@ -82,6 +84,7 @@ func (r *tracedRouter) RegisterRequest(
 		requestID,
 		op,
 		failedMsg,
+		engineType,
 	)
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package tracedvm
@@ -10,26 +10,26 @@ import (
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowstorm"
-	"github.com/dioneprotocol/dionego/snow/engine/dione/vertex"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/trace"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowstorm"
+	"github.com/DioneProtocol/odysseygo/snow/engine/odyssey/vertex"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/trace"
 )
 
-var _ vertex.DAGVM = (*vertexVM)(nil)
+var _ vertex.LinearizableVMWithEngine = (*vertexVM)(nil)
 
 type vertexVM struct {
-	vertex.DAGVM
+	vertex.LinearizableVMWithEngine
 	tracer trace.Tracer
 }
 
-func NewVertexVM(vm vertex.DAGVM, tracer trace.Tracer) vertex.DAGVM {
+func NewVertexVM(vm vertex.LinearizableVMWithEngine, tracer trace.Tracer) vertex.LinearizableVMWithEngine {
 	return &vertexVM{
-		DAGVM:  vm,
-		tracer: tracer,
+		LinearizableVMWithEngine: vm,
+		tracer:                   tracer,
 	}
 }
 
@@ -47,7 +47,7 @@ func (vm *vertexVM) Initialize(
 	ctx, span := vm.tracer.Start(ctx, "vertexVM.Initialize")
 	defer span.End()
 
-	return vm.DAGVM.Initialize(
+	return vm.LinearizableVMWithEngine.Initialize(
 		ctx,
 		chainCtx,
 		db,
@@ -64,7 +64,7 @@ func (vm *vertexVM) PendingTxs(ctx context.Context) []snowstorm.Tx {
 	ctx, span := vm.tracer.Start(ctx, "vertexVM.PendingTxs")
 	defer span.End()
 
-	return vm.DAGVM.PendingTxs(ctx)
+	return vm.LinearizableVMWithEngine.PendingTxs(ctx)
 }
 
 func (vm *vertexVM) ParseTx(ctx context.Context, txBytes []byte) (snowstorm.Tx, error) {
@@ -73,7 +73,7 @@ func (vm *vertexVM) ParseTx(ctx context.Context, txBytes []byte) (snowstorm.Tx, 
 	))
 	defer span.End()
 
-	tx, err := vm.DAGVM.ParseTx(ctx, txBytes)
+	tx, err := vm.LinearizableVMWithEngine.ParseTx(ctx, txBytes)
 	return &tracedTx{
 		Tx:     tx,
 		tracer: vm.tracer,
@@ -86,7 +86,7 @@ func (vm *vertexVM) GetTx(ctx context.Context, txID ids.ID) (snowstorm.Tx, error
 	))
 	defer span.End()
 
-	tx, err := vm.DAGVM.GetTx(ctx, txID)
+	tx, err := vm.LinearizableVMWithEngine.GetTx(ctx, txID)
 	return &tracedTx{
 		Tx:     tx,
 		tracer: vm.tracer,

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -11,20 +11,19 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/config"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/utxo"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
@@ -46,7 +45,6 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			MaxValidatorStake: 2,
 			MinStakeDuration:  3,
 			MaxStakeDuration:  4,
-			MinDelegationFee:  5,
 		}
 		transformTx = txs.Tx{
 			Unsigned: unsignedTransformTx,
@@ -63,7 +61,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 					Ins:          []*dione.TransferableInput{},
 				},
 			},
-			Validator: validator.Validator{
+			Validator: txs.Validator{
 				NodeID: ids.GenerateTestNodeID(),
 				Start:  1,
 				End:    1 + uint64(unsignedTransformTx.MinStakeDuration),
@@ -81,11 +79,6 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				Addrs:     []ids.ShortID{ids.GenerateTestShortID()},
 				Threshold: 1,
 			},
-			DelegatorRewardsOwner: &secp256k1fx.OutputOwners{
-				Addrs:     []ids.ShortID{ids.GenerateTestShortID()},
-				Threshold: 1,
-			},
-			DelegationShares: 20_000,
 		}
 		verifiedSignedTx = txs.Tx{
 			Unsigned: &verifiedTx,
@@ -153,7 +146,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				return &verifiedTx
 			},
-			expectedErr: errTimestampNotBeforeStartTime,
+			expectedErr: ErrTimestampNotBeforeStartTime,
 		},
 		{
 			name: "weight too low",
@@ -179,7 +172,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake - 1
 				return &tx
 			},
-			expectedErr: errWeightTooSmall,
+			expectedErr: ErrWeightTooSmall,
 		},
 		{
 			name: "weight too high",
@@ -205,34 +198,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake + 1
 				return &tx
 			},
-			expectedErr: errWeightTooLarge,
-		},
-		{
-			name: "insufficient delegation fee",
-			backendF: func(*gomock.Controller) *Backend {
-				bootstrapped := &utils.Atomic[bool]{}
-				bootstrapped.Set(true)
-				return &Backend{
-					Ctx:          snow.DefaultContextTest(),
-					Bootstrapped: bootstrapped,
-				}
-			},
-			stateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				state.EXPECT().GetTimestamp().Return(time.Unix(0, 0))
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(&transformTx, nil)
-				return state
-			},
-			sTxF: func() *txs.Tx {
-				return &verifiedSignedTx
-			},
-			txF: func() *txs.AddPermissionlessValidatorTx {
-				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
-				tx.DelegationShares = unsignedTransformTx.MinDelegationFee - 1
-				return &tx
-			},
-			expectedErr: errInsufficientDelegationFee,
+			expectedErr: ErrWeightTooLarge,
 		},
 		{
 			name: "duration too short",
@@ -256,13 +222,12 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
 				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
-				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is 1 less than the minimum
 				tx.Validator.Start = 1
 				tx.Validator.End = uint64(unsignedTransformTx.MinStakeDuration)
 				return &tx
 			},
-			expectedErr: errStakeTooShort,
+			expectedErr: ErrStakeTooShort,
 		},
 		{
 			name: "duration too long",
@@ -286,13 +251,12 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
 				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
-				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is more than the maximum
 				tx.Validator.Start = 1
 				tx.Validator.End = 2 + uint64(unsignedTransformTx.MaxStakeDuration)
 				return &tx
 			},
-			expectedErr: errStakeTooLong,
+			expectedErr: ErrStakeTooLong,
 		},
 		{
 			name: "wrong assetID",
@@ -324,7 +288,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				}
 				return &tx
 			},
-			expectedErr: errWrongStakedAssetID,
+			expectedErr: ErrWrongStakedAssetID,
 		},
 		{
 			name: "duplicate validator",
@@ -350,7 +314,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				return &verifiedTx
 			},
-			expectedErr: errDuplicateValidator,
+			expectedErr: ErrDuplicateValidator,
 		},
 		{
 			name: "validator not subset of primary network validator",
@@ -382,7 +346,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				return &verifiedTx
 			},
-			expectedErr: errValidatorSubset,
+			expectedErr: ErrValidatorSubset,
 		},
 		{
 			name: "flow check fails",
@@ -398,7 +362,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 					gomock.Any(),
 					gomock.Any(),
 					gomock.Any(),
-				).Return(errFlowCheckFailed)
+				).Return(ErrFlowCheckFailed)
 
 				return &Backend{
 					FlowChecker: flowChecker,
@@ -428,7 +392,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				return &verifiedTx
 			},
-			expectedErr: errFlowCheckFailed,
+			expectedErr: ErrFlowCheckFailed,
 		},
 		{
 			name: "starts too far in the future",
@@ -478,7 +442,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				tx.Validator.End = tx.Validator.Start + uint64(unsignedTransformTx.MinStakeDuration)
 				return &tx
 			},
-			expectedErr: errFutureStakeTime,
+			expectedErr: ErrFutureStakeTime,
 		},
 		{
 			name: "success",
@@ -562,7 +526,6 @@ func TestGetValidatorRules(t *testing.T) {
 			MaxValidatorStake: 2,
 			MinStakeDuration:  time.Second,
 			MaxStakeDuration:  2 * time.Second,
-			MinDelegationFee:  1337,
 		}
 		dioneAssetID   = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -588,7 +551,6 @@ func TestGetValidatorRules(t *testing.T) {
 				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  config.MinStakeDuration,
 				maxStakeDuration:  config.MaxStakeDuration,
-				minDelegationFee:  config.MinDelegationFee,
 			},
 		},
 		{
@@ -602,21 +564,6 @@ func TestGetValidatorRules(t *testing.T) {
 			},
 			expectedRules: &addValidatorRules{},
 			expectedErr:   errTest,
-		},
-		{
-			name:     "invalid transformation tx",
-			subnetID: subnetID,
-			backend:  nil,
-			chainStateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				tx := &txs.Tx{
-					Unsigned: &txs.AddDelegatorTx{},
-				}
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)
-				return state
-			},
-			expectedRules: &addValidatorRules{},
-			expectedErr:   errIsNotTransformSubnetTx,
 		},
 		{
 			name:     "subnet",
@@ -631,7 +578,6 @@ func TestGetValidatorRules(t *testing.T) {
 						MaxValidatorStake: config.MaxValidatorStake,
 						MinStakeDuration:  1337,
 						MaxStakeDuration:  42,
-						MinDelegationFee:  config.MinDelegationFee,
 					},
 				}
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)
@@ -643,7 +589,6 @@ func TestGetValidatorRules(t *testing.T) {
 				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  time.Duration(1337) * time.Second,
 				maxStakeDuration:  time.Duration(42) * time.Second,
-				minDelegationFee:  config.MinDelegationFee,
 			},
 			expectedErr: nil,
 		},
@@ -658,126 +603,7 @@ func TestGetValidatorRules(t *testing.T) {
 			chainState := tt.chainStateF(ctrl)
 			rules, err := getValidatorRules(tt.backend, chainState, tt.subnetID)
 			if tt.expectedErr != nil {
-				require.ErrorIs(tt.expectedErr, err)
-				return
-			}
-			require.NoError(err)
-			require.Equal(tt.expectedRules, rules)
-		})
-	}
-}
-
-func TestGetDelegatorRules(t *testing.T) {
-	type test struct {
-		name          string
-		subnetID      ids.ID
-		backend       *Backend
-		chainStateF   func(*gomock.Controller) state.Chain
-		expectedRules *addDelegatorRules
-		expectedErr   error
-	}
-	var (
-		config = &config.Config{
-			MinDelegatorStake: 1,
-			MaxValidatorStake: 2,
-			MinStakeDuration:  time.Second,
-			MaxStakeDuration:  2 * time.Second,
-		}
-		dioneAssetID   = ids.GenerateTestID()
-		customAssetID = ids.GenerateTestID()
-		subnetID      = ids.GenerateTestID()
-	)
-	tests := []test{
-		{
-			name:     "primary network",
-			subnetID: constants.PrimaryNetworkID,
-			backend: &Backend{
-				Config: config,
-				Ctx: &snow.Context{
-					DIONEAssetID: dioneAssetID,
-				},
-			},
-			chainStateF: func(*gomock.Controller) state.Chain {
-				return nil
-			},
-			expectedRules: &addDelegatorRules{
-				assetID:                  dioneAssetID,
-				minDelegatorStake:        config.MinDelegatorStake,
-				maxValidatorStake:        config.MaxValidatorStake,
-				minStakeDuration:         config.MinStakeDuration,
-				maxStakeDuration:         config.MaxStakeDuration,
-				maxValidatorWeightFactor: MaxValidatorWeightFactor,
-			},
-		},
-		{
-			name:     "can't get subnet transformation",
-			subnetID: subnetID,
-			backend:  nil,
-			chainStateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(nil, errTest)
-				return state
-			},
-			expectedRules: &addDelegatorRules{},
-			expectedErr:   errTest,
-		},
-		{
-			name:     "invalid transformation tx",
-			subnetID: subnetID,
-			backend:  nil,
-			chainStateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				tx := &txs.Tx{
-					Unsigned: &txs.AddDelegatorTx{},
-				}
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)
-				return state
-			},
-			expectedRules: &addDelegatorRules{},
-			expectedErr:   errIsNotTransformSubnetTx,
-		},
-		{
-			name:     "subnet",
-			subnetID: subnetID,
-			backend:  nil,
-			chainStateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				tx := &txs.Tx{
-					Unsigned: &txs.TransformSubnetTx{
-						AssetID:                  customAssetID,
-						MinDelegatorStake:        config.MinDelegatorStake,
-						MinValidatorStake:        config.MinValidatorStake,
-						MaxValidatorStake:        config.MaxValidatorStake,
-						MinStakeDuration:         1337,
-						MaxStakeDuration:         42,
-						MinDelegationFee:         config.MinDelegationFee,
-						MaxValidatorWeightFactor: 21,
-					},
-				}
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)
-				return state
-			},
-			expectedRules: &addDelegatorRules{
-				assetID:                  customAssetID,
-				minDelegatorStake:        config.MinDelegatorStake,
-				maxValidatorStake:        config.MaxValidatorStake,
-				minStakeDuration:         time.Duration(1337) * time.Second,
-				maxStakeDuration:         time.Duration(42) * time.Second,
-				maxValidatorWeightFactor: 21,
-			},
-			expectedErr: nil,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			require := require.New(t)
-			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
-			chainState := tt.chainStateF(ctrl)
-			rules, err := getDelegatorRules(tt.backend, chainState, tt.subnetID)
-			if tt.expectedErr != nil {
-				require.ErrorIs(tt.expectedErr, err)
+				require.ErrorIs(err, tt.expectedErr)
 				return
 			}
 			require.NoError(err)

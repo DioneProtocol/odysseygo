@@ -1,10 +1,11 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -12,24 +13,25 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/mempool"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	blockexecutor "github.com/dioneprotocol/dionego/vms/platformvm/blocks/executor"
-	txbuilder "github.com/dioneprotocol/dionego/vms/platformvm/txs/builder"
-	txexecutor "github.com/dioneprotocol/dionego/vms/platformvm/txs/executor"
+	blockexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/blocks/executor"
+	txbuilder "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/builder"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
 )
+
+var errTestingDropped = errors.New("testing dropped")
 
 // shows that a locally generated CreateChainTx can be added to mempool and then
 // removed by inclusion in a block
@@ -59,8 +61,8 @@ func TestBlockBuilderAddLocalTx(t *testing.T) {
 	blkIntf, err := env.Builder.BuildBlock(context.Background())
 	require.NoError(err)
 
-	blk, ok := blkIntf.(*blockexecutor.Block)
-	require.True(ok)
+	require.IsType(&blockexecutor.Block{}, blkIntf)
+	blk := blkIntf.(*blockexecutor.Block)
 	require.Len(blk.Txs(), 1)
 	require.Equal(txID, blk.Txs()[0].ID())
 
@@ -84,14 +86,14 @@ func TestPreviouslyDroppedTxsCanBeReAddedToMempool(t *testing.T) {
 	// A tx simply added to mempool is obviously not marked as dropped
 	require.NoError(env.mempool.Add(tx))
 	require.True(env.mempool.Has(txID))
-	_, isDropped := env.mempool.GetDropReason(txID)
-	require.False(isDropped)
+	reason := env.mempool.GetDropReason(txID)
+	require.NoError(reason)
 
 	// When a tx is marked as dropped, it is still available to allow re-issuance
-	env.mempool.MarkDropped(txID, "dropped for testing")
+	env.mempool.MarkDropped(txID, errTestingDropped)
 	require.True(env.mempool.Has(txID)) // still available
-	_, isDropped = env.mempool.GetDropReason(txID)
-	require.True(isDropped)
+	reason = env.mempool.GetDropReason(txID)
+	require.ErrorIs(reason, errTestingDropped)
 
 	// A previously dropped tx, popped then re-added to mempool,
 	// is not dropped anymore
@@ -99,8 +101,8 @@ func TestPreviouslyDroppedTxsCanBeReAddedToMempool(t *testing.T) {
 	require.NoError(env.mempool.Add(tx))
 
 	require.True(env.mempool.Has(txID))
-	_, isDropped = env.mempool.GetDropReason(txID)
-	require.False(isDropped)
+	reason = env.mempool.GetDropReason(txID)
+	require.NoError(reason)
 }
 
 func TestNoErrorOnUnexpectedSetPreferenceDuringBootstrapping(t *testing.T) {
@@ -136,7 +138,7 @@ func TestGetNextStakerToReward(t *testing.T) {
 			stateF: func(ctrl *gomock.Controller) state.Chain {
 				return state.NewMockChain(ctrl)
 			},
-			expectedErr: errEndOfTime,
+			expectedErr: ErrEndOfTime,
 		},
 		{
 			name:      "no stakers",
@@ -153,7 +155,7 @@ func TestGetNextStakerToReward(t *testing.T) {
 			},
 		},
 		{
-			name:      "expired subnet validator/delegator",
+			name:      "expired subnet validator",
 			timestamp: now,
 			stateF: func(ctrl *gomock.Controller) state.Chain {
 				currentStakerIter := state.NewMockStakerIterator(ctrl)
@@ -164,12 +166,6 @@ func TestGetNextStakerToReward(t *testing.T) {
 					EndTime:  now,
 				})
 				currentStakerIter.EXPECT().Next().Return(true)
-				currentStakerIter.EXPECT().Value().Return(&state.Staker{
-					TxID:     txID,
-					Priority: txs.SubnetPermissionlessDelegatorCurrentPriority,
-					EndTime:  now,
-				})
-				currentStakerIter.EXPECT().Release()
 
 				s := state.NewMockChain(ctrl)
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil)
@@ -207,55 +203,6 @@ func TestGetNextStakerToReward(t *testing.T) {
 			expectedShouldReward: true,
 		},
 		{
-			name:      "expired primary network delegator after subnet expired subnet validator",
-			timestamp: now,
-			stateF: func(ctrl *gomock.Controller) state.Chain {
-				currentStakerIter := state.NewMockStakerIterator(ctrl)
-
-				currentStakerIter.EXPECT().Next().Return(true)
-				currentStakerIter.EXPECT().Value().Return(&state.Staker{
-					Priority: txs.SubnetPermissionedValidatorCurrentPriority,
-					EndTime:  now,
-				})
-				currentStakerIter.EXPECT().Next().Return(true)
-				currentStakerIter.EXPECT().Value().Return(&state.Staker{
-					TxID:     txID,
-					Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					EndTime:  now,
-				})
-				currentStakerIter.EXPECT().Release()
-
-				s := state.NewMockChain(ctrl)
-				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil)
-
-				return s
-			},
-			expectedTxID:         txID,
-			expectedShouldReward: true,
-		},
-		{
-			name:      "non-expired primary network delegator",
-			timestamp: now,
-			stateF: func(ctrl *gomock.Controller) state.Chain {
-				currentStakerIter := state.NewMockStakerIterator(ctrl)
-
-				currentStakerIter.EXPECT().Next().Return(true)
-				currentStakerIter.EXPECT().Value().Return(&state.Staker{
-					TxID:     txID,
-					Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					EndTime:  now.Add(time.Second),
-				})
-				currentStakerIter.EXPECT().Release()
-
-				s := state.NewMockChain(ctrl)
-				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil)
-
-				return s
-			},
-			expectedTxID:         txID,
-			expectedShouldReward: false,
-		},
-		{
 			name:      "non-expired primary network validator",
 			timestamp: now,
 			stateF: func(ctrl *gomock.Controller) state.Chain {
@@ -287,11 +234,10 @@ func TestGetNextStakerToReward(t *testing.T) {
 
 			state := tt.stateF(ctrl)
 			txID, shouldReward, err := getNextStakerToReward(tt.timestamp, state)
+			require.ErrorIs(err, tt.expectedErr)
 			if tt.expectedErr != nil {
-				require.Equal(tt.expectedErr, err)
 				return
 			}
-			require.NoError(err)
 			require.Equal(tt.expectedTxID, txID)
 			require.Equal(tt.expectedShouldReward, shouldReward)
 		})
@@ -325,7 +271,7 @@ func TestBuildBlock(t *testing.T) {
 					}},
 					Outs: []*dione.TransferableOutput{output},
 				}},
-				Validator: validator.Validator{
+				Validator: txs.Validator{
 					// Shouldn't be dropped
 					Start: uint64(now.Add(2 * txexecutor.SyncBound).Unix()),
 				},
@@ -377,12 +323,6 @@ func TestBuildBlock(t *testing.T) {
 				// i.e. it should be rewarded
 				currentStakerIter := state.NewMockStakerIterator(ctrl)
 				currentStakerIter.EXPECT().Next().Return(true)
-				currentStakerIter.EXPECT().Value().Return(&state.Staker{
-					TxID:     stakerTxID,
-					Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					EndTime:  parentTimestamp,
-				})
-				currentStakerIter.EXPECT().Release()
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil)
 				return s
@@ -424,11 +364,6 @@ func TestBuildBlock(t *testing.T) {
 				gomock.InOrder(
 					// expect calls from [getNextStakerToReward]
 					currentStakerIter.EXPECT().Next().Return(true),
-					currentStakerIter.EXPECT().Value().Return(&state.Staker{
-						NextTime: now.Add(time.Second),
-						Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					}),
-					currentStakerIter.EXPECT().Release(),
 				)
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil).Times(1)
@@ -479,11 +414,6 @@ func TestBuildBlock(t *testing.T) {
 				gomock.InOrder(
 					// expect calls from [getNextStakerToReward]
 					currentStakerIter.EXPECT().Next().Return(true),
-					currentStakerIter.EXPECT().Value().Return(&state.Staker{
-						NextTime: now.Add(time.Second),
-						Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					}),
-					currentStakerIter.EXPECT().Release(),
 				)
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil).Times(1)
@@ -492,7 +422,7 @@ func TestBuildBlock(t *testing.T) {
 			expectedBlkF: func(*require.Assertions) blocks.Block {
 				return nil
 			},
-			expectedErr: errNoPendingBlocks,
+			expectedErr: ErrNoPendingBlocks,
 		},
 		{
 			name: "should advance time",
@@ -527,11 +457,6 @@ func TestBuildBlock(t *testing.T) {
 				gomock.InOrder(
 					// expect calls from [getNextStakerToReward]
 					currentStakerIter.EXPECT().Next().Return(true),
-					currentStakerIter.EXPECT().Value().Return(&state.Staker{
-						NextTime: now.Add(-1 * time.Second),
-						Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					}),
-					currentStakerIter.EXPECT().Release(),
 				)
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil).Times(1)
@@ -580,11 +505,6 @@ func TestBuildBlock(t *testing.T) {
 				gomock.InOrder(
 					// expect calls from [getNextStakerToReward]
 					currentStakerIter.EXPECT().Next().Return(true),
-					currentStakerIter.EXPECT().Value().Return(&state.Staker{
-						NextTime: now.Add(time.Second),
-						Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					}),
-					currentStakerIter.EXPECT().Release(),
 				)
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil).Times(1)
@@ -634,11 +554,6 @@ func TestBuildBlock(t *testing.T) {
 				gomock.InOrder(
 					// expect calls from [getNextStakerToReward]
 					currentStakerIter.EXPECT().Next().Return(true),
-					currentStakerIter.EXPECT().Value().Return(&state.Staker{
-						NextTime: now.Add(time.Second),
-						Priority: txs.PrimaryNetworkDelegatorCurrentPriority,
-					}),
-					currentStakerIter.EXPECT().Release(),
 				)
 
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil).Times(1)
@@ -677,7 +592,7 @@ func TestBuildBlock(t *testing.T) {
 				return
 			}
 			require.NoError(err)
-			require.EqualValues(tt.expectedBlkF(require), gotBlk)
+			require.Equal(tt.expectedBlkF(require), gotBlk)
 		})
 	}
 }

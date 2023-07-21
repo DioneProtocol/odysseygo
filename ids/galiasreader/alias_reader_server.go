@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package galiasreader
@@ -6,9 +6,9 @@ package galiasreader
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/ids"
 
-	aliasreaderpb "github.com/dioneprotocol/dionego/proto/pb/aliasreader"
+	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
 )
 
 var _ aliasreaderpb.AliasReaderServer = (*Server)(nil)

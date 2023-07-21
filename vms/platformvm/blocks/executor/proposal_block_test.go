@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -13,25 +13,24 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/executor"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
-func TestApricotProposalBlockTimeVerification(t *testing.T) {
+func TestOdysseyProposalBlockTimeVerification(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -41,21 +40,21 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(shutdownEnvironment(env))
 	}()
 
-	// create apricotParentBlk. It's a standard one for simplicity
+	// create odysseyParentBlk. It's a standard one for simplicity
 	parentHeight := uint64(2022)
 
-	apricotParentBlk, err := blocks.NewApricotStandardBlock(
+	odysseyParentBlk, err := blocks.NewOdysseyStandardBlock(
 		ids.Empty, // does not matter
 		parentHeight,
 		nil, // txs do not matter in this test
 	)
 	require.NoError(err)
-	parentID := apricotParentBlk.ID()
+	parentID := odysseyParentBlk.ID()
 
 	// store parent block, with relevant quantities
 	onParentAccept := state.NewMockDiff(ctrl)
 	env.blkManager.(*manager).blkIDToState[parentID] = &blockState{
-		statelessBlock: apricotParentBlk,
+		statelessBlock: odysseyParentBlk,
 		onAcceptState:  onParentAccept,
 	}
 	env.blkManager.(*manager).lastAccepted = parentID
@@ -66,7 +65,7 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 	// create a proposal transaction to be included into proposal block
 	utx := &txs.AddValidatorTx{
 		BaseTx:    txs.BaseTx{},
-		Validator: validator.Validator{End: uint64(chainTime.Unix())},
+		Validator: txs.Validator{End: uint64(chainTime.Unix())},
 		StakeOuts: []*dione.TransferableOutput{
 			{
 				Asset: dione.Asset{
@@ -78,7 +77,6 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 			},
 		},
 		RewardsOwner:     &secp256k1fx.OutputOwners{},
-		DelegationShares: uint32(defaultTxFee),
 	}
 	addValTx := &txs.Tx{Unsigned: utx}
 	require.NoError(addValTx.Initialize(txs.Codec))
@@ -119,7 +117,7 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 	).AnyTimes()
 
 	// wrong height
-	statelessProposalBlock, err := blocks.NewApricotProposalBlock(
+	statelessProposalBlock, err := blocks.NewOdysseyProposalBlock(
 		parentID,
 		parentHeight,
 		blkTx,
@@ -127,10 +125,12 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 	require.NoError(err)
 
 	block := env.blkManager.NewBlock(statelessProposalBlock)
-	require.Error(block.Verify(context.Background()))
+
+	err = block.Verify(context.Background())
+	require.ErrorIs(err, errIncorrectBlockHeight)
 
 	// valid
-	statelessProposalBlock, err = blocks.NewApricotProposalBlock(
+	statelessProposalBlock, err = blocks.NewOdysseyProposalBlock(
 		parentID,
 		parentHeight+1,
 		blkTx,
@@ -157,7 +157,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	parentTime := defaultGenesisTime
 	parentHeight := uint64(2022)
 
-	banffParentBlk, err := blocks.NewApricotStandardBlock(
+	banffParentBlk, err := blocks.NewOdysseyStandardBlock(
 		genesisBlkID, // does not matter
 		parentHeight,
 		nil, // txs do not matter in this test
@@ -192,7 +192,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	nextStakerTime := chainTime.Add(executor.SyncBound).Add(-1 * time.Second)
 	unsignedNextStakerTx := &txs.AddValidatorTx{
 		BaseTx:    txs.BaseTx{},
-		Validator: validator.Validator{End: uint64(nextStakerTime.Unix())},
+		Validator: txs.Validator{End: uint64(nextStakerTime.Unix())},
 		StakeOuts: []*dione.TransferableOutput{
 			{
 				Asset: dione.Asset{
@@ -204,7 +204,6 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 			},
 		},
 		RewardsOwner:     &secp256k1fx.OutputOwners{},
-		DelegationShares: uint32(defaultTxFee),
 	}
 	nextStakerTx := &txs.Tx{Unsigned: unsignedNextStakerTx}
 	require.NoError(nextStakerTx.Initialize(txs.Codec))
@@ -260,12 +259,13 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, errIncorrectBlockHeight)
 	}
 
 	{
-		// wrong version
-		statelessProposalBlock, err := blocks.NewApricotProposalBlock(
+		// wrong block version
+		statelessProposalBlock, err := blocks.NewOdysseyProposalBlock(
 			parentID,
 			banffParentBlk.Height()+1,
 			blkTx,
@@ -273,7 +273,8 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, errOdysseyBlockIssuedAfterFork)
 	}
 
 	{
@@ -287,14 +288,16 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, errChildBlockEarlierThanParent)
 	}
 
 	{
 		// wrong timestamp, violated synchrony bound
-		beyondSyncBoundTimeStamp := env.clk.Time().Add(executor.SyncBound).Add(time.Second)
+		initClkTime := env.clk.Time()
+		env.clk.Set(parentTime.Add(-executor.SyncBound))
 		statelessProposalBlock, err := blocks.NewBanffProposalBlock(
-			beyondSyncBoundTimeStamp,
+			parentTime.Add(time.Second),
 			parentID,
 			banffParentBlk.Height()+1,
 			blkTx,
@@ -302,7 +305,9 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, executor.ErrChildBlockBeyondSyncBound)
+		env.clk.Set(initClkTime)
 	}
 
 	{
@@ -317,7 +322,8 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, executor.ErrChildBlockAfterStakerChangeTime)
 	}
 
 	{
@@ -337,7 +343,8 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		require.NoError(err)
 
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.Error(block.Verify(context.Background()))
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, executor.ErrAdvanceTimeTxIssuedAfterBanff)
 	}
 
 	{
@@ -352,7 +359,8 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 
 		statelessProposalBlock.Transactions = []*txs.Tx{blkTx}
 		block := env.blkManager.NewBlock(statelessProposalBlock)
-		require.ErrorIs(block.Verify(context.Background()), errBanffProposalBlockWithMultipleTransactions)
+		err = block.Verify(context.Background())
+		require.ErrorIs(err, errBanffProposalBlockWithMultipleTransactions)
 	}
 
 	{
@@ -381,7 +389,7 @@ func TestBanffProposalBlockUpdateStakers(t *testing.T) {
 	// Staker5:                                     |--------------------|
 
 	// Staker0 it's here just to allow to issue a proposal block with the chosen endTime.
-	staker0RewardAddress := ids.GenerateTestShortID()
+	staker0RewardAddress := ids.ShortID{2}
 	staker0 := staker{
 		nodeID:        ids.NodeID(staker0RewardAddress),
 		rewardAddress: staker0RewardAddress,
@@ -397,7 +405,7 @@ func TestBanffProposalBlockUpdateStakers(t *testing.T) {
 		endTime:       defaultGenesisTime.Add(10 * defaultMinStakingDuration).Add(1 * time.Minute),
 	}
 
-	staker2RewardAddress := ids.GenerateTestShortID()
+	staker2RewardAddress := ids.ShortID{1}
 	staker2 := staker{
 		nodeID:        ids.NodeID(staker2RewardAddress),
 		rewardAddress: staker2RewardAddress,
@@ -935,367 +943,4 @@ func TestBanffProposalBlockTrackedSubnet(t *testing.T) {
 			require.Equal(tracked, validators.Contains(env.config.Validators, subnetID, subnetValidatorNodeID))
 		})
 	}
-}
-
-func TestBanffProposalBlockDelegatorStakerWeight(t *testing.T) {
-	require := require.New(t)
-	env := newEnvironment(t, nil)
-	defer func() {
-		require.NoError(shutdownEnvironment(env))
-	}()
-	env.config.BanffTime = time.Time{} // activate Banff
-
-	// Case: Timestamp is after next validator start time
-	// Add a pending validator
-	pendingValidatorStartTime := defaultGenesisTime.Add(1 * time.Second)
-	pendingValidatorEndTime := pendingValidatorStartTime.Add(defaultMaxStakingDuration)
-	nodeID := ids.GenerateTestNodeID()
-	rewardAddress := ids.GenerateTestShortID()
-	_, err := addPendingValidator(
-		env,
-		pendingValidatorStartTime,
-		pendingValidatorEndTime,
-		nodeID,
-		rewardAddress,
-		[]*secp256k1.PrivateKey{preFundedKeys[0]},
-	)
-	require.NoError(err)
-
-	// add Staker0 (with the right end time) to state
-	// just to allow proposalBlk issuance (with a reward Tx)
-	staker0StartTime := defaultGenesisTime
-	staker0EndTime := pendingValidatorStartTime
-	addStaker0, err := env.txBuilder.NewAddValidatorTx(
-		10,
-		uint64(staker0StartTime.Unix()),
-		uint64(staker0EndTime.Unix()),
-		ids.GenerateTestNodeID(),
-		ids.GenerateTestShortID(),
-		reward.PercentDenominator,
-		[]*secp256k1.PrivateKey{preFundedKeys[0], preFundedKeys[1]},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	// store Staker0 to state
-	staker, err := state.NewCurrentStaker(
-		addStaker0.ID(),
-		addStaker0.Unsigned.(*txs.AddValidatorTx),
-		0,
-	)
-	require.NoError(err)
-
-	env.state.PutCurrentValidator(staker)
-	env.state.AddTx(addStaker0, status.Committed)
-	require.NoError(env.state.Commit())
-
-	// create rewardTx for staker0
-	s0RewardTx := &txs.Tx{
-		Unsigned: &txs.RewardValidatorTx{
-			TxID: addStaker0.ID(),
-		},
-	}
-	require.NoError(s0RewardTx.Initialize(txs.Codec))
-
-	// build proposal block moving ahead chain time
-	preferredID := env.state.GetLastAccepted()
-	parentBlk, _, err := env.state.GetStatelessBlock(preferredID)
-	require.NoError(err)
-	statelessProposalBlock, err := blocks.NewBanffProposalBlock(
-		pendingValidatorStartTime,
-		parentBlk.ID(),
-		parentBlk.Height()+1,
-		s0RewardTx,
-	)
-	require.NoError(err)
-	propBlk := env.blkManager.NewBlock(statelessProposalBlock)
-	require.NoError(propBlk.Verify(context.Background()))
-
-	options, err := propBlk.(snowman.OracleBlock).Options(context.Background())
-	require.NoError(err)
-	commitBlk := options[0]
-	require.NoError(commitBlk.Verify(context.Background()))
-
-	require.NoError(propBlk.Accept(context.Background()))
-	require.NoError(commitBlk.Accept(context.Background()))
-
-	// Test validator weight before delegation
-	primarySet, ok := env.config.Validators.Get(constants.PrimaryNetworkID)
-	require.True(ok)
-	vdrWeight := primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinValidatorStake, vdrWeight)
-
-	// Add delegator
-	pendingDelegatorStartTime := pendingValidatorStartTime.Add(1 * time.Second)
-	pendingDelegatorEndTime := pendingDelegatorStartTime.Add(1 * time.Second)
-
-	addDelegatorTx, err := env.txBuilder.NewAddDelegatorTx(
-		env.config.MinDelegatorStake,
-		uint64(pendingDelegatorStartTime.Unix()),
-		uint64(pendingDelegatorEndTime.Unix()),
-		nodeID,
-		preFundedKeys[0].PublicKey().Address(),
-		[]*secp256k1.PrivateKey{
-			preFundedKeys[0],
-			preFundedKeys[1],
-			preFundedKeys[4],
-		},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	staker, err = state.NewPendingStaker(
-		addDelegatorTx.ID(),
-		addDelegatorTx.Unsigned.(*txs.AddDelegatorTx),
-	)
-	require.NoError(err)
-
-	env.state.PutPendingDelegator(staker)
-	env.state.AddTx(addDelegatorTx, status.Committed)
-	env.state.SetHeight( /*dummyHeight*/ uint64(1))
-	require.NoError(env.state.Commit())
-
-	// add Staker0 (with the right end time) to state
-	// so to allow proposalBlk issuance
-	staker0EndTime = pendingDelegatorStartTime
-	addStaker0, err = env.txBuilder.NewAddValidatorTx(
-		10,
-		uint64(staker0StartTime.Unix()),
-		uint64(staker0EndTime.Unix()),
-		ids.GenerateTestNodeID(),
-		ids.GenerateTestShortID(),
-		reward.PercentDenominator,
-		[]*secp256k1.PrivateKey{preFundedKeys[0], preFundedKeys[1]},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	// store Staker0 to state
-	staker, err = state.NewCurrentStaker(
-		addStaker0.ID(),
-		addStaker0.Unsigned.(*txs.AddValidatorTx),
-		0,
-	)
-	require.NoError(err)
-
-	env.state.PutCurrentValidator(staker)
-	env.state.AddTx(addStaker0, status.Committed)
-	require.NoError(env.state.Commit())
-
-	// create rewardTx for staker0
-	s0RewardTx = &txs.Tx{
-		Unsigned: &txs.RewardValidatorTx{
-			TxID: addStaker0.ID(),
-		},
-	}
-	require.NoError(s0RewardTx.Initialize(txs.Codec))
-
-	// Advance Time
-	preferredID = env.state.GetLastAccepted()
-	parentBlk, _, err = env.state.GetStatelessBlock(preferredID)
-	require.NoError(err)
-	statelessProposalBlock, err = blocks.NewBanffProposalBlock(
-		pendingDelegatorStartTime,
-		parentBlk.ID(),
-		parentBlk.Height()+1,
-		s0RewardTx,
-	)
-	require.NoError(err)
-
-	propBlk = env.blkManager.NewBlock(statelessProposalBlock)
-	require.NoError(propBlk.Verify(context.Background()))
-
-	options, err = propBlk.(snowman.OracleBlock).Options(context.Background())
-	require.NoError(err)
-	commitBlk = options[0]
-	require.NoError(commitBlk.Verify(context.Background()))
-
-	require.NoError(propBlk.Accept(context.Background()))
-	require.NoError(commitBlk.Accept(context.Background()))
-
-	// Test validator weight after delegation
-	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
-}
-
-func TestBanffProposalBlockDelegatorStakers(t *testing.T) {
-	require := require.New(t)
-	env := newEnvironment(t, nil)
-	defer func() {
-		require.NoError(shutdownEnvironment(env))
-	}()
-	env.config.BanffTime = time.Time{} // activate Banff
-
-	// Case: Timestamp is after next validator start time
-	// Add a pending validator
-	pendingValidatorStartTime := defaultGenesisTime.Add(1 * time.Second)
-	pendingValidatorEndTime := pendingValidatorStartTime.Add(defaultMinStakingDuration)
-	factory := secp256k1.Factory{}
-	nodeIDKey, _ := factory.NewPrivateKey()
-	rewardAddress := nodeIDKey.PublicKey().Address()
-	nodeID := ids.NodeID(rewardAddress)
-
-	_, err := addPendingValidator(
-		env,
-		pendingValidatorStartTime,
-		pendingValidatorEndTime,
-		nodeID,
-		rewardAddress,
-		[]*secp256k1.PrivateKey{preFundedKeys[0]},
-	)
-	require.NoError(err)
-
-	// add Staker0 (with the right end time) to state
-	// so to allow proposalBlk issuance
-	staker0StartTime := defaultGenesisTime
-	staker0EndTime := pendingValidatorStartTime
-	addStaker0, err := env.txBuilder.NewAddValidatorTx(
-		10,
-		uint64(staker0StartTime.Unix()),
-		uint64(staker0EndTime.Unix()),
-		ids.GenerateTestNodeID(),
-		ids.GenerateTestShortID(),
-		reward.PercentDenominator,
-		[]*secp256k1.PrivateKey{preFundedKeys[0], preFundedKeys[1]},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	// store Staker0 to state
-	staker, err := state.NewCurrentStaker(
-		addStaker0.ID(),
-		addStaker0.Unsigned.(*txs.AddValidatorTx),
-		0,
-	)
-	require.NoError(err)
-
-	env.state.PutCurrentValidator(staker)
-	env.state.AddTx(addStaker0, status.Committed)
-	require.NoError(env.state.Commit())
-
-	// create rewardTx for staker0
-	s0RewardTx := &txs.Tx{
-		Unsigned: &txs.RewardValidatorTx{
-			TxID: addStaker0.ID(),
-		},
-	}
-	require.NoError(s0RewardTx.Initialize(txs.Codec))
-
-	// build proposal block moving ahead chain time
-	preferredID := env.state.GetLastAccepted()
-	parentBlk, _, err := env.state.GetStatelessBlock(preferredID)
-	require.NoError(err)
-	statelessProposalBlock, err := blocks.NewBanffProposalBlock(
-		pendingValidatorStartTime,
-		parentBlk.ID(),
-		parentBlk.Height()+1,
-		s0RewardTx,
-	)
-	require.NoError(err)
-	propBlk := env.blkManager.NewBlock(statelessProposalBlock)
-	require.NoError(propBlk.Verify(context.Background()))
-
-	options, err := propBlk.(snowman.OracleBlock).Options(context.Background())
-	require.NoError(err)
-	commitBlk := options[0]
-	require.NoError(commitBlk.Verify(context.Background()))
-
-	require.NoError(propBlk.Accept(context.Background()))
-	require.NoError(commitBlk.Accept(context.Background()))
-
-	// Test validator weight before delegation
-	primarySet, ok := env.config.Validators.Get(constants.PrimaryNetworkID)
-	require.True(ok)
-	vdrWeight := primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinValidatorStake, vdrWeight)
-
-	// Add delegator
-	pendingDelegatorStartTime := pendingValidatorStartTime.Add(1 * time.Second)
-	pendingDelegatorEndTime := pendingDelegatorStartTime.Add(defaultMinStakingDuration)
-	addDelegatorTx, err := env.txBuilder.NewAddDelegatorTx(
-		env.config.MinDelegatorStake,
-		uint64(pendingDelegatorStartTime.Unix()),
-		uint64(pendingDelegatorEndTime.Unix()),
-		nodeID,
-		preFundedKeys[0].PublicKey().Address(),
-		[]*secp256k1.PrivateKey{
-			preFundedKeys[0],
-			preFundedKeys[1],
-			preFundedKeys[4],
-		},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	staker, err = state.NewPendingStaker(
-		addDelegatorTx.ID(),
-		addDelegatorTx.Unsigned.(*txs.AddDelegatorTx),
-	)
-	require.NoError(err)
-
-	env.state.PutPendingDelegator(staker)
-	env.state.AddTx(addDelegatorTx, status.Committed)
-	env.state.SetHeight( /*dummyHeight*/ uint64(1))
-	require.NoError(env.state.Commit())
-
-	// add Staker0 (with the right end time) to state
-	// so to allow proposalBlk issuance
-	staker0EndTime = pendingDelegatorStartTime
-	addStaker0, err = env.txBuilder.NewAddValidatorTx(
-		10,
-		uint64(staker0StartTime.Unix()),
-		uint64(staker0EndTime.Unix()),
-		ids.GenerateTestNodeID(),
-		ids.GenerateTestShortID(),
-		reward.PercentDenominator,
-		[]*secp256k1.PrivateKey{preFundedKeys[0], preFundedKeys[1]},
-		ids.ShortEmpty,
-	)
-	require.NoError(err)
-
-	// store Staker0 to state
-	staker, err = state.NewCurrentStaker(
-		addStaker0.ID(),
-		addStaker0.Unsigned.(*txs.AddValidatorTx),
-		0,
-	)
-	require.NoError(err)
-
-	env.state.PutCurrentValidator(staker)
-	env.state.AddTx(addStaker0, status.Committed)
-	require.NoError(env.state.Commit())
-
-	// create rewardTx for staker0
-	s0RewardTx = &txs.Tx{
-		Unsigned: &txs.RewardValidatorTx{
-			TxID: addStaker0.ID(),
-		},
-	}
-	require.NoError(s0RewardTx.Initialize(txs.Codec))
-
-	// Advance Time
-	preferredID = env.state.GetLastAccepted()
-	parentBlk, _, err = env.state.GetStatelessBlock(preferredID)
-	require.NoError(err)
-	statelessProposalBlock, err = blocks.NewBanffProposalBlock(
-		pendingDelegatorStartTime,
-		parentBlk.ID(),
-		parentBlk.Height()+1,
-		s0RewardTx,
-	)
-	require.NoError(err)
-	propBlk = env.blkManager.NewBlock(statelessProposalBlock)
-	require.NoError(propBlk.Verify(context.Background()))
-
-	options, err = propBlk.(snowman.OracleBlock).Options(context.Background())
-	require.NoError(err)
-	commitBlk = options[0]
-	require.NoError(commitBlk.Verify(context.Background()))
-
-	require.NoError(propBlk.Accept(context.Background()))
-	require.NoError(commitBlk.Accept(context.Background()))
-
-	// Test validator weight after delegation
-	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
 }

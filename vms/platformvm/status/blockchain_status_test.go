@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package status
@@ -34,7 +34,7 @@ func TestBlockchainStatusJSON(t *testing.T) {
 	{
 		status := BlockchainStatus(math.MaxInt32)
 		_, err := json.Marshal(status)
-		require.Error(err)
+		require.ErrorIs(err, errUnknownBlockchainStatus)
 	}
 
 	{
@@ -47,7 +47,7 @@ func TestBlockchainStatusJSON(t *testing.T) {
 	{
 		var status BlockchainStatus
 		err := json.Unmarshal([]byte(`"not a status"`), &status)
-		require.Error(err)
+		require.ErrorIs(err, errUnknownBlockchainStatus)
 	}
 }
 
@@ -68,7 +68,7 @@ func TestBlockchainStatusVerify(t *testing.T) {
 
 	badStatus := BlockchainStatus(math.MaxInt32)
 	err := badStatus.Verify()
-	require.Error(err, "%s passed verification", badStatus)
+	require.ErrorIs(err, errUnknownBlockchainStatus)
 }
 
 func TestBlockchainStatusString(t *testing.T) {

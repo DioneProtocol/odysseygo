@@ -1,19 +1,19 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
 
 import (
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var _ txs.Visitor = (*AtomicTxExecutor)(nil)
 
-// atomicTxExecutor is used to execute atomic transactions pre-AP5. After AP5
+// atomicTxExecutor is used to execute atomic transactions pre-OP1. After OP1
 // the execution was moved to be performed inside of the standardTxExecutor.
 type AtomicTxExecutor struct {
 	// inputs, to be filled before visitor methods are called
@@ -29,47 +29,39 @@ type AtomicTxExecutor struct {
 }
 
 func (*AtomicTxExecutor) AddValidatorTx(*txs.AddValidatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) AddSubnetValidatorTx(*txs.AddSubnetValidatorTx) error {
-	return errWrongTxType
-}
-
-func (*AtomicTxExecutor) AddDelegatorTx(*txs.AddDelegatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) CreateChainTx(*txs.CreateChainTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) CreateSubnetTx(*txs.CreateSubnetTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) AdvanceTimeTx(*txs.AdvanceTimeTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) RewardValidatorTx(*txs.RewardValidatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) RemoveSubnetValidatorTx(*txs.RemoveSubnetValidatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) TransformSubnetTx(*txs.TransformSubnetTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*AtomicTxExecutor) AddPermissionlessValidatorTx(*txs.AddPermissionlessValidatorTx) error {
-	return errWrongTxType
-}
-
-func (*AtomicTxExecutor) AddPermissionlessDelegatorTx(*txs.AddPermissionlessDelegatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (e *AtomicTxExecutor) ImportTx(tx *txs.ImportTx) error {

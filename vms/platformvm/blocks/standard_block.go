@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -7,19 +7,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
 	_ BanffBlock = (*BanffStandardBlock)(nil)
-	_ Block      = (*ApricotStandardBlock)(nil)
+	_ Block      = (*OdysseyStandardBlock)(nil)
 )
 
 type BanffStandardBlock struct {
 	Time                 uint64 `serialize:"true" json:"time"`
-	ApricotStandardBlock `serialize:"true"`
+	OdysseyStandardBlock `serialize:"true"`
 }
 
 func (b *BanffStandardBlock) Timestamp() time.Time {
@@ -38,7 +38,7 @@ func NewBanffStandardBlock(
 ) (*BanffStandardBlock, error) {
 	blk := &BanffStandardBlock{
 		Time: uint64(timestamp.Unix()),
-		ApricotStandardBlock: ApricotStandardBlock{
+		OdysseyStandardBlock: OdysseyStandardBlock{
 			CommonBlock: CommonBlock{
 				PrntID: parentID,
 				Hght:   height,
@@ -49,12 +49,12 @@ func NewBanffStandardBlock(
 	return blk, initialize(blk)
 }
 
-type ApricotStandardBlock struct {
+type OdysseyStandardBlock struct {
 	CommonBlock  `serialize:"true"`
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
 }
 
-func (b *ApricotStandardBlock) initialize(bytes []byte) error {
+func (b *OdysseyStandardBlock) initialize(bytes []byte) error {
 	b.CommonBlock.initialize(bytes)
 	for _, tx := range b.Transactions {
 		if err := tx.Initialize(txs.Codec); err != nil {
@@ -64,29 +64,29 @@ func (b *ApricotStandardBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *ApricotStandardBlock) InitCtx(ctx *snow.Context) {
+func (b *OdysseyStandardBlock) InitCtx(ctx *snow.Context) {
 	for _, tx := range b.Transactions {
 		tx.Unsigned.InitCtx(ctx)
 	}
 }
 
-func (b *ApricotStandardBlock) Txs() []*txs.Tx {
+func (b *OdysseyStandardBlock) Txs() []*txs.Tx {
 	return b.Transactions
 }
 
-func (b *ApricotStandardBlock) Visit(v Visitor) error {
-	return v.ApricotStandardBlock(b)
+func (b *OdysseyStandardBlock) Visit(v Visitor) error {
+	return v.OdysseyStandardBlock(b)
 }
 
-// NewApricotStandardBlock is kept for testing purposes only.
-// Following Banff activation and subsequent code cleanup, Apricot Standard blocks
+// NewOdysseyStandardBlock is kept for testing purposes only.
+// Following Banff activation and subsequent code cleanup, Odyssey Standard blocks
 // should be only verified (upon bootstrap), never created anymore
-func NewApricotStandardBlock(
+func NewOdysseyStandardBlock(
 	parentID ids.ID,
 	height uint64,
 	txs []*txs.Tx,
-) (*ApricotStandardBlock, error) {
-	blk := &ApricotStandardBlock{
+) (*OdysseyStandardBlock, error) {
+	blk := &OdysseyStandardBlock{
 		CommonBlock: CommonBlock{
 			PrntID: parentID,
 			Hght:   height,

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnets
@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/consensus/dione"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 var errAllowedNodesWhenNotValidatorOnly = errors.New("allowedNodes can only be set when ValidatorOnly is true")
@@ -37,8 +37,8 @@ type Config struct {
 	ValidatorOnly bool `json:"validatorOnly" yaml:"validatorOnly"`
 	// AllowedNodes is the set of node IDs that are explicitly allowed to connect to this Subnet when
 	// ValidatorOnly is enabled.
-	AllowedNodes        set.Set[ids.NodeID]  `json:"allowedNodes" yaml:"allowedNodes"`
-	ConsensusParameters dione.Parameters `json:"consensusParameters" yaml:"consensusParameters"`
+	AllowedNodes        set.Set[ids.NodeID] `json:"allowedNodes" yaml:"allowedNodes"`
+	ConsensusParameters snowball.Parameters `json:"consensusParameters" yaml:"consensusParameters"`
 
 	// ProposerMinBlockDelay is the minimum delay this node will enforce when
 	// building a snowman++ block.
@@ -50,8 +50,8 @@ type Config struct {
 }
 
 func (c *Config) Valid() error {
-	if err := c.ConsensusParameters.Valid(); err != nil {
-		return fmt.Errorf("consensus parameters are invalid: %w", err)
+	if err := c.ConsensusParameters.Verify(); err != nil {
+		return fmt.Errorf("consensus %w", err)
 	}
 	if !c.ValidatorOnly && c.AllowedNodes.Len() > 0 {
 		return errAllowedNodesWhenNotValidatorOnly

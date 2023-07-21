@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package info
@@ -10,20 +10,22 @@ import (
 
 	"github.com/gorilla/rpc/v2"
 
-	"github.com/dioneprotocol/dionego/chains"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/network"
-	"github.com/dioneprotocol/dionego/network/peer"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/networking/benchlist"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
+	"go.uber.org/zap"
+
+	"github.com/DioneProtocol/odysseygo/chains"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/network"
+	"github.com/DioneProtocol/odysseygo/network/peer"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/networking/benchlist"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
 )
 
 var errNoChainProvided = errors.New("argument 'chain' not given")
@@ -51,9 +53,7 @@ type Parameters struct {
 	TransformSubnetTxFee          uint64
 	CreateBlockchainTxFee         uint64
 	AddPrimaryNetworkValidatorFee uint64
-	AddPrimaryNetworkDelegatorFee uint64
 	AddSubnetValidatorFee         uint64
-	AddSubnetDelegatorFee         uint64
 	VMManager                     vms.Manager
 }
 
@@ -101,7 +101,10 @@ type GetNodeVersionReply struct {
 
 // GetNodeVersion returns the version this node is running
 func (i *Info) GetNodeVersion(_ *http.Request, _ *struct{}, reply *GetNodeVersionReply) error {
-	i.log.Debug("Info: GetNodeVersion called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getNodeVersion"),
+	)
 
 	vmVersions, err := i.vmManager.Versions()
 	if err != nil {
@@ -124,7 +127,10 @@ type GetNodeIDReply struct {
 
 // GetNodeID returns the node ID of this node
 func (i *Info) GetNodeID(_ *http.Request, _ *struct{}, reply *GetNodeIDReply) error {
-	i.log.Debug("Info: GetNodeID called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getNodeID"),
+	)
 
 	reply.NodeID = i.NodeID
 	reply.NodePOP = i.NodePOP
@@ -143,7 +149,10 @@ type GetNodeIPReply struct {
 
 // GetNodeIP returns the IP of this node
 func (i *Info) GetNodeIP(_ *http.Request, _ *struct{}, reply *GetNodeIPReply) error {
-	i.log.Debug("Info: GetNodeIP called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getNodeIP"),
+	)
 
 	reply.IP = i.myIP.IPPort().String()
 	return nil
@@ -151,7 +160,10 @@ func (i *Info) GetNodeIP(_ *http.Request, _ *struct{}, reply *GetNodeIPReply) er
 
 // GetNetworkID returns the network ID this node is running on
 func (i *Info) GetNetworkID(_ *http.Request, _ *struct{}, reply *GetNetworkIDReply) error {
-	i.log.Debug("Info: GetNetworkID called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getNetworkID"),
+	)
 
 	reply.NetworkID = json.Uint32(i.NetworkID)
 	return nil
@@ -164,7 +176,10 @@ type GetNetworkNameReply struct {
 
 // GetNetworkName returns the network name this node is running on
 func (i *Info) GetNetworkName(_ *http.Request, _ *struct{}, reply *GetNetworkNameReply) error {
-	i.log.Debug("Info: GetNetworkName called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getNetworkName"),
+	)
 
 	reply.NetworkName = constants.NetworkName(i.NetworkID)
 	return nil
@@ -182,7 +197,10 @@ type GetBlockchainIDReply struct {
 
 // GetBlockchainID returns the blockchain ID that resolves the alias that was supplied
 func (i *Info) GetBlockchainID(_ *http.Request, args *GetBlockchainIDArgs, reply *GetBlockchainIDReply) error {
-	i.log.Debug("Info: GetBlockchainID called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getBlockchainID"),
+	)
 
 	bID, err := i.chainManager.Lookup(args.Alias)
 	reply.BlockchainID = bID
@@ -210,7 +228,10 @@ type PeersReply struct {
 
 // Peers returns the list of current validators
 func (i *Info) Peers(_ *http.Request, args *PeersArgs, reply *PeersReply) error {
-	i.log.Debug("Info: Peers called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "peers"),
+	)
 
 	peers := i.networking.PeerInfo(args.NodeIDs)
 	peerInfo := make([]Peer, len(peers))
@@ -242,7 +263,9 @@ type IsBootstrappedResponse struct {
 // IsBootstrapped returns nil and sets [reply.IsBootstrapped] == true iff [args.Chain] exists and is done bootstrapping
 // Returns an error if the chain doesn't exist
 func (i *Info) IsBootstrapped(_ *http.Request, args *IsBootstrappedArgs, reply *IsBootstrappedResponse) error {
-	i.log.Debug("Info: IsBootstrapped called",
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "isBootstrapped"),
 		logging.UserString("chain", args.Chain),
 	)
 
@@ -280,7 +303,11 @@ type UptimeRequest struct {
 }
 
 func (i *Info) Uptime(_ *http.Request, args *UptimeRequest, reply *UptimeResponse) error {
-	i.log.Debug("Info: Uptime called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "uptime"),
+	)
+
 	result, err := i.networking.NodeUptime(args.SubnetID)
 	if err != nil {
 		return fmt.Errorf("couldn't get node uptime: %w", err)
@@ -297,22 +324,23 @@ type GetTxFeeResponse struct {
 	TransformSubnetTxFee          json.Uint64 `json:"transformSubnetTxFee"`
 	CreateBlockchainTxFee         json.Uint64 `json:"createBlockchainTxFee"`
 	AddPrimaryNetworkValidatorFee json.Uint64 `json:"addPrimaryNetworkValidatorFee"`
-	AddPrimaryNetworkDelegatorFee json.Uint64 `json:"addPrimaryNetworkDelegatorFee"`
 	AddSubnetValidatorFee         json.Uint64 `json:"addSubnetValidatorFee"`
-	AddSubnetDelegatorFee         json.Uint64 `json:"addSubnetDelegatorFee"`
 }
 
 // GetTxFee returns the transaction fee in nDIONE.
 func (i *Info) GetTxFee(_ *http.Request, _ *struct{}, reply *GetTxFeeResponse) error {
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getTxFee"),
+	)
+
 	reply.TxFee = json.Uint64(i.TxFee)
 	reply.CreateAssetTxFee = json.Uint64(i.CreateAssetTxFee)
 	reply.CreateSubnetTxFee = json.Uint64(i.CreateSubnetTxFee)
 	reply.TransformSubnetTxFee = json.Uint64(i.TransformSubnetTxFee)
 	reply.CreateBlockchainTxFee = json.Uint64(i.CreateBlockchainTxFee)
 	reply.AddPrimaryNetworkValidatorFee = json.Uint64(i.AddPrimaryNetworkValidatorFee)
-	reply.AddPrimaryNetworkDelegatorFee = json.Uint64(i.AddPrimaryNetworkDelegatorFee)
 	reply.AddSubnetValidatorFee = json.Uint64(i.AddSubnetValidatorFee)
-	reply.AddSubnetDelegatorFee = json.Uint64(i.AddSubnetDelegatorFee)
 	return nil
 }
 
@@ -323,7 +351,10 @@ type GetVMsReply struct {
 
 // GetVMs lists the virtual machines installed on the node
 func (i *Info) GetVMs(_ *http.Request, _ *struct{}, reply *GetVMsReply) error {
-	i.log.Debug("Info: GetVMs called")
+	i.log.Debug("API called",
+		zap.String("service", "info"),
+		zap.String("method", "getVMs"),
+	)
 
 	// Fetch the VMs registered on this node.
 	vmIDs, err := i.VMManager.ListFactories()

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // For ease of implementation, our database's interface matches Ethereum's
@@ -10,7 +10,7 @@ package database
 import (
 	"io"
 
-	"github.com/dioneprotocol/dionego/api/health"
+	"github.com/DioneProtocol/odysseygo/api/health"
 )
 
 // KeyValueReader wraps the Has and Get method of a backing data store.

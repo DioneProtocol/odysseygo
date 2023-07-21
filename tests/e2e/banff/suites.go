@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements tests for the banff network upgrade.
@@ -11,16 +11,16 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/tests"
-	"github.com/dioneprotocol/dionego/tests/e2e"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 
 var _ = ginkgo.Describe("[Banff]", func() {

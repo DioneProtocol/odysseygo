@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package tracker
@@ -10,11 +10,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/linkedhashmap"
-	"github.com/dioneprotocol/dionego/utils/math/meter"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/math/meter"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 const epsilon = 1e-9

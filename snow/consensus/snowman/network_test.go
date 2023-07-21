@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snowman
@@ -7,13 +7,13 @@ import (
 	"context"
 	"math/rand"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowball"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/bag"
-	"github.com/dioneprotocol/dionego/utils/sampler"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/bag"
+	"github.com/DioneProtocol/odysseygo/utils/sampler"
 )
 
 type Network struct {
@@ -24,7 +24,7 @@ type Network struct {
 
 func (n *Network) shuffleColors() {
 	s := sampler.NewUniform()
-	_ = s.Initialize(uint64(len(n.colors)))
+	s.Initialize(uint64(len(n.colors)))
 	indices, _ := s.Sample(len(n.colors))
 	colors := []*TestBlock(nil)
 	for _, index := range indices {
@@ -105,7 +105,7 @@ func (n *Network) Round() error {
 	running := n.running[runningInd]
 
 	s := sampler.NewUniform()
-	_ = s.Initialize(uint64(len(n.nodes)))
+	s.Initialize(uint64(len(n.nodes)))
 	indices, _ := s.Sample(n.params.K)
 	sampledColors := bag.Bag[ids.ID]{}
 	for _, index := range indices {

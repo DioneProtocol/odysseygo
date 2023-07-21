@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dioneprotocol/dionego/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
 )
 
 func init() {

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metrics
@@ -8,14 +8,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var _ txs.Visitor = (*txMetrics)(nil)
 
 type txMetrics struct {
-	numAddDelegatorTxs,
 	numAddSubnetValidatorTxs,
 	numAddValidatorTxs,
 	numAdvanceTimeTxs,
@@ -26,8 +25,7 @@ type txMetrics struct {
 	numRewardValidatorTxs,
 	numRemoveSubnetValidatorTxs,
 	numTransformSubnetTxs,
-	numAddPermissionlessValidatorTxs,
-	numAddPermissionlessDelegatorTxs prometheus.Counter
+	numAddPermissionlessValidatorTxs prometheus.Counter
 }
 
 func newTxMetrics(
@@ -36,7 +34,6 @@ func newTxMetrics(
 ) (*txMetrics, error) {
 	errs := wrappers.Errs{}
 	m := &txMetrics{
-		numAddDelegatorTxs:               newTxMetric(namespace, "add_delegator", registerer, &errs),
 		numAddSubnetValidatorTxs:         newTxMetric(namespace, "add_subnet_validator", registerer, &errs),
 		numAddValidatorTxs:               newTxMetric(namespace, "add_validator", registerer, &errs),
 		numAdvanceTimeTxs:                newTxMetric(namespace, "advance_time", registerer, &errs),
@@ -48,7 +45,6 @@ func newTxMetrics(
 		numRemoveSubnetValidatorTxs:      newTxMetric(namespace, "remove_subnet_validator", registerer, &errs),
 		numTransformSubnetTxs:            newTxMetric(namespace, "transform_subnet", registerer, &errs),
 		numAddPermissionlessValidatorTxs: newTxMetric(namespace, "add_permissionless_validator", registerer, &errs),
-		numAddPermissionlessDelegatorTxs: newTxMetric(namespace, "add_permissionless_delegator", registerer, &errs),
 	}
 	return m, errs.Err
 }
@@ -75,11 +71,6 @@ func (m *txMetrics) AddValidatorTx(*txs.AddValidatorTx) error {
 
 func (m *txMetrics) AddSubnetValidatorTx(*txs.AddSubnetValidatorTx) error {
 	m.numAddSubnetValidatorTxs.Inc()
-	return nil
-}
-
-func (m *txMetrics) AddDelegatorTx(*txs.AddDelegatorTx) error {
-	m.numAddDelegatorTxs.Inc()
 	return nil
 }
 
@@ -125,10 +116,5 @@ func (m *txMetrics) TransformSubnetTx(*txs.TransformSubnetTx) error {
 
 func (m *txMetrics) AddPermissionlessValidatorTx(*txs.AddPermissionlessValidatorTx) error {
 	m.numAddPermissionlessValidatorTxs.Inc()
-	return nil
-}
-
-func (m *txMetrics) AddPermissionlessDelegatorTx(*txs.AddPermissionlessDelegatorTx) error {
-	m.numAddPermissionlessDelegatorTxs.Inc()
 	return nil
 }

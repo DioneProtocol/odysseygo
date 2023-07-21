@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package keystore
@@ -8,10 +8,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database/encdb"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/encdb"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
 )
 
 // Test user password, must meet minimum complexity/length requirements
@@ -29,20 +30,20 @@ func TestUserClosedDB(t *testing.T) {
 	u := NewUserFromDB(db)
 
 	_, err = u.GetAddresses()
-	require.Error(err, "closed db should have caused an error")
+	require.ErrorIs(err, database.ErrClosed)
 
 	_, err = u.GetKey(ids.ShortEmpty)
-	require.Error(err, "closed db should have caused an error")
+	require.ErrorIs(err, database.ErrClosed)
 
 	_, err = GetKeychain(u, nil)
-	require.Error(err, "closed db should have caused an error")
+	require.ErrorIs(err, database.ErrClosed)
 
 	factory := secp256k1.Factory{}
 	sk, err := factory.NewPrivateKey()
 	require.NoError(err)
 
 	err = u.PutKeys(sk)
-	require.Error(err, "closed db should have caused an error")
+	require.ErrorIs(err, database.ErrClosed)
 }
 
 func TestUser(t *testing.T) {

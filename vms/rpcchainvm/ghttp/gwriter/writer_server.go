@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package gwriter
@@ -7,7 +7,7 @@ import (
 	"context"
 	"io"
 
-	writerpb "github.com/dioneprotocol/dionego/proto/pb/io/writer"
+	writerpb "github.com/DioneProtocol/odysseygo/proto/pb/io/writer"
 )
 
 var _ writerpb.WriterServer = (*Server)(nil)

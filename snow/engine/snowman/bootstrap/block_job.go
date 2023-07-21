@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package bootstrap
@@ -12,13 +12,13 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common/queue"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/queue"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 var errMissingDependenciesOnAccept = errors.New("attempting to accept a block with missing dependencies")
@@ -35,7 +35,6 @@ func (p *parser) Parse(ctx context.Context, blkBytes []byte) (queue.Job, error) 
 		return nil, err
 	}
 	return &blockJob{
-		parser:      p,
 		log:         p.log,
 		numAccepted: p.numAccepted,
 		numDropped:  p.numDropped,
@@ -45,7 +44,6 @@ func (p *parser) Parse(ctx context.Context, blkBytes []byte) (queue.Job, error) 
 }
 
 type blockJob struct {
-	parser                  *parser
 	log                     logging.Logger
 	numAccepted, numDropped prometheus.Counter
 	blk                     snowman.Block

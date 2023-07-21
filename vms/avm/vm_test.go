@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -9,7 +9,6 @@ import (
 	"errors"
 	"math"
 	"testing"
-	"time"
 
 	stdjson "encoding/json"
 
@@ -17,41 +16,41 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/api/keystore"
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/cb58"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/avm/fxs"
-	"github.com/dioneprotocol/dionego/vms/avm/states"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/nftfx"
-	"github.com/dioneprotocol/dionego/vms/propertyfx"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/cb58"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
-	networkID     uint32 = 10
-	chainID              = ids.ID{5, 4, 3, 2, 1}
-	testTxFee            = uint64(1000)
-	testBanffTime        = time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC)
-	startBalance         = uint64(50000)
+	chainID      = ids.ID{5, 4, 3, 2, 1}
+	testTxFee    = uint64(1000)
+	startBalance = uint64(50000)
 
 	keys  []*secp256k1.PrivateKey
 	addrs []ids.ShortID // addrs[i] corresponds to keys[i]
@@ -83,12 +82,12 @@ func init() {
 func NewContext(tb testing.TB) *snow.Context {
 	genesisBytes := BuildGenesisTest(tb)
 
-	tx := GetDIONETxFromGenesisTest(genesisBytes, tb)
+	tx := GetDIONEXTxFromGenesisTest(genesisBytes, tb)
 
 	ctx := snow.DefaultContextTest()
-	ctx.NetworkID = networkID
+	ctx.NetworkID = constants.UnitTestID
 	ctx.ChainID = chainID
-	ctx.DIONEAssetID = tx.ID()
+	ctx.DIONEXAssetID = tx.ID()
 	ctx.XChainID = ids.Empty.Prefix(0)
 	ctx.CChainID = ids.Empty.Prefix(1)
 	aliaser := ctx.BCLookup.(ids.Aliaser)
@@ -120,8 +119,9 @@ func NewContext(tb testing.TB) *snow.Context {
 }
 
 // Returns:
-//   1) tx in genesis that creates asset
-//   2) the index of the output
+//
+//  1. tx in genesis that creates asset
+//  2. the index of the output
 func GetCreateTxFromGenesisTest(tb testing.TB, genesisBytes []byte, assetName string) *txs.Tx {
 	parser, err := txs.NewParser([]fxs.Fx{
 		&secp256k1fx.Fx{},
@@ -161,8 +161,8 @@ func GetCreateTxFromGenesisTest(tb testing.TB, genesisBytes []byte, assetName st
 	return tx
 }
 
-func GetDIONETxFromGenesisTest(genesisBytes []byte, tb testing.TB) *txs.Tx {
-	return GetCreateTxFromGenesisTest(tb, genesisBytes, "DIONE")
+func GetDIONEXTxFromGenesisTest(genesisBytes []byte, tb testing.TB) *txs.Tx {
+	return GetCreateTxFromGenesisTest(tb, genesisBytes, "DIONEX")
 }
 
 // BuildGenesisTest is the common Genesis builder for most tests
@@ -175,7 +175,7 @@ func BuildGenesisTest(tb testing.TB) []byte {
 		Encoding: formatting.Hex,
 		GenesisData: map[string]AssetDefinition{
 			"asset1": {
-				Name:   "DIONE",
+				Name:   "DIONEX",
 				Symbol: "SYMB",
 				InitialState: map[string][]interface{}{
 					"fixedCap": {
@@ -303,7 +303,7 @@ func GenesisVMWithArgs(tb testing.TB, additionalFxs []*common.Fx, args *BuildGen
 	ctx.Keystore = userKeystore.NewBlockchainKeyStore(ctx.ChainID)
 
 	issuer := make(chan common.Message, 1)
-	vm := &VM{Factory: Factory{
+	vm := &VM{Config: config.Config{
 		TxFee:            testTxFee,
 		CreateAssetTxFee: testTxFee,
 	}}
@@ -351,7 +351,7 @@ func GenesisVMWithArgs(tb testing.TB, additionalFxs []*common.Fx, args *BuildGen
 }
 
 func NewTx(t *testing.T, genesisBytes []byte, vm *VM) *txs.Tx {
-	return NewTxWithAsset(t, genesisBytes, vm, "DIONE")
+	return NewTxWithAsset(t, genesisBytes, vm, "DIONEX")
 }
 
 func NewTxWithAsset(t *testing.T, genesisBytes []byte, vm *VM, assetName string) *txs.Tx {
@@ -359,7 +359,7 @@ func NewTxWithAsset(t *testing.T, genesisBytes []byte, vm *VM, assetName string)
 
 	newTx := &txs.Tx{Unsigned: &txs.BaseTx{
 		BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: dione.UTXOID{
@@ -388,11 +388,11 @@ func setupIssueTx(t testing.TB) (chan common.Message, *VM, *snow.Context, []*txs
 	genesisBytes, issuer, vm, _ := GenesisVM(t)
 	ctx := vm.ctx
 
-	dioneTx := GetDIONETxFromGenesisTest(genesisBytes, t)
+	dioneTx := GetDIONEXTxFromGenesisTest(genesisBytes, t)
 	key := keys[0]
 	firstTx := &txs.Tx{Unsigned: &txs.BaseTx{
 		BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: dione.UTXOID{
@@ -427,7 +427,7 @@ func setupIssueTx(t testing.TB) (chan common.Message, *VM, *snow.Context, []*txs
 
 	secondTx := &txs.Tx{Unsigned: &txs.BaseTx{
 		BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: dione.UTXOID{
@@ -673,7 +673,7 @@ func TestIssueNFT(t *testing.T) {
 
 	createAssetTx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Name:         "Team Rocket",
@@ -709,7 +709,7 @@ func TestIssueNFT(t *testing.T) {
 
 	mintNFTTx := &txs.Tx{Unsigned: &txs.OperationTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
@@ -739,7 +739,7 @@ func TestIssueNFT(t *testing.T) {
 	transferNFTTx := &txs.Tx{
 		Unsigned: &txs.OperationTx{
 			BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-				NetworkID:    networkID,
+				NetworkID:    constants.UnitTestID,
 				BlockchainID: chainID,
 			}},
 			Ops: []*txs.Operation{{
@@ -826,7 +826,7 @@ func TestIssueProperty(t *testing.T) {
 
 	createAssetTx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Name:         "Team Rocket",
@@ -854,7 +854,7 @@ func TestIssueProperty(t *testing.T) {
 
 	mintPropertyTx := &txs.Tx{Unsigned: &txs.OperationTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
@@ -892,7 +892,7 @@ func TestIssueProperty(t *testing.T) {
 
 	burnPropertyTx := &txs.Tx{Unsigned: &txs.OperationTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
@@ -1015,7 +1015,7 @@ func TestIssueTxWithAnotherAsset(t *testing.T) {
 
 	newTx := &txs.Tx{Unsigned: &txs.BaseTx{
 		BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{
 				// fee asset
@@ -1117,7 +1117,7 @@ func TestTxCached(t *testing.T) {
 
 	registerer := prometheus.NewRegistry()
 
-	err = vm.metrics.Initialize("", registerer)
+	vm.metrics, err = metrics.New("", registerer)
 	require.NoError(t, err)
 
 	db := memdb.New()
@@ -1152,7 +1152,7 @@ func TestTxNotCached(t *testing.T) {
 	registerer := prometheus.NewRegistry()
 	require.NoError(t, err)
 
-	err = vm.metrics.Initialize("", registerer)
+	vm.metrics, err = metrics.New("", registerer)
 	require.NoError(t, err)
 
 	db := memdb.New()
@@ -1258,7 +1258,7 @@ func TestTxVerifyAfterVerifyAncestorTx(t *testing.T) {
 	secondTx := issueTxs[2]
 	key := keys[0]
 	firstTxDescendant := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
-		NetworkID:    networkID,
+		NetworkID:    constants.UnitTestID,
 		BlockchainID: chainID,
 		Ins: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
@@ -1491,7 +1491,7 @@ func TestIssueImportTx(t *testing.T) {
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 	peerSharedMemory := m.NewSharedMemory(constants.PlatformChainID)
 
-	genesisTx := GetDIONETxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetDIONEXTxFromGenesisTest(genesisBytes, t)
 
 	dioneID := genesisTx.ID()
 	platformID := ids.Empty.Prefix(0)
@@ -1547,7 +1547,7 @@ func TestIssueImportTx(t *testing.T) {
 	txAssetID := dione.Asset{ID: dioneID}
 	tx := &txs.Tx{Unsigned: &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Outs: []*dione.TransferableOutput{{
 				Asset: txAssetID,
@@ -1704,7 +1704,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 
 	key := keys[0]
 
-	genesisTx := GetDIONETxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetDIONEXTxFromGenesisTest(genesisBytes, t)
 
 	utxoID := dione.UTXOID{
 		TxID: ids.ID{
@@ -1717,7 +1717,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 
 	tx := &txs.Tx{Unsigned: &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		SourceChain: constants.PlatformChainID,
@@ -1773,7 +1773,7 @@ func TestIssueExportTx(t *testing.T) {
 	ctx := NewContext(t)
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 
-	genesisTx := GetDIONETxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetDIONEXTxFromGenesisTest(genesisBytes, t)
 
 	dioneID := genesisTx.ID()
 
@@ -1808,7 +1808,7 @@ func TestIssueExportTx(t *testing.T) {
 
 	tx := &txs.Tx{Unsigned: &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: dione.UTXOID{
@@ -1898,7 +1898,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	ctx := NewContext(t)
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 
-	genesisTx := GetDIONETxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetDIONEXTxFromGenesisTest(genesisBytes, t)
 
 	dioneID := genesisTx.ID()
 	platformID := ids.Empty.Prefix(0)
@@ -1944,7 +1944,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	assetID := dione.Asset{ID: dioneID}
 	tx := &txs.Tx{Unsigned: &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: dione.UTXOID{

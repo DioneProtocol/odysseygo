@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for Dione Indexer API Endpoint
+// Client interface for Odyssey Indexer API Endpoint
 type Client interface {
 	// GetContainerRange returns the transactions at index [startIndex], [startIndex+1], ... , [startIndex+n-1]
 	// If [n] == 0, returns an empty response (i.e. null).
@@ -34,7 +34,7 @@ type Client interface {
 	GetContainerByID(ctx context.Context, containerID ids.ID, options ...rpc.Option) (Container, uint64, error)
 }
 
-// Client implementation for Dione Indexer API Endpoint
+// Client implementation for Odyssey Indexer API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

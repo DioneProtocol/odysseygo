@@ -1,11 +1,11 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
 
 import (
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 // CommonBlock contains fields and methods common to all blocks in this VM.
@@ -16,17 +16,17 @@ type CommonBlock struct {
 	// This block's height. The genesis block is at height 0.
 	Hght uint64 `serialize:"true" json:"height"`
 
-	id    ids.ID
-	bytes []byte
+	BlockID ids.ID `json:"id"`
+	bytes   []byte
 }
 
 func (b *CommonBlock) initialize(bytes []byte) {
-	b.id = hashing.ComputeHash256Array(bytes)
+	b.BlockID = hashing.ComputeHash256Array(bytes)
 	b.bytes = bytes
 }
 
 func (b *CommonBlock) ID() ids.ID {
-	return b.id
+	return b.BlockID
 }
 
 func (b *CommonBlock) Parent() ids.ID {

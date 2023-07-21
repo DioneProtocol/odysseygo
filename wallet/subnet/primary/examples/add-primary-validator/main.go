@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -8,14 +8,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/dioneprotocol/dionego/api/info"
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/api/info"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 
 func main() {
@@ -26,8 +25,6 @@ func main() {
 	duration := 3 * 7 * 24 * time.Hour // 3 weeks
 	weight := 2_000 * units.Dione
 	validatorRewardAddr := key.Address()
-	delegatorRewardAddr := key.Address()
-	delegationFee := uint32(reward.PercentDenominator / 2) // 50%
 
 	ctx := context.Background()
 	infoClient := info.NewClient(uri)
@@ -54,7 +51,7 @@ func main() {
 
 	addValidatorStartTime := time.Now()
 	addValidatorTxID, err := pWallet.IssueAddPermissionlessValidatorTx(
-		&validator.SubnetValidator{Validator: validator.Validator{
+		&txs.SubnetValidator{Validator: txs.Validator{
 			NodeID: nodeID,
 			Start:  uint64(startTime.Unix()),
 			End:    uint64(startTime.Add(duration).Unix()),
@@ -66,11 +63,6 @@ func main() {
 			Threshold: 1,
 			Addrs:     []ids.ShortID{validatorRewardAddr},
 		},
-		&secp256k1fx.OutputOwners{
-			Threshold: 1,
-			Addrs:     []ids.ShortID{delegatorRewardAddr},
-		},
-		delegationFee,
 	)
 	if err != nil {
 		log.Fatalf("failed to issue add permissionless validator transaction: %s\n", err)

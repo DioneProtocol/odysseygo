@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -12,25 +12,25 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/dioneprotocol/dionego/api/info"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/tests"
-	"github.com/dioneprotocol/dionego/tests/e2e"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/avm"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/api/info"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 // PChainWorkflow is an integration test for normal P-Chain operations
-// - Issues an Add Validator and an Add Delegator using the funding address
+// - Issues an Add Validator using the funding address
 // - Exports DIONE from the P-Chain funding address to the X-Chain created address
 // - Exports DIONE from the X-Chain created address to the P-Chain created address
 // - Checks the expected value of the funding address
@@ -67,11 +67,10 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 
 			tests.Outf("{{blue}} fetching minimal stake amounts {{/}}\n")
 			ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
-			minValStake, minDelStake, err := pChainClient.GetMinStake(ctx, constants.PlatformChainID)
+			minValStake, err := pChainClient.GetMinStake(ctx, constants.PlatformChainID)
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
 			tests.Outf("{{green}} minimal validator stake: %d {{/}}\n", minValStake)
-			tests.Outf("{{green}} minimal delegator stake: %d {{/}}\n", minDelStake)
 
 			tests.Outf("{{blue}} fetching tx fee {{/}}\n")
 			infoClient := info.NewClient(nodeURI)
@@ -90,14 +89,14 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			ginkgo.By("check selected keys have sufficient funds", func() {
 				pBalances, err := pWallet.Builder().GetBalance()
 				pBalance := pBalances[dioneAssetID]
-				minBalance := minValStake + txFees + minDelStake + txFees + toTransfer + txFees
+				minBalance := minValStake + txFees + txFees + toTransfer + txFees
 				gomega.Expect(pBalance, err).To(gomega.BeNumerically(">=", minBalance))
 			})
 			// create validator data
 			validatorStartTimeDiff := 30 * time.Second
 			vdrStartTime := time.Now().Add(validatorStartTimeDiff)
 
-			vdr := &validator.Validator{
+			vdr := &txs.Validator{
 				NodeID: ids.GenerateTestNodeID(),
 				Start:  uint64(vdrStartTime.Unix()),
 				End:    uint64(vdrStartTime.Add(72 * time.Hour).Unix()),
@@ -107,14 +106,12 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{pShortAddr},
 			}
-			shares := uint32(20000) // TODO: retrieve programmatically
 
 			ginkgo.By("issue add validator tx", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				addValidatorTxID, err := pWallet.IssueAddValidatorTx(
 					vdr,
 					rewardOwner,
-					shares,
 					common.WithContext(ctx),
 				)
 				cancel()
@@ -122,22 +119,6 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				txStatus, err := pChainClient.GetTxStatus(ctx, addValidatorTxID)
-				cancel()
-				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
-			})
-
-			ginkgo.By("issue add delegator tx", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				addDelegatorTxID, err := pWallet.IssueAddDelegatorTx(
-					vdr,
-					rewardOwner,
-					common.WithContext(ctx),
-				)
-				cancel()
-				gomega.Expect(err).Should(gomega.BeNil())
-
-				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, addDelegatorTxID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})

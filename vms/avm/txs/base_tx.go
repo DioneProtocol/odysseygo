@@ -1,15 +1,14 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 import (
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -44,31 +43,6 @@ func (t *BaseTx) InputIDs() set.Set[ids.ID] {
 		inputIDs.Add(in.InputID())
 	}
 	return inputIDs
-}
-
-func (t *BaseTx) SyntacticVerify(
-	ctx *snow.Context,
-	c codec.Manager,
-	txFeeAssetID ids.ID,
-	txFee uint64,
-	_ uint64,
-	_ int,
-) error {
-	if t == nil {
-		return errNilTx
-	}
-
-	if err := t.BaseTx.Verify(ctx); err != nil {
-		return err
-	}
-
-	return dione.VerifyTx(
-		txFee,
-		txFeeAssetID,
-		[][]*dione.TransferableInput{t.Ins},
-		[][]*dione.TransferableOutput{t.Outs},
-		c,
-	)
 }
 
 func (t *BaseTx) Visit(v Visitor) error {

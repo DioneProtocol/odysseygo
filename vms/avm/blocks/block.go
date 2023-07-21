@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -6,10 +6,10 @@ package blocks
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
 )
 
 // Block defines the common stateless interface for all blocks
@@ -21,6 +21,7 @@ type Block interface {
 	Height() uint64
 	// Timestamp that this block was created at
 	Timestamp() time.Time
+	MerkleRoot() ids.ID
 	Bytes() []byte
 
 	// Txs returns the transactions contained in the block

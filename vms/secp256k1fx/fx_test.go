@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package secp256k1fx
@@ -9,11 +9,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/codec/linearcodec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/cb58"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/logging"
+	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/cb58"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
 )
 
 var (
@@ -64,7 +64,8 @@ func TestFxInitialize(t *testing.T) {
 func TestFxInitializeInvalid(t *testing.T) {
 	require := require.New(t)
 	fx := Fx{}
-	require.ErrorIs(fx.Initialize(nil), errWrongVMType)
+	err := fx.Initialize(nil)
+	require.ErrorIs(err, ErrWrongVMType)
 }
 
 func TestFxVerifyTransfer(t *testing.T) {
@@ -137,7 +138,8 @@ func TestFxVerifyTransferNilTx(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(nil, in, cred, out), errWrongTxType)
+	err := fx.VerifyTransfer(nil, in, cred, out)
+	require.ErrorIs(err, ErrWrongTxType)
 }
 
 func TestFxVerifyTransferNilOutput(t *testing.T) {
@@ -163,7 +165,8 @@ func TestFxVerifyTransferNilOutput(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, nil), errWrongUTXOType)
+	err := fx.VerifyTransfer(tx, in, cred, nil)
+	require.ErrorIs(err, ErrWrongUTXOType)
 }
 
 func TestFxVerifyTransferNilInput(t *testing.T) {
@@ -193,7 +196,8 @@ func TestFxVerifyTransferNilInput(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, nil, cred, out), errWrongInputType)
+	err := fx.VerifyTransfer(tx, nil, cred, out)
+	require.ErrorIs(err, ErrWrongInputType)
 }
 
 func TestFxVerifyTransferNilCredential(t *testing.T) {
@@ -224,7 +228,8 @@ func TestFxVerifyTransferNilCredential(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, nil, out), errWrongCredentialType)
+	err := fx.VerifyTransfer(tx, in, nil, out)
+	require.ErrorIs(err, ErrWrongCredentialType)
 }
 
 func TestFxVerifyTransferInvalidOutput(t *testing.T) {
@@ -260,7 +265,8 @@ func TestFxVerifyTransferInvalidOutput(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errOutputUnoptimized)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrOutputUnoptimized)
 }
 
 func TestFxVerifyTransferWrongAmounts(t *testing.T) {
@@ -296,7 +302,8 @@ func TestFxVerifyTransferWrongAmounts(t *testing.T) {
 		},
 	}
 
-	require.Error(fx.VerifyTransfer(tx, in, cred, out))
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrMismatchedAmounts)
 }
 
 func TestFxVerifyTransferTimelocked(t *testing.T) {
@@ -332,7 +339,8 @@ func TestFxVerifyTransferTimelocked(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errTimelocked)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrTimelocked)
 }
 
 func TestFxVerifyTransferTooManySigners(t *testing.T) {
@@ -369,7 +377,8 @@ func TestFxVerifyTransferTooManySigners(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errTooManySigners)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrTooManySigners)
 }
 
 func TestFxVerifyTransferTooFewSigners(t *testing.T) {
@@ -403,7 +412,8 @@ func TestFxVerifyTransferTooFewSigners(t *testing.T) {
 		Sigs: [][secp256k1.SignatureLen]byte{},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errTooFewSigners)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrTooFewSigners)
 }
 
 func TestFxVerifyTransferMismatchedSigners(t *testing.T) {
@@ -440,7 +450,8 @@ func TestFxVerifyTransferMismatchedSigners(t *testing.T) {
 		},
 	}
 
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errInputCredentialSignersMismatch)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrInputCredentialSignersMismatch)
 }
 
 func TestFxVerifyTransferInvalidSignature(t *testing.T) {
@@ -479,7 +490,8 @@ func TestFxVerifyTransferInvalidSignature(t *testing.T) {
 
 	require.NoError(fx.VerifyTransfer(tx, in, cred, out))
 	require.NoError(fx.Bootstrapped())
-	require.Error(fx.VerifyTransfer(tx, in, cred, out), errAddrsNotSortedUnique)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, secp256k1.ErrInvalidSig)
 }
 
 func TestFxVerifyTransferWrongSigner(t *testing.T) {
@@ -518,7 +530,8 @@ func TestFxVerifyTransferWrongSigner(t *testing.T) {
 
 	require.NoError(fx.VerifyTransfer(tx, in, cred, out))
 	require.NoError(fx.Bootstrapped())
-	require.Error(fx.VerifyTransfer(tx, in, cred, out))
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrWrongSig)
 }
 
 func TestFxVerifyTransferSigIndexOOB(t *testing.T) {
@@ -557,7 +570,8 @@ func TestFxVerifyTransferSigIndexOOB(t *testing.T) {
 
 	require.NoError(fx.VerifyTransfer(tx, in, cred, out))
 	require.NoError(fx.Bootstrapped())
-	require.ErrorIs(fx.VerifyTransfer(tx, in, cred, out), errInputOutputIndexOutOfBounds)
+	err := fx.VerifyTransfer(tx, in, cred, out)
+	require.ErrorIs(err, ErrInputOutputIndexOutOfBounds)
 }
 
 func TestFxVerifyOperation(t *testing.T) {
@@ -660,7 +674,8 @@ func TestFxVerifyOperationUnknownTx(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo}
-	require.ErrorIs(fx.VerifyOperation(nil, op, cred, utxos), errWrongTxType)
+	err := fx.VerifyOperation(nil, op, cred, utxos)
+	require.ErrorIs(err, ErrWrongTxType)
 }
 
 func TestFxVerifyOperationUnknownOperation(t *testing.T) {
@@ -689,7 +704,8 @@ func TestFxVerifyOperationUnknownOperation(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo}
-	require.ErrorIs(fx.VerifyOperation(tx, nil, cred, utxos), errWrongOpType)
+	err := fx.VerifyOperation(tx, nil, cred, utxos)
+	require.ErrorIs(err, ErrWrongOpType)
 }
 
 func TestFxVerifyOperationUnknownCredential(t *testing.T) {
@@ -736,7 +752,8 @@ func TestFxVerifyOperationUnknownCredential(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo}
-	require.ErrorIs(fx.VerifyOperation(tx, op, nil, utxos), errWrongCredentialType)
+	err := fx.VerifyOperation(tx, op, nil, utxos)
+	require.ErrorIs(err, ErrWrongCredentialType)
 }
 
 func TestFxVerifyOperationWrongNumberOfUTXOs(t *testing.T) {
@@ -788,7 +805,8 @@ func TestFxVerifyOperationWrongNumberOfUTXOs(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo, utxo}
-	require.ErrorIs(fx.VerifyOperation(tx, op, cred, utxos), errWrongNumberOfUTXOs)
+	err := fx.VerifyOperation(tx, op, cred, utxos)
+	require.ErrorIs(err, ErrWrongNumberOfUTXOs)
 }
 
 func TestFxVerifyOperationUnknownUTXOType(t *testing.T) {
@@ -832,7 +850,8 @@ func TestFxVerifyOperationUnknownUTXOType(t *testing.T) {
 	}
 
 	utxos := []interface{}{nil}
-	require.ErrorIs(fx.VerifyOperation(tx, op, cred, utxos), errWrongUTXOType)
+	err := fx.VerifyOperation(tx, op, cred, utxos)
+	require.ErrorIs(err, ErrWrongUTXOType)
 }
 
 func TestFxVerifyOperationInvalidOperationVerify(t *testing.T) {
@@ -881,7 +900,8 @@ func TestFxVerifyOperationInvalidOperationVerify(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo}
-	require.ErrorIs(fx.VerifyOperation(tx, op, cred, utxos), errOutputUnspendable)
+	err := fx.VerifyOperation(tx, op, cred, utxos)
+	require.ErrorIs(err, ErrOutputUnspendable)
 }
 
 func TestFxVerifyOperationMismatchedMintOutputs(t *testing.T) {
@@ -928,7 +948,8 @@ func TestFxVerifyOperationMismatchedMintOutputs(t *testing.T) {
 	}
 
 	utxos := []interface{}{utxo}
-	require.ErrorIs(fx.VerifyOperation(tx, op, cred, utxos), errWrongMintCreated)
+	err := fx.VerifyOperation(tx, op, cred, utxos)
+	require.ErrorIs(err, ErrWrongMintCreated)
 }
 
 func TestVerifyPermission(t *testing.T) {
@@ -962,7 +983,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 0,
 				Addrs:     []ids.ShortID{addr},
 			},
-			errOutputUnoptimized,
+			ErrOutputUnoptimized,
 		},
 		{
 			"threshold 0, no sigs, no addrs",
@@ -995,7 +1016,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 0,
 				Addrs:     []ids.ShortID{addr},
 			},
-			errOutputUnoptimized,
+			ErrOutputUnoptimized,
 		},
 		{
 			"threshold 1, 0 sigs (too few sigs)",
@@ -1006,7 +1027,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{addr},
 			},
-			errTooFewSigners,
+			ErrTooFewSigners,
 		},
 		{
 			"threshold 1, 1 incorrect sig",
@@ -1017,7 +1038,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{ids.GenerateTestShortID()},
 			},
-			errWrongSig,
+			ErrWrongSig,
 		},
 		{
 			"repeated sig",
@@ -1028,7 +1049,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 2,
 				Addrs:     []ids.ShortID{addr, addr2},
 			},
-			errNotSortedUnique,
+			ErrInputIndicesNotSortedUnique,
 		},
 		{
 			"threshold 2, repeated address and repeated sig",
@@ -1039,7 +1060,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 2,
 				Addrs:     []ids.ShortID{addr, addr},
 			},
-			errAddrsNotSortedUnique,
+			ErrAddrsNotSortedUnique,
 		},
 		{
 			"threshold 2, 2 sigs",
@@ -1061,7 +1082,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 2,
 				Addrs:     []ids.ShortID{addr, addr2},
 			},
-			errNotSortedUnique,
+			ErrInputIndicesNotSortedUnique,
 		},
 		{
 			"threshold 1, 1 sig, index out of bounds",
@@ -1072,7 +1093,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{addr},
 			},
-			errInputOutputIndexOutOfBounds,
+			ErrInputOutputIndexOutOfBounds,
 		},
 		{
 			"too many signers",
@@ -1083,7 +1104,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{addr, addr2},
 			},
-			errTooManySigners,
+			ErrTooManySigners,
 		},
 		{
 			"number of signatures doesn't match",
@@ -1094,7 +1115,7 @@ func TestVerifyPermission(t *testing.T) {
 				Threshold: 1,
 				Addrs:     []ids.ShortID{addr, addr2},
 			},
-			errInputCredentialSignersMismatch,
+			ErrInputCredentialSignersMismatch,
 		},
 		{
 			"output is locked",
@@ -1106,7 +1127,7 @@ func TestVerifyPermission(t *testing.T) {
 				Locktime:  uint64(now.Add(time.Second).Unix()),
 				Addrs:     []ids.ShortID{addr, addr2},
 			},
-			errTimelocked,
+			ErrTimelocked,
 		},
 	}
 

@@ -4,7 +4,7 @@ The activation of the Banff fork changes the way P-chain tracks its `ChainTime`.
 
 ## About `ChainTime`
 
-One of the P-chain's main responsibilities is to record staking periods of any staker (i.e. any validator or delegator) on any subnet to duly reward their activity.
+One of the P-chain's main responsibilities is to record staking periods of any staker (i.e. any validator) on any subnet to duly reward their activity.
 
 The P-chain tracks a network agreed timestamp called `ChainTime` that allows nodes to reach agreement about when a staker starts and stops staking. These start/stop times are basic inputs to determine whether the staker should be rewarded based on what percentage of `ChainTime` it was perceived as active from other validators.
 
@@ -12,7 +12,7 @@ Note that this `ChainTime` has nothing to do with the `Snowman++` timestamp. `Sn
 
 ## Pre Banff fork context
 
-Before the Banff fork activation, `ChainTime` was incremented by an `AdvanceTimeTx` transaction, being included into an `ApricotProposalBlock` block type. Validators voted on `ChainTime` advance by accepting either the `ApricotCommitBlock` or the `ApricotAbortBlock` following the `ApricotProposalBlock`. `ChainTime` was moved ahead only if the `CommitBlock` was accepted.
+Before the Banff fork activation, `ChainTime` was incremented by an `AdvanceTimeTx` transaction, being included into an `OdysseyProposalBlock` block type. Validators voted on `ChainTime` advance by accepting either the `OdysseyCommitBlock` or the `OdysseyAbortBlock` following the `OdysseyProposalBlock`. `ChainTime` was moved ahead only if the `CommitBlock` was accepted.
 
 `AdvanceTimeTx` transactions are subject to three main validations:
 

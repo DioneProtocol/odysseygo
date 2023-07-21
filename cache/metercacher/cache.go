@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metercacher
@@ -6,8 +6,8 @@ package metercacher
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 )
 
 var _ cache.Cacher[struct{}, struct{}] = (*Cache[struct{}, struct{}])(nil)
@@ -33,6 +33,7 @@ func (c *Cache[K, V]) Put(key K, value V) {
 	c.Cacher.Put(key, value)
 	end := c.clock.Time()
 	c.put.Observe(float64(end.Sub(start)))
+	c.portionFilled.Set(c.Cacher.PortionFilled())
 }
 
 func (c *Cache[K, V]) Get(key K) (V, bool) {
@@ -47,4 +48,14 @@ func (c *Cache[K, V]) Get(key K) (V, bool) {
 	}
 
 	return value, has
+}
+
+func (c *Cache[K, _]) Evict(key K) {
+	c.Cacher.Evict(key)
+	c.portionFilled.Set(c.Cacher.PortionFilled())
+}
+
+func (c *Cache[_, _]) Flush() {
+	c.Cacher.Flush()
+	c.portionFilled.Set(c.Cacher.PortionFilled())
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sender
@@ -11,17 +11,18 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/message"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/networking/router"
-	"github.com/dioneprotocol/dionego/snow/networking/timeout"
-	"github.com/dioneprotocol/dionego/subnets"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/networking/router"
+	"github.com/DioneProtocol/odysseygo/snow/networking/timeout"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 var _ common.Sender = (*sender)(nil)
@@ -73,9 +74,20 @@ func New(
 				Help: fmt.Sprintf("# of times a %s request was not sent because the node was benched", op),
 			},
 		)
-		if err := ctx.Registerer.Register(counter); err != nil {
-			return nil, fmt.Errorf("couldn't register metric for %s: %w", op, err)
+
+		switch engineType {
+		case p2p.EngineType_ENGINE_TYPE_SNOWMAN:
+			if err := ctx.Registerer.Register(counter); err != nil {
+				return nil, fmt.Errorf("couldn't register metric for %s: %w", op, err)
+			}
+		case p2p.EngineType_ENGINE_TYPE_ODYSSEY:
+			if err := ctx.OdysseyRegisterer.Register(counter); err != nil {
+				return nil, fmt.Errorf("couldn't register metric for %s: %w", op, err)
+			}
+		default:
+			return nil, fmt.Errorf("unknown engine type %s", engineType)
 		}
+
 		s.failedDueToBench[op] = counter
 	}
 	return s, nil
@@ -107,6 +119,7 @@ func (s *sender) SendGetStateSummaryFrontier(ctx context.Context, nodeIDs set.Se
 			requestID,
 			message.StateSummaryFrontierOp,
 			inMsg,
+			p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 		)
 	}
 
@@ -203,19 +216,22 @@ func (s *sender) SendStateSummaryFrontier(ctx context.Context, nodeID ids.NodeID
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.StateSummaryFrontierOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.StateSummaryFrontierOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-			zap.Binary("summary", summary),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.StateSummaryFrontierOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+				zap.Binary("summary", summary),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.StateSummaryFrontierOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+			)
+		}
 	}
 }
 
@@ -245,6 +261,7 @@ func (s *sender) SendGetAcceptedStateSummary(ctx context.Context, nodeIDs set.Se
 			requestID,
 			message.AcceptedStateSummaryOp,
 			inMsg,
+			p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 		)
 	}
 
@@ -380,6 +397,7 @@ func (s *sender) SendGetAcceptedFrontier(ctx context.Context, nodeIDs set.Set[id
 			requestID,
 			message.AcceptedFrontierOp,
 			inMsg,
+			s.engineType,
 		)
 	}
 
@@ -446,7 +464,6 @@ func (s *sender) SendAcceptedFrontier(ctx context.Context, nodeID ids.NodeID, re
 			requestID,
 			containerIDs,
 			nodeID,
-			s.engineType,
 		)
 		go s.router.HandleInbound(ctx, inMsg)
 		return
@@ -457,7 +474,6 @@ func (s *sender) SendAcceptedFrontier(ctx context.Context, nodeID ids.NodeID, re
 		s.ctx.ChainID,
 		requestID,
 		containerIDs,
-		s.engineType,
 	)
 	if err != nil {
 		s.ctx.Log.Error("failed to build message",
@@ -517,6 +533,7 @@ func (s *sender) SendGetAccepted(ctx context.Context, nodeIDs set.Set[ids.NodeID
 			requestID,
 			message.AcceptedOp,
 			inMsg,
+			s.engineType,
 		)
 	}
 
@@ -585,14 +602,13 @@ func (s *sender) SendAccepted(ctx context.Context, nodeID ids.NodeID, requestID 
 			requestID,
 			containerIDs,
 			nodeID,
-			s.engineType,
 		)
 		go s.router.HandleInbound(ctx, inMsg)
 		return
 	}
 
 	// Create the outbound message.
-	outMsg, err := s.msgCreator.Accepted(s.ctx.ChainID, requestID, containerIDs, s.engineType)
+	outMsg, err := s.msgCreator.Accepted(s.ctx.ChainID, requestID, containerIDs)
 	if err != nil {
 		s.ctx.Log.Error("failed to build message",
 			zap.Stringer("messageOp", message.AcceptedOp),
@@ -643,6 +659,7 @@ func (s *sender) SendGetAncestors(ctx context.Context, nodeID ids.NodeID, reques
 		requestID,
 		message.AncestorsOp,
 		inMsg,
+		s.engineType,
 	)
 
 	// Sending a GetAncestors to myself always fails.
@@ -712,7 +729,7 @@ func (s *sender) SendGetAncestors(ctx context.Context, nodeID ids.NodeID, reques
 // The Ancestors message gives the recipient the contents of several containers.
 func (s *sender) SendAncestors(_ context.Context, nodeID ids.NodeID, requestID uint32, containers [][]byte) {
 	// Create the outbound message.
-	outMsg, err := s.msgCreator.Ancestors(s.ctx.ChainID, requestID, containers, s.engineType)
+	outMsg, err := s.msgCreator.Ancestors(s.ctx.ChainID, requestID, containers)
 	if err != nil {
 		s.ctx.Log.Error("failed to build message",
 			zap.Stringer("messageOp", message.AncestorsOp),
@@ -767,6 +784,7 @@ func (s *sender) SendGet(ctx context.Context, nodeID ids.NodeID, requestID uint3
 		requestID,
 		message.PutOp,
 		inMsg,
+		s.engineType,
 	)
 
 	// Sending a Get to myself always fails.
@@ -860,19 +878,22 @@ func (s *sender) SendPut(_ context.Context, nodeID ids.NodeID, requestID uint32,
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-			zap.Binary("container", container),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+				zap.Binary("container", container),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+			)
+		}
 	}
 }
 
@@ -904,6 +925,7 @@ func (s *sender) SendPushQuery(ctx context.Context, nodeIDs set.Set[ids.NodeID],
 			requestID,
 			message.ChitsOp,
 			inMsg,
+			s.engineType,
 		)
 	}
 
@@ -978,19 +1000,22 @@ func (s *sender) SendPushQuery(ctx context.Context, nodeIDs set.Set[ids.NodeID],
 
 	for nodeID := range nodeIDs {
 		if !sentTo.Contains(nodeID) {
-			s.ctx.Log.Debug("failed to send message",
-				zap.Stringer("messageOp", message.PushQueryOp),
-				zap.Stringer("nodeID", nodeID),
-				zap.Stringer("chainID", s.ctx.ChainID),
-				zap.Uint32("requestID", requestID),
-			)
-			s.ctx.Log.Verbo("failed to send message",
-				zap.Stringer("messageOp", message.PushQueryOp),
-				zap.Stringer("nodeID", nodeID),
-				zap.Stringer("chainID", s.ctx.ChainID),
-				zap.Uint32("requestID", requestID),
-				zap.Binary("container", container),
-			)
+			if s.ctx.Log.Enabled(logging.Verbo) {
+				s.ctx.Log.Verbo("failed to send message",
+					zap.Stringer("messageOp", message.PushQueryOp),
+					zap.Stringer("nodeID", nodeID),
+					zap.Stringer("chainID", s.ctx.ChainID),
+					zap.Uint32("requestID", requestID),
+					zap.Binary("container", container),
+				)
+			} else {
+				s.ctx.Log.Debug("failed to send message",
+					zap.Stringer("messageOp", message.PushQueryOp),
+					zap.Stringer("nodeID", nodeID),
+					zap.Stringer("chainID", s.ctx.ChainID),
+					zap.Uint32("requestID", requestID),
+				)
+			}
 
 			// Register failures for nodes we didn't send a request to.
 			s.timeouts.RegisterRequestToUnreachableValidator()
@@ -1032,6 +1057,7 @@ func (s *sender) SendPullQuery(ctx context.Context, nodeIDs set.Set[ids.NodeID],
 			requestID,
 			message.ChitsOp,
 			inMsg,
+			s.engineType,
 		)
 	}
 
@@ -1139,14 +1165,13 @@ func (s *sender) SendChits(ctx context.Context, nodeID ids.NodeID, requestID uin
 			votes,
 			accepted,
 			nodeID,
-			s.engineType,
 		)
 		go s.router.HandleInbound(ctx, inMsg)
 		return
 	}
 
 	// Create the outbound message.
-	outMsg, err := s.msgCreator.Chits(s.ctx.ChainID, requestID, votes, accepted, s.engineType)
+	outMsg, err := s.msgCreator.Chits(s.ctx.ChainID, requestID, votes, accepted)
 	if err != nil {
 		s.ctx.Log.Error("failed to build message",
 			zap.Stringer("messageOp", message.ChitsOp),
@@ -1196,6 +1221,7 @@ func (s *sender) SendCrossChainAppRequest(ctx context.Context, chainID ids.ID, r
 		requestID,
 		message.CrossChainAppResponseOp,
 		failedMsg,
+		p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 	)
 
 	inMsg := message.InternalCrossChainAppRequest(
@@ -1249,6 +1275,7 @@ func (s *sender) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID]
 			requestID,
 			message.AppResponseOp,
 			inMsg,
+			p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 		)
 	}
 
@@ -1320,19 +1347,22 @@ func (s *sender) SendAppRequest(ctx context.Context, nodeIDs set.Set[ids.NodeID]
 
 	for nodeID := range nodeIDs {
 		if !sentTo.Contains(nodeID) {
-			s.ctx.Log.Debug("failed to send message",
-				zap.Stringer("messageOp", message.AppRequestOp),
-				zap.Stringer("nodeID", nodeID),
-				zap.Stringer("chainID", s.ctx.ChainID),
-				zap.Uint32("requestID", requestID),
-			)
-			s.ctx.Log.Verbo("failed to send message",
-				zap.Stringer("messageOp", message.AppRequestOp),
-				zap.Stringer("nodeID", nodeID),
-				zap.Stringer("chainID", s.ctx.ChainID),
-				zap.Uint32("requestID", requestID),
-				zap.Binary("payload", appRequestBytes),
-			)
+			if s.ctx.Log.Enabled(logging.Verbo) {
+				s.ctx.Log.Verbo("failed to send message",
+					zap.Stringer("messageOp", message.AppRequestOp),
+					zap.Stringer("nodeID", nodeID),
+					zap.Stringer("chainID", s.ctx.ChainID),
+					zap.Uint32("requestID", requestID),
+					zap.Binary("payload", appRequestBytes),
+				)
+			} else {
+				s.ctx.Log.Debug("failed to send message",
+					zap.Stringer("messageOp", message.AppRequestOp),
+					zap.Stringer("nodeID", nodeID),
+					zap.Stringer("chainID", s.ctx.ChainID),
+					zap.Uint32("requestID", requestID),
+				)
+			}
 
 			// Register failures for nodes we didn't send a request to.
 			s.timeouts.RegisterRequestToUnreachableValidator()
@@ -1390,19 +1420,22 @@ func (s *sender) SendAppResponse(ctx context.Context, nodeID ids.NodeID, request
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.AppResponseOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.AppResponseOp),
-			zap.Stringer("nodeID", nodeID),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Uint32("requestID", requestID),
-			zap.Binary("payload", appResponseBytes),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.AppResponseOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+				zap.Binary("payload", appResponseBytes),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.AppResponseOp),
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Uint32("requestID", requestID),
+			)
+		}
 	}
 	return nil
 }
@@ -1430,17 +1463,20 @@ func (s *sender) SendAppGossipSpecific(_ context.Context, nodeIDs set.Set[ids.No
 	if sentTo.Len() == 0 {
 		for nodeID := range nodeIDs {
 			if !sentTo.Contains(nodeID) {
-				s.ctx.Log.Debug("failed to send message",
-					zap.Stringer("messageOp", message.AppGossipOp),
-					zap.Stringer("nodeID", nodeID),
-					zap.Stringer("chainID", s.ctx.ChainID),
-				)
-				s.ctx.Log.Verbo("failed to send message",
-					zap.Stringer("messageOp", message.AppGossipOp),
-					zap.Stringer("nodeID", nodeID),
-					zap.Stringer("chainID", s.ctx.ChainID),
-					zap.Binary("payload", appGossipBytes),
-				)
+				if s.ctx.Log.Enabled(logging.Verbo) {
+					s.ctx.Log.Verbo("failed to send message",
+						zap.Stringer("messageOp", message.AppGossipOp),
+						zap.Stringer("nodeID", nodeID),
+						zap.Stringer("chainID", s.ctx.ChainID),
+						zap.Binary("payload", appGossipBytes),
+					)
+				} else {
+					s.ctx.Log.Debug("failed to send message",
+						zap.Stringer("messageOp", message.AppGossipOp),
+						zap.Stringer("nodeID", nodeID),
+						zap.Stringer("chainID", s.ctx.ChainID),
+					)
+				}
 			}
 		}
 	}
@@ -1475,15 +1511,18 @@ func (s *sender) SendAppGossip(_ context.Context, appGossipBytes []byte) error {
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.AppGossipOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.AppGossipOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Binary("payload", appGossipBytes),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.AppGossipOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Binary("payload", appGossipBytes),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.AppGossipOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+			)
+		}
 	}
 	return nil
 }
@@ -1517,15 +1556,18 @@ func (s *sender) SendGossip(_ context.Context, container []byte) {
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Binary("container", container),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Binary("container", container),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+			)
+		}
 	}
 }
 
@@ -1563,15 +1605,18 @@ func (s *sender) Accept(ctx *snow.ConsensusContext, _ ids.ID, container []byte) 
 		s.subnet,
 	)
 	if sentTo.Len() == 0 {
-		s.ctx.Log.Debug("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-		)
-		s.ctx.Log.Verbo("failed to send message",
-			zap.Stringer("messageOp", message.PutOp),
-			zap.Stringer("chainID", s.ctx.ChainID),
-			zap.Binary("container", container),
-		)
+		if s.ctx.Log.Enabled(logging.Verbo) {
+			s.ctx.Log.Verbo("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+				zap.Binary("container", container),
+			)
+		} else {
+			s.ctx.Log.Debug("failed to send message",
+				zap.Stringer("messageOp", message.PutOp),
+				zap.Stringer("chainID", s.ctx.ChainID),
+			)
+		}
 	}
 	return nil
 }

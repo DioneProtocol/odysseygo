@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -8,23 +8,23 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/avm"
-	"github.com/dioneprotocol/dionego/vms/avm/fxs"
-	"github.com/dioneprotocol/dionego/vms/nftfx"
-	"github.com/dioneprotocol/dionego/vms/platformvm/api"
-	"github.com/dioneprotocol/dionego/vms/platformvm/genesis"
-	"github.com/dioneprotocol/dionego/vms/propertyfx"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/api"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	xchaintxs "github.com/dioneprotocol/dionego/vms/avm/txs"
-	pchaintxs "github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	xchaintxs "github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	pchaintxs "github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 const (
@@ -33,13 +33,19 @@ const (
 )
 
 var (
-	errStakeDurationTooHigh   = errors.New("initial stake duration larger than maximum configured")
-	errNoInitiallyStakedFunds = errors.New("initial staked funds cannot be empty")
-	errNoSupply               = errors.New("initial supply must be > 0")
-	errNoStakeDuration        = errors.New("initial stake duration must be > 0")
-	errNoStakers              = errors.New("initial stakers must be > 0")
-	errNoCChainGenesis        = errors.New("C-Chain genesis cannot be empty")
-	errNoTxs                  = errors.New("genesis creates no transactions")
+	errStakeDurationTooHigh            = errors.New("initial stake duration larger than maximum configured")
+	errNoInitiallyStakedFunds          = errors.New("initial staked funds cannot be empty")
+	errNoSupply                        = errors.New("initial supply must be > 0")
+	errNoStakeDuration                 = errors.New("initial stake duration must be > 0")
+	errNoStakers                       = errors.New("initial stakers must be > 0")
+	errNoCChainGenesis                 = errors.New("C-Chain genesis cannot be empty")
+	errNoTxs                           = errors.New("genesis creates no transactions")
+	errNoAllocationToStake             = errors.New("no allocation to stake")
+	errDuplicateInitiallyStakedAddress = errors.New("duplicate initially staked address")
+	errConflictingNetworkIDs           = errors.New("conflicting networkIDs")
+	errFutureStartTime                 = errors.New("startTime cannot be in the future")
+	errInitialStakeDurationTooLow      = errors.New("initial stake duration is too low")
+	errOverridesStandardNetworkConfig  = errors.New("overrides standard network genesis config")
 )
 
 // validateInitialStakedFunds ensures all staked
@@ -76,7 +82,8 @@ func validateInitialStakedFunds(config *Config) error {
 			}
 
 			return fmt.Errorf(
-				"address %s is duplicated in initial staked funds",
+				"%w: %s",
+				errDuplicateInitiallyStakedAddress,
 				dioneAddr,
 			)
 		}
@@ -96,7 +103,8 @@ func validateInitialStakedFunds(config *Config) error {
 			}
 
 			return fmt.Errorf(
-				"address %s does not have an allocation to stake",
+				"%w in address %s",
+				errNoAllocationToStake,
 				dioneAddr,
 			)
 		}
@@ -110,7 +118,8 @@ func validateInitialStakedFunds(config *Config) error {
 func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig) error {
 	if networkID != config.NetworkID {
 		return fmt.Errorf(
-			"networkID %d specified but genesis config contains networkID %d",
+			"%w: expected %d but config contains %d",
+			errConflictingNetworkIDs,
 			networkID,
 			config.NetworkID,
 		)
@@ -127,7 +136,8 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 	startTime := time.Unix(int64(config.StartTime), 0)
 	if time.Since(startTime) < 0 {
 		return fmt.Errorf(
-			"start time cannot be in the future: %s",
+			"%w: %s",
+			errFutureStartTime,
 			startTime,
 		)
 	}
@@ -153,10 +163,9 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 	offsetTimeRequired := config.InitialStakeDurationOffset * uint64(len(config.InitialStakers)-1)
 	if offsetTimeRequired > config.InitialStakeDuration {
 		return fmt.Errorf(
-			"initial stake duration is %d but need at least %d with offset of %d",
-			config.InitialStakeDuration,
+			"%w must be at least %d",
+			errInitialStakeDurationTooLow,
 			offsetTimeRequired,
-			config.InitialStakeDurationOffset,
 		)
 	}
 
@@ -187,6 +196,7 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 // loads the network genesis data from the config at [filepath].
 //
 // FromFile returns:
+//
 //  1. The byte representation of the genesis state of the platform chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
@@ -194,9 +204,9 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 	switch networkID {
 	case constants.MainnetID, constants.TestnetID, constants.LocalID:
 		return nil, ids.ID{}, fmt.Errorf(
-			"cannot override genesis config for standard network %s (%d)",
+			"%w: %s",
+			errOverridesStandardNetworkConfig,
 			constants.NetworkName(networkID),
-			networkID,
 		)
 	}
 
@@ -228,6 +238,7 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 // loads the network genesis data from [genesisContent].
 //
 // FromFlag returns:
+//
 //  1. The byte representation of the genesis state of the platform chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
@@ -235,9 +246,9 @@ func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig
 	switch networkID {
 	case constants.MainnetID, constants.TestnetID, constants.LocalID:
 		return nil, ids.ID{}, fmt.Errorf(
-			"cannot override genesis config for standard network %s (%d)",
+			"%w: %s",
+			errOverridesStandardNetworkConfig,
 			constants.NetworkName(networkID),
-			networkID,
 		)
 	}
 
@@ -254,6 +265,7 @@ func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig
 }
 
 // FromConfig returns:
+//
 //  1. The byte representation of the genesis state of the platform chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
@@ -404,8 +416,6 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 			}
 		}
 
-		delegationFee := json.Uint32(staker.DelegationFee)
-
 		platformvmArgs.Validators = append(platformvmArgs.Validators,
 			api.PermissionlessValidator{
 				Staker: api.Staker{
@@ -418,7 +428,6 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 					Addresses: []string{destAddrStr},
 				},
 				Staked:             utxos,
-				ExactDelegationFee: &delegationFee,
 			},
 		)
 	}

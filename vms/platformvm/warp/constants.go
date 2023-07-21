@@ -1,9 +1,9 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
 
-import "github.com/dioneprotocol/dionego/ids"
+import "github.com/DioneProtocol/odysseygo/ids"
 
 // AnycastID is a special DestinationChainID that is used to indicate that the
 // message is intended to be able to be received by any chain.

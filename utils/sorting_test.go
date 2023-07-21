@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utils
@@ -23,7 +23,7 @@ func TestSortSliceSortable(t *testing.T) {
 	var s []sortable
 	Sort(s)
 	require.True(IsSortedAndUniqueSortable(s))
-	require.Equal(0, len(s))
+	require.Empty(s)
 
 	s = []sortable{1}
 	Sort(s)
@@ -115,7 +115,7 @@ func TestSortByHash(t *testing.T) {
 
 	s := [][]byte{}
 	SortByHash(s)
-	require.Len(s, 0)
+	require.Empty(s)
 
 	s = [][]byte{{1}}
 	SortByHash(s)

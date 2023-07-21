@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package grpcutils
@@ -16,10 +16,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/database/rpcdb"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/rpcdb"
 
-	pb "github.com/dioneprotocol/dionego/proto/pb/rpcdb"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
 )
 
 func TestDialOptsSmoke(t *testing.T) {

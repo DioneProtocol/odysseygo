@@ -1,39 +1,63 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
 
 import (
-	"container/list"
 	"fmt"
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"golang.org/x/exp/maps"
 
-	"github.com/dioneprotocol/dionego/api"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 type WalletService struct {
-	vm *VM
-
-	pendingTxMap      map[ids.ID]*list.Element
-	pendingTxOrdering *list.List
+	vm         *VM
+	pendingTxs linkedhashmap.LinkedHashmap[ids.ID, *txs.Tx]
 }
 
 func (w *WalletService) decided(txID ids.ID) {
-	e, ok := w.pendingTxMap[txID]
-	if !ok {
+	if _, ok := w.pendingTxs.Get(txID); !ok {
 		return
 	}
-	delete(w.pendingTxMap, txID)
-	w.pendingTxOrdering.Remove(e)
+
+	w.vm.ctx.Log.Info("tx decided over wallet API",
+		zap.Stringer("txID", txID),
+	)
+	w.pendingTxs.Delete(txID)
+
+	for {
+		txID, tx, ok := w.pendingTxs.Oldest()
+		if !ok {
+			return
+		}
+
+		txBytes := tx.Bytes()
+		_, err := w.vm.IssueTx(txBytes)
+		if err == nil {
+			w.vm.ctx.Log.Info("issued tx to mempool over wallet API",
+				zap.Stringer("txID", txID),
+			)
+			return
+		}
+
+		w.pendingTxs.Delete(txID)
+		w.vm.ctx.Log.Warn("dropping tx issued over wallet API",
+			zap.Stringer("txID", txID),
+			zap.Error(err),
+		)
+	}
 }
 
 func (w *WalletService) issue(txBytes []byte) (ids.ID, error) {
@@ -42,16 +66,34 @@ func (w *WalletService) issue(txBytes []byte) (ids.ID, error) {
 		return ids.ID{}, err
 	}
 
-	txID, err := w.vm.IssueTx(txBytes)
-	if err != nil {
-		return ids.ID{}, err
-	}
+	txID := tx.ID()
+	w.vm.ctx.Log.Info("issuing tx over wallet API",
+		zap.Stringer("txID", txID),
+	)
 
-	if _, dup := w.pendingTxMap[txID]; dup {
+	if _, ok := w.pendingTxs.Get(txID); ok {
+		w.vm.ctx.Log.Warn("issuing duplicate tx over wallet API",
+			zap.Stringer("txID", txID),
+		)
 		return txID, nil
 	}
 
-	w.pendingTxMap[txID] = w.pendingTxOrdering.PushBack(tx)
+	if w.pendingTxs.Len() == 0 {
+		_, err := w.vm.IssueTx(txBytes)
+		if err != nil {
+			return ids.ID{}, err
+		}
+
+		w.vm.ctx.Log.Info("issued tx to mempool over wallet API",
+			zap.Stringer("txID", txID),
+		)
+	} else {
+		w.vm.ctx.Log.Info("enqueueing tx over wallet API",
+			zap.Stringer("txID", txID),
+		)
+	}
+
+	w.pendingTxs.Put(txID, tx)
 	return txID, nil
 }
 
@@ -61,8 +103,10 @@ func (w *WalletService) update(utxos []*dione.UTXO) ([]*dione.UTXO, error) {
 		utxoMap[utxo.InputID()] = utxo
 	}
 
-	for e := w.pendingTxOrdering.Front(); e != nil; e = e.Next() {
-		tx := e.Value.(*txs.Tx)
+	iter := w.pendingTxs.NewIterator()
+
+	for iter.Next() {
+		tx := iter.Value()
 		for _, inputUTXO := range tx.Unsigned.InputUTXOs() {
 			if inputUTXO.Symbolic() {
 				continue
@@ -78,12 +122,15 @@ func (w *WalletService) update(utxos []*dione.UTXO) ([]*dione.UTXO, error) {
 			utxoMap[utxo.InputID()] = utxo
 		}
 	}
+
 	return maps.Values(utxoMap), nil
 }
 
 // IssueTx attempts to issue a transaction into consensus
 func (w *WalletService) IssueTx(_ *http.Request, args *api.FormattedTx, reply *api.JSONTxID) error {
-	w.vm.ctx.Log.Debug("AVM Wallet: IssueTx called",
+	w.vm.ctx.Log.Warn("deprecated API called",
+		zap.String("service", "wallet"),
+		zap.String("method", "issueTx"),
 		logging.UserString("tx", args.Tx),
 	)
 
@@ -107,7 +154,9 @@ func (w *WalletService) Send(r *http.Request, args *SendArgs, reply *api.JSONTxI
 
 // SendMultiple sends a transaction with multiple outputs.
 func (w *WalletService) SendMultiple(_ *http.Request, args *SendMultipleArgs, reply *api.JSONTxIDChangeAddr) error {
-	w.vm.ctx.Log.Debug("AVM Wallet: SendMultiple",
+	w.vm.ctx.Log.Warn("deprecated API called",
+		zap.String("service", "wallet"),
+		zap.String("method", "sendMultiple"),
 		logging.UserString("username", args.Username),
 	)
 
@@ -193,10 +242,7 @@ func (w *WalletService) SendMultiple(_ *http.Request, args *SendMultipleArgs, re
 		})
 	}
 
-	amountsWithFee := make(map[ids.ID]uint64, len(amounts)+1)
-	for assetKey, amount := range amounts {
-		amountsWithFee[assetKey] = amount
-	}
+	amountsWithFee := maps.Clone(amounts)
 
 	amountWithFee, err := math.Add64(amounts[w.vm.feeAssetID], w.vm.TxFee)
 	if err != nil {

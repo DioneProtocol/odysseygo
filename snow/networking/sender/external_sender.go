@@ -1,13 +1,13 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sender
 
 import (
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/message"
-	"github.com/dioneprotocol/dionego/subnets"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 // ExternalSender sends consensus messages to other validators

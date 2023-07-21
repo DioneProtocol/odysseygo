@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package version
@@ -17,7 +17,7 @@ func TestNewDefaultApplication(t *testing.T) {
 		Patch: 3,
 	}
 
-	require.Equal(t, "dione/1.2.3", v.String())
+	require.Equal(t, "odyssey/1.2.3", v.String())
 	require.NoError(t, v.Compatible(v))
 	require.False(t, v.Before(v))
 }

@@ -1,9 +1,10 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -19,92 +20,100 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/dioneprotocol/dionego/app/runner"
-	"github.com/dioneprotocol/dionego/chains"
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/ipcs"
-	"github.com/dioneprotocol/dionego/nat"
-	"github.com/dioneprotocol/dionego/network"
-	"github.com/dioneprotocol/dionego/network/dialer"
-	"github.com/dioneprotocol/dionego/network/throttling"
-	"github.com/dioneprotocol/dionego/node"
-	"github.com/dioneprotocol/dionego/snow/consensus/dione"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowball"
-	"github.com/dioneprotocol/dionego/snow/networking/benchlist"
-	"github.com/dioneprotocol/dionego/snow/networking/router"
-	"github.com/dioneprotocol/dionego/snow/networking/tracker"
-	"github.com/dioneprotocol/dionego/staking"
-	"github.com/dioneprotocol/dionego/subnets"
-	"github.com/dioneprotocol/dionego/trace"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/utils/dynamicip"
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/password"
-	"github.com/dioneprotocol/dionego/utils/perms"
-	"github.com/dioneprotocol/dionego/utils/profiler"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/storage"
-	"github.com/dioneprotocol/dionego/utils/timer"
-	"github.com/dioneprotocol/dionego/vms"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/proposervm"
+	"github.com/DioneProtocol/odysseygo/api/server"
+	"github.com/DioneProtocol/odysseygo/chains"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/ipcs"
+	"github.com/DioneProtocol/odysseygo/nat"
+	"github.com/DioneProtocol/odysseygo/network"
+	"github.com/DioneProtocol/odysseygo/network/dialer"
+	"github.com/DioneProtocol/odysseygo/network/throttling"
+	"github.com/DioneProtocol/odysseygo/node"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
+	"github.com/DioneProtocol/odysseygo/snow/networking/benchlist"
+	"github.com/DioneProtocol/odysseygo/snow/networking/router"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/staking"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/DioneProtocol/odysseygo/utils/compression"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/dynamicip"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/password"
+	"github.com/DioneProtocol/odysseygo/utils/perms"
+	"github.com/DioneProtocol/odysseygo/utils/profiler"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/storage"
+	"github.com/DioneProtocol/odysseygo/utils/timer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm"
 )
 
 const (
 	chainConfigFileName  = "config"
 	chainUpgradeFileName = "upgrade"
 	subnetConfigFileExt  = ".json"
+	ipResolutionTimeout  = 30 * time.Second
 )
 
 var (
+	// Deprecated key --> deprecation message (i.e. which key replaces it)
 	deprecatedKeys = map[string]string{
-		WhitelistedSubnetsKey: fmt.Sprintf("Use --%s instead", TrackSubnetsKey),
+		NetworkCompressionEnabledKey:           fmt.Sprintf("use --%s instead", NetworkCompressionTypeKey),
+		GenesisConfigFileKey:                   fmt.Sprintf("use --%s instead", GenesisFileKey),
+		GenesisConfigContentKey:                fmt.Sprintf("use --%s instead", GenesisFileContentKey),
+		InboundConnUpgradeThrottlerCooldownKey: fmt.Sprintf("use --%s instead", NetworkInboundConnUpgradeThrottlerCooldownKey),
+		InboundThrottlerMaxConnsPerSecKey:      fmt.Sprintf("use --%s instead", NetworkInboundThrottlerMaxConnsPerSecKey),
+		OutboundConnectionThrottlingRpsKey:     fmt.Sprintf("use --%s instead", NetworkOutboundConnectionThrottlingRpsKey),
+		OutboundConnectionTimeoutKey:           fmt.Sprintf("use --%s instead", NetworkOutboundConnectionTimeoutKey),
+		StakingEnabledKey:                      fmt.Sprintf("use --%s instead", SybilProtectionEnabledKey),
+		StakingDisabledWeightKey:               fmt.Sprintf("use --%s instead", SybilProtectionDisabledWeightKey),
+		ConsensusGossipFrequencyKey:            fmt.Sprintf("use --%s instead", ConsensusAcceptedFrontierGossipFrequencyKey),
 	}
 
-	errInvalidStakerWeights          = errors.New("staking weights must be positive")
-	errStakingDisableOnPublicNetwork = errors.New("staking disabled on public network")
-	errAuthPasswordTooWeak           = errors.New("API auth password is not strong enough")
-	errInvalidUptimeRequirement      = errors.New("uptime requirement must be in the range [0, 1]")
-	errMinValidatorStakeAboveMax     = errors.New("minimum validator stake can't be greater than maximum validator stake")
-	errInvalidDelegationFee          = errors.New("delegation fee must be in the range [0, 1,000,000]")
-	errInvalidMinStakeDuration       = errors.New("min stake duration must be > 0")
-	errMinStakeDurationAboveMax      = errors.New("max stake duration can't be less than min stake duration")
-	errStakeMaxConsumptionTooLarge   = fmt.Errorf("max stake consumption must be less than or equal to %d", reward.PercentDenominator)
-	errStakeMaxConsumptionBelowMin   = errors.New("stake max consumption can't be less than min stake consumption")
-	errStakeMintingPeriodBelowMin    = errors.New("stake minting period can't be less than max stake duration")
-	errCannotTrackPrimaryNetwork     = errors.New("cannot track primary network")
-	errStakingKeyContentUnset        = fmt.Errorf("%s key not set but %s set", StakingTLSKeyContentKey, StakingCertContentKey)
-	errStakingCertContentUnset       = fmt.Errorf("%s key set but %s not set", StakingTLSKeyContentKey, StakingCertContentKey)
-	errMissingStakingSigningKeyFile  = errors.New("missing staking signing key file")
-	errTracingEndpointEmpty          = fmt.Errorf("%s cannot be empty", TracingEndpointKey)
-	errPluginDirNotADirectory        = errors.New("plugin dir is not a directory")
+	errSybilProtectionDisabledStakerWeights   = errors.New("sybil protection disabled weights must be positive")
+	errSybilProtectionDisabledOnPublicNetwork = errors.New("sybil protection disabled on public network")
+	errAuthPasswordTooWeak                    = errors.New("API auth password is not strong enough")
+	errInvalidUptimeRequirement               = errors.New("uptime requirement must be in the range [0, 1]")
+	errMinValidatorStakeAboveMax              = errors.New("minimum validator stake can't be greater than maximum validator stake")
+	errInvalidMinStakeDuration                = errors.New("min stake duration must be > 0")
+	errMinStakeDurationAboveMax               = errors.New("max stake duration can't be less than min stake duration")
+	errStakeMaxConsumptionTooLarge            = fmt.Errorf("max stake consumption must be less than or equal to %d", reward.PercentDenominator)
+	errStakeMaxConsumptionBelowMin            = errors.New("stake max consumption can't be less than min stake consumption")
+	errStakeMintingPeriodBelowMin             = errors.New("stake minting period can't be less than max stake duration")
+	errCannotTrackPrimaryNetwork              = errors.New("cannot track primary network")
+	errStakingKeyContentUnset                 = fmt.Errorf("%s key not set but %s set", StakingTLSKeyContentKey, StakingCertContentKey)
+	errStakingCertContentUnset                = fmt.Errorf("%s key set but %s not set", StakingTLSKeyContentKey, StakingCertContentKey)
+	errMissingStakingSigningKeyFile           = errors.New("missing staking signing key file")
+	errTracingEndpointEmpty                   = fmt.Errorf("%s cannot be empty", TracingEndpointKey)
+	errPluginDirNotADirectory                 = errors.New("plugin dir is not a directory")
+	errCannotReadDirectory                    = errors.New("cannot read directory")
+	errUnmarshalling                          = errors.New("unmarshalling failed")
+	errFileDoesNotExist                       = errors.New("file does not exist")
 )
 
-func GetRunnerConfig(v *viper.Viper) runner.Config {
-	return runner.Config{
-		DisplayVersionAndExit: v.GetBool(VersionKey),
-	}
-}
-
-func getConsensusConfig(v *viper.Viper) dione.Parameters {
-	return dione.Parameters{
-		Parameters: snowball.Parameters{
-			K:                       v.GetInt(SnowSampleSizeKey),
-			Alpha:                   v.GetInt(SnowQuorumSizeKey),
-			BetaVirtuous:            v.GetInt(SnowVirtuousCommitThresholdKey),
-			BetaRogue:               v.GetInt(SnowRogueCommitThresholdKey),
-			ConcurrentRepolls:       v.GetInt(SnowConcurrentRepollsKey),
-			OptimalProcessing:       v.GetInt(SnowOptimalProcessingKey),
-			MaxOutstandingItems:     v.GetInt(SnowMaxProcessingKey),
-			MaxItemProcessingTime:   v.GetDuration(SnowMaxTimeProcessingKey),
-			MixedQueryNumPushVdr:    int(v.GetUint(SnowMixedQueryNumPushVdrKey)),
-			MixedQueryNumPushNonVdr: int(v.GetUint(SnowMixedQueryNumPushNonVdrKey)),
-		},
-		BatchSize: v.GetInt(SnowDioneBatchSizeKey),
-		Parents:   v.GetInt(SnowDioneNumParentsKey),
+func getConsensusConfig(v *viper.Viper) snowball.Parameters {
+	return snowball.Parameters{
+		K:     v.GetInt(SnowSampleSizeKey),
+		Alpha: v.GetInt(SnowQuorumSizeKey),
+		// During the X-chain linearization we require BetaVirtuous and
+		// BetaRogue to be equal. Therefore we use the more conservative
+		// BetaRogue value for both BetaVirtuous and BetaRogue.
+		//
+		// TODO: After the X-chain linearization use the
+		// SnowVirtuousCommitThresholdKey as before.
+		BetaVirtuous:            v.GetInt(SnowRogueCommitThresholdKey),
+		BetaRogue:               v.GetInt(SnowRogueCommitThresholdKey),
+		ConcurrentRepolls:       v.GetInt(SnowConcurrentRepollsKey),
+		OptimalProcessing:       v.GetInt(SnowOptimalProcessingKey),
+		MaxOutstandingItems:     v.GetInt(SnowMaxProcessingKey),
+		MaxItemProcessingTime:   v.GetDuration(SnowMaxTimeProcessingKey),
+		MixedQueryNumPushVdr:    int(v.GetUint(SnowMixedQueryNumPushVdrKey)),
+		MixedQueryNumPushNonVdr: int(v.GetUint(SnowMixedQueryNumPushNonVdrKey)),
 	}
 }
 
@@ -210,6 +219,12 @@ func getHTTPConfig(v *viper.Viper) (node.HTTPConfig, error) {
 	}
 
 	config := node.HTTPConfig{
+		HTTPConfig: server.HTTPConfig{
+			ReadTimeout:       v.GetDuration(HTTPReadTimeoutKey),
+			ReadHeaderTimeout: v.GetDuration(HTTPReadHeaderTimeoutKey),
+			WriteTimeout:      v.GetDuration(HTTPWriteTimeoutKey),
+			IdleTimeout:       v.GetDuration(HTTPIdleTimeoutKey),
+		},
 		APIConfig: node.APIConfig{
 			APIIndexerConfig: node.APIIndexerConfig{
 				IndexAPIEnabled:      v.GetBool(IndexEnabledKey),
@@ -227,9 +242,8 @@ func getHTTPConfig(v *viper.Viper) (node.HTTPConfig, error) {
 		HTTPSKey:          httpsKey,
 		HTTPSCert:         httpsCert,
 		APIAllowedOrigins: v.GetStringSlice(HTTPAllowedOrigins),
-
-		ShutdownTimeout: v.GetDuration(HTTPShutdownTimeoutKey),
-		ShutdownWait:    v.GetDuration(HTTPShutdownWaitKey),
+		ShutdownTimeout:   v.GetDuration(HTTPShutdownTimeoutKey),
+		ShutdownWait:      v.GetDuration(HTTPShutdownWaitKey),
 	}
 
 	config.APIAuthConfig, err = getAPIAuthConfig(v)
@@ -297,15 +311,40 @@ func getGossipConfig(v *viper.Viper) subnets.GossipConfig {
 	}
 }
 
-func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duration) (network.Config, error) {
+func getNetworkConfig(
+	v *viper.Viper,
+	sybilProtectionEnabled bool,
+	halflife time.Duration,
+) (network.Config, error) {
 	// Set the max number of recent inbound connections upgraded to be
 	// equal to the max number of inbound connections per second.
-	maxInboundConnsPerSec := v.GetFloat64(InboundThrottlerMaxConnsPerSecKey)
-	upgradeCooldown := v.GetDuration(InboundConnUpgradeThrottlerCooldownKey)
+	maxInboundConnsPerSec := v.GetFloat64(getRenamedKey(v, InboundThrottlerMaxConnsPerSecKey, NetworkInboundThrottlerMaxConnsPerSecKey))
+	upgradeCooldown := v.GetDuration(getRenamedKey(v, InboundConnUpgradeThrottlerCooldownKey, NetworkInboundConnUpgradeThrottlerCooldownKey))
 	upgradeCooldownInSeconds := upgradeCooldown.Seconds()
 	maxRecentConnsUpgraded := int(math.Ceil(maxInboundConnsPerSec * upgradeCooldownInSeconds))
+
+	var (
+		compressionType compression.Type
+		err             error
+	)
+	if v.IsSet(NetworkCompressionTypeKey) {
+		if v.IsSet(NetworkCompressionEnabledKey) {
+			return network.Config{}, fmt.Errorf("cannot set both %q and %q", NetworkCompressionTypeKey, NetworkCompressionEnabledKey)
+		}
+
+		compressionType, err = compression.TypeFromString(v.GetString(NetworkCompressionTypeKey))
+		if err != nil {
+			return network.Config{}, err
+		}
+	} else {
+		if v.GetBool(NetworkCompressionEnabledKey) {
+			compressionType = constants.DefaultNetworkCompressionType
+		} else {
+			compressionType = compression.TypeNone
+		}
+	}
+
 	config := network.Config{
-		// Throttling
 		ThrottlerConfig: network.ThrottlerConfig{
 			MaxInboundConnsPerSec: maxInboundConnsPerSec,
 			InboundConnUpgradeThrottlerConfig: throttling.InboundConnUpgradeThrottlerConfig{
@@ -340,7 +379,7 @@ func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duratio
 		},
 
 		HealthConfig: network.HealthConfig{
-			Enabled:                      stakingEnabled,
+			Enabled:                      sybilProtectionEnabled,
 			MaxTimeSinceMsgSent:          v.GetDuration(NetworkHealthMaxTimeSinceMsgSentKey),
 			MaxTimeSinceMsgReceived:      v.GetDuration(NetworkHealthMaxTimeSinceMsgReceivedKey),
 			MaxPortionSendQueueBytesFull: v.GetFloat64(NetworkHealthMaxPortionSendQueueFillKey),
@@ -353,8 +392,8 @@ func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duratio
 		ProxyReadHeaderTimeout: v.GetDuration(NetworkTCPProxyReadTimeoutKey),
 
 		DialerConfig: dialer.Config{
-			ThrottleRps:       v.GetUint32(OutboundConnectionThrottlingRpsKey),
-			ConnectionTimeout: v.GetDuration(OutboundConnectionTimeoutKey),
+			ThrottleRps:       v.GetUint32(getRenamedKey(v, OutboundConnectionThrottlingRpsKey, NetworkOutboundConnectionThrottlingRpsKey)),
+			ConnectionTimeout: v.GetDuration(getRenamedKey(v, OutboundConnectionTimeoutKey, NetworkOutboundConnectionTimeoutKey)),
 		},
 
 		TLSKeyLogFile: v.GetString(NetworkTLSKeyLogFileKey),
@@ -378,7 +417,7 @@ func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duratio
 		},
 
 		MaxClockDifference:           v.GetDuration(NetworkMaxClockDifferenceKey),
-		CompressionEnabled:           v.GetBool(NetworkCompressionEnabledKey),
+		CompressionType:              compressionType,
 		PingFrequency:                v.GetDuration(NetworkPingFrequencyKey),
 		AllowPrivateIPs:              v.GetBool(NetworkAllowPrivateIPsKey),
 		UptimeMetricFreq:             v.GetDuration(UptimeMetricFreqKey),
@@ -399,9 +438,13 @@ func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duratio
 	case config.HealthConfig.MaxPortionSendQueueBytesFull < 0 || config.HealthConfig.MaxPortionSendQueueBytesFull > 1:
 		return network.Config{}, fmt.Errorf("%s must be in [0,1]", NetworkHealthMaxPortionSendQueueFillKey)
 	case config.DialerConfig.ConnectionTimeout < 0:
-		return network.Config{}, fmt.Errorf("%q must be >= 0", OutboundConnectionTimeoutKey)
+		return network.Config{}, fmt.Errorf("%q must be >= 0", NetworkOutboundConnectionTimeoutKey)
 	case config.PeerListGossipFreq < 0:
 		return network.Config{}, fmt.Errorf("%s must be >= 0", NetworkPeerListGossipFreqKey)
+	case config.ThrottlerConfig.InboundMsgThrottlerConfig.CPUThrottlerConfig.MaxRecheckDelay < constants.MinInboundThrottlerMaxRecheckDelay:
+		return network.Config{}, fmt.Errorf("%s must be >= %d", InboundThrottlerCPUMaxRecheckDelayKey, constants.MinInboundThrottlerMaxRecheckDelay)
+	case config.ThrottlerConfig.InboundMsgThrottlerConfig.DiskThrottlerConfig.MaxRecheckDelay < constants.MinInboundThrottlerMaxRecheckDelay:
+		return network.Config{}, fmt.Errorf("%s must be >= %d", InboundThrottlerDiskMaxRecheckDelayKey, constants.MinInboundThrottlerMaxRecheckDelay)
 	case config.MaxReconnectDelay < 0:
 		return network.Config{}, fmt.Errorf("%s must be >= 0", NetworkMaxReconnectDelayKey)
 	case config.InitialReconnectDelay < 0:
@@ -422,7 +465,7 @@ func getNetworkConfig(v *viper.Viper, stakingEnabled bool, halflife time.Duratio
 	return config, nil
 }
 
-func getBenchlistConfig(v *viper.Viper, consensusParameters dione.Parameters) (benchlist.Config, error) {
+func getBenchlistConfig(v *viper.Viper, consensusParameters snowball.Parameters) (benchlist.Config, error) {
 	alpha := consensusParameters.Alpha
 	k := consensusParameters.K
 	config := benchlist.Config{
@@ -569,7 +612,9 @@ func getIPConfig(v *viper.Viper) (node.IPConfig, error) {
 		}
 
 		// Use that to resolve our public IP.
-		ip, err := resolver.Resolve()
+		ctx, cancel := context.WithTimeout(context.Background(), ipResolutionTimeout)
+		defer cancel()
+		ip, err := resolver.Resolve(ctx)
 		if err != nil {
 			return node.IPConfig{}, fmt.Errorf("couldn't resolve public IP: %w", err)
 		}
@@ -747,18 +792,18 @@ func getStakingSigner(v *viper.Viper) (*bls.SecretKey, error) {
 
 func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, error) {
 	config := node.StakingConfig{
-		EnableStaking:         v.GetBool(StakingEnabledKey),
-		DisabledStakingWeight: v.GetUint64(StakingDisabledWeightKey),
-		StakingKeyPath:        GetExpandedArg(v, StakingTLSKeyPathKey),
-		StakingCertPath:       GetExpandedArg(v, StakingCertPathKey),
-		StakingSignerPath:     GetExpandedArg(v, StakingSignerKeyPathKey),
+		SybilProtectionEnabled:        v.GetBool(getRenamedKey(v, StakingEnabledKey, SybilProtectionEnabledKey)),
+		SybilProtectionDisabledWeight: v.GetUint64(getRenamedKey(v, StakingDisabledWeightKey, SybilProtectionDisabledWeightKey)),
+		StakingKeyPath:                GetExpandedArg(v, StakingTLSKeyPathKey),
+		StakingCertPath:               GetExpandedArg(v, StakingCertPathKey),
+		StakingSignerPath:             GetExpandedArg(v, StakingSignerKeyPathKey),
 	}
-	if !config.EnableStaking && config.DisabledStakingWeight == 0 {
-		return node.StakingConfig{}, errInvalidStakerWeights
+	if !config.SybilProtectionEnabled && config.SybilProtectionDisabledWeight == 0 {
+		return node.StakingConfig{}, errSybilProtectionDisabledStakerWeights
 	}
 
-	if !config.EnableStaking && (networkID == constants.MainnetID || networkID == constants.FujiID) {
-		return node.StakingConfig{}, errStakingDisableOnPublicNetwork
+	if !config.SybilProtectionEnabled && (networkID == constants.MainnetID || networkID == constants.TestnetID) {
+		return node.StakingConfig{}, errSybilProtectionDisabledOnPublicNetwork
 	}
 
 	var err error
@@ -770,25 +815,21 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 	if err != nil {
 		return node.StakingConfig{}, err
 	}
-	if networkID != constants.MainnetID && networkID != constants.FujiID {
+	if networkID != constants.MainnetID && networkID != constants.TestnetID {
 		config.UptimeRequirement = v.GetFloat64(UptimeRequirementKey)
 		config.MinValidatorStake = v.GetUint64(MinValidatorStakeKey)
 		config.MaxValidatorStake = v.GetUint64(MaxValidatorStakeKey)
-		config.MinDelegatorStake = v.GetUint64(MinDelegatorStakeKey)
 		config.MinStakeDuration = v.GetDuration(MinStakeDurationKey)
 		config.MaxStakeDuration = v.GetDuration(MaxStakeDurationKey)
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
 		config.RewardConfig.MinConsumptionRate = v.GetUint64(StakeMinConsumptionRateKey)
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
 		config.RewardConfig.SupplyCap = v.GetUint64(StakeSupplyCapKey)
-		config.MinDelegationFee = v.GetUint32(MinDelegatorFeeKey)
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:
 			return node.StakingConfig{}, errInvalidUptimeRequirement
 		case config.MinValidatorStake > config.MaxValidatorStake:
 			return node.StakingConfig{}, errMinValidatorStakeAboveMax
-		case config.MinDelegationFee > 1_000_000:
-			return node.StakingConfig{}, errInvalidDelegationFee
 		case config.MinStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
 		case config.MaxStakeDuration < config.MinStakeDuration:
@@ -807,7 +848,7 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 }
 
 func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
-	if networkID != constants.MainnetID && networkID != constants.FujiID {
+	if networkID != constants.MainnetID && networkID != constants.TestnetID {
 		return genesis.TxFeeConfig{
 			TxFee:                         v.GetUint64(TxFeeKey),
 			CreateAssetTxFee:              v.GetUint64(CreateAssetTxFeeKey),
@@ -815,9 +856,7 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 			TransformSubnetTxFee:          v.GetUint64(TransformSubnetTxFeeKey),
 			CreateBlockchainTxFee:         v.GetUint64(CreateBlockchainTxFeeKey),
 			AddPrimaryNetworkValidatorFee: v.GetUint64(AddPrimaryNetworkValidatorFeeKey),
-			AddPrimaryNetworkDelegatorFee: v.GetUint64(AddPrimaryNetworkDelegatorFeeKey),
 			AddSubnetValidatorFee:         v.GetUint64(AddSubnetValidatorFeeKey),
-			AddSubnetDelegatorFee:         v.GetUint64(AddSubnetDelegatorFeeKey),
 		}
 	}
 	return genesis.GetTxFeeConfig(networkID)
@@ -825,14 +864,16 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 
 func getGenesisData(v *viper.Viper, networkID uint32, stakingCfg *genesis.StakingConfig) ([]byte, ids.ID, error) {
 	// try first loading genesis content directly from flag/env-var
-	if v.IsSet(GenesisConfigContentKey) {
-		genesisData := v.GetString(GenesisConfigContentKey)
+	configContentKey := getRenamedKey(v, GenesisConfigContentKey, GenesisFileContentKey)
+	if v.IsSet(configContentKey) {
+		genesisData := v.GetString(configContentKey)
 		return genesis.FromFlag(networkID, genesisData, stakingCfg)
 	}
 
+	configFileKey := getRenamedKey(v, GenesisConfigFileKey, GenesisFileKey)
 	// if content is not specified go for the file
-	if v.IsSet(GenesisConfigFileKey) {
-		genesisFileName := GetExpandedArg(v, GenesisConfigFileKey)
+	if v.IsSet(configFileKey) {
+		genesisFileName := GetExpandedArg(v, configFileKey)
 		return genesis.FromFile(networkID, genesisFileName, stakingCfg)
 	}
 
@@ -842,15 +883,10 @@ func getGenesisData(v *viper.Viper, networkID uint32, stakingCfg *genesis.Stakin
 }
 
 func getTrackedSubnets(v *viper.Viper) (set.Set[ids.ID], error) {
-	var trackSubnets string
-	if v.IsSet(TrackSubnetsKey) {
-		trackSubnets = v.GetString(TrackSubnetsKey)
-	} else {
-		trackSubnets = v.GetString(WhitelistedSubnetsKey)
-	}
-
-	trackedSubnetIDs := set.Set[ids.ID]{}
-	for _, subnet := range strings.Split(trackSubnets, ",") {
+	trackSubnetsStr := v.GetString(TrackSubnetsKey)
+	trackSubnetsStrs := strings.Split(trackSubnetsStr, ",")
+	trackedSubnetIDs := set.NewSet[ids.ID](len(trackSubnetsStrs))
+	for _, subnet := range trackSubnetsStrs {
 		if subnet == "" {
 			continue
 		}
@@ -913,7 +949,7 @@ func getAliases(v *viper.Viper, name string, contentKey string, fileKey string) 
 
 		if !exists {
 			if v.IsSet(fileKey) {
-				return nil, fmt.Errorf("%s file does not exist in %v", name, aliasFilePath)
+				return nil, fmt.Errorf("%w: %s", errFileDoesNotExist, aliasFilePath)
 			}
 			return nil, nil
 		}
@@ -926,7 +962,7 @@ func getAliases(v *viper.Viper, name string, contentKey string, fileKey string) 
 
 	aliasMap := make(map[ids.ID][]string)
 	if err := json.Unmarshal(fileBytes, &aliasMap); err != nil {
-		return nil, fmt.Errorf("problem unmarshaling %s: %w", name, err)
+		return nil, fmt.Errorf("%w on %s: %s", errUnmarshalling, name, err)
 	}
 	return aliasMap, nil
 }
@@ -939,21 +975,21 @@ func getChainAliases(v *viper.Viper) (map[ids.ID][]string, error) {
 	return getAliases(v, "chain aliases", ChainAliasesContentKey, ChainAliasesFileKey)
 }
 
-func getVMManager(v *viper.Viper) (vms.Manager, error) {
+func getVMAliaser(v *viper.Viper) (ids.Aliaser, error) {
 	vmAliases, err := getVMAliases(v)
 	if err != nil {
 		return nil, err
 	}
 
-	manager := vms.NewManager()
+	aliser := ids.NewAliaser()
 	for vmID, aliases := range vmAliases {
 		for _, alias := range aliases {
-			if err := manager.Alias(vmID, alias); err != nil {
+			if err := aliser.Alias(vmID, alias); err != nil {
 				return nil, err
 			}
 		}
 	}
-	return manager, nil
+	return aliser, nil
 }
 
 // getPathFromDirKey reads flag value from viper instance and then checks the folder existence
@@ -969,7 +1005,7 @@ func getPathFromDirKey(v *viper.Viper, configKey string) (string, error) {
 	}
 	if v.IsSet(configKey) {
 		// user specified a config dir explicitly, but dir does not exist.
-		return "", fmt.Errorf("cannot read directory: %v", cleanPath)
+		return "", fmt.Errorf("%w: %s", errCannotReadDirectory, cleanPath)
 	}
 	return "", nil
 }
@@ -1122,7 +1158,7 @@ func getSubnetConfigsFromDir(v *viper.Viper, subnetIDs []ids.ID) (map[ids.ID]sub
 
 		config := getDefaultSubnetConfig(v)
 		if err := json.Unmarshal(file, &config); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %s", errUnmarshalling, err)
 		}
 
 		if err := config.Valid(); err != nil {
@@ -1266,9 +1302,15 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 	}
 
 	// Gossiping
-	nodeConfig.ConsensusGossipFrequency = v.GetDuration(ConsensusGossipFrequencyKey)
-	if nodeConfig.ConsensusGossipFrequency < 0 {
-		return node.Config{}, fmt.Errorf("%s must be >= 0", ConsensusGossipFrequencyKey)
+	nodeConfig.AcceptedFrontierGossipFrequency = v.GetDuration(getRenamedKey(v, ConsensusGossipFrequencyKey, ConsensusAcceptedFrontierGossipFrequencyKey))
+	if nodeConfig.AcceptedFrontierGossipFrequency < 0 {
+		return node.Config{}, fmt.Errorf("%s must be >= 0", ConsensusAcceptedFrontierGossipFrequencyKey)
+	}
+
+	// App handling
+	nodeConfig.ConsensusAppConcurrency = int(v.GetUint(ConsensusAppConcurrencyKey))
+	if nodeConfig.ConsensusAppConcurrency <= 0 {
+		return node.Config{}, fmt.Errorf("%s must be > 0", ConsensusAppConcurrencyKey)
 	}
 
 	nodeConfig.UseCurrentHeight = v.GetBool(ProposerVMUseCurrentHeightKey)
@@ -1343,7 +1385,7 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 	}
 
 	// Network Config
-	nodeConfig.NetworkConfig, err = getNetworkConfig(v, nodeConfig.EnableStaking, healthCheckAveragerHalflife)
+	nodeConfig.NetworkConfig, err = getNetworkConfig(v, nodeConfig.SybilProtectionEnabled, healthCheckAveragerHalflife)
 	if err != nil {
 		return node.Config{}, err
 	}
@@ -1395,11 +1437,11 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 
 	// Node health
 	nodeConfig.MinPercentConnectedStakeHealthy = map[ids.ID]float64{
-		constants.PrimaryNetworkID: calcMinConnectedStake(primaryNetworkConfig.ConsensusParameters.Parameters),
+		constants.PrimaryNetworkID: calcMinConnectedStake(primaryNetworkConfig.ConsensusParameters),
 	}
 
 	for subnetID, config := range subnetConfigs {
-		nodeConfig.MinPercentConnectedStakeHealthy[subnetID] = calcMinConnectedStake(config.ConsensusParameters.Parameters)
+		nodeConfig.MinPercentConnectedStakeHealthy[subnetID] = calcMinConnectedStake(config.ConsensusParameters)
 	}
 
 	// Chain Configs
@@ -1415,7 +1457,7 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 	}
 
 	// VM Aliases
-	nodeConfig.VMManager, err = getVMManager(v)
+	nodeConfig.VMAliaser, err = getVMAliaser(v)
 	if err != nil {
 		return node.Config{}, err
 	}
@@ -1474,4 +1516,13 @@ func providedFlags(v *viper.Viper) map[string]interface{} {
 		}
 	}
 	return customSettings
+}
+
+// getRenamedKey returns the new key if it is set, otherwise it returns the deprecated key.
+func getRenamedKey(v *viper.Viper, deprecatedKey string, newKey string) string {
+	if v.IsSet(newKey) {
+		return newKey
+	}
+
+	return deprecatedKey
 }

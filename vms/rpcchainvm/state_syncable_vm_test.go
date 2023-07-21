@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -13,20 +13,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block/mocks"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime/subprocess"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime/subprocess"
 
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
 )
 
 var (
@@ -326,7 +326,7 @@ func TestStateSyncEnabled(t *testing.T) {
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = vm.StateSyncEnabled(context.Background())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 func TestGetOngoingSyncStateSummary(t *testing.T) {
@@ -351,7 +351,7 @@ func TestGetOngoingSyncStateSummary(t *testing.T) {
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = vm.GetOngoingSyncStateSummary(context.Background())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 func TestGetLastStateSummary(t *testing.T) {
@@ -376,7 +376,7 @@ func TestGetLastStateSummary(t *testing.T) {
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = vm.GetLastStateSummary(context.Background())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 func TestParseStateSummary(t *testing.T) {
@@ -400,12 +400,12 @@ func TestParseStateSummary(t *testing.T) {
 
 	// test parsing nil summary
 	_, err = vm.ParseStateSummary(context.Background(), nil)
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = vm.ParseStateSummary(context.Background(), mockedSummary.Bytes())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 func TestGetStateSummary(t *testing.T) {
@@ -430,7 +430,7 @@ func TestGetStateSummary(t *testing.T) {
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = vm.GetStateSummary(context.Background(), mockedSummary.Height())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 func TestAcceptStateSummary(t *testing.T) {
@@ -458,7 +458,7 @@ func TestAcceptStateSummary(t *testing.T) {
 	// test a non-special error.
 	// TODO: retrieve exact error
 	_, err = summary.Accept(context.Background())
-	require.Error(err)
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors
 }
 
 // Show that LastAccepted call returns the right answer after a StateSummary

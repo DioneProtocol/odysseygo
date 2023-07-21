@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package database
@@ -16,8 +16,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/units"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/units"
 )
 
 // Tests is a list of all database tests
@@ -921,7 +921,8 @@ func TestCompactNoPanic(t *testing.T, db Database) {
 
 	require.NoError(db.Compact(nil, nil))
 	require.NoError(db.Close())
-	require.Equal(ErrClosed, db.Compact(nil, nil))
+	err := db.Compact(nil, nil)
+	require.ErrorIs(err, ErrClosed)
 }
 
 // TestClear tests to make sure the deletion helper works as expected.
@@ -949,7 +950,7 @@ func TestClear(t *testing.T, db Database) {
 
 	count, err = Count(db)
 	require.NoError(err)
-	require.Equal(0, count)
+	require.Zero(count)
 
 	require.NoError(db.Close())
 }

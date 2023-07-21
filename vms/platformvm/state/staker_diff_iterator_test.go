@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 func TestStakerDiffIterator(t *testing.T) {
@@ -26,31 +26,10 @@ func TestStakerDiffIterator(t *testing.T) {
 	pendingStakers := []*Staker{
 		{
 			TxID:      ids.GenerateTestID(),
-			StartTime: time.Unix(0, 0),
-			EndTime:   time.Unix(5, 0),
-			NextTime:  time.Unix(0, 0),
-			Priority:  txs.PrimaryNetworkDelegatorApricotPendingPriority,
-		},
-		{
-			TxID:      ids.GenerateTestID(),
-			StartTime: time.Unix(5, 0),
-			EndTime:   time.Unix(10, 0),
-			NextTime:  time.Unix(5, 0),
-			Priority:  txs.PrimaryNetworkDelegatorApricotPendingPriority,
-		},
-		{
-			TxID:      ids.GenerateTestID(),
 			StartTime: time.Unix(11, 0),
 			EndTime:   time.Unix(20, 0),
 			NextTime:  time.Unix(11, 0),
 			Priority:  txs.PrimaryNetworkValidatorPendingPriority,
-		},
-		{
-			TxID:      ids.GenerateTestID(),
-			StartTime: time.Unix(11, 0),
-			EndTime:   time.Unix(20, 0),
-			NextTime:  time.Unix(11, 0),
-			Priority:  txs.PrimaryNetworkDelegatorApricotPendingPriority,
 		},
 	}
 
@@ -63,35 +42,7 @@ func TestStakerDiffIterator(t *testing.T) {
 			isAdded: true,
 		},
 		{
-			txID:    pendingStakers[1].TxID,
-			isAdded: true,
-		},
-		{
 			txID:    pendingStakers[0].TxID,
-			isAdded: false,
-		},
-		{
-			txID:    pendingStakers[1].TxID,
-			isAdded: false,
-		},
-		{
-			txID:    currentStakers[0].TxID,
-			isAdded: false,
-		},
-		{
-			txID:    pendingStakers[2].TxID,
-			isAdded: true,
-		},
-		{
-			txID:    pendingStakers[3].TxID,
-			isAdded: true,
-		},
-		{
-			txID:    pendingStakers[3].TxID,
-			isAdded: false,
-		},
-		{
-			txID:    pendingStakers[2].TxID,
 			isAdded: false,
 		},
 	}

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package verify
@@ -12,9 +12,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/validators"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
 )
 
 var errMissing = errors.New("missing")
@@ -42,7 +42,7 @@ func TestSameSubnet(t *testing.T) {
 				}
 			},
 			chainID: chainID0,
-			result:  errSameChainID,
+			result:  ErrSameChainID,
 		},
 		{
 			name: "unknown chain",
@@ -70,7 +70,7 @@ func TestSameSubnet(t *testing.T) {
 				}
 			},
 			chainID: chainID1,
-			result:  errMismatchedSubnetIDs,
+			result:  ErrMismatchedSubnetIDs,
 		},
 		{
 			name: "same subnet",

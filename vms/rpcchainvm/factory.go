@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -6,17 +6,15 @@ package rpcchainvm
 import (
 	"context"
 	"fmt"
-	"io"
 
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/vms"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime/subprocess"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/vms"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime/subprocess"
 
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
 )
 
 var _ vms.Factory = (*factory)(nil)
@@ -35,21 +33,12 @@ func NewFactory(path string, processTracker resource.ProcessTracker, runtimeTrac
 	}
 }
 
-func (f *factory) New(ctx *snow.Context) (interface{}, error) {
+func (f *factory) New(log logging.Logger) (interface{}, error) {
 	config := &subprocess.Config{
+		Stderr:           log,
+		Stdout:           log,
 		HandshakeTimeout: runtime.DefaultHandshakeTimeout,
-	}
-
-	// createStaticHandlers will send a nil ctx to disable logs
-	// TODO: create a separate log file and no-op ctx
-	if ctx != nil {
-		config.Stderr = ctx.Log
-		config.Stdout = ctx.Log
-		config.Log = ctx.Log
-	} else {
-		config.Stderr = io.Discard
-		config.Stdout = io.Discard
-		config.Log = logging.NoLog{}
+		Log:              log,
 	}
 
 	listener, err := grpcutils.NewListener()
@@ -73,7 +62,7 @@ func (f *factory) New(ctx *snow.Context) (interface{}, error) {
 	}
 
 	vm := NewClient(vmpb.NewVMClient(clientConn))
-	vm.SetProcess(ctx, stopper, status.Pid, f.processTracker)
+	vm.SetProcess(stopper, status.Pid, f.processTracker)
 
 	f.runtimeTracker.TrackRuntime(stopper)
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package types
@@ -6,7 +6,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/dioneprotocol/dionego/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
 )
 
 // JSONByteSlice represents [[]byte] that is json marshalled to hex

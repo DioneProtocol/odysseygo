@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -14,22 +14,23 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/index"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/index"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var indexEnabledAvmConfig = Config{
@@ -104,7 +105,7 @@ func TestIndexTransaction_Ordered(t *testing.T) {
 
 		var inputUTXOs []*dione.UTXO
 		for _, utxoID := range uniqueParsedTX.InputUTXOs() {
-			utxo, err := vm.getUTXO(utxoID)
+			utxo, err := vm.dagState.GetUTXOFromID(utxoID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -194,7 +195,7 @@ func TestIndexTransaction_MultipleTransactions(t *testing.T) {
 
 		var inputUTXOs []*dione.UTXO
 		for _, utxoID := range uniqueParsedTX.InputUTXOs() {
-			utxo, err := vm.getUTXO(utxoID)
+			utxo, err := vm.dagState.GetUTXOFromID(utxoID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -264,7 +265,7 @@ func TestIndexTransaction_MultipleAddresses(t *testing.T) {
 
 	var inputUTXOs []*dione.UTXO //nolint:prealloc
 	for _, utxoID := range tx.Unsigned.InputUTXOs() {
-		utxo, err := vm.getUTXO(utxoID)
+		utxo, err := vm.dagState.GetUTXOFromID(utxoID)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -347,7 +348,7 @@ func TestIndexTransaction_UnorderedWrites(t *testing.T) {
 
 		var inputUTXOs []*dione.UTXO
 		for _, utxoID := range uniqueParsedTX.InputUTXOs() {
-			utxo, err := vm.getUTXO(utxoID)
+			utxo, err := vm.dagState.GetUTXOFromID(utxoID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -414,7 +415,7 @@ func TestIndexingNewInitWithIndexingEnabled(t *testing.T) {
 
 	// now disable indexing with allow-incomplete set to false
 	_, err = index.NewNoIndexer(db, false)
-	require.Error(t, err)
+	require.ErrorIs(t, err, index.ErrCausesIncompleteIndex)
 
 	// now disable indexing with allow-incomplete set to true
 	_, err = index.NewNoIndexer(db, true)
@@ -431,7 +432,7 @@ func TestIndexingNewInitWithIndexingDisabled(t *testing.T) {
 
 	// It's not OK to have an incomplete index when allowIncompleteIndices is false
 	_, err = index.NewIndexer(db, ctx.Log, "", prometheus.NewRegistry(), false)
-	require.Error(t, err)
+	require.ErrorIs(t, err, index.ErrIndexingRequiredFromGenesis)
 
 	// It's OK to have an incomplete index when allowIncompleteIndices is true
 	_, err = index.NewIndexer(db, ctx.Log, "", prometheus.NewRegistry(), true)
@@ -456,12 +457,12 @@ func TestIndexingAllowIncomplete(t *testing.T) {
 	_, err := index.NewNoIndexer(db, false)
 	require.NoError(t, err)
 
-	// we initialise with indexing enabled now and allow incomplete indexing as false
+	// we initialize with indexing enabled now and allow incomplete indexing as false
 	_, err = index.NewIndexer(db, ctx.Log, "", prometheus.NewRegistry(), false)
 	// we should get error because:
 	// - indexing was disabled previously
 	// - node now is asked to enable indexing with allow incomplete set to false
-	require.Error(t, err)
+	require.ErrorIs(t, err, index.ErrIndexingRequiredFromGenesis)
 }
 
 func buildPlatformUTXO(utxoID dione.UTXOID, txAssetID dione.Asset, addr ids.ShortID) *dione.UTXO {
@@ -485,7 +486,7 @@ func signTX(codec codec.Manager, tx *txs.Tx, key *secp256k1.PrivateKey) error {
 func buildTX(utxoID dione.UTXOID, txAssetID dione.Asset, address ...ids.ShortID) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.BaseTx{
 		BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Ins: []*dione.TransferableInput{{
 				UTXOID: utxoID,
@@ -546,6 +547,8 @@ func setupTestVM(t *testing.T, ctx *snow.Context, baseDBManager manager.Manager,
 }
 
 func assertLatestIdx(t *testing.T, db database.Database, sourceAddress ids.ShortID, assetID ids.ID, expectedIdx uint64) {
+	require := require.New(t)
+
 	addressDB := prefixdb.New(sourceAddress[:], db)
 	assetDB := prefixdb.New(assetID[:], addressDB)
 
@@ -553,9 +556,9 @@ func assertLatestIdx(t *testing.T, db database.Database, sourceAddress ids.Short
 	binary.BigEndian.PutUint64(expectedIdxBytes, expectedIdx)
 
 	idxBytes, err := assetDB.Get([]byte("idx"))
-	require.NoError(t, err)
+	require.NoError(err)
 
-	require.EqualValues(t, expectedIdxBytes, idxBytes)
+	require.Equal(expectedIdxBytes, idxBytes)
 }
 
 func checkIndexedTX(db database.Database, index uint64, sourceAddress ids.ShortID, assetID ids.ID, transactionID ids.ID) error {
@@ -584,12 +587,14 @@ func assertIndexedTX(t *testing.T, db database.Database, index uint64, sourceAdd
 	}
 }
 
-// Sets up test tx IDs in DB in the following structure for the indexer to pick them up:
-// [address] prefix DB
-//		[assetID] prefix DB
-//			- "idx": 2
-//			- 0: txID1
-//			- 1: txID1
+// Sets up test tx IDs in DB in the following structure for the indexer to pick
+// them up:
+//
+//	[address] prefix DB
+//	  [assetID] prefix DB
+//	    - "idx": 2
+//	    - 0: txID1
+//	    - 1: txID1
 func setupTestTxsInDB(t *testing.T, db *versiondb.Database, address ids.ShortID, assetID ids.ID, txCount int) []ids.ID {
 	var testTxs []ids.ID
 	for i := 0; i < txCount; i++ {

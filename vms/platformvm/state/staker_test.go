@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -12,9 +12,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var errCustom = errors.New("custom")
@@ -51,34 +51,6 @@ func TestStakerLess(t *testing.T) {
 				TxID:     ids.ID([32]byte{}),
 				NextTime: time.Unix(0, 0),
 				Priority: txs.PrimaryNetworkValidatorCurrentPriority,
-			},
-			less: false,
-		},
-		{
-			name: "left priority < right priority",
-			left: &Staker{
-				TxID:     ids.ID([32]byte{}),
-				NextTime: time.Unix(0, 0),
-				Priority: txs.PrimaryNetworkDelegatorApricotPendingPriority,
-			},
-			right: &Staker{
-				TxID:     ids.ID([32]byte{}),
-				NextTime: time.Unix(0, 0),
-				Priority: txs.PrimaryNetworkValidatorPendingPriority,
-			},
-			less: true,
-		},
-		{
-			name: "left priority > right priority",
-			left: &Staker{
-				TxID:     ids.ID([32]byte{}),
-				NextTime: time.Unix(0, 0),
-				Priority: txs.PrimaryNetworkValidatorPendingPriority,
-			},
-			right: &Staker{
-				TxID:     ids.ID([32]byte{}),
-				NextTime: time.Unix(0, 0),
-				Priority: txs.PrimaryNetworkDelegatorApricotPendingPriority,
 			},
 			less: false,
 		},

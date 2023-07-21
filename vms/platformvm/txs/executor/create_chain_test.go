@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -9,21 +9,22 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // Ensure Execute fails when there are not enough control sigs
 func TestCreateChainTxInsufficientControlSigs(t *testing.T) {
 	require := require.New(t)
-	env := newEnvironment( /*postBanff*/ true)
+	env := newEnvironment(true /*=postBanff*/, false /*=postCortina*/)
 	env.ctx.Lock.Lock()
 	defer func() {
 		require.NoError(shutdownEnvironment(env))
@@ -52,13 +53,13 @@ func TestCreateChainTxInsufficientControlSigs(t *testing.T) {
 		Tx:      tx,
 	}
 	err = tx.Unsigned.Visit(&executor)
-	require.Error(err, "should have erred because a sig is missing")
+	require.ErrorIs(err, errUnauthorizedSubnetModification)
 }
 
 // Ensure Execute fails when an incorrect control signature is given
 func TestCreateChainTxWrongControlSig(t *testing.T) {
 	require := require.New(t)
-	env := newEnvironment( /*postBanff*/ true)
+	env := newEnvironment(true /*=postBanff*/, false /*=postCortina*/)
 	env.ctx.Lock.Lock()
 	defer func() {
 		require.NoError(shutdownEnvironment(env))
@@ -94,14 +95,14 @@ func TestCreateChainTxWrongControlSig(t *testing.T) {
 		Tx:      tx,
 	}
 	err = tx.Unsigned.Visit(&executor)
-	require.Error(err, "should have failed verification because a sig is invalid")
+	require.ErrorIs(err, errUnauthorizedSubnetModification)
 }
 
 // Ensure Execute fails when the Subnet the blockchain specifies as
 // its validator set doesn't exist
 func TestCreateChainTxNoSuchSubnet(t *testing.T) {
 	require := require.New(t)
-	env := newEnvironment( /*postBanff*/ true)
+	env := newEnvironment(true /*=postBanff*/, false /*=postCortina*/)
 	env.ctx.Lock.Lock()
 	defer func() {
 		require.NoError(shutdownEnvironment(env))
@@ -129,13 +130,13 @@ func TestCreateChainTxNoSuchSubnet(t *testing.T) {
 		Tx:      tx,
 	}
 	err = tx.Unsigned.Visit(&executor)
-	require.Error(err, "should have failed because subnet doesn't exist")
+	require.ErrorIs(err, errCantFindSubnet)
 }
 
 // Ensure valid tx passes semanticVerify
 func TestCreateChainTxValid(t *testing.T) {
 	require := require.New(t)
-	env := newEnvironment( /*postBanff*/ true)
+	env := newEnvironment(true /*=postBanff*/, false /*=postCortina*/)
 	env.ctx.Lock.Lock()
 	defer func() {
 		require.NoError(shutdownEnvironment(env))
@@ -164,39 +165,39 @@ func TestCreateChainTxValid(t *testing.T) {
 	require.NoError(err)
 }
 
-func TestCreateChainTxAP3FeeChange(t *testing.T) {
-	ap3Time := defaultGenesisTime.Add(time.Hour)
+func TestCreateChainTxOP1FeeChange(t *testing.T) {
+	op1Time := defaultGenesisTime.Add(time.Hour)
 	tests := []struct {
-		name         string
-		time         time.Time
-		fee          uint64
-		expectsError bool
+		name          string
+		time          time.Time
+		fee           uint64
+		expectedError error
 	}{
 		{
-			name:         "pre-fork - correctly priced",
-			time:         defaultGenesisTime,
-			fee:          0,
-			expectsError: false,
+			name:          "pre-fork - correctly priced",
+			time:          defaultGenesisTime,
+			fee:           0,
+			expectedError: nil,
 		},
 		{
-			name:         "post-fork - incorrectly priced",
-			time:         ap3Time,
-			fee:          100*defaultTxFee - 1*units.NanoDione,
-			expectsError: true,
+			name:          "post-fork - incorrectly priced",
+			time:          op1Time,
+			fee:           100*defaultTxFee - 1*units.NanoDione,
+			expectedError: utxo.ErrInsufficientUnlockedFunds,
 		},
 		{
-			name:         "post-fork - correctly priced",
-			time:         ap3Time,
-			fee:          100 * defaultTxFee,
-			expectsError: false,
+			name:          "post-fork - correctly priced",
+			time:          op1Time,
+			fee:           100 * defaultTxFee,
+			expectedError: nil,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			require := require.New(t)
 
-			env := newEnvironment( /*postBanff*/ true)
-			env.config.ApricotPhase3Time = ap3Time
+			env := newEnvironment(true /*=postBanff*/, false /*=postCortina*/)
+			env.config.OdysseyPhase1Time = op1Time
 
 			defer func() {
 				require.NoError(shutdownEnvironment(env))
@@ -237,7 +238,7 @@ func TestCreateChainTxAP3FeeChange(t *testing.T) {
 				Tx:      tx,
 			}
 			err = tx.Unsigned.Visit(&executor)
-			require.Equal(test.expectsError, err != nil)
+			require.ErrorIs(err, test.expectedError)
 		})
 	}
 }

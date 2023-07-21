@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metercacher
@@ -8,8 +8,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/utils/metric"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 func newAveragerMetric(namespace, name string, reg prometheus.Registerer, errs *wrappers.Errs) metric.Averager {
@@ -35,7 +35,7 @@ func newCounterMetric(namespace, name string, reg prometheus.Registerer, errs *w
 type metrics struct {
 	get,
 	put metric.Averager
-
+	portionFilled prometheus.Gauge
 	hit,
 	miss prometheus.Counter
 }
@@ -47,6 +47,14 @@ func (m *metrics) Initialize(
 	errs := wrappers.Errs{}
 	m.get = newAveragerMetric(namespace, "get", reg, &errs)
 	m.put = newAveragerMetric(namespace, "put", reg, &errs)
+	m.portionFilled = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "portion_filled",
+			Help:      "fraction of cache filled",
+		},
+	)
+	errs.Add(reg.Register(m.portionFilled))
 	m.hit = newCounterMetric(namespace, "hit", reg, &errs)
 	m.miss = newCounterMetric(namespace, "miss", reg, &errs)
 	return errs.Err

@@ -1,22 +1,16 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 import (
-	"errors"
-
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
-	errNoImportInputs = errors.New("no import inputs")
-
 	_ UnsignedTx             = (*ImportTx)(nil)
 	_ secp256k1fx.UnsignedTx = (*ImportTx)(nil)
 )
@@ -71,40 +65,6 @@ func (t *ImportTx) AssetIDs() set.Set[ids.ID] {
 // NumCredentials returns the number of expected credentials
 func (t *ImportTx) NumCredentials() int {
 	return t.BaseTx.NumCredentials() + len(t.ImportedIns)
-}
-
-// SyntacticVerify that this import transaction is well-formed.
-func (t *ImportTx) SyntacticVerify(
-	ctx *snow.Context,
-	c codec.Manager,
-	txFeeAssetID ids.ID,
-	txFee uint64,
-	_ uint64,
-	_ int,
-) error {
-	switch {
-	case t == nil:
-		return errNilTx
-	case len(t.ImportedIns) == 0:
-		return errNoImportInputs
-	}
-
-	// We don't call [t.BaseTx.SyntacticVerify] because the flow check performed
-	// here is less strict than the flow check performed in the [BaseTx].
-	if err := t.BaseTx.BaseTx.Verify(ctx); err != nil {
-		return err
-	}
-
-	return dione.VerifyTx(
-		txFee,
-		txFeeAssetID,
-		[][]*dione.TransferableInput{
-			t.Ins,
-			t.ImportedIns,
-		},
-		[][]*dione.TransferableOutput{t.Outs},
-		c,
-	)
 }
 
 func (t *ImportTx) Visit(v Visitor) error {

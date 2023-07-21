@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dione
@@ -6,7 +6,7 @@ package dione
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (

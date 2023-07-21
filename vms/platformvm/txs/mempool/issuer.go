@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package mempool
@@ -6,7 +6,7 @@ package mempool
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -35,11 +35,6 @@ func (i *issuer) AddValidatorTx(*txs.AddValidatorTx) error {
 }
 
 func (i *issuer) AddSubnetValidatorTx(*txs.AddSubnetValidatorTx) error {
-	i.m.addStakerTx(i.tx)
-	return nil
-}
-
-func (i *issuer) AddDelegatorTx(*txs.AddDelegatorTx) error {
 	i.m.addStakerTx(i.tx)
 	return nil
 }
@@ -79,7 +74,3 @@ func (i *issuer) AddPermissionlessValidatorTx(*txs.AddPermissionlessValidatorTx)
 	return nil
 }
 
-func (i *issuer) AddPermissionlessDelegatorTx(*txs.AddPermissionlessDelegatorTx) error {
-	i.m.addStakerTx(i.tx)
-	return nil
-}

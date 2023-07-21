@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utxo
@@ -9,57 +9,38 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/fx"
-	"github.com/dioneprotocol/dionego/vms/platformvm/stakeable"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
 	_ Handler = (*handler)(nil)
 
+	ErrInsufficientFunds            = errors.New("insufficient funds")
+	ErrInsufficientUnlockedFunds    = errors.New("insufficient unlocked funds")
+	ErrInsufficientLockedFunds      = errors.New("insufficient locked funds")
+	errWrongNumberCredentials       = errors.New("wrong number of credentials")
+	errWrongNumberUTXOs             = errors.New("wrong number of UTXOs")
+	errAssetIDMismatch              = errors.New("input asset ID does not match UTXO asset ID")
+	errLocktimeMismatch             = errors.New("input locktime does not match UTXO locktime")
 	errCantSign                     = errors.New("can't sign")
 	errLockedFundsNotMarkedAsLocked = errors.New("locked funds not marked as locked")
 )
 
-// Removes the UTXOs consumed by [ins] from the UTXO set
-func Consume(utxoDB state.UTXODeleter, ins []*dione.TransferableInput) {
-	for _, input := range ins {
-		utxoDB.DeleteUTXO(input.InputID())
-	}
-}
-
-// Adds the UTXOs created by [outs] to the UTXO set.
-// [txID] is the ID of the tx that created [outs].
-func Produce(
-	utxoDB state.UTXOAdder,
-	txID ids.ID,
-	outs []*dione.TransferableOutput,
-) {
-	for index, out := range outs {
-		utxoDB.AddUTXO(&dione.UTXO{
-			UTXOID: dione.UTXOID{
-				TxID:        txID,
-				OutputIndex: uint32(index),
-			},
-			Asset: out.Asset,
-			Out:   out.Output(),
-		})
-	}
-}
-
 // TODO: Stake and Authorize should be replaced by similar methods in the
-//       P-chain wallet
+// P-chain wallet
 type Spender interface {
 	// Spend the provided amount while deducting the provided fee.
 	// Arguments:
@@ -114,7 +95,7 @@ type Verifier interface {
 	// Note: [unlockedProduced] is modified by this method.
 	VerifySpend(
 		tx txs.UnsignedTx,
-		utxoDB state.UTXOGetter,
+		utxoDB dione.UTXOGetter,
 		ins []*dione.TransferableInput,
 		outs []*dione.TransferableOutput,
 		creds []verify.Verifiable,
@@ -397,8 +378,9 @@ func (h *handler) Spend(
 
 	if amountBurned < fee || amountStaked < amount {
 		return nil, nil, nil, nil, fmt.Errorf(
-			"provided keys have balance (unlocked, locked) (%d, %d) but need (%d, %d)",
-			amountBurned, amountStaked, fee, amount)
+			"%w (unlocked, locked) (%d, %d) but need (%d, %d)",
+			ErrInsufficientFunds, amountBurned, amountStaked, fee, amount,
+		)
 	}
 
 	dione.SortTransferableInputsWithSigners(ins, signers)  // sort inputs and keys
@@ -453,7 +435,7 @@ func (h *handler) Authorize(
 
 func (h *handler) VerifySpend(
 	tx txs.UnsignedTx,
-	utxoDB state.UTXOGetter,
+	utxoDB dione.UTXOGetter,
 	ins []*dione.TransferableInput,
 	outs []*dione.TransferableOutput,
 	creds []verify.Verifiable,
@@ -485,14 +467,16 @@ func (h *handler) VerifySpendUTXOs(
 ) error {
 	if len(ins) != len(creds) {
 		return fmt.Errorf(
-			"there are %d inputs but %d credentials. Should be same number",
+			"%w: %d inputs != %d credentials",
+			errWrongNumberCredentials,
 			len(ins),
 			len(creds),
 		)
 	}
 	if len(ins) != len(utxos) {
 		return fmt.Errorf(
-			"there are %d inputs but %d utxos. Should be same number",
+			"%w: %d inputs != %d utxos",
+			errWrongNumberUTXOs,
 			len(ins),
 			len(utxos),
 		)
@@ -522,8 +506,8 @@ func (h *handler) VerifySpendUTXOs(
 		claimedAssetID := input.AssetID()
 		if realAssetID != claimedAssetID {
 			return fmt.Errorf(
-				"input %d has asset ID %s but UTXO has asset ID %s",
-				index,
+				"%w: %s != %s",
+				errAssetIDMismatch,
 				claimedAssetID,
 				realAssetID,
 			)
@@ -546,7 +530,12 @@ func (h *handler) VerifySpendUTXOs(
 		} else if ok {
 			if inner.Locktime != locktime {
 				// This input is locked, but its locktime is wrong
-				return fmt.Errorf("expected input %d locktime to be %d but got %d", index, locktime, inner.Locktime)
+				return fmt.Errorf(
+					"%w: %d != %d",
+					errLocktimeMismatch,
+					inner.Locktime,
+					locktime,
+				)
 			}
 			in = inner.TransferableIn
 		}
@@ -656,10 +645,11 @@ func (h *handler) VerifySpendUTXOs(
 					unlockedConsumedAsset := unlockedConsumed[assetID]
 					if increase > unlockedConsumedAsset {
 						return fmt.Errorf(
-							"address %s produces %d unlocked and consumes %d unlocked for locktime %d",
+							"%w: %s needs %d more %s for locktime %d",
+							ErrInsufficientLockedFunds,
 							ownerID,
-							increase,
-							unlockedConsumedAsset,
+							increase-unlockedConsumedAsset,
+							assetID,
 							locktime,
 						)
 					}
@@ -674,10 +664,10 @@ func (h *handler) VerifySpendUTXOs(
 		// More unlocked tokens produced than consumed. Invalid.
 		if unlockedProducedAsset > unlockedConsumedAsset {
 			return fmt.Errorf(
-				"tx produces more unlocked %q (%d) than it consumes (%d)",
+				"%w: needs %d more %s",
+				ErrInsufficientUnlockedFunds,
+				unlockedProducedAsset-unlockedConsumedAsset,
 				assetID,
-				unlockedProducedAsset,
-				unlockedConsumedAsset,
 			)
 		}
 	}

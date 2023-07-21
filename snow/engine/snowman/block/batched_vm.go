@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -8,10 +8,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 var ErrRemoteVMNotImplemented = errors.New("vm does not implement RemoteVM interface")
@@ -82,12 +82,13 @@ func GetAncestors(
 		// Ensure response size isn't too large. Include wrappers.IntLen because
 		// the size of the message is included with each container, and the size
 		// is repr. by an int.
-		if newLen := ancestorsBytesLen + len(blkBytes) + wrappers.IntLen; newLen <= maxBlocksSize {
-			ancestorsBytes = append(ancestorsBytes, blkBytes)
-			ancestorsBytesLen = newLen
-		} else { // reached maximum response size
+		newLen := ancestorsBytesLen + len(blkBytes) + wrappers.IntLen
+		if newLen > maxBlocksSize {
+			// reached maximum response size
 			break
 		}
+		ancestorsBytes = append(ancestorsBytes, blkBytes)
+		ancestorsBytesLen = newLen
 	}
 
 	return ancestorsBytes, nil

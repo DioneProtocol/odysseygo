@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -6,13 +6,12 @@ package p
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
@@ -26,7 +25,7 @@ type builderWithOptions struct {
 // given options by default.
 //
 //   - [builder] is the builder that will be called to perform the underlying
-//     opterations.
+//     operations.
 //   - [options] will be provided to the builder in addition to the options
 //     provided in the method calls.
 func NewBuilderWithOptions(builder Builder, options ...common.Option) Builder {
@@ -55,21 +54,19 @@ func (b *builderWithOptions) GetImportableBalance(
 }
 
 func (b *builderWithOptions) NewAddValidatorTx(
-	vdr *validator.Validator,
+	vdr *txs.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
-	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
 	return b.Builder.NewAddValidatorTx(
 		vdr,
 		rewardsOwner,
-		shares,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
 func (b *builderWithOptions) NewAddSubnetValidatorTx(
-	vdr *validator.SubnetValidator,
+	vdr *txs.SubnetValidator,
 	options ...common.Option,
 ) (*txs.AddSubnetValidatorTx, error) {
 	return b.Builder.NewAddSubnetValidatorTx(
@@ -86,18 +83,6 @@ func (b *builderWithOptions) RemoveSubnetValidatorTx(
 	return b.Builder.NewRemoveSubnetValidatorTx(
 		nodeID,
 		subnetID,
-		common.UnionOptions(b.options, options)...,
-	)
-}
-
-func (b *builderWithOptions) NewAddDelegatorTx(
-	vdr *validator.Validator,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	options ...common.Option,
-) (*txs.AddDelegatorTx, error) {
-	return b.Builder.NewAddDelegatorTx(
-		vdr,
-		rewardsOwner,
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -165,8 +150,6 @@ func (b *builderWithOptions) NewTransformSubnetTx(
 	maxValidatorStake uint64,
 	minStakeDuration time.Duration,
 	maxStakeDuration time.Duration,
-	minDelegationFee uint32,
-	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
@@ -182,8 +165,6 @@ func (b *builderWithOptions) NewTransformSubnetTx(
 		maxValidatorStake,
 		minStakeDuration,
 		maxStakeDuration,
-		minDelegationFee,
-		minDelegatorStake,
 		maxValidatorWeightFactor,
 		uptimeRequirement,
 		common.UnionOptions(b.options, options)...,
@@ -191,12 +172,10 @@ func (b *builderWithOptions) NewTransformSubnetTx(
 }
 
 func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
-	vdr *validator.SubnetValidator,
+	vdr *txs.SubnetValidator,
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
-	delegationRewardsOwner *secp256k1fx.OutputOwners,
-	shares uint32,
 	options ...common.Option,
 ) (*txs.AddPermissionlessValidatorTx, error) {
 	return b.Builder.NewAddPermissionlessValidatorTx(
@@ -204,22 +183,6 @@ func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
 		signer,
 		assetID,
 		validationRewardsOwner,
-		delegationRewardsOwner,
-		shares,
-		common.UnionOptions(b.options, options)...,
-	)
-}
-
-func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
-	vdr *validator.SubnetValidator,
-	assetID ids.ID,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	options ...common.Option,
-) (*txs.AddPermissionlessDelegatorTx, error) {
-	return b.Builder.NewAddPermissionlessDelegatorTx(
-		vdr,
-		assetID,
-		rewardsOwner,
 		common.UnionOptions(b.options, options)...,
 	)
 }

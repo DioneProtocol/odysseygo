@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -6,12 +6,12 @@ package block
 import (
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/staking"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 var (
@@ -19,6 +19,7 @@ var (
 
 	errUnexpectedProposer = errors.New("expected no proposer but one was provided")
 	errMissingProposer    = errors.New("expected proposer but none was provided")
+	errInvalidCertificate = errors.New("invalid certificate")
 )
 
 type Block interface {
@@ -92,11 +93,7 @@ func (b *statelessBlock) initialize(bytes []byte) error {
 
 	cert, err := x509.ParseCertificate(b.StatelessBlock.Certificate)
 	if err != nil {
-		return err
-	}
-
-	if err := staking.VerifyCertificate(cert); err != nil {
-		return err
+		return fmt.Errorf("%w: %s", errInvalidCertificate, err)
 	}
 
 	b.cert = cert

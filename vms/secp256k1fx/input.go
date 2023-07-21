@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package secp256k1fx
@@ -6,8 +6,8 @@ package secp256k1fx
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/math"
 )
 
 const (
@@ -15,8 +15,8 @@ const (
 )
 
 var (
-	errNilInput        = errors.New("nil input")
-	errNotSortedUnique = errors.New("signatures not sorted and unique")
+	ErrNilInput                    = errors.New("nil input")
+	ErrInputIndicesNotSortedUnique = errors.New("address indices not sorted and unique")
 )
 
 type Input struct {
@@ -35,9 +35,9 @@ func (in *Input) Cost() (uint64, error) {
 func (in *Input) Verify() error {
 	switch {
 	case in == nil:
-		return errNilInput
+		return ErrNilInput
 	case !utils.IsSortedAndUniqueOrdered(in.SigIndices):
-		return errNotSortedUnique
+		return ErrInputIndicesNotSortedUnique
 	default:
 		return nil
 	}

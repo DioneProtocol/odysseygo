@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package merkledb
@@ -12,7 +12,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 // TODO add more codec tests
@@ -20,7 +21,7 @@ import (
 func newRandomProofNode(r *rand.Rand) ProofNode {
 	key := make([]byte, r.Intn(32)) // #nosec G404
 	_, _ = r.Read(key)              // #nosec G404
-	val := make([]byte, r.Intn(32)) // #nosec G404
+	val := make([]byte, r.Intn(64)) // #nosec G404
 	_, _ = r.Read(val)              // #nosec G404
 
 	children := map[byte]ids.ID{}
@@ -31,8 +32,10 @@ func newRandomProofNode(r *rand.Rand) ProofNode {
 			children[byte(j)] = childID
 		}
 	}
-
-	if len(val) == 0 {
+	// use the hash instead when length is greater than the hash length
+	if len(val) >= HashLength {
+		val = hashing.ComputeHash256(val)
+	} else if len(val) == 0 {
 		// We do this because when we encode a value of []byte{} we will later
 		// decode it as nil.
 		// Doing this prevents inconsistency when comparing the encoded and
@@ -41,26 +44,30 @@ func newRandomProofNode(r *rand.Rand) ProofNode {
 		// variable on the struct
 		val = nil
 	}
+
 	return ProofNode{
-		KeyPath:  newPath(key).Serialize(),
-		Value:    Some(val),
-		Children: children,
+		KeyPath:     newPath(key).Serialize(),
+		ValueOrHash: Some(val),
+		Children:    children,
 	}
 }
 
-func newKeyValues(r *rand.Rand, num uint) []KeyValue {
-	keyValues := make([]KeyValue, num)
-	for i := range keyValues {
+func newKeyChanges(r *rand.Rand, num uint) []KeyChange {
+	keyChanges := make([]KeyChange, num)
+	for i := range keyChanges {
 		key := make([]byte, r.Intn(32)) // #nosec G404
 		_, _ = r.Read(key)              // #nosec G404
 		val := make([]byte, r.Intn(32)) // #nosec G404
 		_, _ = r.Read(val)              // #nosec G404
-		keyValues[i] = KeyValue{
+		if len(val) == 0 {
+			val = nil
+		}
+		keyChanges[i] = KeyChange{
 			Key:   key,
-			Value: val,
+			Value: Some(val),
 		}
 	}
-	return keyValues
+	return keyChanges
 }
 
 func nilEmptySlices(dest interface{}) {
@@ -380,6 +387,7 @@ func FuzzCodecChangeProofDeterministic(f *testing.F) {
 			randSeed int,
 			hadRootsInHistory bool,
 			numProofNodes uint,
+			numChangedKeys uint,
 			numDeletedKeys uint,
 		) {
 			require := require.New(t)
@@ -393,18 +401,18 @@ func FuzzCodecChangeProofDeterministic(f *testing.F) {
 				endProofNodes[i] = newRandomProofNode(r)
 			}
 
-			deletedKeys := make([][]byte, numDeletedKeys)
-			for i := range deletedKeys {
-				deletedKeys[i] = make([]byte, r.Intn(32)) // #nosec G404
-				_, _ = r.Read(deletedKeys[i])             // #nosec G404
+			keyChanges := newKeyChanges(r, numChangedKeys)
+			for i := uint(0); i < numDeletedKeys; i++ {
+				keyToDelete := make([]byte, r.Intn(32)) // #nosec G404
+				_, _ = r.Read(keyToDelete)              // #nosec G404
+				keyChanges = append(keyChanges, KeyChange{Key: keyToDelete})
 			}
 
 			proof := ChangeProof{
 				HadRootsInHistory: hadRootsInHistory,
 				StartProof:        startProofNodes,
 				EndProof:          endProofNodes,
-				KeyValues:         newKeyValues(r, numProofNodes),
-				DeletedKeys:       deletedKeys,
+				KeyChanges:        keyChanges,
 			}
 
 			proofBytes, err := Codec.EncodeChangeProof(Version, &proof)
@@ -582,34 +590,17 @@ func TestCodec_DecodeChangeProof(t *testing.T) {
 		HadRootsInHistory: true,
 		StartProof:        nil,
 		EndProof:          nil,
-		KeyValues:         nil,
-		DeletedKeys:       nil,
+		KeyChanges:        nil,
 	}
 
 	proofBytes, err := Codec.EncodeChangeProof(Version, &proof)
 	require.NoError(err)
 
-	// Remove key-values length and deleted keys length (both 0) from end
-	proofBytes = proofBytes[:len(proofBytes)-2*minVarIntLen]
+	// Remove key-values length (0) from end
+	proofBytes = proofBytes[:len(proofBytes)-minVarIntLen]
 
-	// Put key-values length of -1 and deleted keys length of 0
+	// Put key-values length of -1
 	proofBytesBuf := bytes.NewBuffer(proofBytes)
-	err = Codec.(*codecImpl).encodeInt(proofBytesBuf, -1)
-	require.NoError(err)
-	err = Codec.(*codecImpl).encodeInt(proofBytesBuf, 0)
-	require.NoError(err)
-
-	_, err = Codec.DecodeChangeProof(proofBytesBuf.Bytes(), &parsedProof)
-	require.ErrorIs(err, errNegativeNumKeyValues)
-
-	proofBytes = proofBytesBuf.Bytes()
-	proofBytes = proofBytes[:len(proofBytes)-2*minVarIntLen]
-	proofBytesBuf = bytes.NewBuffer(proofBytes)
-
-	// Remove key-values length and deleted keys length from end
-	// Put key-values length of 0 and deleted keys length of -1
-	err = Codec.(*codecImpl).encodeInt(proofBytesBuf, 0)
-	require.NoError(err)
 	err = Codec.(*codecImpl).encodeInt(proofBytesBuf, -1)
 	require.NoError(err)
 

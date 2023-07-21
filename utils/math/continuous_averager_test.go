@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package math
@@ -45,7 +45,7 @@ func TestUninitializedAverager(t *testing.T) {
 	firstObservation := float64(10)
 
 	a := NewUninitializedAverager(halfLife)
-	require.Equal(t, 0.0, a.Read())
+	require.Zero(t, a.Read())
 
 	a.Observe(firstObservation, currentTime)
 	require.Equal(t, firstObservation, a.Read())

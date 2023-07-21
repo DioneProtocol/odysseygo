@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var _ txs.Visitor = (*MempoolTxVerifier)(nil)
@@ -23,11 +23,11 @@ type MempoolTxVerifier struct {
 }
 
 func (*MempoolTxVerifier) AdvanceTimeTx(*txs.AdvanceTimeTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*MempoolTxVerifier) RewardValidatorTx(*txs.RewardValidatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (v *MempoolTxVerifier) AddValidatorTx(tx *txs.AddValidatorTx) error {
@@ -38,9 +38,6 @@ func (v *MempoolTxVerifier) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) e
 	return v.standardTx(tx)
 }
 
-func (v *MempoolTxVerifier) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
-	return v.standardTx(tx)
-}
 
 func (v *MempoolTxVerifier) CreateChainTx(tx *txs.CreateChainTx) error {
 	return v.standardTx(tx)
@@ -70,9 +67,6 @@ func (v *MempoolTxVerifier) AddPermissionlessValidatorTx(tx *txs.AddPermissionle
 	return v.standardTx(tx)
 }
 
-func (v *MempoolTxVerifier) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessDelegatorTx) error {
-	return v.standardTx(tx)
-}
 
 func (v *MempoolTxVerifier) standardTx(tx txs.UnsignedTx) error {
 	baseState, err := v.standardBaseState()
@@ -88,7 +82,7 @@ func (v *MempoolTxVerifier) standardTx(tx txs.UnsignedTx) error {
 	err = tx.Visit(&executor)
 	// We ignore [errFutureStakeTime] here because the time will be advanced
 	// when this transaction is issued.
-	if errors.Is(err, errFutureStakeTime) {
+	if errors.Is(err, ErrFutureStakeTime) {
 		return nil
 	}
 	return err
@@ -109,7 +103,7 @@ func (v *MempoolTxVerifier) standardBaseState() (state.Diff, error) {
 	}
 
 	if !v.Backend.Config.IsBanffActivated(nextBlkTime) {
-		// next tx would be included into an Apricot block
+		// next tx would be included into an Odyssey block
 		// so we verify it against current chain state
 		return state, nil
 	}

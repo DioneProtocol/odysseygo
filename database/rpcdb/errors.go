@@ -1,12 +1,12 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcdb
 
 import (
-	"github.com/dioneprotocol/dionego/database"
+	"github.com/DioneProtocol/odysseygo/database"
 
-	rpcdbpb "github.com/dioneprotocol/dionego/proto/pb/rpcdb"
+	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
 )
 
 var (

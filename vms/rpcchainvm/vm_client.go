@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -24,41 +24,42 @@ import (
 
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"github.com/dioneprotocol/dionego/api/keystore/gkeystore"
-	"github.com/dioneprotocol/dionego/api/metrics"
-	"github.com/dioneprotocol/dionego/chains/atomic/gsharedmemory"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/database/rpcdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/ids/galiasreader"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/common/appsender"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/validators/gvalidators"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/components/chain"
-	"github.com/dioneprotocol/dionego/vms/platformvm/warp/gwarp"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/ghttp"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/messenger"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/api/keystore/gkeystore"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/chains/atomic/gsharedmemory"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/rpcdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/ids/galiasreader"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/appsender"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/validators/gvalidators"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/components/chain"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp/gwarp"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 
-	aliasreaderpb "github.com/dioneprotocol/dionego/proto/pb/aliasreader"
-	appsenderpb "github.com/dioneprotocol/dionego/proto/pb/appsender"
-	httppb "github.com/dioneprotocol/dionego/proto/pb/http"
-	keystorepb "github.com/dioneprotocol/dionego/proto/pb/keystore"
-	messengerpb "github.com/dioneprotocol/dionego/proto/pb/messenger"
-	rpcdbpb "github.com/dioneprotocol/dionego/proto/pb/rpcdb"
-	sharedmemorypb "github.com/dioneprotocol/dionego/proto/pb/sharedmemory"
-	validatorstatepb "github.com/dioneprotocol/dionego/proto/pb/validatorstate"
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
-	warppb "github.com/dioneprotocol/dionego/proto/pb/warp"
+	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
+	appsenderpb "github.com/DioneProtocol/odysseygo/proto/pb/appsender"
+	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
+	keystorepb "github.com/DioneProtocol/odysseygo/proto/pb/keystore"
+	messengerpb "github.com/DioneProtocol/odysseygo/proto/pb/messenger"
+	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
+	sharedmemorypb "github.com/DioneProtocol/odysseygo/proto/pb/sharedmemory"
+	validatorstatepb "github.com/DioneProtocol/odysseygo/proto/pb/validatorstate"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
+	warppb "github.com/DioneProtocol/odysseygo/proto/pb/warp"
 )
 
 const (
@@ -105,8 +106,6 @@ type VMClient struct {
 	conns        []*grpc.ClientConn
 
 	grpcServerMetrics *grpc_prometheus.ServerMetrics
-
-	ctx *snow.Context
 }
 
 // NewClient returns a VM connected to a remote VM
@@ -117,8 +116,7 @@ func NewClient(client vmpb.VMClient) *VMClient {
 }
 
 // SetProcess gives ownership of the server process to the client.
-func (vm *VMClient) SetProcess(ctx *snow.Context, runtime runtime.Stopper, pid int, processTracker resource.ProcessTracker) {
-	vm.ctx = ctx
+func (vm *VMClient) SetProcess(runtime runtime.Stopper, pid int, processTracker resource.ProcessTracker) {
 	vm.runtime = runtime
 	vm.processTracker = processTracker
 	vm.pid = pid
@@ -139,8 +137,6 @@ func (vm *VMClient) Initialize(
 	if len(fxs) != 0 {
 		return errUnsupportedFXs
 	}
-
-	vm.ctx = chainCtx
 
 	// Register metrics
 	registerer := prometheus.NewRegistry()
@@ -169,7 +165,7 @@ func (vm *VMClient) Initialize(
 		serverAddr := serverListener.Addr().String()
 
 		go grpcutils.Serve(serverListener, vm.newDBServer(semDB.Database))
-		vm.ctx.Log.Info("grpc: serving database",
+		chainCtx.Log.Info("grpc: serving database",
 			zap.String("version", dbVersion),
 			zap.String("address", serverAddr),
 		)
@@ -195,7 +191,7 @@ func (vm *VMClient) Initialize(
 	serverAddr := serverListener.Addr().String()
 
 	go grpcutils.Serve(serverListener, vm.newInitServer())
-	vm.ctx.Log.Info("grpc: serving vm services",
+	chainCtx.Log.Info("grpc: serving vm services",
 		zap.String("address", serverAddr),
 	)
 
@@ -204,6 +200,7 @@ func (vm *VMClient) Initialize(
 		SubnetId:     chainCtx.SubnetID[:],
 		ChainId:      chainCtx.ChainID[:],
 		NodeId:       chainCtx.NodeID.Bytes(),
+		PublicKey:    bls.PublicKeyToBytes(chainCtx.PublicKey),
 		XChainId:     chainCtx.XChainID[:],
 		CChainId:     chainCtx.CChainID[:],
 		DioneAssetId:  chainCtx.DIONEAssetID[:],
@@ -264,7 +261,7 @@ func (vm *VMClient) Initialize(
 	}
 	vm.State = chainState
 
-	return vm.ctx.Metrics.Register(multiGatherer)
+	return chainCtx.Metrics.Register(multiGatherer)
 }
 
 func (vm *VMClient) newDBServer(db database.Database) *grpc.Server {

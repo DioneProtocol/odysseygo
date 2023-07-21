@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snow
@@ -6,11 +6,11 @@ package snow
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
 )
 
 const (
-	Initializing = iota
+	Initializing State = iota
 	StateSyncing
 	Bootstrapping
 	NormalOp

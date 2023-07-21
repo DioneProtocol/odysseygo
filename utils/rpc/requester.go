@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpc
@@ -8,23 +8,23 @@ import (
 	"net/url"
 )
 
-var _ EndpointRequester = (*dioneEndpointRequester)(nil)
+var _ EndpointRequester = (*odysseyEndpointRequester)(nil)
 
 type EndpointRequester interface {
 	SendRequest(ctx context.Context, method string, params interface{}, reply interface{}, options ...Option) error
 }
 
-type dioneEndpointRequester struct {
+type odysseyEndpointRequester struct {
 	uri string
 }
 
 func NewEndpointRequester(uri string) EndpointRequester {
-	return &dioneEndpointRequester{
+	return &odysseyEndpointRequester{
 		uri: uri,
 	}
 }
 
-func (e *dioneEndpointRequester) SendRequest(
+func (e *odysseyEndpointRequester) SendRequest(
 	ctx context.Context,
 	method string,
 	params interface{},

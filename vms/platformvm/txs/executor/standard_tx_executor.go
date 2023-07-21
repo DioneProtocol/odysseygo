@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -9,14 +9,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -39,11 +38,11 @@ type StandardTxExecutor struct {
 }
 
 func (*StandardTxExecutor) AdvanceTimeTx(*txs.AdvanceTimeTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (*StandardTxExecutor) RewardValidatorTx(*txs.RewardValidatorTx) error {
-	return errWrongTxType
+	return ErrWrongTxType
 }
 
 func (e *StandardTxExecutor) CreateChainTx(tx *txs.CreateChainTx) error {
@@ -75,9 +74,9 @@ func (e *StandardTxExecutor) CreateChainTx(tx *txs.CreateChainTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	utxo.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Add the new chain to the database
 	e.State.AddChain(e.Tx)
 
@@ -114,9 +113,9 @@ func (e *StandardTxExecutor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	utxo.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Add the new subnet to the database
 	e.State.AddSubnet(e.Tx)
 	return nil
@@ -183,9 +182,9 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	utxo.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	e.AtomicRequests = map[ids.ID]*atomic.Requests{
 		tx.SourceChain: {
@@ -227,9 +226,9 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	utxo.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
 	for i, out := range tx.ExportedOutputs {
@@ -286,8 +285,8 @@ func (e *StandardTxExecutor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -309,31 +308,8 @@ func (e *StandardTxExecutor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) 
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
-
-	return nil
-}
-
-func (e *StandardTxExecutor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
-	if _, err := verifyAddDelegatorTx(
-		e.Backend,
-		e.State,
-		e.Tx,
-		tx,
-	); err != nil {
-		return err
-	}
-
-	txID := e.Tx.ID()
-	newStaker, err := state.NewPendingStaker(txID, tx)
-	if err != nil {
-		return err
-	}
-
-	e.State.PutPendingDelegator(newStaker)
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -360,11 +336,9 @@ func (e *StandardTxExecutor) RemoveSubnetValidatorTx(tx *txs.RemoveSubnetValidat
 		e.State.DeletePendingValidator(staker)
 	}
 
-	// Invariant: There are no permissioned subnet delegators to remove.
-
 	txID := e.Tx.ID()
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -406,9 +380,9 @@ func (e *StandardTxExecutor) TransformSubnetTx(tx *txs.TransformSubnetTx) error 
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	utxo.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Transform the new subnet in the database
 	e.State.AddSubnetTransformation(e.Tx)
 	e.State.SetCurrentSupply(tx.Subnet, tx.InitialSupply)
@@ -432,31 +406,9 @@ func (e *StandardTxExecutor) AddPermissionlessValidatorTx(tx *txs.AddPermissionl
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
 
-func (e *StandardTxExecutor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessDelegatorTx) error {
-	if err := verifyAddPermissionlessDelegatorTx(
-		e.Backend,
-		e.State,
-		e.Tx,
-		tx,
-	); err != nil {
-		return err
-	}
-
-	txID := e.Tx.ID()
-	newStaker, err := state.NewPendingStaker(txID, tx)
-	if err != nil {
-		return err
-	}
-
-	e.State.PutPendingDelegator(newStaker)
-	utxo.Consume(e.State, tx.Ins)
-	utxo.Produce(e.State, txID, tx.Outs)
-
-	return nil
-}

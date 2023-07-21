@@ -1,6 +1,6 @@
 # Subnets
 
-The Dione network consists of the Primary Network and a collection of
+The Odyssey network consists of the Primary Network and a collection of
 sub-networks (subnets).
 
 ## Subnet Creation

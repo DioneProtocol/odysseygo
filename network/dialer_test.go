@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -8,8 +8,8 @@ import (
 	"errors"
 	"net"
 
-	"github.com/dioneprotocol/dionego/network/dialer"
-	"github.com/dioneprotocol/dionego/utils/ips"
+	"github.com/DioneProtocol/odysseygo/network/dialer"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
 )
 
 var (
@@ -30,8 +30,9 @@ func newTestDialer() *testDialer {
 }
 
 func (d *testDialer) NewListener() (ips.DynamicIPPort, *testListener) {
+	// Uses a private IP to easily enable testing AllowPrivateIPs
 	ip := ips.NewDynamicIPPort(
-		net.IPv6loopback,
+		net.IPv4(10, 0, 0, 0),
 		uint16(len(d.listeners)),
 	)
 	staticIP := ip.IPPort()

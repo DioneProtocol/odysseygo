@@ -1,10 +1,10 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sampler
 
 import (
-	safemath "github.com/dioneprotocol/dionego/utils/math"
+	safemath "github.com/DioneProtocol/odysseygo/utils/math"
 )
 
 type weightedWithoutReplacementGeneric struct {
@@ -21,9 +21,7 @@ func (s *weightedWithoutReplacementGeneric) Initialize(weights []uint64) error {
 		}
 		totalWeight = newWeight
 	}
-	if err := s.u.Initialize(totalWeight); err != nil {
-		return err
-	}
+	s.u.Initialize(totalWeight)
 	return s.w.Initialize(weights)
 }
 

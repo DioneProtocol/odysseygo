@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -9,12 +9,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestNewBanffProposalBlock(t *testing.T) {
@@ -33,7 +32,7 @@ func TestNewBanffProposalBlock(t *testing.T) {
 				},
 			},
 			StakeOuts: []*dione.TransferableOutput{},
-			Validator: validator.Validator{},
+			Validator: txs.Validator{},
 			RewardsOwner: &secp256k1fx.OutputOwners{
 				Addrs: []ids.ShortID{},
 			},
@@ -60,7 +59,7 @@ func TestNewBanffProposalBlock(t *testing.T) {
 	require.Equal(height, blk.Height())
 }
 
-func TestNewApricotProposalBlock(t *testing.T) {
+func TestNewOdysseyProposalBlock(t *testing.T) {
 	require := require.New(t)
 
 	parentID := ids.GenerateTestID()
@@ -75,7 +74,7 @@ func TestNewApricotProposalBlock(t *testing.T) {
 				},
 			},
 			StakeOuts: []*dione.TransferableOutput{},
-			Validator: validator.Validator{},
+			Validator: txs.Validator{},
 			RewardsOwner: &secp256k1fx.OutputOwners{
 				Addrs: []ids.ShortID{},
 			},
@@ -84,7 +83,7 @@ func TestNewApricotProposalBlock(t *testing.T) {
 	}
 	require.NoError(tx.Initialize(txs.Codec))
 
-	blk, err := NewApricotProposalBlock(
+	blk, err := NewOdysseyProposalBlock(
 		parentID,
 		height,
 		tx,

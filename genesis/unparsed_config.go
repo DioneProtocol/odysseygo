@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 )
 
 var errInvalidETHAddress = errors.New("invalid eth address")
@@ -56,13 +56,11 @@ func (ua UnparsedAllocation) Parse() (Allocation, error) {
 type UnparsedStaker struct {
 	NodeID        ids.NodeID `json:"nodeID"`
 	RewardAddress string     `json:"rewardAddress"`
-	DelegationFee uint32     `json:"delegationFee"`
 }
 
 func (us UnparsedStaker) Parse() (Staker, error) {
 	s := Staker{
 		NodeID:        us.NodeID,
-		DelegationFee: us.DelegationFee,
 	}
 
 	_, _, dioneAddrBytes, err := address.Parse(us.RewardAddress)

@@ -7,7 +7,7 @@ set -o pipefail
 print_usage() {
   printf "Usage: build [OPTIONS]
 
-  Build dionego
+  Build odysseygo
 
   Options:
 
@@ -24,10 +24,10 @@ while getopts 'r' flag; do
   esac
 done
 
-# Dionego root folder
-DIONE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+# OdysseyGo root folder
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
-source "$DIONE_PATH"/scripts/constants.sh
+source "$ODYSSEY_PATH"/scripts/constants.sh
 
 # Download dependencies
 echo "Downloading dependencies..."
@@ -35,11 +35,11 @@ go mod download
 
 build_args="$race"
 
-# Build dionego
-"$DIONE_PATH"/scripts/build_dione.sh $build_args
+# Build odysseygo
+"$ODYSSEY_PATH"/scripts/build_odyssey.sh $build_args
 
-# Exit build successfully if the DioneGo binary is created successfully
-if [[ -f "$dionego_path" ]]; then
+# Exit build successfully if the OdysseyGo binary is created successfully
+if [[ -f "$odysseygo_path" ]]; then
         echo "Build Successful"
         exit 0
 else

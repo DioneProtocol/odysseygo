@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -9,14 +9,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // TODO use table tests here
@@ -33,10 +32,12 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 	)
 
 	// Case : signed tx is nil
-	require.ErrorIs(stx.SyntacticVerify(ctx), ErrNilSignedTx)
+	err = stx.SyntacticVerify(ctx)
+	require.ErrorIs(err, ErrNilSignedTx)
 
 	// Case : unsigned tx is nil
-	require.ErrorIs(addSubnetValidatorTx.SyntacticVerify(ctx), ErrNilTx)
+	err = addSubnetValidatorTx.SyntacticVerify(ctx)
+	require.ErrorIs(err, ErrNilTx)
 
 	validatorWeight := uint64(2022)
 	subnetID := ids.ID{'s', 'u', 'b', 'n', 'e', 't', 'I', 'D'}
@@ -72,8 +73,8 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 			Outs:         outputs,
 			Memo:         []byte{1, 2, 3, 4, 5, 6, 7, 8},
 		}},
-		Validator: validator.SubnetValidator{
-			Validator: validator.Validator{
+		SubnetValidator: SubnetValidator{
+			Validator: Validator{
 				NodeID: ctx.NodeID,
 				Start:  uint64(clk.Time().Unix()),
 				End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -95,26 +96,26 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
+	require.ErrorIs(err, dione.ErrWrongNetworkID)
 	addSubnetValidatorTx.NetworkID--
 
-	// Case: Missing Subnet ID
+	// Case: Specifies primary network SubnetID
 	addSubnetValidatorTx.SyntacticallyVerified = false
-	addSubnetValidatorTx.Validator.Subnet = ids.Empty
+	addSubnetValidatorTx.Subnet = ids.Empty
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
-	addSubnetValidatorTx.Validator.Subnet = subnetID
+	require.ErrorIs(err, errAddPrimaryNetworkValidator)
+	addSubnetValidatorTx.Subnet = subnetID
 
 	// Case: No weight
 	addSubnetValidatorTx.SyntacticallyVerified = false
-	addSubnetValidatorTx.Validator.Wght = 0
+	addSubnetValidatorTx.Wght = 0
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
-	addSubnetValidatorTx.Validator.Wght = validatorWeight
+	require.ErrorIs(err, ErrWeightTooSmall)
+	addSubnetValidatorTx.Wght = validatorWeight
 
 	// Case: Subnet auth indices not unique
 	addSubnetValidatorTx.SyntacticallyVerified = false
@@ -124,12 +125,12 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
+	require.ErrorIs(err, secp256k1fx.ErrInputIndicesNotSortedUnique)
 	*input = oldInput
 
 	// Case: adding to Primary Network
 	addSubnetValidatorTx.SyntacticallyVerified = false
-	addSubnetValidatorTx.Validator.Subnet = constants.PrimaryNetworkID
+	addSubnetValidatorTx.Subnet = constants.PrimaryNetworkID
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
@@ -183,8 +184,8 @@ func TestAddSubnetValidatorMarshal(t *testing.T) {
 			Outs:         outputs,
 			Memo:         []byte{1, 2, 3, 4, 5, 6, 7, 8},
 		}},
-		Validator: validator.SubnetValidator{
-			Validator: validator.Validator{
+		SubnetValidator: SubnetValidator{
+			Validator: Validator{
 				NodeID: ctx.NodeID,
 				Start:  uint64(clk.Time().Unix()),
 				End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -213,12 +214,6 @@ func TestAddSubnetValidatorMarshal(t *testing.T) {
 func TestAddSubnetValidatorTxNotValidatorTx(t *testing.T) {
 	txIntf := any((*AddSubnetValidatorTx)(nil))
 	_, ok := txIntf.(ValidatorTx)
-	require.False(t, ok)
-}
-
-func TestAddSubnetValidatorTxNotDelegatorTx(t *testing.T) {
-	txIntf := any((*AddSubnetValidatorTx)(nil))
-	_, ok := txIntf.(DelegatorTx)
 	require.False(t, ok)
 }
 

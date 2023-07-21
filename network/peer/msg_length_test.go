@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 )
 
 func TestWriteMsgLen(t *testing.T) {
@@ -120,7 +120,10 @@ func TestReadMsgLen(t *testing.T) {
 
 		msgLenBytes, err := writeMsgLen(msgLen, tv.msgLimit)
 		require.NoError(err)
-		require.Equal(tv.msgLenBytes, msgLenBytes[:])
+
+		msgLenAfterWrite, err := readMsgLen(msgLenBytes[:], tv.msgLimit)
+		require.NoError(err)
+		require.Equal(tv.expectedMsgLen, msgLenAfterWrite)
 	}
 }
 

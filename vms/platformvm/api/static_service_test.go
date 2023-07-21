@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package api
@@ -8,21 +8,18 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
 )
-
-const testNetworkID = 10 // To be used in tests
 
 func TestBuildGenesisInvalidUTXOBalance(t *testing.T) {
 	require := require.New(t)
 	nodeID := ids.NodeID{1, 2, 3}
-	hrp := constants.NetworkIDToHRP[testNetworkID]
-	addr, err := address.FormatBech32(hrp, nodeID.Bytes())
+	addr, err := address.FormatBech32(constants.UnitTestHRP, nodeID.Bytes())
 	require.NoError(err)
 
 	utxo := UTXO{
@@ -59,14 +56,14 @@ func TestBuildGenesisInvalidUTXOBalance(t *testing.T) {
 	reply := BuildGenesisReply{}
 
 	ss := StaticService{}
-	require.Error(ss.BuildGenesis(nil, &args, &reply), "should have errored due to an invalid balance")
+	err = ss.BuildGenesis(nil, &args, &reply)
+	require.ErrorIs(err, errUTXOHasNoValue)
 }
 
-func TestBuildGenesisInvalidAmount(t *testing.T) {
+func TestBuildGenesisInvalidStakeWeight(t *testing.T) {
 	require := require.New(t)
 	nodeID := ids.NodeID{1, 2, 3}
-	hrp := constants.NetworkIDToHRP[testNetworkID]
-	addr, err := address.FormatBech32(hrp, nodeID.Bytes())
+	addr, err := address.FormatBech32(constants.UnitTestHRP, nodeID.Bytes())
 	require.NoError(err)
 
 	utxo := UTXO{
@@ -103,14 +100,14 @@ func TestBuildGenesisInvalidAmount(t *testing.T) {
 	reply := BuildGenesisReply{}
 
 	ss := StaticService{}
-	require.Error(ss.BuildGenesis(nil, &args, &reply), "should have errored due to an invalid amount")
+	err = ss.BuildGenesis(nil, &args, &reply)
+	require.ErrorIs(err, errValidatorHasNoWeight)
 }
 
 func TestBuildGenesisInvalidEndtime(t *testing.T) {
 	require := require.New(t)
 	nodeID := ids.NodeID{1, 2, 3}
-	hrp := constants.NetworkIDToHRP[testNetworkID]
-	addr, err := address.FormatBech32(hrp, nodeID.Bytes())
+	addr, err := address.FormatBech32(constants.UnitTestHRP, nodeID.Bytes())
 	require.NoError(err)
 
 	utxo := UTXO{
@@ -148,14 +145,14 @@ func TestBuildGenesisInvalidEndtime(t *testing.T) {
 	reply := BuildGenesisReply{}
 
 	ss := StaticService{}
-	require.Error(ss.BuildGenesis(nil, &args, &reply), "should have errored due to an invalid end time")
+	err = ss.BuildGenesis(nil, &args, &reply)
+	require.ErrorIs(err, errValidatorAlreadyExited)
 }
 
 func TestBuildGenesisReturnsSortedValidators(t *testing.T) {
 	require := require.New(t)
 	nodeID := ids.NodeID{1}
-	hrp := constants.NetworkIDToHRP[testNetworkID]
-	addr, err := address.FormatBech32(hrp, nodeID.Bytes())
+	addr, err := address.FormatBech32(constants.UnitTestHRP, nodeID.Bytes())
 	require.NoError(err)
 
 	utxo := UTXO{

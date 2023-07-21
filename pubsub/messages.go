@@ -1,15 +1,17 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package pubsub
 
 import (
-	"github.com/dioneprotocol/dionego/api"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
 )
 
 // NewBloom command for a new bloom filter
+//
+// Deprecated: The pubsub server is deprecated.
 type NewBloom struct {
 	// MaxElements size of bloom filter
 	MaxElements json.Uint64 `json:"maxElements"`
@@ -18,9 +20,13 @@ type NewBloom struct {
 }
 
 // NewSet command for a new map set
+//
+// Deprecated: The pubsub server is deprecated.
 type NewSet struct{}
 
 // AddAddresses command to add addresses
+//
+// Deprecated: The pubsub server is deprecated.
 type AddAddresses struct {
 	api.JSONAddresses
 
@@ -29,6 +35,8 @@ type AddAddresses struct {
 }
 
 // Command execution command
+//
+// Deprecated: The pubsub server is deprecated.
 type Command struct {
 	NewBloom     *NewBloom     `json:"newBloom,omitempty"`
 	NewSet       *NewSet       `json:"newSet,omitempty"`

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package primary
@@ -6,30 +6,30 @@ package primary
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/api/info"
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/rpc"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/avm"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/wallet/chain/p"
-	"github.com/dioneprotocol/dionego/wallet/chain/x"
+	"github.com/DioneProtocol/odysseygo/api/info"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 )
 
 const (
-	MainnetAPIURI = "https://api.dione.network"
-	FujiAPIURI    = "https://api.dione-test.network"
+	MainnetAPIURI = "https://api.dioneprotocol.com"
+	TestnetAPIURI    = "https://test.api.dioneprotocol.com"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
 )
 
-// TODO: refactor UTXOClient definition to allow the client implementations to
-//       perform their own assertions.
+// TODO: Refactor UTXOClient definition to allow the client implementations to
+// perform their own assertions.
 var (
 	_ UTXOClient = platformvm.Client(nil)
 	_ UTXOClient = avm.Client(nil)

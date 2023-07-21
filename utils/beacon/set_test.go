@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package beacon
@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/ips"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
 )
 
 func TestSet(t *testing.T) {
@@ -44,7 +44,7 @@ func TestSet(t *testing.T) {
 	ipsArg := s.IPsArg()
 	require.Equal("", ipsArg)
 	len := s.Len()
-	require.Equal(0, len)
+	require.Zero(len)
 
 	err := s.Add(b0)
 	require.NoError(err)

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package reflectcodec
@@ -9,8 +9,8 @@ import (
 	"math"
 	"reflect"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 const (
@@ -19,12 +19,9 @@ const (
 )
 
 var (
-	ErrMaxMarshalSliceLimitExceeded = errors.New("maximum marshal slice limit exceeded")
-
 	errMarshalNil   = errors.New("can't marshal nil pointer or interface")
 	errUnmarshalNil = errors.New("can't unmarshal nil")
 	errNeedPointer  = errors.New("argument to unmarshal must be a pointer")
-	errExtraSpace   = errors.New("trailing buffer space")
 )
 
 var _ codec.Codec = (*genericCodec)(nil)
@@ -52,16 +49,21 @@ type TypeCodec interface {
 // implementation for interface encoding.
 //
 // A few notes:
-// 1) We use "marshal" and "serialize" interchangeably, and "unmarshal" and "deserialize" interchangeably
-// 2) To include a field of a struct in the serialized form, add the tag `{tagName}:"true"` to it. `{tagName}` defaults to `serialize`.
-// 3) These typed members of a struct may be serialized:
-//    bool, string, uint[8,16,32,64], int[8,16,32,64],
-//	  structs, slices, arrays, interface.
-//	  structs, slices and arrays can only be serialized if their constituent values can be.
-// 4) To marshal an interface, you must pass a pointer to the value
-// 5) To unmarshal an interface,  you must call codec.RegisterType([instance of the type that fulfills the interface]).
-// 6) Serialized fields must be exported
-// 7) nil slices are marshaled as empty slices
+//
+//  1. We use "marshal" and "serialize" interchangeably, and "unmarshal" and
+//     "deserialize" interchangeably
+//  2. To include a field of a struct in the serialized form, add the tag
+//     `{tagName}:"true"` to it. `{tagName}` defaults to `serialize`.
+//  3. These typed members of a struct may be serialized:
+//     bool, string, uint[8,16,32,64], int[8,16,32,64],
+//     structs, slices, arrays, interface.
+//     structs, slices and arrays can only be serialized if their constituent
+//     values can be.
+//  4. To marshal an interface, you must pass a pointer to the value
+//  5. To unmarshal an interface, you must call
+//     codec.RegisterType([instance of the type that fulfills the interface]).
+//  6. Serialized fields must be exported
+//  7. nil slices are marshaled as empty slices
 type genericCodec struct {
 	typer       TypeCodec
 	maxSliceLen uint32
@@ -273,9 +275,10 @@ func (c *genericCodec) marshal(value reflect.Value, p *wrappers.Packer, maxSlice
 		numElts := value.Len() // # elements in the slice/array. 0 if this slice is nil.
 		if uint32(numElts) > maxSliceLen {
 			return fmt.Errorf("%w; slice length, %d, exceeds maximum length, %d",
-				ErrMaxMarshalSliceLimitExceeded,
+				codec.ErrMaxSliceLenExceeded,
 				numElts,
-				maxSliceLen)
+				maxSliceLen,
+			)
 		}
 		p.PackInt(uint32(numElts)) // pack # elements
 		if p.Err != nil {
@@ -307,7 +310,11 @@ func (c *genericCodec) marshal(value reflect.Value, p *wrappers.Packer, maxSlice
 			return p.Err
 		}
 		if uint32(numElts) > c.maxSliceLen {
-			return fmt.Errorf("%w; array length, %d, exceeds maximum length, %d", ErrMaxMarshalSliceLimitExceeded, numElts, c.maxSliceLen)
+			return fmt.Errorf("%w; array length, %d, exceeds maximum length, %d",
+				codec.ErrMaxSliceLenExceeded,
+				numElts,
+				c.maxSliceLen,
+			)
 		}
 		for i := 0; i < numElts; i++ { // Process each element in the array
 			if err := c.marshal(value.Index(i), p, c.maxSliceLen); err != nil {
@@ -327,7 +334,7 @@ func (c *genericCodec) marshal(value reflect.Value, p *wrappers.Packer, maxSlice
 		}
 		return nil
 	default:
-		return fmt.Errorf("can't marshal unknown kind %s", valueKind)
+		return fmt.Errorf("%w: %s", codec.ErrUnsupportedType, valueKind)
 	}
 }
 
@@ -349,7 +356,11 @@ func (c *genericCodec) Unmarshal(bytes []byte, dest interface{}) error {
 		return err
 	}
 	if p.Offset != len(bytes) {
-		return errExtraSpace
+		return fmt.Errorf("%w: read %d provided %d",
+			codec.ErrExtraSpace,
+			p.Offset,
+			len(bytes),
+		)
 	}
 	return nil
 }
@@ -419,15 +430,17 @@ func (c *genericCodec) unmarshal(p *wrappers.Packer, value reflect.Value, maxSli
 		}
 		if numElts32 > maxSliceLen {
 			return fmt.Errorf("%w; array length, %d, exceeds maximum length, %d",
-				ErrMaxMarshalSliceLimitExceeded,
+				codec.ErrMaxSliceLenExceeded,
 				numElts32,
-				maxSliceLen)
+				maxSliceLen,
+			)
 		}
 		if numElts32 > math.MaxInt32 {
 			return fmt.Errorf("%w; array length, %d, exceeds maximum length, %d",
-				ErrMaxMarshalSliceLimitExceeded,
+				codec.ErrMaxSliceLenExceeded,
 				numElts32,
-				math.MaxInt32)
+				math.MaxInt32,
+			)
 		}
 		numElts := int(numElts32)
 

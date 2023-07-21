@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -6,19 +6,19 @@ package blocks
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
 	_ BanffBlock = (*BanffCommitBlock)(nil)
-	_ Block      = (*ApricotCommitBlock)(nil)
+	_ Block      = (*OdysseyCommitBlock)(nil)
 )
 
 type BanffCommitBlock struct {
 	Time               uint64 `serialize:"true" json:"time"`
-	ApricotCommitBlock `serialize:"true"`
+	OdysseyCommitBlock `serialize:"true"`
 }
 
 func (b *BanffCommitBlock) Timestamp() time.Time {
@@ -36,7 +36,7 @@ func NewBanffCommitBlock(
 ) (*BanffCommitBlock, error) {
 	blk := &BanffCommitBlock{
 		Time: uint64(timestamp.Unix()),
-		ApricotCommitBlock: ApricotCommitBlock{
+		OdysseyCommitBlock: OdysseyCommitBlock{
 			CommonBlock: CommonBlock{
 				PrntID: parentID,
 				Hght:   height,
@@ -46,30 +46,30 @@ func NewBanffCommitBlock(
 	return blk, initialize(blk)
 }
 
-type ApricotCommitBlock struct {
+type OdysseyCommitBlock struct {
 	CommonBlock `serialize:"true"`
 }
 
-func (b *ApricotCommitBlock) initialize(bytes []byte) error {
+func (b *OdysseyCommitBlock) initialize(bytes []byte) error {
 	b.CommonBlock.initialize(bytes)
 	return nil
 }
 
-func (*ApricotCommitBlock) InitCtx(*snow.Context) {}
+func (*OdysseyCommitBlock) InitCtx(*snow.Context) {}
 
-func (*ApricotCommitBlock) Txs() []*txs.Tx {
+func (*OdysseyCommitBlock) Txs() []*txs.Tx {
 	return nil
 }
 
-func (b *ApricotCommitBlock) Visit(v Visitor) error {
-	return v.ApricotCommitBlock(b)
+func (b *OdysseyCommitBlock) Visit(v Visitor) error {
+	return v.OdysseyCommitBlock(b)
 }
 
-func NewApricotCommitBlock(
+func NewOdysseyCommitBlock(
 	parentID ids.ID,
 	height uint64,
-) (*ApricotCommitBlock, error) {
-	blk := &ApricotCommitBlock{
+) (*OdysseyCommitBlock, error) {
+	blk := &OdysseyCommitBlock{
 		CommonBlock: CommonBlock{
 			PrntID: parentID,
 			Hght:   height,

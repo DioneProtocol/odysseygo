@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -12,15 +12,15 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block/mocks"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/components/chain"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/components/chain"
 )
 
 var (
@@ -98,8 +98,7 @@ func TestBatchedParseBlockCaching(t *testing.T) {
 	require.NoError(err)
 	require.Equal(blkID1, blk.ID())
 
-	_, typeChecked := blk.(*chain.BlockWrapper)
-	require.True(typeChecked)
+	require.IsType(&chain.BlockWrapper{}, blk)
 
 	// Call should cache the first block and parse the second block
 	blks, err := vm.BatchedParseBlock(context.Background(), [][]byte{blkBytes1, blkBytes2})
@@ -108,11 +107,8 @@ func TestBatchedParseBlockCaching(t *testing.T) {
 	require.Equal(blkID1, blks[0].ID())
 	require.Equal(blkID2, blks[1].ID())
 
-	_, typeChecked = blks[0].(*chain.BlockWrapper)
-	require.True(typeChecked)
-
-	_, typeChecked = blks[1].(*chain.BlockWrapper)
-	require.True(typeChecked)
+	require.IsType(&chain.BlockWrapper{}, blks[0])
+	require.IsType(&chain.BlockWrapper{}, blks[1])
 
 	// Call should be fully cached and not result in a grpc call
 	blks, err = vm.BatchedParseBlock(context.Background(), [][]byte{blkBytes1, blkBytes2})
@@ -121,9 +117,6 @@ func TestBatchedParseBlockCaching(t *testing.T) {
 	require.Equal(blkID1, blks[0].ID())
 	require.Equal(blkID2, blks[1].ID())
 
-	_, typeChecked = blks[0].(*chain.BlockWrapper)
-	require.True(typeChecked)
-
-	_, typeChecked = blks[1].(*chain.BlockWrapper)
-	require.True(typeChecked)
+	require.IsType(&chain.BlockWrapper{}, blks[0])
+	require.IsType(&chain.BlockWrapper{}, blks[1])
 }

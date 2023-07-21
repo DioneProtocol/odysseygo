@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -6,41 +6,23 @@ package txs
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
 )
 
-// ValidatorTx defines the interface for a validator transaction that supports
-// delegation.
+// ValidatorTx defines the interface for a validator transaction.
 type ValidatorTx interface {
 	UnsignedTx
-	Validator
-}
+	PermissionlessStaker
 
-type DelegatorTx interface {
-	UnsignedTx
-	Delegator
+	ValidationRewardsOwner() fx.Owner
 }
 
 type StakerTx interface {
 	UnsignedTx
 	Staker
-}
-
-type Validator interface {
-	PermissionlessStaker
-
-	ValidationRewardsOwner() fx.Owner
-	DelegationRewardsOwner() fx.Owner
-	Shares() uint32
-}
-
-type Delegator interface {
-	PermissionlessStaker
-
-	RewardsOwner() fx.Owner
 }
 
 type PermissionlessStaker interface {

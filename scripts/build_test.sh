@@ -5,8 +5,8 @@ set -o nounset
 set -o pipefail
 
 # Directory above this script
-DIONE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
-source "$DIONE_PATH"/scripts/constants.sh
+source "$ODYSSEY_PATH"/scripts/constants.sh
 
 go test -race -timeout="120s" -coverprofile="coverage.out" -covermode="atomic" $(go list ./... | grep -v /mocks | grep -v proto | grep -v tests)

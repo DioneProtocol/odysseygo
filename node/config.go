@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package node
@@ -7,24 +7,24 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/dioneprotocol/dionego/chains"
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/nat"
-	"github.com/dioneprotocol/dionego/network"
-	"github.com/dioneprotocol/dionego/snow/networking/benchlist"
-	"github.com/dioneprotocol/dionego/snow/networking/router"
-	"github.com/dioneprotocol/dionego/snow/networking/tracker"
-	"github.com/dioneprotocol/dionego/subnets"
-	"github.com/dioneprotocol/dionego/trace"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/utils/dynamicip"
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/profiler"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/timer"
-	"github.com/dioneprotocol/dionego/vms"
+	"github.com/DioneProtocol/odysseygo/api/server"
+	"github.com/DioneProtocol/odysseygo/chains"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/nat"
+	"github.com/DioneProtocol/odysseygo/network"
+	"github.com/DioneProtocol/odysseygo/snow/networking/benchlist"
+	"github.com/DioneProtocol/odysseygo/snow/networking/router"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/dynamicip"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/profiler"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer"
 )
 
 type IPCConfig struct {
@@ -44,6 +44,7 @@ type APIIndexerConfig struct {
 }
 
 type HTTPConfig struct {
+	server.HTTPConfig
 	APIConfig `json:"apiConfig"`
 	HTTPHost  string `json:"httpHost"`
 	HTTPPort  uint16 `json:"httpPort"`
@@ -83,13 +84,13 @@ type IPConfig struct {
 
 type StakingConfig struct {
 	genesis.StakingConfig
-	EnableStaking         bool            `json:"enableStaking"`
-	StakingTLSCert        tls.Certificate `json:"-"`
-	StakingSigningKey     *bls.SecretKey  `json:"-"`
-	DisabledStakingWeight uint64          `json:"disabledStakingWeight"`
-	StakingKeyPath        string          `json:"stakingKeyPath"`
-	StakingCertPath       string          `json:"stakingCertPath"`
-	StakingSignerPath     string          `json:"stakingSignerPath"`
+	SybilProtectionEnabled        bool            `json:"sybilProtectionEnabled"`
+	StakingTLSCert                tls.Certificate `json:"-"`
+	StakingSigningKey             *bls.SecretKey  `json:"-"`
+	SybilProtectionDisabledWeight uint64          `json:"sybilProtectionDisabledWeight"`
+	StakingKeyPath                string          `json:"stakingKeyPath"`
+	StakingCertPath               string          `json:"stakingCertPath"`
+	StakingSignerPath             string          `json:"stakingSignerPath"`
 }
 
 type StateSyncConfig struct {
@@ -133,7 +134,7 @@ type DatabaseConfig struct {
 	Config []byte `json:"-"`
 }
 
-// Config contains all of the configurations of an Dione node.
+// Config contains all of the configurations of an Odyssey node.
 type Config struct {
 	HTTPConfig          `json:"httpConfig"`
 	IPConfig            `json:"ipConfig"`
@@ -176,8 +177,11 @@ type Config struct {
 	ConsensusRouter          router.Router       `json:"-"`
 	RouterHealthConfig       router.HealthConfig `json:"routerHealthConfig"`
 	ConsensusShutdownTimeout time.Duration       `json:"consensusShutdownTimeout"`
-	// Gossip a container in the accepted frontier every [ConsensusGossipFrequency]
-	ConsensusGossipFrequency time.Duration `json:"consensusGossipFreq"`
+	// Gossip a container in the accepted frontier every [AcceptedFrontierGossipFrequency]
+	AcceptedFrontierGossipFrequency time.Duration `json:"consensusGossipFreq"`
+	// ConsensusAppConcurrency defines the maximum number of goroutines to
+	// handle App messages per chain.
+	ConsensusAppConcurrency int `json:"consensusAppConcurrency"`
 
 	TrackedSubnets set.Set[ids.ID] `json:"trackedSubnets"`
 
@@ -186,7 +190,7 @@ type Config struct {
 	ChainConfigs map[string]chains.ChainConfig `json:"-"`
 	ChainAliases map[ids.ID][]string           `json:"chainAliases"`
 
-	VMManager vms.Manager `json:"-"`
+	VMAliaser ids.Aliaser `json:"-"`
 
 	// Halflife to use for the processing requests tracker.
 	// Larger halflife --> usage metrics change more slowly.

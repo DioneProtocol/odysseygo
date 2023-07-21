@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -6,21 +6,21 @@ package blocks
 import (
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
-var _ Block = (*ApricotAtomicBlock)(nil)
+var _ Block = (*OdysseyAtomicBlock)(nil)
 
-// ApricotAtomicBlock being accepted results in the atomic transaction contained
+// OdysseyAtomicBlock being accepted results in the atomic transaction contained
 // in the block to be accepted and committed to the chain.
-type ApricotAtomicBlock struct {
+type OdysseyAtomicBlock struct {
 	CommonBlock `serialize:"true"`
 	Tx          *txs.Tx `serialize:"true" json:"tx"`
 }
 
-func (b *ApricotAtomicBlock) initialize(bytes []byte) error {
+func (b *OdysseyAtomicBlock) initialize(bytes []byte) error {
 	b.CommonBlock.initialize(bytes)
 	if err := b.Tx.Initialize(txs.Codec); err != nil {
 		return fmt.Errorf("failed to initialize tx: %w", err)
@@ -28,24 +28,24 @@ func (b *ApricotAtomicBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *ApricotAtomicBlock) InitCtx(ctx *snow.Context) {
+func (b *OdysseyAtomicBlock) InitCtx(ctx *snow.Context) {
 	b.Tx.Unsigned.InitCtx(ctx)
 }
 
-func (b *ApricotAtomicBlock) Txs() []*txs.Tx {
+func (b *OdysseyAtomicBlock) Txs() []*txs.Tx {
 	return []*txs.Tx{b.Tx}
 }
 
-func (b *ApricotAtomicBlock) Visit(v Visitor) error {
-	return v.ApricotAtomicBlock(b)
+func (b *OdysseyAtomicBlock) Visit(v Visitor) error {
+	return v.OdysseyAtomicBlock(b)
 }
 
-func NewApricotAtomicBlock(
+func NewOdysseyAtomicBlock(
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
-) (*ApricotAtomicBlock, error) {
-	blk := &ApricotAtomicBlock{
+) (*OdysseyAtomicBlock, error) {
+	blk := &OdysseyAtomicBlock{
 		CommonBlock: CommonBlock{
 			PrntID: parentID,
 			Hght:   height,

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -7,22 +7,23 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/executor"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
 )
 
 var (
 	_ blocks.Visitor = (*verifier)(nil)
 
-	errApricotBlockIssuedAfterFork                = errors.New("apricot block issued after fork")
+	errOdysseyBlockIssuedAfterFork                = errors.New("odyssey block issued after fork")
 	errBanffProposalBlockWithMultipleTransactions = errors.New("BanffProposalBlock contains multiple transactions")
 	errBanffStandardBlockWithoutChanges           = errors.New("BanffStandardBlock performs no state changes")
+	errIncorrectBlockHeight                       = errors.New("incorrect block height")
 	errChildBlockEarlierThanParent                = errors.New("proposed timestamp before current chain time")
 	errConflictingBatchTxs                        = errors.New("block contains conflicting transactions")
 	errConflictingParentTxs                       = errors.New("block contains a transaction that conflicts with a transaction in a parent block")
@@ -85,7 +86,7 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	onAbortState.SetTimestamp(nextChainTime)
 	changes.Apply(onAbortState)
 
-	return v.proposalBlock(&b.ApricotProposalBlock, onCommitState, onAbortState)
+	return v.proposalBlock(&b.OdysseyProposalBlock, onCommitState, onAbortState)
 }
 
 func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
@@ -119,25 +120,25 @@ func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	onAcceptState.SetTimestamp(nextChainTime)
 	changes.Apply(onAcceptState)
 
-	return v.standardBlock(&b.ApricotStandardBlock, onAcceptState)
+	return v.standardBlock(&b.OdysseyStandardBlock, onAcceptState)
 }
 
-func (v *verifier) ApricotAbortBlock(b *blocks.ApricotAbortBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
+func (v *verifier) OdysseyAbortBlock(b *blocks.OdysseyAbortBlock) error {
+	if err := v.odysseyCommonBlock(b); err != nil {
 		return err
 	}
 	return v.abortBlock(b)
 }
 
-func (v *verifier) ApricotCommitBlock(b *blocks.ApricotCommitBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
+func (v *verifier) OdysseyCommitBlock(b *blocks.OdysseyCommitBlock) error {
+	if err := v.odysseyCommonBlock(b); err != nil {
 		return err
 	}
 	return v.commitBlock(b)
 }
 
-func (v *verifier) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
+func (v *verifier) OdysseyProposalBlock(b *blocks.OdysseyProposalBlock) error {
+	if err := v.odysseyCommonBlock(b); err != nil {
 		return err
 	}
 
@@ -154,8 +155,8 @@ func (v *verifier) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
 	return v.proposalBlock(b, onCommitState, onAbortState)
 }
 
-func (v *verifier) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
-	if err := v.apricotCommonBlock(b); err != nil {
+func (v *verifier) OdysseyStandardBlock(b *blocks.OdysseyStandardBlock) error {
+	if err := v.odysseyCommonBlock(b); err != nil {
 		return err
 	}
 
@@ -168,9 +169,9 @@ func (v *verifier) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
 	return v.standardBlock(b, onAcceptState)
 }
 
-func (v *verifier) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
-	// We call [commonBlock] here rather than [apricotCommonBlock] because below
-	// this check we perform the more strict check that ApricotPhase5 isn't
+func (v *verifier) OdysseyAtomicBlock(b *blocks.OdysseyAtomicBlock) error {
+	// We call [commonBlock] here rather than [odysseyCommonBlock] because below
+	// this check we perform the more strict check that OdysseyPhase1 isn't
 	// activated.
 	if err := v.commonBlock(b); err != nil {
 		return err
@@ -179,11 +180,11 @@ func (v *verifier) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
 	parentID := b.Parent()
 	currentTimestamp := v.getTimestamp(parentID)
 	cfg := v.txExecutorBackend.Config
-	if cfg.IsApricotPhase5Activated(currentTimestamp) {
+	if cfg.IsOdysseyPhase1Activated(currentTimestamp) {
 		return fmt.Errorf(
-			"the chain timestamp (%d) is after the apricot phase 5 time (%d), hence atomic transactions should go through the standard block",
+			"the chain timestamp (%d) is after the odyssey phase 5 time (%d), hence atomic transactions should go through the standard block",
 			currentTimestamp.Unix(),
-			cfg.ApricotPhase5Time.Unix(),
+			cfg.OdysseyPhase1Time.Unix(),
 		)
 	}
 
@@ -196,7 +197,7 @@ func (v *verifier) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
 
 	if err := b.Tx.Unsigned.Visit(&atomicExecutor); err != nil {
 		txID := b.Tx.ID()
-		v.MarkDropped(txID, err.Error()) // cache tx as dropped
+		v.MarkDropped(txID, err) // cache tx as dropped
 		return fmt.Errorf("tx %s failed semantic verification: %w", txID, err)
 	}
 
@@ -279,19 +280,19 @@ func (v *verifier) banffNonOptionBlock(b blocks.BanffBlock) error {
 	)
 }
 
-func (v *verifier) apricotCommonBlock(b blocks.Block) error {
+func (v *verifier) odysseyCommonBlock(b blocks.Block) error {
 	// We can use the parent timestamp here, because we are guaranteed that the
-	// parent was verified. Apricot blocks only update the timestamp with
+	// parent was verified. Odyssey blocks only update the timestamp with
 	// AdvanceTimeTxs. This means that this block's timestamp will be equal to
 	// the parent block's timestamp; unless this is a CommitBlock. In order for
 	// the timestamp of the CommitBlock to be after the Banff activation,
-	// the parent ApricotProposalBlock must include an AdvanceTimeTx with a
+	// the parent OdysseyProposalBlock must include an AdvanceTimeTx with a
 	// timestamp after the Banff timestamp. This is verified not to occur
 	// during the verification of the ProposalBlock.
 	parentID := b.Parent()
 	timestamp := v.getTimestamp(parentID)
 	if v.txExecutorBackend.Config.IsBanffActivated(timestamp) {
-		return fmt.Errorf("%w: timestamp = %s", errApricotBlockIssuedAfterFork, timestamp)
+		return fmt.Errorf("%w: timestamp = %s", errOdysseyBlockIssuedAfterFork, timestamp)
 	}
 	return v.commonBlock(b)
 }
@@ -307,7 +308,8 @@ func (v *verifier) commonBlock(b blocks.Block) error {
 	height := b.Height()
 	if expectedHeight != height {
 		return fmt.Errorf(
-			"expected block to have height %d, but found %d",
+			"%w expected %d, but found %d",
+			errIncorrectBlockHeight,
 			expectedHeight,
 			height,
 		)
@@ -351,7 +353,7 @@ func (v *verifier) commitBlock(b blocks.Block) error {
 
 // proposalBlock populates the state of this block if [nil] is returned
 func (v *verifier) proposalBlock(
-	b *blocks.ApricotProposalBlock,
+	b *blocks.OdysseyProposalBlock,
 	onCommitState state.Diff,
 	onAbortState state.Diff,
 ) error {
@@ -364,7 +366,7 @@ func (v *verifier) proposalBlock(
 
 	if err := b.Tx.Unsigned.Visit(&txExecutor); err != nil {
 		txID := b.Tx.ID()
-		v.MarkDropped(txID, err.Error()) // cache tx as dropped
+		v.MarkDropped(txID, err) // cache tx as dropped
 		return err
 	}
 
@@ -380,7 +382,7 @@ func (v *verifier) proposalBlock(
 		},
 		statelessBlock: b,
 		// It is safe to use [b.onAbortState] here because the timestamp will
-		// never be modified by an Apricot Abort block and the timestamp will
+		// never be modified by an Odyssey Abort block and the timestamp will
 		// always be the same as the Banff Proposal Block.
 		timestamp: onAbortState.GetTimestamp(),
 	}
@@ -391,7 +393,7 @@ func (v *verifier) proposalBlock(
 
 // standardBlock populates the state of this block if [nil] is returned
 func (v *verifier) standardBlock(
-	b *blocks.ApricotStandardBlock,
+	b *blocks.OdysseyStandardBlock,
 	onAcceptState state.Diff,
 ) error {
 	blkState := &blockState{
@@ -411,7 +413,7 @@ func (v *verifier) standardBlock(
 		}
 		if err := tx.Unsigned.Visit(&txExecutor); err != nil {
 			txID := tx.ID()
-			v.MarkDropped(txID, err.Error()) // cache tx as dropped
+			v.MarkDropped(txID, err) // cache tx as dropped
 			return err
 		}
 		// ensure it doesn't overlap with current input batch

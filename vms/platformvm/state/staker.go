@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/btree"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var _ btree.LessFunc[*Staker] = (*Staker).Less
@@ -31,8 +31,8 @@ type StakerIterator interface {
 	Release()
 }
 
-// Staker contains all information required to represent a validator or
-// delegator in the current and pending validator sets.
+// Staker contains all information required to represent a validator
+// in the current and pending validator sets.
 // Invariant: Staker's size is bounded to prevent OOM DoS attacks.
 type Staker struct {
 	TxID            ids.ID
@@ -59,6 +59,7 @@ type Staker struct {
 }
 
 // A *Staker is considered to be less than another *Staker when:
+//
 //  1. If its NextTime is before the other's.
 //  2. If the NextTimes are the same, the *Staker with the lesser priority is the
 //     lesser one.

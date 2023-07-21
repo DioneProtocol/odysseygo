@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -9,15 +9,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/stakeable"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestAddValidatorTxSyntacticVerify(t *testing.T) {
@@ -34,10 +33,12 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	)
 
 	// Case : signed tx is nil
-	require.ErrorIs(stx.SyntacticVerify(ctx), ErrNilSignedTx)
+	err = stx.SyntacticVerify(ctx)
+	require.ErrorIs(err, ErrNilSignedTx)
 
 	// Case : unsigned tx is nil
-	require.ErrorIs(addValidatorTx.SyntacticVerify(ctx), ErrNilTx)
+	err = addValidatorTx.SyntacticVerify(ctx)
+	require.ErrorIs(err, ErrNilTx)
 
 	validatorWeight := uint64(2022)
 	rewardAddress := preFundedKeys[0].PublicKey().Address()
@@ -82,7 +83,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 			Ins:          inputs,
 			Outs:         outputs,
 		}},
-		Validator: validator.Validator{
+		Validator: Validator{
 			NodeID: ctx.NodeID,
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -94,7 +95,6 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 			Threshold: 1,
 			Addrs:     []ids.ShortID{rewardAddress},
 		},
-		DelegationShares: reward.PercentDenominator,
 	}
 
 	// Case: valid tx
@@ -108,7 +108,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
+	require.ErrorIs(err, dione.ErrWrongNetworkID)
 	addValidatorTx.NetworkID--
 
 	// Case: Stake owner has no addresses
@@ -120,7 +120,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
+	require.ErrorIs(err, secp256k1fx.ErrOutputUnspendable)
 	addValidatorTx.StakeOuts = stakes
 
 	// Case: Rewards owner has no addresses
@@ -129,17 +129,12 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
+	require.ErrorIs(err, secp256k1fx.ErrOutputUnspendable)
 	addValidatorTx.RewardsOwner.(*secp256k1fx.OutputOwners).Addrs = []ids.ShortID{rewardAddress}
 
-	// Case: Too many shares
 	addValidatorTx.SyntacticallyVerified = false
-	addValidatorTx.DelegationShares++ // 1 more than max amount
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	err = stx.SyntacticVerify(ctx)
-	require.Error(err)
-	addValidatorTx.DelegationShares--
 }
 
 func TestAddValidatorTxSyntacticVerifyNotDIONE(t *testing.T) {
@@ -199,7 +194,7 @@ func TestAddValidatorTxSyntacticVerifyNotDIONE(t *testing.T) {
 			Ins:          inputs,
 			Outs:         outputs,
 		}},
-		Validator: validator.Validator{
+		Validator: Validator{
 			NodeID: ctx.NodeID,
 			Start:  uint64(clk.Time().Unix()),
 			End:    uint64(clk.Time().Add(time.Hour).Unix()),
@@ -211,16 +206,8 @@ func TestAddValidatorTxSyntacticVerifyNotDIONE(t *testing.T) {
 			Threshold: 1,
 			Addrs:     []ids.ShortID{rewardAddress},
 		},
-		DelegationShares: reward.PercentDenominator,
 	}
 
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
-	require.Error(stx.SyntacticVerify(ctx))
-}
-
-func TestAddValidatorTxNotDelegatorTx(t *testing.T) {
-	txIntf := any((*AddValidatorTx)(nil))
-	_, ok := txIntf.(DelegatorTx)
-	require.False(t, ok)
 }

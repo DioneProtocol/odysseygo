@@ -1,12 +1,12 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package manager
 
 import (
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 var _ utils.Sortable[*VersionedDatabase] = (*VersionedDatabase)(nil)

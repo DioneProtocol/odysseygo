@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -6,16 +6,16 @@ package txs
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (
 	_ UnsignedTx = (*RemoveSubnetValidatorTx)(nil)
 
-	errRemovePrimaryNetworkValidator = errors.New("can't remove primary network validator with RemoveSubnetValidatorTx")
+	ErrRemovePrimaryNetworkValidator = errors.New("can't remove primary network validator with RemoveSubnetValidatorTx")
 )
 
 // Removes a validator from a subnet.
@@ -37,7 +37,7 @@ func (tx *RemoveSubnetValidatorTx) SyntacticVerify(ctx *snow.Context) error {
 		// already passed syntactic verification
 		return nil
 	case tx.Subnet == constants.PrimaryNetworkID:
-		return errRemovePrimaryNetworkValidator
+		return ErrRemovePrimaryNetworkValidator
 	}
 
 	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {

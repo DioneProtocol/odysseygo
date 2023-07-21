@@ -1,32 +1,36 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
 
 import (
+	"errors"
 	"fmt"
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/window"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/metrics"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/validators"
 )
 
-var _ blocks.Visitor = (*acceptor)(nil)
+var (
+	_ blocks.Visitor = (*acceptor)(nil)
+
+	errMissingBlockState = errors.New("missing state of block")
+)
 
 // acceptor handles the logic for accepting a block.
 // All errors returned by this struct are fatal and should result in the chain
 // being shutdown.
 type acceptor struct {
 	*backend
-	metrics          metrics.Metrics
-	recentlyAccepted window.Window[ids.ID]
-	bootstrapped     *utils.Atomic[bool]
+	metrics      metrics.Metrics
+	validators   validators.Manager
+	bootstrapped *utils.Atomic[bool]
 }
 
 func (a *acceptor) BanffAbortBlock(b *blocks.BanffAbortBlock) error {
@@ -78,10 +82,10 @@ func (a *acceptor) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	return a.standardBlock(b)
 }
 
-func (a *acceptor) ApricotAbortBlock(b *blocks.ApricotAbortBlock) error {
+func (a *acceptor) OdysseyAbortBlock(b *blocks.OdysseyAbortBlock) error {
 	a.ctx.Log.Debug(
 		"accepting block",
-		zap.String("blockType", "apricot abort"),
+		zap.String("blockType", "odyssey abort"),
 		zap.Stringer("blkID", b.ID()),
 		zap.Uint64("height", b.Height()),
 		zap.Stringer("parentID", b.Parent()),
@@ -90,10 +94,10 @@ func (a *acceptor) ApricotAbortBlock(b *blocks.ApricotAbortBlock) error {
 	return a.abortBlock(b)
 }
 
-func (a *acceptor) ApricotCommitBlock(b *blocks.ApricotCommitBlock) error {
+func (a *acceptor) OdysseyCommitBlock(b *blocks.OdysseyCommitBlock) error {
 	a.ctx.Log.Debug(
 		"accepting block",
-		zap.String("blockType", "apricot commit"),
+		zap.String("blockType", "odyssey commit"),
 		zap.Stringer("blkID", b.ID()),
 		zap.Uint64("height", b.Height()),
 		zap.Stringer("parentID", b.Parent()),
@@ -102,10 +106,10 @@ func (a *acceptor) ApricotCommitBlock(b *blocks.ApricotCommitBlock) error {
 	return a.commitBlock(b)
 }
 
-func (a *acceptor) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
+func (a *acceptor) OdysseyProposalBlock(b *blocks.OdysseyProposalBlock) error {
 	a.ctx.Log.Debug(
 		"accepting block",
-		zap.String("blockType", "apricot proposal"),
+		zap.String("blockType", "odyssey proposal"),
 		zap.Stringer("blkID", b.ID()),
 		zap.Uint64("height", b.Height()),
 		zap.Stringer("parentID", b.Parent()),
@@ -115,10 +119,10 @@ func (a *acceptor) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
 	return nil
 }
 
-func (a *acceptor) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
+func (a *acceptor) OdysseyStandardBlock(b *blocks.OdysseyStandardBlock) error {
 	a.ctx.Log.Debug(
 		"accepting block",
-		zap.String("blockType", "apricot standard"),
+		zap.String("blockType", "odyssey standard"),
 		zap.Stringer("blkID", b.ID()),
 		zap.Uint64("height", b.Height()),
 		zap.Stringer("parentID", b.Parent()),
@@ -127,13 +131,13 @@ func (a *acceptor) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
 	return a.standardBlock(b)
 }
 
-func (a *acceptor) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
+func (a *acceptor) OdysseyAtomicBlock(b *blocks.OdysseyAtomicBlock) error {
 	blkID := b.ID()
 	defer a.free(blkID)
 
 	a.ctx.Log.Debug(
 		"accepting block",
-		zap.String("blockType", "apricot atomic"),
+		zap.String("blockType", "odyssey atomic"),
 		zap.Stringer("blkID", blkID),
 		zap.Uint64("height", b.Height()),
 		zap.Stringer("parentID", b.Parent()),
@@ -145,11 +149,13 @@ func (a *acceptor) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
 
 	blkState, ok := a.blkIDToState[blkID]
 	if !ok {
-		return fmt.Errorf("couldn't find state of block %s", blkID)
+		return fmt.Errorf("%w %s", errMissingBlockState, blkID)
 	}
 
 	// Update the state to reflect the changes made in [onAcceptState].
-	blkState.onAcceptState.Apply(a.state)
+	if err := blkState.onAcceptState.Apply(a.state); err != nil {
+		return err
+	}
 
 	defer a.state.Abort()
 	batch, err := a.state.CommitBatch()
@@ -231,9 +237,11 @@ func (a *acceptor) optionBlock(b, parent blocks.Block) error {
 
 	blkState, ok := a.blkIDToState[blkID]
 	if !ok {
-		return fmt.Errorf("couldn't find state of block %s", blkID)
+		return fmt.Errorf("%w %s", errMissingBlockState, blkID)
 	}
-	blkState.onAcceptState.Apply(a.state)
+	if err := blkState.onAcceptState.Apply(a.state); err != nil {
+		return err
+	}
 	return a.state.Commit()
 }
 
@@ -267,11 +275,13 @@ func (a *acceptor) standardBlock(b blocks.Block) error {
 
 	blkState, ok := a.blkIDToState[blkID]
 	if !ok {
-		return fmt.Errorf("couldn't find state of block %s", blkID)
+		return fmt.Errorf("%w %s", errMissingBlockState, blkID)
 	}
 
 	// Update the state to reflect the changes made in [onAcceptState].
-	blkState.onAcceptState.Apply(a.state)
+	if err := blkState.onAcceptState.Apply(a.state); err != nil {
+		return err
+	}
 
 	defer a.state.Abort()
 	batch, err := a.state.CommitBatch()
@@ -305,6 +315,6 @@ func (a *acceptor) commonAccept(b blocks.Block) error {
 	a.state.SetLastAccepted(blkID)
 	a.state.SetHeight(b.Height())
 	a.state.AddStatelessBlock(b, choices.Accepted)
-	a.recentlyAccepted.Add(blkID)
+	a.validators.OnAcceptedBlockID(blkID)
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -6,9 +6,10 @@ package message
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
-	"github.com/dioneprotocol/dionego/utils/ips"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/utils/compression"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
 )
 
 var _ OutboundMsgBuilder = (*outMsgBuilder)(nil)
@@ -36,7 +37,10 @@ type OutboundMsgBuilder interface {
 		peerAcks []*p2p.PeerAck,
 	) (OutboundMessage, error)
 
-	Ping() (OutboundMessage, error)
+	Ping(
+		primaryUptime uint32,
+		subnetUptimes []*p2p.SubnetUptime,
+	) (OutboundMessage, error)
 
 	Pong(
 		primaryUptime uint32,
@@ -79,7 +83,6 @@ type OutboundMsgBuilder interface {
 		chainID ids.ID,
 		requestID uint32,
 		containerIDs []ids.ID,
-		engineType p2p.EngineType,
 	) (OutboundMessage, error)
 
 	GetAccepted(
@@ -94,7 +97,6 @@ type OutboundMsgBuilder interface {
 		chainID ids.ID,
 		requestID uint32,
 		containerIDs []ids.ID,
-		engineType p2p.EngineType,
 	) (OutboundMessage, error)
 
 	GetAncestors(
@@ -109,7 +111,6 @@ type OutboundMsgBuilder interface {
 		chainID ids.ID,
 		requestID uint32,
 		containers [][]byte,
-		engineType p2p.EngineType,
 	) (OutboundMessage, error)
 
 	Get(
@@ -148,7 +149,6 @@ type OutboundMsgBuilder interface {
 		requestID uint32,
 		preferredContainerIDs []ids.ID,
 		acceptedContainerIDs []ids.ID,
-		engineType p2p.EngineType,
 	) (OutboundMessage, error)
 
 	AppRequest(
@@ -171,28 +171,34 @@ type OutboundMsgBuilder interface {
 }
 
 type outMsgBuilder struct {
-	compress bool // set to "true" if compression is enabled
+	compressionType compression.Type
 
 	builder *msgBuilder
 }
 
 // Use "message.NewCreator" to import this function
 // since we do not expose "msgBuilder" yet
-func newOutboundBuilder(enableCompression bool, builder *msgBuilder) OutboundMsgBuilder {
+func newOutboundBuilder(compressionType compression.Type, builder *msgBuilder) OutboundMsgBuilder {
 	return &outMsgBuilder{
-		compress: enableCompression,
-		builder:  builder,
+		compressionType: compressionType,
+		builder:         builder,
 	}
 }
 
-func (b *outMsgBuilder) Ping() (OutboundMessage, error) {
+func (b *outMsgBuilder) Ping(
+	primaryUptime uint32,
+	subnetUptimes []*p2p.SubnetUptime,
+) (OutboundMessage, error) {
 	return b.builder.createOutbound(
 		&p2p.Message{
 			Message: &p2p.Message_Ping{
-				Ping: &p2p.Ping{},
+				Ping: &p2p.Ping{
+					Uptime:        primaryUptime,
+					SubnetUptimes: subnetUptimes,
+				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -210,7 +216,7 @@ func (b *outMsgBuilder) Pong(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -241,7 +247,7 @@ func (b *outMsgBuilder) Version(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		true,
 	)
 }
@@ -266,7 +272,7 @@ func (b *outMsgBuilder) PeerList(peers []ips.ClaimedIPPort, bypassThrottling boo
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		bypassThrottling,
 	)
 }
@@ -280,7 +286,7 @@ func (b *outMsgBuilder) PeerListAck(peerAcks []*p2p.PeerAck) (OutboundMessage, e
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -300,7 +306,7 @@ func (b *outMsgBuilder) GetStateSummaryFrontier(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -320,7 +326,7 @@ func (b *outMsgBuilder) StateSummaryFrontier(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -342,7 +348,7 @@ func (b *outMsgBuilder) GetAcceptedStateSummary(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -364,7 +370,7 @@ func (b *outMsgBuilder) AcceptedStateSummary(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -386,7 +392,7 @@ func (b *outMsgBuilder) GetAcceptedFrontier(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -395,7 +401,6 @@ func (b *outMsgBuilder) AcceptedFrontier(
 	chainID ids.ID,
 	requestID uint32,
 	containerIDs []ids.ID,
-	engineType p2p.EngineType,
 ) (OutboundMessage, error) {
 	containerIDBytes := make([][]byte, len(containerIDs))
 	encodeIDs(containerIDs, containerIDBytes)
@@ -406,11 +411,10 @@ func (b *outMsgBuilder) AcceptedFrontier(
 					ChainId:      chainID[:],
 					RequestId:    requestID,
 					ContainerIds: containerIDBytes,
-					EngineType:   engineType,
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -436,7 +440,7 @@ func (b *outMsgBuilder) GetAccepted(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -445,7 +449,6 @@ func (b *outMsgBuilder) Accepted(
 	chainID ids.ID,
 	requestID uint32,
 	containerIDs []ids.ID,
-	engineType p2p.EngineType,
 ) (OutboundMessage, error) {
 	containerIDBytes := make([][]byte, len(containerIDs))
 	encodeIDs(containerIDs, containerIDBytes)
@@ -456,11 +459,10 @@ func (b *outMsgBuilder) Accepted(
 					ChainId:      chainID[:],
 					RequestId:    requestID,
 					ContainerIds: containerIDBytes,
-					EngineType:   engineType,
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -484,7 +486,7 @@ func (b *outMsgBuilder) GetAncestors(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -493,7 +495,6 @@ func (b *outMsgBuilder) Ancestors(
 	chainID ids.ID,
 	requestID uint32,
 	containers [][]byte,
-	engineType p2p.EngineType,
 ) (OutboundMessage, error) {
 	return b.builder.createOutbound(
 		&p2p.Message{
@@ -502,11 +503,10 @@ func (b *outMsgBuilder) Ancestors(
 					ChainId:    chainID[:],
 					RequestId:  requestID,
 					Containers: containers,
-					EngineType: engineType,
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -530,7 +530,7 @@ func (b *outMsgBuilder) Get(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -552,7 +552,7 @@ func (b *outMsgBuilder) Put(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -576,7 +576,7 @@ func (b *outMsgBuilder) PushQuery(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -600,7 +600,7 @@ func (b *outMsgBuilder) PullQuery(
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -610,7 +610,6 @@ func (b *outMsgBuilder) Chits(
 	requestID uint32,
 	preferredContainerIDs []ids.ID,
 	acceptedContainerIDs []ids.ID,
-	engineType p2p.EngineType,
 ) (OutboundMessage, error) {
 	preferredContainerIDBytes := make([][]byte, len(preferredContainerIDs))
 	encodeIDs(preferredContainerIDs, preferredContainerIDBytes)
@@ -624,11 +623,10 @@ func (b *outMsgBuilder) Chits(
 					RequestId:             requestID,
 					PreferredContainerIds: preferredContainerIDBytes,
 					AcceptedContainerIds:  acceptedContainerIDBytes,
-					EngineType:            engineType,
 				},
 			},
 		},
-		false,
+		compression.TypeNone,
 		false,
 	)
 }
@@ -650,7 +648,7 @@ func (b *outMsgBuilder) AppRequest(
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -666,7 +664,7 @@ func (b *outMsgBuilder) AppResponse(chainID ids.ID, requestID uint32, msg []byte
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }
@@ -681,7 +679,7 @@ func (b *outMsgBuilder) AppGossip(chainID ids.ID, msg []byte) (OutboundMessage, 
 				},
 			},
 		},
-		b.compress,
+		b.compressionType,
 		false,
 	)
 }

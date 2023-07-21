@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package gruntime
@@ -6,9 +6,9 @@ package gruntime
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 
-	pb "github.com/dioneprotocol/dionego/proto/pb/vm/runtime"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/vm/runtime"
 )
 
 var _ runtime.Initializer = (*Client)(nil)

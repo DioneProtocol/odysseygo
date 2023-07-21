@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package mempool
@@ -9,12 +9,12 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/txheap"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/txheap"
 )
 
 const (
@@ -73,8 +73,8 @@ type Mempool interface {
 	// not evicted from unissued decision/staker txs.
 	// This allows previously dropped txs to be possibly
 	// reissued.
-	MarkDropped(txID ids.ID, reason string)
-	GetDropReason(txID ids.ID) (string, bool)
+	MarkDropped(txID ids.ID, reason error)
+	GetDropReason(txID ids.ID) error
 }
 
 // Transactions from clients that have not yet been put into blocks and added to
@@ -90,8 +90,8 @@ type mempool struct {
 	unissuedStakerTxs   txheap.Heap
 
 	// Key: Tx ID
-	// Value: String repr. of the verification error
-	droppedTxIDs *cache.LRU[ids.ID, string]
+	// Value: Verification error
+	droppedTxIDs *cache.LRU[ids.ID, error]
 
 	consumedUTXOs set.Set[ids.ID]
 
@@ -136,7 +136,7 @@ func NewMempool(
 		bytesAvailable:       maxMempoolSize,
 		unissuedDecisionTxs:  unissuedDecisionTxs,
 		unissuedStakerTxs:    unissuedStakerTxs,
-		droppedTxIDs:         &cache.LRU[ids.ID, string]{Size: droppedTxIDsCacheSize},
+		droppedTxIDs:         &cache.LRU[ids.ID, error]{Size: droppedTxIDsCacheSize},
 		consumedUTXOs:        set.NewSet[ids.ID](initialConsumedUTXOsSize),
 		dropIncoming:         false, // enable tx adding by default
 		blkTimer:             blkTimer,
@@ -275,16 +275,13 @@ func (m *mempool) PeekStakerTx() *txs.Tx {
 	return m.unissuedStakerTxs.Peek()
 }
 
-func (m *mempool) MarkDropped(txID ids.ID, reason string) {
+func (m *mempool) MarkDropped(txID ids.ID, reason error) {
 	m.droppedTxIDs.Put(txID, reason)
 }
 
-func (m *mempool) GetDropReason(txID ids.ID) (string, bool) {
-	reason, exist := m.droppedTxIDs.Get(txID)
-	if !exist {
-		return "", false
-	}
-	return reason, true
+func (m *mempool) GetDropReason(txID ids.ID) error {
+	err, _ := m.droppedTxIDs.Get(txID)
+	return err
 }
 
 func (m *mempool) register(tx *txs.Tx) {

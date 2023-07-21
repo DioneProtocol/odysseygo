@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package grpcutils
@@ -16,7 +16,7 @@ import (
 
 	tspb "google.golang.org/protobuf/types/known/timestamppb"
 
-	httppb "github.com/dioneprotocol/dionego/proto/pb/http"
+	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
 )
 
 func Errorf(code int, tmpl string, args ...interface{}) error {

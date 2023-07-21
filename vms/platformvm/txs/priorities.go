@@ -1,20 +1,13 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 const (
-	// First primary network apricot delegators are moved from the pending to
-	// the current validator set,
-	PrimaryNetworkDelegatorApricotPendingPriority Priority = iota + 1
 	// then primary network validators,
-	PrimaryNetworkValidatorPendingPriority
-	// then primary network banff delegators,
-	PrimaryNetworkDelegatorBanffPendingPriority
+	PrimaryNetworkValidatorPendingPriority Priority = iota + 1
 	// then permissionless subnet validators,
 	SubnetPermissionlessValidatorPendingPriority
-	// then permissionless subnet delegators.
-	SubnetPermissionlessDelegatorPendingPriority
 	// then permissioned subnet validators,
 	SubnetPermissionedValidatorPendingPriority
 
@@ -24,23 +17,45 @@ const (
 	//            are removed by the advancement of time. Permissionless stakers
 	//            are removed with a RewardValidatorTx after time has advanced.
 	SubnetPermissionedValidatorCurrentPriority
-	// then permissionless subnet delegators,
-	SubnetPermissionlessDelegatorCurrentPriority
 	// then permissionless subnet validators,
 	SubnetPermissionlessValidatorCurrentPriority
-	// then primary network delegators,
-	PrimaryNetworkDelegatorCurrentPriority
 	// then primary network validators.
 	PrimaryNetworkValidatorCurrentPriority
 )
 
 var PendingToCurrentPriorities = []Priority{
-	PrimaryNetworkDelegatorApricotPendingPriority: PrimaryNetworkDelegatorCurrentPriority,
-	PrimaryNetworkValidatorPendingPriority:        PrimaryNetworkValidatorCurrentPriority,
-	PrimaryNetworkDelegatorBanffPendingPriority:   PrimaryNetworkDelegatorCurrentPriority,
-	SubnetPermissionlessValidatorPendingPriority:  SubnetPermissionlessValidatorCurrentPriority,
-	SubnetPermissionlessDelegatorPendingPriority:  SubnetPermissionlessDelegatorCurrentPriority,
-	SubnetPermissionedValidatorPendingPriority:    SubnetPermissionedValidatorCurrentPriority,
+	PrimaryNetworkValidatorPendingPriority:       PrimaryNetworkValidatorCurrentPriority,
+	SubnetPermissionlessValidatorPendingPriority: SubnetPermissionlessValidatorCurrentPriority,
+	SubnetPermissionedValidatorPendingPriority:   SubnetPermissionedValidatorCurrentPriority,
 }
 
 type Priority byte
+
+func (p Priority) IsCurrent() bool {
+	return p.IsCurrentValidator()
+}
+
+func (p Priority) IsPending() bool {
+	return p.IsPendingValidator()
+}
+
+func (p Priority) IsValidator() bool {
+	return p.IsCurrentValidator() || p.IsPendingValidator()
+}
+
+func (p Priority) IsPermissionedValidator() bool {
+	return p == SubnetPermissionedValidatorCurrentPriority ||
+		p == SubnetPermissionedValidatorPendingPriority
+}
+
+func (p Priority) IsCurrentValidator() bool {
+	return p == PrimaryNetworkValidatorCurrentPriority ||
+		p == SubnetPermissionedValidatorCurrentPriority ||
+		p == SubnetPermissionlessValidatorCurrentPriority
+}
+
+func (p Priority) IsPendingValidator() bool {
+	return p == PrimaryNetworkValidatorPendingPriority ||
+		p == SubnetPermissionedValidatorPendingPriority ||
+		p == SubnetPermissionlessValidatorPendingPriority
+}

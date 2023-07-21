@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package queue
@@ -12,12 +12,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 // Magic value that comes from the size in bytes of a serialized key-value bootstrap checkpoint in a database +
@@ -390,7 +390,7 @@ func TestHandleJobWithMissingDependencyOnRunnableStack(t *testing.T) {
 	_, err = jobs.ExecuteAll(context.Background(), snow.DefaultConsensusContextTest(), &common.Halter{}, false)
 	// Assert that the database closed error on job1 causes ExecuteAll
 	// to fail in the middle of execution.
-	require.Error(err)
+	require.ErrorIs(err, database.ErrClosed)
 	require.True(executed0)
 	require.False(executed1)
 
@@ -411,7 +411,7 @@ func TestHandleJobWithMissingDependencyOnRunnableStack(t *testing.T) {
 	}
 
 	missingIDs := jobs.MissingIDs()
-	require.Equal(1, len(missingIDs))
+	require.Len(missingIDs, 1)
 
 	require.Equal(missingIDs[0], job0.ID())
 
@@ -482,12 +482,12 @@ func TestInitializeNumJobs(t *testing.T) {
 	pushed, err := jobs.Push(context.Background(), job0)
 	require.True(pushed)
 	require.NoError(err)
-	require.EqualValues(1, jobs.state.numJobs)
+	require.Equal(uint64(1), jobs.state.numJobs)
 
 	pushed, err = jobs.Push(context.Background(), job1)
 	require.True(pushed)
 	require.NoError(err)
-	require.EqualValues(2, jobs.state.numJobs)
+	require.Equal(uint64(2), jobs.state.numJobs)
 
 	err = jobs.Commit()
 	require.NoError(err)
@@ -502,7 +502,7 @@ func TestInitializeNumJobs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.EqualValues(2, jobs.state.numJobs)
+	require.Equal(uint64(2), jobs.state.numJobs)
 }
 
 func TestClearAll(t *testing.T) {

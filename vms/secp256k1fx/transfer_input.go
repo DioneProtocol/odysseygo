@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package secp256k1fx
@@ -6,10 +6,10 @@ package secp256k1fx
 import (
 	"errors"
 
-	"github.com/dioneprotocol/dionego/snow"
+	"github.com/DioneProtocol/odysseygo/snow"
 )
 
-var errNoValueInput = errors.New("input has no value")
+var ErrNoValueInput = errors.New("input has no value")
 
 type TransferInput struct {
 	Amt   uint64 `serialize:"true" json:"amount"`
@@ -27,9 +27,9 @@ func (in *TransferInput) Amount() uint64 {
 func (in *TransferInput) Verify() error {
 	switch {
 	case in == nil:
-		return errNilInput
+		return ErrNilInput
 	case in.Amt == 0:
-		return errNoValueInput
+		return ErrNoValueInput
 	default:
 		return in.Input.Verify()
 	}

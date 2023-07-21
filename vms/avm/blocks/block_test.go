@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -9,20 +9,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/vms/avm/fxs"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
-	networkID uint32 = 10
-	chainID          = ids.GenerateTestID()
-	keys             = secp256k1.TestKeys()
-	assetID          = ids.GenerateTestID()
+	chainID = ids.GenerateTestID()
+	keys    = secp256k1.TestKeys()
+	assetID = ids.GenerateTestID()
 )
 
 func TestStandardBlocks(t *testing.T) {
@@ -55,8 +55,8 @@ func TestStandardBlocks(t *testing.T) {
 	require.Equal(standardBlk.Bytes(), parsed.Bytes())
 	require.Equal(standardBlk.Timestamp(), parsed.Timestamp())
 
-	parsedStandardBlk, ok := parsed.(*StandardBlock)
-	require.True(ok)
+	require.IsType(&StandardBlock{}, parsed)
+	parsedStandardBlk := parsed.(*StandardBlock)
 
 	require.Equal(txs, parsedStandardBlk.Txs())
 	require.Equal(parsed.Txs(), parsedStandardBlk.Txs())
@@ -68,7 +68,7 @@ func createTestTxs(cm codec.Manager) ([]*txs.Tx, error) {
 	for i := 0; i < countTxs; i++ {
 		// Create the tx
 		tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    networkID,
+			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Outs: []*dione.TransferableOutput{{
 				Asset: dione.Asset{ID: assetID},

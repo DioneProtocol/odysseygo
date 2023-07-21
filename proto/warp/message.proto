@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package warp;
 
-option go_package = "github.com/dioneprotocol/dionego/proto/pb/warp";
+option go_package = "github.com/DioneProtocol/odysseygo/proto/pb/warp";
 
 service Signer {
   rpc Sign(SignRequest) returns (SignResponse);

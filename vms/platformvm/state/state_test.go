@@ -1,35 +1,37 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
 
 import (
-	"math"
 	"testing"
 	"time"
+
+	stdmath "math"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/config"
-	"github.com/dioneprotocol/dionego/vms/platformvm/genesis"
-	"github.com/dioneprotocol/dionego/vms/platformvm/metrics"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -66,20 +68,12 @@ func TestStateSyncGenesis(t *testing.T) {
 	require.NotNil(staker)
 	require.Equal(initialNodeID, staker.NodeID)
 
-	delegatorIterator, err := state.GetCurrentDelegatorIterator(constants.PrimaryNetworkID, initialNodeID)
-	require.NoError(err)
-	assertIteratorsEqual(t, EmptyIterator, delegatorIterator)
-
 	stakerIterator, err := state.GetCurrentStakerIterator()
 	require.NoError(err)
 	assertIteratorsEqual(t, NewSliceIterator(staker), stakerIterator)
 
 	_, err = state.GetPendingValidator(constants.PrimaryNetworkID, initialNodeID)
 	require.ErrorIs(err, database.ErrNotFound)
-
-	delegatorIterator, err = state.GetPendingDelegatorIterator(constants.PrimaryNetworkID, initialNodeID)
-	require.NoError(err)
-	assertIteratorsEqual(t, EmptyIterator, delegatorIterator)
 }
 
 func TestGetValidatorWeightDiffs(t *testing.T) {
@@ -98,9 +92,7 @@ func TestGetValidatorWeightDiffs(t *testing.T) {
 
 	type stakerDiff struct {
 		validatorsToAdd    []*Staker
-		delegatorsToAdd    []*Staker
 		validatorsToRemove []*Staker
-		delegatorsToRemove []*Staker
 
 		expectedValidatorWeightDiffs map[ids.ID]map[ids.NodeID]*ValidatorWeightDiff
 	}
@@ -132,14 +124,6 @@ func TestGetValidatorWeightDiffs(t *testing.T) {
 					Weight:   10,
 				},
 			},
-			delegatorsToAdd: []*Staker{
-				{
-					TxID:     txID1,
-					NodeID:   nodeID0,
-					SubnetID: constants.PrimaryNetworkID,
-					Weight:   5,
-				},
-			},
 			expectedValidatorWeightDiffs: map[ids.ID]map[ids.NodeID]*ValidatorWeightDiff{
 				constants.PrimaryNetworkID: {
 					nodeID0: {
@@ -148,32 +132,6 @@ func TestGetValidatorWeightDiffs(t *testing.T) {
 					},
 				},
 				subnetID0: {
-					nodeID0: {
-						Decrease: false,
-						Amount:   10,
-					},
-				},
-			},
-		},
-		{
-			delegatorsToAdd: []*Staker{
-				{
-					TxID:     txID2,
-					NodeID:   nodeID0,
-					SubnetID: constants.PrimaryNetworkID,
-					Weight:   15,
-				},
-			},
-			delegatorsToRemove: []*Staker{
-				{
-					TxID:     txID1,
-					NodeID:   nodeID0,
-					SubnetID: constants.PrimaryNetworkID,
-					Weight:   5,
-				},
-			},
-			expectedValidatorWeightDiffs: map[ids.ID]map[ids.NodeID]*ValidatorWeightDiff{
-				constants.PrimaryNetworkID: {
 					nodeID0: {
 						Decrease: false,
 						Amount:   10,
@@ -194,14 +152,6 @@ func TestGetValidatorWeightDiffs(t *testing.T) {
 					NodeID:   nodeID0,
 					SubnetID: subnetID0,
 					Weight:   10,
-				},
-			},
-			delegatorsToRemove: []*Staker{
-				{
-					TxID:     txID2,
-					NodeID:   nodeID0,
-					SubnetID: constants.PrimaryNetworkID,
-					Weight:   15,
 				},
 			},
 			expectedValidatorWeightDiffs: map[ids.ID]map[ids.NodeID]*ValidatorWeightDiff{
@@ -226,14 +176,8 @@ func TestGetValidatorWeightDiffs(t *testing.T) {
 		for _, validator := range stakerDiff.validatorsToAdd {
 			state.PutCurrentValidator(validator)
 		}
-		for _, delegator := range stakerDiff.delegatorsToAdd {
-			state.PutCurrentDelegator(delegator)
-		}
 		for _, validator := range stakerDiff.validatorsToRemove {
 			state.DeleteCurrentValidator(validator)
-		}
-		for _, delegator := range stakerDiff.delegatorsToRemove {
-			state.DeleteCurrentDelegator(delegator)
 		}
 		state.SetHeight(uint64(i + 1))
 		require.NoError(state.Commit())
@@ -425,7 +369,7 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 	s, db := newUninitializedState(require)
 
 	initialValidator := &txs.AddValidatorTx{
-		Validator: validator.Validator{
+		Validator: txs.Validator{
 			NodeID: initialNodeID,
 			Start:  uint64(initialTime.Unix()),
 			End:    uint64(initialValidatorEndTime.Unix()),
@@ -440,7 +384,6 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 			},
 		},
 		RewardsOwner:     &secp256k1fx.OutputOwners{},
-		DelegationShares: reward.PercentDenominator,
 	}
 	initialValidatorTx := &txs.Tx{Unsigned: initialValidator}
 	require.NoError(initialValidatorTx.Initialize(txs.Codec))
@@ -478,7 +421,7 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 		InitialSupply: units.Schmeckle + units.Dione,
 	}
 
-	genesisBlk, err := blocks.NewApricotCommitBlock(genesisBlkID, 0)
+	genesisBlk, err := blocks.NewOdysseyCommitBlock(genesisBlkID, 0)
 	require.NoError(err)
 	require.NoError(s.(*state).syncGenesis(genesisBlk, genesisState))
 
@@ -508,6 +451,7 @@ func newStateFromDB(require *require.Assertions, db database.Database) State {
 			MintingPeriod:      365 * 24 * time.Hour,
 			SupplyCap:          720 * units.MegaDione,
 		}),
+		&utils.Atomic[bool]{},
 	)
 	require.NoError(err)
 	require.NotNil(state)
@@ -516,18 +460,18 @@ func newStateFromDB(require *require.Assertions, db database.Database) State {
 
 func TestValidatorWeightDiff(t *testing.T) {
 	type test struct {
-		name      string
-		ops       []func(*ValidatorWeightDiff) error
-		shouldErr bool
-		expected  ValidatorWeightDiff
+		name        string
+		ops         []func(*ValidatorWeightDiff) error
+		expected    *ValidatorWeightDiff
+		expectedErr error
 	}
 
 	tests := []test{
 		{
-			name:      "no ops",
-			ops:       []func(*ValidatorWeightDiff) error{},
-			shouldErr: false,
-			expected:  ValidatorWeightDiff{},
+			name:        "no ops",
+			ops:         []func(*ValidatorWeightDiff) error{},
+			expected:    &ValidatorWeightDiff{},
+			expectedErr: nil,
 		},
 		{
 			name: "simple decrease",
@@ -539,24 +483,24 @@ func TestValidatorWeightDiff(t *testing.T) {
 					return d.Add(true, 1)
 				},
 			},
-			shouldErr: false,
-			expected: ValidatorWeightDiff{
+			expected: &ValidatorWeightDiff{
 				Decrease: true,
 				Amount:   2,
 			},
+			expectedErr: nil,
 		},
 		{
 			name: "decrease overflow",
 			ops: []func(*ValidatorWeightDiff) error{
 				func(d *ValidatorWeightDiff) error {
-					return d.Add(true, math.MaxUint64)
+					return d.Add(true, stdmath.MaxUint64)
 				},
 				func(d *ValidatorWeightDiff) error {
 					return d.Add(true, 1)
 				},
 			},
-			shouldErr: true,
-			expected:  ValidatorWeightDiff{},
+			expected:    &ValidatorWeightDiff{},
+			expectedErr: math.ErrOverflow,
 		},
 		{
 			name: "simple increase",
@@ -568,24 +512,24 @@ func TestValidatorWeightDiff(t *testing.T) {
 					return d.Add(false, 1)
 				},
 			},
-			shouldErr: false,
-			expected: ValidatorWeightDiff{
+			expected: &ValidatorWeightDiff{
 				Decrease: false,
 				Amount:   2,
 			},
+			expectedErr: nil,
 		},
 		{
 			name: "increase overflow",
 			ops: []func(*ValidatorWeightDiff) error{
 				func(d *ValidatorWeightDiff) error {
-					return d.Add(false, math.MaxUint64)
+					return d.Add(false, stdmath.MaxUint64)
 				},
 				func(d *ValidatorWeightDiff) error {
 					return d.Add(false, 1)
 				},
 			},
-			shouldErr: true,
-			expected:  ValidatorWeightDiff{},
+			expected:    &ValidatorWeightDiff{},
+			expectedErr: math.ErrOverflow,
 		},
 		{
 			name: "varied use",
@@ -629,11 +573,11 @@ func TestValidatorWeightDiff(t *testing.T) {
 					return d.Add(true, 2) // Value -2
 				},
 			},
-			shouldErr: false,
-			expected: ValidatorWeightDiff{
+			expected: &ValidatorWeightDiff{
 				Decrease: true,
 				Amount:   2,
 			},
+			expectedErr: nil,
 		},
 	}
 
@@ -645,12 +589,10 @@ func TestValidatorWeightDiff(t *testing.T) {
 			for _, op := range tt.ops {
 				errs.Add(op(diff))
 			}
-			if tt.shouldErr {
-				require.Error(errs.Err)
-				return
+			require.ErrorIs(errs.Err, tt.expectedErr)
+			if tt.expectedErr == nil {
+				require.Equal(tt.expected, diff)
 			}
-			require.NoError(errs.Err)
-			require.Equal(tt.expected, *diff)
 		})
 	}
 }

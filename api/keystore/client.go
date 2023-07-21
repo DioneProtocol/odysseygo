@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package keystore
@@ -6,14 +6,17 @@ package keystore
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/api"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for Dione Keystore API Endpoint
+// Client interface for Odyssey Keystore API Endpoint
+//
+// Deprecated: The Keystore API is deprecated. Dedicated wallets should be used
+// instead.
 type Client interface {
 	CreateUser(context.Context, api.UserPass, ...rpc.Option) error
 	// Returns the usernames of all keystore users
@@ -26,11 +29,13 @@ type Client interface {
 	DeleteUser(context.Context, api.UserPass, ...rpc.Option) error
 }
 
-// Client implementation for Dione Keystore API Endpoint
+// Client implementation for Odyssey Keystore API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }
 
+// Deprecated: The Keystore API is deprecated. Dedicated wallets should be used
+// instead.
 func NewClient(uri string) Client {
 	return &client{requester: rpc.NewEndpointRequester(
 		uri + "/ext/keystore",

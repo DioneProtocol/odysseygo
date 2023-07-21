@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -12,8 +12,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/utils/constants"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 )
 
 const fallbackMinPercentConnected = 0.8
@@ -104,7 +104,7 @@ func (vm *VM) HealthCheck(context.Context) (interface{}, error) {
 		}
 	}
 
-	if len(errorReasons) == 0 || !vm.StakingEnabled {
+	if len(errorReasons) == 0 || !vm.SybilProtectionEnabled {
 		return details, nil
 	}
 	return details, fmt.Errorf("platform layer is unhealthy err: %w, details: %s",

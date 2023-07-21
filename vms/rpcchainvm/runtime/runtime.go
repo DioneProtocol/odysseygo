@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package runtime
@@ -11,7 +11,7 @@ import (
 
 const (
 	// Address of the runtime engine server.
-	EngineAddressKey = "DIONE_VM_RUNTIME_ENGINE_ADDR"
+	EngineAddressKey = "ODYSSEY_VM_RUNTIME_ENGINE_ADDR"
 
 	// Duration before handshake timeout during bootstrap.
 	DefaultHandshakeTimeout = 5 * time.Second
@@ -28,7 +28,7 @@ var (
 )
 
 type Initializer interface {
-	// Initialize provides DioneGo with compatibility, networking and
+	// Initialize provides OdysseyGo with compatibility, networking and
 	// process information of a VM.
 	Initialize(ctx context.Context, protocolVersion uint, vmAddr string) error
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -8,16 +8,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/api"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/rpc"
-
-	cjson "github.com/dioneprotocol/dionego/utils/json"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
@@ -25,16 +24,25 @@ var _ Client = (*client)(nil)
 // Client for interacting with an AVM (X-Chain) instance
 type Client interface {
 	WalletClient
+	// GetBlock returns the block with the given id.
+	GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Option) ([]byte, error)
+	// GetBlockByHeight returns the block at the given [height].
+	GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error)
+	// GetHeight returns the height of the last accepted block.
+	GetHeight(ctx context.Context, options ...rpc.Option) (uint64, error)
 	// GetTxStatus returns the status of [txID]
+	//
+	// Deprecated: GetTxStatus only returns Accepted or Unknown, GetTx should be
+	// used instead to determine if the tx was accepted.
 	GetTxStatus(ctx context.Context, txID ids.ID, options ...rpc.Option) (choices.Status, error)
 	// ConfirmTx attempts to confirm [txID] by repeatedly checking its status.
 	// Note: ConfirmTx will block until either the context is done or the client
 	//       returns a decided status.
+	// TODO: Move this function off of the Client interface into a utility
+	// function.
 	ConfirmTx(ctx context.Context, txID ids.ID, freq time.Duration, options ...rpc.Option) (choices.Status, error)
 	// GetTx returns the byte representation of [txID]
 	GetTx(ctx context.Context, txID ids.ID, options ...rpc.Option) ([]byte, error)
-	// IssueStopVertex issues a stop vertex.
-	IssueStopVertex(ctx context.Context, options ...rpc.Option) error
 	// GetUTXOs returns the byte representation of the UTXOs controlled by [addrs]
 	GetUTXOs(
 		ctx context.Context,
@@ -59,10 +67,17 @@ type Client interface {
 	GetAssetDescription(ctx context.Context, assetID string, options ...rpc.Option) (*GetAssetDescriptionReply, error)
 	// GetBalance returns the balance of [assetID] held by [addr].
 	// If [includePartial], balance includes partial owned (i.e. in a multisig) funds.
+	//
+	// Deprecated: GetUTXOs should be used instead.
 	GetBalance(ctx context.Context, addr ids.ShortID, assetID string, includePartial bool, options ...rpc.Option) (*GetBalanceReply, error)
 	// GetAllBalances returns all asset balances for [addr]
+	//
+	// Deprecated: GetUTXOs should be used instead.
 	GetAllBalances(ctx context.Context, addr ids.ShortID, includePartial bool, options ...rpc.Option) ([]Balance, error)
 	// CreateAsset creates a new asset and returns its assetID
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -76,6 +91,9 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// CreateFixedCapAsset creates a new fixed cap asset and returns its assetID
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateFixedCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -88,6 +106,9 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// CreateVariableCapAsset creates a new variable cap asset and returns its assetID
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateVariableCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -100,6 +121,9 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// CreateNFTAsset creates a new NFT asset and returns its assetID
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateNFTAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -111,14 +135,25 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// CreateAddress creates a new address controlled by [user]
+	//
+	// Deprecated: Keys should no longer be stored on the node.
 	CreateAddress(ctx context.Context, user api.UserPass, options ...rpc.Option) (ids.ShortID, error)
 	// ListAddresses returns all addresses on this chain controlled by [user]
+	//
+	// Deprecated: Keys should no longer be stored on the node.
 	ListAddresses(ctx context.Context, user api.UserPass, options ...rpc.Option) ([]ids.ShortID, error)
 	// ExportKey returns the private key corresponding to [addr] controlled by [user]
+	//
+	// Deprecated: Keys should no longer be stored on the node.
 	ExportKey(ctx context.Context, user api.UserPass, addr ids.ShortID, options ...rpc.Option) (*secp256k1.PrivateKey, error)
 	// ImportKey imports [privateKey] to [user]
+	//
+	// Deprecated: Keys should no longer be stored on the node.
 	ImportKey(ctx context.Context, user api.UserPass, privateKey *secp256k1.PrivateKey, options ...rpc.Option) (ids.ShortID, error)
 	// Mint [amount] of [assetID] to be owned by [to]
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Mint(
 		ctx context.Context,
 		user api.UserPass,
@@ -130,6 +165,9 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// SendNFT sends an NFT and returns the ID of the newly created transaction
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	SendNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -141,6 +179,9 @@ type Client interface {
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// MintNFT issues a MintNFT transaction and returns the ID of the newly created transaction
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	MintNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -153,9 +194,15 @@ type Client interface {
 	) (ids.ID, error)
 	// Import sends an import transaction to import funds from [sourceChain] and
 	// returns the ID of the newly created transaction
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Import(ctx context.Context, user api.UserPass, to ids.ShortID, sourceChain string, options ...rpc.Option) (ids.ID, error) // Export sends an asset from this chain to the P/C-Chain.
 	// After this tx is accepted, the DIONE must be imported to the P/C-chain with an importTx.
 	// Returns the ID of the newly created atomic transaction
+	//
+	// Deprecated: Transactions should be issued using the
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Export(
 		ctx context.Context,
 		user api.UserPass,
@@ -187,6 +234,36 @@ func NewClient(uri, chain string) Client {
 	}
 }
 
+func (c *client) GetBlock(ctx context.Context, blkID ids.ID, options ...rpc.Option) ([]byte, error) {
+	res := &api.FormattedBlock{}
+	err := c.requester.SendRequest(ctx, "avm.getBlock", &api.GetBlockArgs{
+		BlockID:  blkID,
+		Encoding: formatting.HexNC,
+	}, res, options...)
+	if err != nil {
+		return nil, err
+	}
+	return formatting.Decode(res.Encoding, res.Block)
+}
+
+func (c *client) GetBlockByHeight(ctx context.Context, height uint64, options ...rpc.Option) ([]byte, error) {
+	res := &api.FormattedBlock{}
+	err := c.requester.SendRequest(ctx, "avm.getBlockByHeight", &api.GetBlockByHeightArgs{
+		Height:   json.Uint64(height),
+		Encoding: formatting.HexNC,
+	}, res, options...)
+	if err != nil {
+		return nil, err
+	}
+	return formatting.Decode(res.Encoding, res.Block)
+}
+
+func (c *client) GetHeight(ctx context.Context, options ...rpc.Option) (uint64, error) {
+	res := &api.GetHeightResponse{}
+	err := c.requester.SendRequest(ctx, "avm.getHeight", struct{}{}, res, options...)
+	return uint64(res.Height), err
+}
+
 func (c *client) IssueTx(ctx context.Context, txBytes []byte, options ...rpc.Option) (ids.ID, error) {
 	txStr, err := formatting.Encode(formatting.Hex, txBytes)
 	if err != nil {
@@ -198,10 +275,6 @@ func (c *client) IssueTx(ctx context.Context, txBytes []byte, options ...rpc.Opt
 		Encoding: formatting.Hex,
 	}, res, options...)
 	return res.TxID, err
-}
-
-func (c *client) IssueStopVertex(ctx context.Context, options ...rpc.Option) error {
-	return c.requester.SendRequest(ctx, "avm.issueStopVertex", &struct{}{}, &struct{}{}, options...)
 }
 
 func (c *client) GetTxStatus(ctx context.Context, txID ids.ID, options ...rpc.Option) (choices.Status, error) {
@@ -241,12 +314,7 @@ func (c *client) GetTx(ctx context.Context, txID ids.ID, options ...rpc.Option) 
 	if err != nil {
 		return nil, err
 	}
-
-	txBytes, err := formatting.Decode(res.Encoding, res.Tx)
-	if err != nil {
-		return nil, err
-	}
-	return txBytes, nil
+	return formatting.Decode(res.Encoding, res.Tx)
 }
 
 func (c *client) GetUTXOs(
@@ -273,7 +341,7 @@ func (c *client) GetAtomicUTXOs(
 	err := c.requester.SendRequest(ctx, "avm.getUTXOs", &api.GetUTXOsArgs{
 		Addresses:   ids.ShortIDsToStrings(addrs),
 		SourceChain: sourceChain,
-		Limit:       cjson.Uint32(limit),
+		Limit:       json.Uint32(limit),
 		StartIndex: api.Index{
 			Address: startAddress.String(),
 			UTXO:    startUTXOID.String(),
@@ -366,14 +434,14 @@ func (c *client) CreateAsset(
 	holders := make([]*Holder, len(clientHolders))
 	for i, clientHolder := range clientHolders {
 		holders[i] = &Holder{
-			Amount:  cjson.Uint64(clientHolder.Amount),
+			Amount:  json.Uint64(clientHolder.Amount),
 			Address: clientHolder.Address.String(),
 		}
 	}
 	minters := make([]Owners, len(clientMinters))
 	for i, clientMinter := range clientMinters {
 		minters[i] = Owners{
-			Threshold: cjson.Uint32(clientMinter.Threshold),
+			Threshold: json.Uint32(clientMinter.Threshold),
 			Minters:   ids.ShortIDsToStrings(clientMinter.Minters),
 		}
 	}
@@ -407,7 +475,7 @@ func (c *client) CreateFixedCapAsset(
 	holders := make([]*Holder, len(clientHolders))
 	for i, clientHolder := range clientHolders {
 		holders[i] = &Holder{
-			Amount:  cjson.Uint64(clientHolder.Amount),
+			Amount:  json.Uint64(clientHolder.Amount),
 			Address: clientHolder.Address.String(),
 		}
 	}
@@ -440,7 +508,7 @@ func (c *client) CreateVariableCapAsset(
 	minters := make([]Owners, len(clientMinters))
 	for i, clientMinter := range clientMinters {
 		minters[i] = Owners{
-			Threshold: cjson.Uint32(clientMinter.Threshold),
+			Threshold: json.Uint32(clientMinter.Threshold),
 			Minters:   ids.ShortIDsToStrings(clientMinter.Minters),
 		}
 	}
@@ -472,7 +540,7 @@ func (c *client) CreateNFTAsset(
 	minters := make([]Owners, len(clientMinters))
 	for i, clientMinter := range clientMinters {
 		minters[i] = Owners{
-			Threshold: cjson.Uint32(clientMinter.Threshold),
+			Threshold: json.Uint32(clientMinter.Threshold),
 			Minters:   ids.ShortIDsToStrings(clientMinter.Minters),
 		}
 	}
@@ -547,7 +615,7 @@ func (c *client) Send(
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr.String()},
 		},
 		SendOutput: SendOutput{
-			Amount:  cjson.Uint64(amount),
+			Amount:  json.Uint64(amount),
 			AssetID: assetID,
 			To:      to.String(),
 		},
@@ -569,7 +637,7 @@ func (c *client) SendMultiple(
 	outputs := make([]SendOutput, len(clientOutputs))
 	for i, clientOutput := range clientOutputs {
 		outputs[i] = SendOutput{
-			Amount:  cjson.Uint64(clientOutput.Amount),
+			Amount:  json.Uint64(clientOutput.Amount),
 			AssetID: clientOutput.AssetID,
 			To:      clientOutput.To.String(),
 		}
@@ -603,7 +671,7 @@ func (c *client) Mint(
 			JSONFromAddrs:  api.JSONFromAddrs{From: ids.ShortIDsToStrings(from)},
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr.String()},
 		},
-		Amount:  cjson.Uint64(amount),
+		Amount:  json.Uint64(amount),
 		AssetID: assetID,
 		To:      to.String(),
 	}, res, options...)
@@ -628,7 +696,7 @@ func (c *client) SendNFT(
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr.String()},
 		},
 		AssetID: assetID,
-		GroupID: cjson.Uint32(groupID),
+		GroupID: json.Uint32(groupID),
 		To:      to.String(),
 	}, res, options...)
 	return res.TxID, err
@@ -691,7 +759,7 @@ func (c *client) Export(
 			JSONFromAddrs:  api.JSONFromAddrs{From: ids.ShortIDsToStrings(from)},
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr.String()},
 		},
-		Amount:      cjson.Uint64(amount),
+		Amount:      json.Uint64(amount),
 		TargetChain: targetChain,
 		To:          to.String(),
 		AssetID:     assetID,

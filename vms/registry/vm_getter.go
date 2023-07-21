@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package registry
@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/filesystem"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/vms"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/filesystem"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/vms"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 )
 
 var (

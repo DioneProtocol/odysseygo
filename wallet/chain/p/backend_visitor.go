@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -6,10 +6,10 @@ package p
 import (
 	stdcontext "context"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var _ txs.Visitor = (*backendVisitor)(nil)
@@ -34,10 +34,6 @@ func (b *backendVisitor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 }
 
 func (b *backendVisitor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) error {
-	return b.baseTx(&tx.BaseTx)
-}
-
-func (b *backendVisitor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 	return b.baseTx(&tx.BaseTx)
 }
 
@@ -91,10 +87,6 @@ func (b *backendVisitor) TransformSubnetTx(tx *txs.TransformSubnetTx) error {
 }
 
 func (b *backendVisitor) AddPermissionlessValidatorTx(tx *txs.AddPermissionlessValidatorTx) error {
-	return b.baseTx(&tx.BaseTx)
-}
-
-func (b *backendVisitor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessDelegatorTx) error {
 	return b.baseTx(&tx.BaseTx)
 }
 

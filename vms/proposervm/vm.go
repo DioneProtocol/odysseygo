@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -14,29 +14,29 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/api/metrics"
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/cache/metercacher"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/proposervm/indexer"
-	"github.com/dioneprotocol/dionego/vms/proposervm/proposer"
-	"github.com/dioneprotocol/dionego/vms/proposervm/scheduler"
-	"github.com/dioneprotocol/dionego/vms/proposervm/state"
-	"github.com/dioneprotocol/dionego/vms/proposervm/tree"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/indexer"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/proposer"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/scheduler"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/state"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/tree"
 
-	statelessblock "github.com/dioneprotocol/dionego/vms/proposervm/block"
+	statelessblock "github.com/DioneProtocol/odysseygo/vms/proposervm/block"
 )
 
 const (

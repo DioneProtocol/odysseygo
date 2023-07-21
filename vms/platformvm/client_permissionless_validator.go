@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -6,10 +6,10 @@ package platformvm
 import (
 	"encoding/json"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/vms/platformvm/api"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/api"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
 )
 
 // ClientStaker is the representation of a staker sent via client.
@@ -39,24 +39,11 @@ type ClientOwner struct {
 // over client
 type ClientPermissionlessValidator struct {
 	ClientStaker
-	ValidationRewardOwner *ClientOwner
-	DelegationRewardOwner *ClientOwner
-	PotentialReward       *uint64
-	DelegationFee         float32
-	Uptime                *float32
-	Connected             *bool
-	Signer                *signer.ProofOfPossession
-	// The delegators delegating to this validator
-	DelegatorCount  *uint64
-	DelegatorWeight *uint64
-	Delegators      []ClientDelegator
-}
-
-// ClientDelegator is the repr. of a delegator sent over client
-type ClientDelegator struct {
-	ClientStaker
-	RewardOwner     *ClientOwner
-	PotentialReward *uint64
+	ValidationRewardOwner  *ClientOwner
+	PotentialReward        *uint64
+	Uptime                 *float32
+	Connected              *bool
+	Signer                 *signer.ProofOfPossession
 }
 
 func apiStakerToClientStaker(validator api.Staker) ClientStaker {
@@ -102,40 +89,13 @@ func getClientPermissionlessValidators(validatorsSliceIntf []interface{}) ([]Cli
 			return nil, err
 		}
 
-		delegationRewardOwner, err := apiOwnerToClientOwner(apiValidator.DelegationRewardOwner)
-		if err != nil {
-			return nil, err
-		}
-
-		var clientDelegators []ClientDelegator
-		if apiValidator.Delegators != nil {
-			clientDelegators = make([]ClientDelegator, len(*apiValidator.Delegators))
-			for j, apiDelegator := range *apiValidator.Delegators {
-				rewardOwner, err := apiOwnerToClientOwner(apiDelegator.RewardOwner)
-				if err != nil {
-					return nil, err
-				}
-
-				clientDelegators[j] = ClientDelegator{
-					ClientStaker:    apiStakerToClientStaker(apiDelegator.Staker),
-					RewardOwner:     rewardOwner,
-					PotentialReward: (*uint64)(apiDelegator.PotentialReward),
-				}
-			}
-		}
-
 		clientValidators[i] = ClientPermissionlessValidator{
-			ClientStaker:          apiStakerToClientStaker(apiValidator.Staker),
-			ValidationRewardOwner: validationRewardOwner,
-			DelegationRewardOwner: delegationRewardOwner,
-			PotentialReward:       (*uint64)(apiValidator.PotentialReward),
-			DelegationFee:         float32(apiValidator.DelegationFee),
-			Uptime:                (*float32)(apiValidator.Uptime),
-			Connected:             &apiValidator.Connected,
-			Signer:                apiValidator.Signer,
-			DelegatorCount:        (*uint64)(apiValidator.DelegatorCount),
-			DelegatorWeight:       (*uint64)(apiValidator.DelegatorWeight),
-			Delegators:            clientDelegators,
+			ClientStaker:           apiStakerToClientStaker(apiValidator.Staker),
+			ValidationRewardOwner:  validationRewardOwner,
+			PotentialReward:        (*uint64)(apiValidator.PotentialReward),
+			Uptime:                 (*float32)(apiValidator.Uptime),
+			Connected:              &apiValidator.Connected,
+			Signer:                 apiValidator.Signer,
 		}
 	}
 	return clientValidators, nil
