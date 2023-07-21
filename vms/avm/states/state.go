@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package states
@@ -9,17 +9,17 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/cache/metercacher"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/vms/avm/blocks"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/avm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 const (
@@ -44,22 +44,27 @@ var (
 	_ State = (*state)(nil)
 )
 
-type Chain interface {
-	GetUTXO(utxoID ids.ID) (*dione.UTXO, error)
-	AddUTXO(utxo *dione.UTXO)
-	DeleteUTXO(utxoID ids.ID)
+type ReadOnlyChain interface {
+	dione.UTXOGetter
+
+	// TODO: Remove GetUTXOFromID after the DAG linearization
+	GetUTXOFromID(utxoID *dione.UTXOID) (*dione.UTXO, error)
 
 	GetTx(txID ids.ID) (*txs.Tx, error)
-	AddTx(tx *txs.Tx)
-
 	GetBlockID(height uint64) (ids.ID, error)
 	GetBlock(blkID ids.ID) (blocks.Block, error)
-	AddBlock(block blocks.Block)
-
 	GetLastAccepted() ids.ID
-	SetLastAccepted(blkID ids.ID)
-
 	GetTimestamp() time.Time
+}
+
+type Chain interface {
+	ReadOnlyChain
+	dione.UTXOAdder
+	dione.UTXODeleter
+
+	AddTx(tx *txs.Tx)
+	AddBlock(block blocks.Block)
+	SetLastAccepted(blkID ids.ID)
 	SetTimestamp(t time.Time)
 }
 
@@ -231,6 +236,10 @@ func (s *state) GetUTXO(utxoID ids.ID) (*dione.UTXO, error) {
 		return utxo, nil
 	}
 	return s.utxoState.GetUTXO(utxoID)
+}
+
+func (s *state) GetUTXOFromID(utxoID *dione.UTXOID) (*dione.UTXO, error) {
+	return s.GetUTXO(utxoID.InputID())
 }
 
 func (s *state) UTXOIDs(addr []byte, start ids.ID, limit int) ([]ids.ID, error) {

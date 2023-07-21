@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/ids"
 )
 
 func TestNewBanffAbortBlock(t *testing.T) {
@@ -33,12 +33,12 @@ func TestNewBanffAbortBlock(t *testing.T) {
 	require.Equal(height, blk.Height())
 }
 
-func TestNewApricotAbortBlock(t *testing.T) {
+func TestNewOdysseyAbortBlock(t *testing.T) {
 	require := require.New(t)
 
 	parentID := ids.GenerateTestID()
 	height := uint64(1337)
-	blk, err := NewApricotAbortBlock(
+	blk, err := NewOdysseyAbortBlock(
 		parentID,
 		height,
 	)

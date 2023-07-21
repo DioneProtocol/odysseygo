@@ -1,11 +1,9 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
 
-import (
-	"github.com/dioneprotocol/dionego/ids"
-)
+import "github.com/DioneProtocol/odysseygo/ids"
 
 type Versions interface {
 	// GetState returns the state of the chain after [blkID] has been accepted.

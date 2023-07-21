@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -11,8 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/staking"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/staking"
 )
 
 func TestParse(t *testing.T) {
@@ -60,7 +61,7 @@ func TestParseDuplicateExtension(t *testing.T) {
 	require.NoError(err)
 
 	_, err = Parse(blockBytes)
-	require.Error(err) // Do not check for errDuplicateExtension to support g1.19
+	require.ErrorIs(err, errInvalidCertificate)
 }
 
 func TestParseHeader(t *testing.T) {
@@ -130,5 +131,5 @@ func TestParseGibberish(t *testing.T) {
 	bytes := []byte{0, 1, 2, 3, 4, 5}
 
 	_, err := Parse(bytes)
-	require.Error(err)
+	require.ErrorIs(err, codec.ErrUnknownVersion)
 }

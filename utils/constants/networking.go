@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package constants
@@ -7,7 +7,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/dioneprotocol/dionego/utils/units"
+	"github.com/DioneProtocol/odysseygo/utils/compression"
+	"github.com/DioneProtocol/odysseygo/utils/units"
 )
 
 // Const variables to be exported
@@ -54,7 +55,8 @@ const (
 	DefaultNetworkTimeoutCoefficient    = 2
 	DefaultNetworkReadHandshakeTimeout  = 15 * time.Second
 
-	DefaultNetworkCompressionEnabled        = true
+	DefaultNetworkCompressionEnabled        = true // TODO remove when NetworkCompressionEnabledKey is removed
+	DefaultNetworkCompressionType           = compression.TypeGzip
 	DefaultNetworkMaxClockDifference        = time.Minute
 	DefaultNetworkAllowPrivateIPs           = true
 	DefaultNetworkRequireValidatorToConnect = false
@@ -76,8 +78,9 @@ const (
 	DefaultBenchlistMinFailingDuration = 2*time.Minute + 30*time.Second
 
 	// Router
-	DefaultConsensusGossipFrequency                        = 10 * time.Second
-	DefaultConsensusShutdownTimeout                        = 30 * time.Second
+	DefaultAcceptedFrontierGossipFrequency                 = 10 * time.Second
+	DefaultConsensusAppConcurrency                         = 2
+	DefaultConsensusShutdownTimeout                        = time.Minute
 	DefaultConsensusGossipAcceptedFrontierValidatorSize    = 0
 	DefaultConsensusGossipAcceptedFrontierNonValidatorSize = 0
 	DefaultConsensusGossipAcceptedFrontierPeerSize         = 15
@@ -97,6 +100,7 @@ const (
 	DefaultInboundThrottlerBandwidthMaxBurstSize    = DefaultMaxMessageSize
 	DefaultInboundThrottlerCPUMaxRecheckDelay       = 5 * time.Second
 	DefaultInboundThrottlerDiskMaxRecheckDelay      = 5 * time.Second
+	MinInboundThrottlerMaxRecheckDelay              = time.Millisecond
 
 	// Outbound Throttling
 	DefaultOutboundThrottlerAtLargeAllocSize    = 32 * units.MiB
@@ -117,5 +121,5 @@ const (
 
 	// Delays
 	DefaultNetworkInitialReconnectDelay = time.Second
-	DefaultNetworkMaxReconnectDelay     = time.Hour
+	DefaultNetworkMaxReconnectDelay     = time.Minute
 )

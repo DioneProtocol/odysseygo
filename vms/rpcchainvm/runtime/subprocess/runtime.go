@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subprocess
@@ -15,12 +15,12 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/gruntime"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/gruntime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 
-	pb "github.com/dioneprotocol/dionego/proto/pb/vm/runtime"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/vm/runtime"
 )
 
 type Config struct {
@@ -137,7 +137,7 @@ func Bootstrap(
 
 	if intitializer.err != nil {
 		stopper.Stop(ctx)
-		return nil, nil, fmt.Errorf("%w: %v", runtime.ErrHandshakeFailed, err)
+		return nil, nil, fmt.Errorf("%w: %v", runtime.ErrHandshakeFailed, intitializer.err)
 	}
 
 	log.Info("plugin handshake succeeded",

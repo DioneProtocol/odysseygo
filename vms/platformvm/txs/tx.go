@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -7,17 +7,21 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
+	_ cache.SizedElement = (*Tx)(nil)
+
 	ErrNilSignedTx = errors.New("nil signed tx is not valid")
 
 	errSignedTxNotInitialized = errors.New("signed tx was never initialized and is not valid")
@@ -31,7 +35,7 @@ type Tx struct {
 	// The credentials of this transaction
 	Creds []verify.Verifiable `serialize:"true" json:"credentials"`
 
-	id    ids.ID
+	TxID  ids.ID `json:"id"`
 	bytes []byte
 }
 
@@ -63,7 +67,7 @@ func (tx *Tx) Initialize(c codec.Manager) error {
 func (tx *Tx) SetBytes(unsignedBytes, signedBytes []byte) {
 	tx.Unsigned.SetBytes(unsignedBytes)
 	tx.bytes = signedBytes
-	tx.id = hashing.ComputeHash256Array(signedBytes)
+	tx.TxID = hashing.ComputeHash256Array(signedBytes)
 }
 
 // Parse signed tx starting from its byte representation.
@@ -85,12 +89,19 @@ func Parse(c codec.Manager, signedBytes []byte) (*Tx, error) {
 	return tx, nil
 }
 
+func (tx *Tx) Size() int {
+	if tx == nil {
+		return wrappers.LongLen
+	}
+	return len(tx.bytes) + wrappers.LongLen
+}
+
 func (tx *Tx) Bytes() []byte {
 	return tx.bytes
 }
 
 func (tx *Tx) ID() ids.ID {
-	return tx.id
+	return tx.TxID
 }
 
 // UTXOs returns the UTXOs transaction is producing.
@@ -100,7 +111,7 @@ func (tx *Tx) UTXOs() []*dione.UTXO {
 	for i, out := range outs {
 		utxos[i] = &dione.UTXO{
 			UTXOID: dione.UTXOID{
-				TxID:        tx.id,
+				TxID:        tx.TxID,
 				OutputIndex: uint32(i),
 			},
 			Asset: dione.Asset{ID: out.AssetID()},
@@ -114,7 +125,7 @@ func (tx *Tx) SyntacticVerify(ctx *snow.Context) error {
 	switch {
 	case tx == nil:
 		return ErrNilSignedTx
-	case tx.id == ids.Empty:
+	case tx.TxID == ids.Empty:
 		return errSignedTxNotInitialized
 	default:
 		return tx.Unsigned.SyntacticVerify(ctx)

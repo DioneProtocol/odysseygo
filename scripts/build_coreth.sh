@@ -9,10 +9,10 @@ coreth_path=''
 evm_path=''
 
 # Directory above this script
-DIONE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 
 # Load the constants
-source "$DIONE_PATH"/scripts/constants.sh
+source "$ODYSSEY_PATH"/scripts/constants.sh
 
 print_usage() {
   printf "Usage: build_coreth [OPTIONS]
@@ -44,18 +44,18 @@ if [[ -z $coreth_path ]] || [[ -z $evm_path ]]; then
 fi
 
 if [[ ! -d "$coreth_path" ]]; then
-  go get "github.com/dioneprotocol/coreth@$coreth_version"
+  go get "github.com/DioneProtocol/coreth@$coreth_version"
 fi
 
 # Build Coreth
 build_args="$race"
 echo "Building Coreth @ ${coreth_version} ..."
 cd "$coreth_path"
-go build $build_args -ldflags "-X github.com/dioneprotocol/coreth/plugin/evm.Version=$coreth_version $static_ld_flags" -o "$evm_path" "plugin/"*.go
-cd "$DIONE_PATH"
+go build $build_args -ldflags "-X github.com/DioneProtocol/coreth/plugin/evm.Version=$coreth_version $static_ld_flags" -o "$evm_path" "plugin/"*.go
+cd "$ODYSSEY_PATH"
 
 # Building coreth + using go get can mess with the go.mod file.
-go mod tidy -compat=1.18
+go mod tidy -compat=1.19
 
 # Exit build successfully if the Coreth EVM binary is created successfully
 if [[ -f "$evm_path" ]]; then

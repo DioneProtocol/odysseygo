@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
 )
 
 var _ Block = (*StandardBlock)(nil)
@@ -22,15 +22,16 @@ type StandardBlock struct {
 	// This block's height. The genesis block is at height 0.
 	Hght uint64 `serialize:"true" json:"height"`
 	Time uint64 `serialize:"true" json:"time"`
+	Root ids.ID `serialize:"true" json:"merkleRoot"`
 	// List of transactions contained in this block.
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
 
-	id    ids.ID
-	bytes []byte
+	BlockID ids.ID `json:"id"`
+	bytes   []byte
 }
 
 func (b *StandardBlock) initialize(bytes []byte, cm codec.Manager) error {
-	b.id = hashing.ComputeHash256Array(bytes)
+	b.BlockID = hashing.ComputeHash256Array(bytes)
 	b.bytes = bytes
 	for _, tx := range b.Transactions {
 		if err := tx.Initialize(cm); err != nil {
@@ -47,7 +48,7 @@ func (b *StandardBlock) InitCtx(ctx *snow.Context) {
 }
 
 func (b *StandardBlock) ID() ids.ID {
-	return b.id
+	return b.BlockID
 }
 
 func (b *StandardBlock) Parent() ids.ID {
@@ -60,6 +61,10 @@ func (b *StandardBlock) Height() uint64 {
 
 func (b *StandardBlock) Timestamp() time.Time {
 	return time.Unix(int64(b.Time), 0)
+}
+
+func (b *StandardBlock) MerkleRoot() ids.ID {
+	return b.Root
 }
 
 func (b *StandardBlock) Txs() []*txs.Tx {

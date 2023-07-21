@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -16,14 +16,14 @@ import (
 
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/gruntime"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/gruntime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
-	runtimepb "github.com/dioneprotocol/dionego/proto/pb/vm/runtime"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
+	runtimepb "github.com/DioneProtocol/odysseygo/proto/pb/vm/runtime"
 )
 
 const defaultRuntimeDialTimeout = 5 * time.Second
@@ -33,20 +33,31 @@ const defaultRuntimeDialTimeout = 5 * time.Second
 //
 // Serve starts the RPC Chain VM server and performs a handshake with the VM runtime service.
 func Serve(ctx context.Context, vm block.ChainVM, opts ...grpcutils.ServerOption) error {
-	shutdownHandler := make(chan os.Signal, 2)
-	signal.Notify(shutdownHandler, os.Interrupt, syscall.SIGTERM)
+	signals := make(chan os.Signal, 2)
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 
 	server := newVMServer(vm, opts...)
-
 	go func(ctx context.Context) {
-		select {
-		case <-shutdownHandler:
-			fmt.Println("runtime engine: received shutdown signal")
-		case <-ctx.Done():
-			fmt.Println("runtime engine: context has been cancelled")
+		defer func() {
+			server.GracefulStop()
+			fmt.Println("vm server: graceful termination success")
+		}()
+
+		for {
+			select {
+			case s := <-signals:
+				switch s {
+				case syscall.SIGINT:
+					fmt.Println("runtime engine: ignoring signal: SIGINT")
+				case syscall.SIGTERM:
+					fmt.Println("runtime engine: received shutdown signal: SIGTERM")
+					return
+				}
+			case <-ctx.Done():
+				fmt.Println("runtime engine: context has been cancelled")
+				return
+			}
 		}
-		server.GracefulStop()
-		fmt.Println("vm server: graceful termination success")
 	}(ctx)
 
 	// address of Runtime server from ENV

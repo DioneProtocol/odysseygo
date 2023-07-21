@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dialer
@@ -13,8 +13,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
 )
 
 // Test that canceling a context passed into Dial results
@@ -64,7 +64,7 @@ func TestDialerCancelDial(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err = dialer.Dial(ctx, myIP)
-	require.Error(err)
+	require.ErrorIs(err, context.Canceled)
 
 	// Make an outgoing connection with a non-cancelled context
 	conn, err := dialer.Dial(context.Background(), myIP)

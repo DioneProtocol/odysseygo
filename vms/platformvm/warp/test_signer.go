@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package warp
@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 )
 
 // SignerTests is a list of all signer tests
@@ -30,7 +30,8 @@ func TestSignerWrongChainID(t *testing.T, s Signer, _ *bls.SecretKey, _ ids.ID) 
 	require.NoError(err)
 
 	_, err = s.Sign(msg)
-	require.Error(err)
+	// TODO: require error to be errWrongSourceChainID
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
 }
 
 // Test that a signature generated with the signer verifies correctly

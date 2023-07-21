@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -11,24 +11,26 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/vms/proposervm/block"
-	"github.com/dioneprotocol/dionego/vms/proposervm/proposer"
+	"github.com/stretchr/testify/require"
+
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/proposer"
 )
 
 // Ensure that a byzantine node issuing an invalid PreForkBlock (Y) when the
 // parent block (X) is issued into a PostForkBlock (A) will be marked as invalid
 // correctly.
 //
-//     G
-//   / |
-// A - X
-//     |
-//     Y
+//	    G
+//	  / |
+//	A - X
+//	    |
+//	    Y
 func TestInvalidByzantineProposerParent(t *testing.T) {
 	forkTime := time.Unix(0, 0) // enable ProBlks
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
@@ -97,12 +99,14 @@ func TestInvalidByzantineProposerParent(t *testing.T) {
 // the parent block (X) is issued into a PostForkBlock (A) will be marked as
 // invalid correctly.
 //
-//     G
-//   / |
-// A - X
-//    / \
-//   Y   Z
+//	    G
+//	  / |
+//	A - X
+//	   / \
+//	  Y   Z
 func TestInvalidByzantineProposerOracleParent(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
 	proVM.Set(coreGenBlk.Timestamp())
 
@@ -176,11 +180,8 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 		t.Fatal("could not build post fork oracle block")
 	}
 
-	aBlock, ok := aBlockIntf.(*postForkBlock)
-	if !ok {
-		t.Fatal("expected post fork block")
-	}
-
+	require.IsType(&postForkBlock{}, aBlockIntf)
+	aBlock := aBlockIntf.(*postForkBlock)
 	opts, err := aBlock.Options(context.Background())
 	if err != nil {
 		t.Fatal("could not retrieve options from post fork oracle block")
@@ -218,11 +219,11 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 // parent block (X) is issued into a PostForkBlock (A) will be marked as invalid
 // correctly.
 //
-//     G
-//   / |
-// A - X
-//   / |
-// B - Y
+//	    G
+//	  / |
+//	A - X
+//	  / |
+//	B - Y
 func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 	forkTime := time.Unix(0, 0) // enable ProBlks
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
@@ -324,12 +325,14 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 // contains core block (Y) whose parent (G) doesn't match (B)'s parent (A)'s
 // inner block (X) will be marked as invalid correctly.
 //
-//     G
-//   / | \
-// A - X  |
-// |     /
-// B - Y
+//	    G
+//	  / | \
+//	A - X  |
+//	|     /
+//	B - Y
 func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
 	proVM.Set(coreGenBlk.Timestamp())
 
@@ -402,10 +405,8 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 		t.Fatal("could not build post fork oracle block")
 	}
 
-	aBlock, ok := aBlockIntf.(*postForkBlock)
-	if !ok {
-		t.Fatal("expected post fork block")
-	}
+	require.IsType(&postForkBlock{}, aBlockIntf)
+	aBlock := aBlockIntf.(*postForkBlock)
 	opts, err := aBlock.Options(context.Background())
 	if err != nil {
 		t.Fatal("could not retrieve options from post fork oracle block")
@@ -422,13 +423,13 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 	}
 }
 
-//   ,--G ----.
-//  /    \     \
-// A(X)  B(Y)  C(Z)
-// | \_ /_____/
-// |\  /   |
-// | \/    |
-// O2 O1   O3
+//	  ,--G ----.
+//	 /    \     \
+//	A(X)  B(Y)  C(Z)
+//	| \_ /_____/
+//	|\  /   |
+//	| \/    |
+//	O2 O1   O3
 //
 // O1.parent = B (non-Oracle), O1.inner = first option of X (invalid)
 // O2.parent = A (original), O2.inner = first option of X (valid)

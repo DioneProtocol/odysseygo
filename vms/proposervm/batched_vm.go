@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -7,14 +7,14 @@ import (
 	"context"
 	"time"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 
-	statelessblock "github.com/dioneprotocol/dionego/vms/proposervm/block"
+	statelessblock "github.com/DioneProtocol/odysseygo/vms/proposervm/block"
 )
 
 var _ block.BatchedChainVM = (*VM)(nil)
@@ -24,7 +24,7 @@ func (vm *VM) GetAncestors(
 	blkID ids.ID,
 	maxBlocksNum int,
 	maxBlocksSize int,
-	maxBlocksRetrivalTime time.Duration,
+	maxBlocksRetrievalTime time.Duration,
 ) ([][]byte, error) {
 	if vm.batchedVM == nil {
 		return nil, block.ErrRemoteVMNotImplemented
@@ -50,15 +50,13 @@ func (vm *VM) GetAncestors(
 		// is repr. by an int.
 		currentByteLength += wrappers.IntLen + len(blkBytes)
 		elapsedTime := vm.Clock.Time().Sub(startTime)
-		if len(res) > 0 && (currentByteLength >= maxBlocksSize || maxBlocksRetrivalTime <= elapsedTime) {
+		if len(res) > 0 && (currentByteLength >= maxBlocksSize || maxBlocksRetrievalTime <= elapsedTime) {
 			return res, nil // reached maximum size or ran out of time
 		}
 
 		res = append(res, blkBytes)
 		blkID = blk.ParentID()
-		maxBlocksNum--
-
-		if maxBlocksNum <= 0 {
+		if len(res) >= maxBlocksNum {
 			return res, nil
 		}
 	}
@@ -66,7 +64,7 @@ func (vm *VM) GetAncestors(
 	// snowman++ fork may have been hit.
 	preMaxBlocksNum := maxBlocksNum - len(res)
 	preMaxBlocksSize := maxBlocksSize - currentByteLength
-	preMaxBlocksRetrivalTime := maxBlocksRetrivalTime - time.Since(startTime)
+	preMaxBlocksRetrivalTime := maxBlocksRetrievalTime - time.Since(startTime)
 	innerBytes, err := vm.batchedVM.GetAncestors(
 		ctx,
 		blkID,

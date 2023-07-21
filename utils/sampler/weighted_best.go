@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sampler
@@ -8,9 +8,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 
-	safemath "github.com/dioneprotocol/dionego/utils/math"
+	safemath "github.com/DioneProtocol/odysseygo/utils/math"
 )
 
 var (
@@ -41,15 +41,11 @@ func (s *weightedBest) Initialize(weights []uint64) error {
 		totalWeight = newWeight
 	}
 
-	if totalWeight > math.MaxInt64 {
-		return errWeightsTooLarge
-	}
-
 	samples := []uint64(nil)
 	if totalWeight > 0 {
 		samples = make([]uint64, s.benchmarkIterations)
 		for i := range samples {
-			samples[i] = uint64(globalRNG.Int63n(int64(totalWeight)))
+			samples[i] = globalRNG.Uint64Inclusive(totalWeight - 1)
 		}
 	}
 

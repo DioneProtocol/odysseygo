@@ -1,11 +1,9 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package constants
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestGetHRP(t *testing.T) {
 	tests := []struct {
@@ -18,11 +16,11 @@ func TestGetHRP(t *testing.T) {
 		},
 		{
 			id:  TestnetID,
-			hrp: FujiHRP,
+			hrp: TestnetHRP,
 		},
 		{
-			id:  FujiID,
-			hrp: FujiHRP,
+			id:  TestnetID,
+			hrp: TestnetHRP,
 		},
 		{
 			id:  LocalID,
@@ -54,11 +52,11 @@ func TestNetworkName(t *testing.T) {
 		},
 		{
 			id:   TestnetID,
-			name: FujiName,
+			name: TestnetName,
 		},
 		{
-			id:   FujiID,
-			name: FujiName,
+			id:   TestnetID,
+			name: TestnetName,
 		},
 		{
 			id:   LocalID,
@@ -98,8 +96,8 @@ func TestNetworkID(t *testing.T) {
 			id:   TestnetID,
 		},
 		{
-			name: FujiName,
-			id:   FujiID,
+			name: TestnetName,
+			id:   TestnetID,
 		},
 		{
 			name: LocalName,

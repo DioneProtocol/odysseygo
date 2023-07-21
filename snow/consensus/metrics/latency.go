@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metrics
@@ -11,12 +11,12 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/linkedhashmap"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/metric"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 var _ Latency = (*latency)(nil)
@@ -86,7 +86,7 @@ func NewLatency(metricName, descriptionName string, log logging.Logger, namespac
 		log:               log,
 
 		// e.g.,
-		// "dione_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_processing" to count how blocks are currently processing
+		// "odyssey_7y7zwo7XatqnX4dtTakLo32o7jkMX4XuDa26WaxbCXoCT1qKK_blks_processing" to count how blocks are currently processing
 		numProcessing: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      fmt.Sprintf("%s_processing", metricName),
@@ -109,11 +109,11 @@ func NewLatency(metricName, descriptionName string, log logging.Logger, namespac
 		),
 
 		// e.g.,
-		// "dione_C_blks_accepted_count" to count how many "Observe" gets called -- count all "Accept"
-		// "dione_C_blks_accepted_sum" to count how many ns have elapsed since its issuance on acceptance
-		// "dione_C_blks_accepted_sum / dione_C_blks_accepted_count" is the average block acceptance latency in ns
-		// "dione_C_blks_accepted_container_size_sum" to track cumulative sum of all accepted blocks' sizes
-		// "dione_C_blks_accepted_container_size_sum / dione_C_blks_accepted_count" is the average block size
+		// "odyssey_C_blks_accepted_count" to count how many "Observe" gets called -- count all "Accept"
+		// "odyssey_C_blks_accepted_sum" to count how many ns have elapsed since its issuance on acceptance
+		// "odyssey_C_blks_accepted_sum / odyssey_C_blks_accepted_count" is the average block acceptance latency in ns
+		// "odyssey_C_blks_accepted_container_size_sum" to track cumulative sum of all accepted blocks' sizes
+		// "odyssey_C_blks_accepted_container_size_sum / odyssey_C_blks_accepted_count" is the average block size
 		latAccepted: metric.NewAveragerWithErrs(
 			namespace,
 			fmt.Sprintf("%s_accepted", metricName),
@@ -128,11 +128,11 @@ func NewLatency(metricName, descriptionName string, log logging.Logger, namespac
 		}),
 
 		// e.g.,
-		// "dione_P_blks_rejected_count" to count how many "Observe" gets called -- count all "Reject"
-		// "dione_P_blks_rejected_sum" to count how many ns have elapsed since its issuance on rejection
-		// "dione_P_blks_accepted_sum / dione_P_blks_accepted_count" is the average block acceptance latency in ns
-		// "dione_P_blks_accepted_container_size_sum" to track cumulative sum of all accepted blocks' sizes
-		// "dione_P_blks_accepted_container_size_sum / dione_P_blks_accepted_count" is the average block size
+		// "odyssey_P_blks_rejected_count" to count how many "Observe" gets called -- count all "Reject"
+		// "odyssey_P_blks_rejected_sum" to count how many ns have elapsed since its issuance on rejection
+		// "odyssey_P_blks_accepted_sum / odyssey_P_blks_accepted_count" is the average block acceptance latency in ns
+		// "odyssey_P_blks_accepted_container_size_sum" to track cumulative sum of all accepted blocks' sizes
+		// "odyssey_P_blks_accepted_container_size_sum / odyssey_P_blks_accepted_count" is the average block size
 		latRejected: metric.NewAveragerWithErrs(
 			namespace,
 			fmt.Sprintf("%s_rejected", metricName),

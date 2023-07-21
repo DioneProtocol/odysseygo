@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -10,18 +10,19 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestNewImportTx(t *testing.T) {
-	env := newEnvironment( /*postBanff*/ false)
+	env := newEnvironment(false /*=postBanff*/, false /*=postCortina*/)
 	defer func() {
 		require.NoError(t, shutdownEnvironment(env))
 	}()
@@ -32,8 +33,7 @@ func TestNewImportTx(t *testing.T) {
 		sharedMemory  atomic.SharedMemory
 		sourceKeys    []*secp256k1.PrivateKey
 		timestamp     time.Time
-		shouldErr     bool
-		shouldVerify  bool
+		expectedErr   error
 	}
 
 	factory := secp256k1.Factory{}
@@ -104,8 +104,8 @@ func TestNewImportTx(t *testing.T) {
 					env.ctx.DIONEAssetID: env.config.TxFee - 1,
 				},
 			),
-			sourceKeys: []*secp256k1.PrivateKey{sourceKey},
-			shouldErr:  true,
+			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
+			expectedErr: utxo.ErrInsufficientFunds,
 		},
 		{
 			description:   "can barely pay fee",
@@ -116,9 +116,8 @@ func TestNewImportTx(t *testing.T) {
 					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
 			),
-			sourceKeys:   []*secp256k1.PrivateKey{sourceKey},
-			shouldErr:    false,
-			shouldVerify: true,
+			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
+			expectedErr: nil,
 		},
 		{
 			description:   "attempting to import from C-chain",
@@ -129,10 +128,9 @@ func TestNewImportTx(t *testing.T) {
 					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
 			),
-			sourceKeys:   []*secp256k1.PrivateKey{sourceKey},
-			timestamp:    env.config.ApricotPhase5Time,
-			shouldErr:    false,
-			shouldVerify: true,
+			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
+			timestamp:   env.config.OdysseyPhase1Time,
+			expectedErr: nil,
 		},
 		{
 			description:   "attempting to import non-dione from X-chain",
@@ -144,10 +142,9 @@ func TestNewImportTx(t *testing.T) {
 					customAssetID:       1,
 				},
 			),
-			sourceKeys:   []*secp256k1.PrivateKey{sourceKey},
-			timestamp:    env.config.BanffTime,
-			shouldErr:    false,
-			shouldVerify: true,
+			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
+			timestamp:   env.config.BanffTime,
+			expectedErr: nil,
 		},
 	}
 
@@ -163,15 +160,16 @@ func TestNewImportTx(t *testing.T) {
 				tt.sourceKeys,
 				ids.ShortEmpty,
 			)
-			if tt.shouldErr {
-				require.Error(err)
+			require.ErrorIs(err, tt.expectedErr)
+			if tt.expectedErr != nil {
 				return
 			}
 			require.NoError(err)
 
 			unsignedTx := tx.Unsigned.(*txs.ImportTx)
 			require.NotEmpty(unsignedTx.ImportedInputs)
-			require.Equal(len(tx.Creds), len(unsignedTx.Ins)+len(unsignedTx.ImportedInputs), "should have the same number of credentials as inputs")
+			numInputs := len(unsignedTx.Ins) + len(unsignedTx.ImportedInputs)
+			require.Equal(len(tx.Creds), numInputs, "should have the same number of credentials as inputs")
 
 			totalIn := uint64(0)
 			for _, in := range unsignedTx.Ins {
@@ -202,11 +200,7 @@ func TestNewImportTx(t *testing.T) {
 				Tx:            tx,
 			}
 			err = tx.Unsigned.Visit(&verifier)
-			if tt.shouldVerify {
-				require.NoError(err)
-			} else {
-				require.Error(err)
-			}
+			require.NoError(err)
 		})
 	}
 }

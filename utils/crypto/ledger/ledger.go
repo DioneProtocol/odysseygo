@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package ledger
@@ -6,25 +6,30 @@ package ledger
 import (
 	"fmt"
 
-	ledger "github.com/dioneprotocol/ledger-avalanche/go"
+	ledger "github.com/DioneProtocol/ledger-odyssey/go"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/keychain"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
-const rootPath = "m/44'/9000'/0'"
+const (
+	rootPath          = "m/44'/9000'/0'"
+	ledgerBufferLimit = 8192
+	ledgerPathSize    = 9
+)
 
 var _ keychain.Ledger = (*Ledger)(nil)
 
 // Ledger is a wrapper around the low-level Ledger Device interface that
-// provides Dione-specific access.
+// provides Odyssey-specific access.
 type Ledger struct {
-	device *ledger.LedgerDione
+	device *ledger.LedgerOdyssey
 }
 
 func New() (keychain.Ledger, error) {
-	device, err := ledger.FindLedgerDioneApp()
+	device, err := ledger.FindLedgerOdysseyApp()
 	return &Ledger{
 		device: device,
 	}, err
@@ -69,6 +74,35 @@ func (l *Ledger) SignHash(hash []byte, addressIndices []uint32) ([][]byte, error
 		return nil, fmt.Errorf("%w: unable to sign hash", err)
 	}
 	responses := make([][]byte, len(addressIndices))
+	for i, index := range strIndices {
+		sig, ok := response.Signature[index]
+		if !ok {
+			return nil, fmt.Errorf("missing signature %s", index)
+		}
+		responses[i] = sig
+	}
+	return responses, nil
+}
+
+func (l *Ledger) Sign(txBytes []byte, addressIndices []uint32) ([][]byte, error) {
+	// will pass to the ledger addressIndices both as signing paths and change paths
+	numSigningPaths := len(addressIndices)
+	numChangePaths := len(addressIndices)
+	if len(txBytes)+(numSigningPaths+numChangePaths)*ledgerPathSize > ledgerBufferLimit {
+		// There is a limit on the tx length that can be parsed by the ledger
+		// app. When the tx that is being signed is too large, we sign with hash
+		// instead.
+		//
+		// Ref: https://github.com/DioneProtocol/odyssey-wallet-sdk/blob/9a71f05e424e06b94eaccf21fd32d7983ed1b040/src/Wallet/Ledger/provider/ZondaxProvider.ts#L68
+		unsignedHash := hashing.ComputeHash256(txBytes)
+		return l.SignHash(unsignedHash, addressIndices)
+	}
+	strIndices := convertToSigningPaths(addressIndices)
+	response, err := l.device.Sign(rootPath, strIndices, txBytes, strIndices)
+	if err != nil {
+		return nil, fmt.Errorf("%w: unable to sign transaction", err)
+	}
+	responses := make([][]byte, len(strIndices))
 	for i, index := range strIndices {
 		sig, ok := response.Signature[index]
 		if !ok {

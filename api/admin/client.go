@@ -1,21 +1,20 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package admin
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/dioneprotocol/dionego/api"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for the Dione Platform Info API Endpoint
+// Client interface for the Odyssey Platform Info API Endpoint
 type Client interface {
 	StartCPUProfiler(context.Context, ...rpc.Option) error
 	StopCPUProfiler(context.Context, ...rpc.Option) error
@@ -31,7 +30,7 @@ type Client interface {
 	GetConfig(ctx context.Context, options ...rpc.Option) (interface{}, error)
 }
 
-// Client implementation for the Dione Platform Info API Endpoint
+// Client implementation for the Odyssey Platform Info API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }
@@ -106,13 +105,13 @@ func (c *client) SetLoggerLevel(
 	if len(logLevel) > 0 {
 		logLevelArg, err = logging.ToLevel(logLevel)
 		if err != nil {
-			return fmt.Errorf("couldn't parse %q to log level", logLevel)
+			return err
 		}
 	}
 	if len(displayLevel) > 0 {
 		displayLevelArg, err = logging.ToLevel(displayLevel)
 		if err != nil {
-			return fmt.Errorf("couldn't parse %q to log level", displayLevel)
+			return err
 		}
 	}
 	return c.requester.SendRequest(ctx, "admin.setLoggerLevel", &SetLoggerLevelArgs{

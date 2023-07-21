@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -18,14 +18,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block/mocks"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime/subprocess"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime/subprocess"
 
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
 )
 
 const (

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package e2e_test
@@ -11,15 +11,14 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/dioneprotocol/dionego/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
 
 	// ensure test packages are scanned by ginkgo
-	_ "github.com/dioneprotocol/dionego/tests/e2e/banff"
-	_ "github.com/dioneprotocol/dionego/tests/e2e/p"
-	_ "github.com/dioneprotocol/dionego/tests/e2e/ping"
-	_ "github.com/dioneprotocol/dionego/tests/e2e/static-handlers"
-	_ "github.com/dioneprotocol/dionego/tests/e2e/x/transfer"
-	_ "github.com/dioneprotocol/dionego/tests/e2e/x/whitelist-vtx"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/banff"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/p"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/ping"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/static-handlers"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x/transfer"
 )
 
 func TestE2E(t *testing.T) {
@@ -32,8 +31,8 @@ var (
 	logLevel string
 
 	networkRunnerGRPCEp              string
-	networkRunnerDioneGoExecPath string
-	networkRunnerDioneGoLogLevel string
+	networkRunnerOdysseyGoExecPath string
+	networkRunnerOdysseyGoLogLevel string
 
 	uris string
 
@@ -55,16 +54,16 @@ func init() {
 		"[optional] gRPC server endpoint for network-runner (only required for local network-runner tests)",
 	)
 	flag.StringVar(
-		&networkRunnerDioneGoExecPath,
-		"network-runner-dionego-path",
+		&networkRunnerOdysseyGoExecPath,
+		"network-runner-odysseygo-path",
 		"",
-		"[optional] dionego executable path (only required for local network-runner tests)",
+		"[optional] odysseygo executable path (only required for local network-runner tests)",
 	)
 	flag.StringVar(
-		&networkRunnerDioneGoLogLevel,
-		"network-runner-dionego-log-level",
+		&networkRunnerOdysseyGoLogLevel,
+		"network-runner-odysseygo-log-level",
 		"INFO",
-		"[optional] dionego log-level (only required for local network-runner tests)",
+		"[optional] odysseygo log-level (only required for local network-runner tests)",
 	)
 
 	// e.g., custom network HTTP RPC endpoints
@@ -72,7 +71,7 @@ func init() {
 		&uris,
 		"uris",
 		"",
-		"HTTP RPC endpoint URIs for dione node (comma-separated, required to run against existing cluster)",
+		"HTTP RPC endpoint URIs for odyssey node (comma-separated, required to run against existing cluster)",
 	)
 
 	// file that contains a list of new-line separated secp256k1 private keys
@@ -88,8 +87,8 @@ var _ = ginkgo.BeforeSuite(func() {
 	err := e2e.Env.ConfigCluster(
 		logLevel,
 		networkRunnerGRPCEp,
-		networkRunnerDioneGoExecPath,
-		networkRunnerDioneGoLogLevel,
+		networkRunnerOdysseyGoExecPath,
+		networkRunnerOdysseyGoLogLevel,
 		uris,
 		testKeysFile,
 	)

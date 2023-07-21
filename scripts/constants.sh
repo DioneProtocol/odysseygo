@@ -3,28 +3,28 @@
 # Use lower_case variables in the scripts and UPPER_CASE variables for override
 # Use the constants.sh for env overrides
 
-DIONE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
 
-# Where DioneGo binary goes
-dionego_path="$DIONE_PATH/build/dionego"
-plugin_dir=${PLUGIN_DIR:-$HOME/.dionego/plugins}
+# Where OdysseyGo binary goes
+odysseygo_path="$ODYSSEY_PATH/build/odysseygo"
+plugin_dir=${PLUGIN_DIR:-$HOME/.odysseygo/plugins}
 evm_path=${EVM_PATH:-$plugin_dir/evm}
-coreth_version=${CORETH_VERSION:-'v0.11.7-rc.3'}
+coreth_version=${CORETH_VERSION:-'v0.12.2-rc.0'}
 
 # Set the PATHS
 GOPATH="$(go env GOPATH)"
-coreth_path=${CORETH_PATH:-"$GOPATH/pkg/mod/github.com/dioneprotocol/coreth@$coreth_version"}
+coreth_path=${CORETH_PATH:-"$GOPATH/pkg/mod/github.com/DioneProtocol/coreth@$coreth_version"}
 
-# Avalabs docker hub
-# dioneprotocol/dionego - defaults to local as to avoid unintentional pushes
-# You should probably set it - export DOCKER_REPO='dioneprotocol/dionego'
-dionego_dockerhub_repo=${DOCKER_REPO:-"dionego"}
+# DioneProtocol docker hub
+# DioneProtocol/odysseygo - defaults to local as to avoid unintentional pushes
+# You should probably set it - export DOCKER_REPO='dioneprotocol/odysseygo'
+odysseygo_dockerhub_repo=${DOCKER_REPO:-"odysseygo"}
 
 # Current branch
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI
 current_branch=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match || true)
 
-git_commit=${DIONEGO_COMMIT:-$( git rev-list -1 HEAD )}
+git_commit=${ODYSSEYGO_COMMIT:-$( git rev-list -1 HEAD )}
 
 # Static compilation
 static_ld_flags=''
@@ -40,3 +40,6 @@ fi
 # We use "export" here instead of just setting a bash variable because we need
 # to pass this flag to all child processes spawned by the shell.
 export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+# While CGO_ENABLED doesn't need to be explicitly set, it produces a much more
+# clear error due to the default value change in go1.20.
+export CGO_ENABLED=1

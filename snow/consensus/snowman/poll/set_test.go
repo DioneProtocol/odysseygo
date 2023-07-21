@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package poll
@@ -10,10 +10,10 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/bag"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/bag"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 func TestNewSetErrorOnMetrics(t *testing.T) {
@@ -76,17 +76,17 @@ func TestCreateAndFinishPollOutOfOrder_NewerFinishesFirst(t *testing.T) {
 
 	// vote out of order
 	results = s.Vote(1, vdr1, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr2, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr3, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	results = s.Vote(2, vdr1, vtx2) // poll 2 finished
-	require.Len(t, results, 0)      // expect 2 to not have finished because 1 is still pending
+	require.Empty(t, results)       // expect 2 to not have finished because 1 is still pending
 
 	results = s.Vote(1, vdr2, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	results = s.Vote(1, vdr3, vtx1) // poll 1 finished, poll 2 should be finished as well
 	require.Len(t, results, 2)
@@ -129,14 +129,14 @@ func TestCreateAndFinishPollOutOfOrder_OlderFinishesFirst(t *testing.T) {
 
 	// vote out of order
 	results = s.Vote(1, vdr1, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr2, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr3, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	results = s.Vote(1, vdr2, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	results = s.Vote(1, vdr3, vtx1) // poll 1 finished, poll 2 still remaining
 	require.Len(t, results, 1)      // because 1 is the oldest
@@ -190,25 +190,25 @@ func TestCreateAndFinishPollOutOfOrder_UnfinishedPollsGaps(t *testing.T) {
 	// vote out of order
 	// 2 finishes first to create a gap of finished poll between two unfinished polls 1 and 3
 	results = s.Vote(2, vdr3, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr2, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(2, vdr1, vtx2)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	// 3 finishes now, 2 has already finished but 1 is not finished so we expect to receive no results still
 	results = s.Vote(3, vdr2, vtx3)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(3, vdr3, vtx3)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(3, vdr1, vtx3)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 
 	// 1 finishes now, 2 and 3 have already finished so we expect 3 items in results
 	results = s.Vote(1, vdr1, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(1, vdr2, vtx1)
-	require.Len(t, results, 0)
+	require.Empty(t, results)
 	results = s.Vote(1, vdr3, vtx1)
 	require.Len(t, results, 3)
 	require.Equal(t, vtx1, results[0].List()[0])
@@ -316,9 +316,9 @@ func TestSetString(t *testing.T) {
 
 	expected := `current polls: (Size = 1)
     RequestID 0:
-        waiting on Bag: (Size = 1)
+        waiting on Bag[ids.NodeID]: (Size = 1)
             NodeID-6HgC8KRBEhXYbF4riJyJFLSHt37UNuRt: 1
-        received Bag: (Size = 0)`
+        received Bag[ids.ID]: (Size = 0)`
 	if !s.Add(0, vdrs) {
 		t.Fatalf("Should have been able to add a new poll")
 	} else if str := s.String(); expected != str {

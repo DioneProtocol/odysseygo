@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package states
@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/avm/blocks"
-	"github.com/dioneprotocol/dionego/vms/avm/txs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/avm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var (
@@ -74,6 +74,10 @@ func (d *diff) GetUTXO(utxoID ids.ID) (*dione.UTXO, error) {
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
 	}
 	return parentState.GetUTXO(utxoID)
+}
+
+func (d *diff) GetUTXOFromID(utxoID *dione.UTXOID) (*dione.UTXO, error) {
+	return d.GetUTXO(utxoID.InputID())
 }
 
 func (d *diff) AddUTXO(utxo *dione.UTXO) {

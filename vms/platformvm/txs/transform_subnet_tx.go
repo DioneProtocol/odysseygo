@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
 )
 
 var (
@@ -30,8 +30,6 @@ var (
 	errMaxValidatorStakeTooLarge         = errors.New("max validator stake must be less than or equal to max supply")
 	errMinStakeDurationZero              = errors.New("min stake duration must be non-0")
 	errMinStakeDurationTooLarge          = errors.New("min stake duration must be less than or equal to max stake duration")
-	errMinDelegationFeeTooLarge          = fmt.Errorf("min delegation fee must be less than or equal to %d", reward.PercentDenominator)
-	errMinDelegatorStakeZero             = errors.New("min delegator stake must be non-0")
 	errMaxValidatorWeightFactorZero      = errors.New("max validator weight factor must be non-0")
 	errUptimeRequirementTooLarge         = fmt.Errorf("uptime requirement must be less than or equal to %d", reward.PercentDenominator)
 )
@@ -73,7 +71,7 @@ type TransformSubnetTx struct {
 	// - Must be <= [InitialSupply]
 	MinValidatorStake uint64 `serialize:"true" json:"minValidatorStake"`
 	// MaxValidatorStake is the maximum amount of funds a single validator can
-	// be allocated, including delegated funds.
+	// be allocated.
 	// Restrictions:
 	// - Must be >= [MinValidatorStake]
 	// - Must be <= [MaximumSupply]
@@ -87,19 +85,8 @@ type TransformSubnetTx struct {
 	// - Must be >= [MinStakeDuration]
 	// - Must be <= [GlobalMaxStakeDuration]
 	MaxStakeDuration uint32 `serialize:"true" json:"maxStakeDuration"`
-	// MinDelegationFee is the minimum percentage a validator must charge a
-	// delegator for delegating.
-	// Restrictions:
-	// - Must be <= [reward.PercentDenominator]
-	MinDelegationFee uint32 `serialize:"true" json:"minDelegationFee"`
-	// MinDelegatorStake is the minimum amount of funds required to become a
-	// delegator.
-	// Restrictions:
-	// - Must be > 0
-	MinDelegatorStake uint64 `serialize:"true" json:"minDelegatorStake"`
 	// MaxValidatorWeightFactor is the factor which calculates the maximum
-	// amount of delegation a validator can receive.
-	// Note: a value of 1 effectively disables delegation.
+	// amount a validator can receive.
 	// Restrictions:
 	// - Must be > 0
 	MaxValidatorWeightFactor byte `serialize:"true" json:"maxValidatorWeightFactor"`
@@ -144,10 +131,6 @@ func (tx *TransformSubnetTx) SyntacticVerify(ctx *snow.Context) error {
 		return errMinStakeDurationZero
 	case tx.MinStakeDuration > tx.MaxStakeDuration:
 		return errMinStakeDurationTooLarge
-	case tx.MinDelegationFee > reward.PercentDenominator:
-		return errMinDelegationFeeTooLarge
-	case tx.MinDelegatorStake == 0:
-		return errMinDelegatorStakeZero
 	case tx.MaxValidatorWeightFactor == 0:
 		return errMaxValidatorWeightFactorZero
 	case tx.UptimeRequirement > reward.PercentDenominator:

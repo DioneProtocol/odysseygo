@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package bls
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/utils"
+	"github.com/DioneProtocol/odysseygo/utils"
 )
 
 func TestPublicKeyFromBytesWrongSize(t *testing.T) {
@@ -16,7 +16,7 @@ func TestPublicKeyFromBytesWrongSize(t *testing.T) {
 
 	pkBytes := utils.RandomBytes(PublicKeyLen + 1)
 	_, err := PublicKeyFromBytes(pkBytes)
-	require.ErrorIs(err, errFailedPublicKeyDecompress)
+	require.ErrorIs(err, ErrFailedPublicKeyDecompress)
 }
 
 func TestPublicKeyBytes(t *testing.T) {

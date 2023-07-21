@@ -1,15 +1,15 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
 
 import (
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 )
 
 // Validator is a struct that contains the base values representing a validator
-// of the Dione Network.
+// of the Odyssey Network.
 type Validator struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey
@@ -23,7 +23,7 @@ type Validator struct {
 }
 
 // GetValidatorOutput is a struct that contains the publicly relevant values of
-// a validator of the Dione Network for the output of GetValidator.
+// a validator of the Odyssey Network for the output of GetValidator.
 type GetValidatorOutput struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey

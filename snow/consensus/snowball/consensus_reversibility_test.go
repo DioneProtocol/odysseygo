@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snowball
@@ -6,7 +6,7 @@ package snowball
 import (
 	"testing"
 
-	"github.com/dioneprotocol/dionego/utils/sampler"
+	"github.com/DioneProtocol/odysseygo/utils/sampler"
 )
 
 func TestSnowballGovernance(t *testing.T) {

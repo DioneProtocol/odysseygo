@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package metrics
@@ -8,8 +8,8 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
 )
 
 var _ blocks.Visitor = (*blockMetrics)(nil)
@@ -86,22 +86,22 @@ func (m *blockMetrics) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	return nil
 }
 
-func (m *blockMetrics) ApricotAbortBlock(*blocks.ApricotAbortBlock) error {
+func (m *blockMetrics) OdysseyAbortBlock(*blocks.OdysseyAbortBlock) error {
 	m.numAbortBlocks.Inc()
 	return nil
 }
 
-func (m *blockMetrics) ApricotCommitBlock(*blocks.ApricotCommitBlock) error {
+func (m *blockMetrics) OdysseyCommitBlock(*blocks.OdysseyCommitBlock) error {
 	m.numCommitBlocks.Inc()
 	return nil
 }
 
-func (m *blockMetrics) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
+func (m *blockMetrics) OdysseyProposalBlock(b *blocks.OdysseyProposalBlock) error {
 	m.numProposalBlocks.Inc()
 	return b.Tx.Unsigned.Visit(m.txMetrics)
 }
 
-func (m *blockMetrics) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
+func (m *blockMetrics) OdysseyStandardBlock(b *blocks.OdysseyStandardBlock) error {
 	m.numStandardBlocks.Inc()
 	for _, tx := range b.Transactions {
 		if err := tx.Unsigned.Visit(m.txMetrics); err != nil {
@@ -111,7 +111,7 @@ func (m *blockMetrics) ApricotStandardBlock(b *blocks.ApricotStandardBlock) erro
 	return nil
 }
 
-func (m *blockMetrics) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
+func (m *blockMetrics) OdysseyAtomicBlock(b *blocks.OdysseyAtomicBlock) error {
 	m.numAtomicBlocks.Inc()
 	return b.Tx.Unsigned.Visit(m.txMetrics)
 }

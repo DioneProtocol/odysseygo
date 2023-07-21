@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sync
@@ -7,7 +7,7 @@ package sync
 // Look into making a struct to handle requests/responses that uses a sync pool
 // to avoid allocations.
 
-var _ ResponseHandler = &responseHandler{}
+var _ ResponseHandler = (*responseHandler)(nil)
 
 // Handles responses/failure notifications for a sent request.
 // Exactly one of OnResponse or OnFailure is eventually called.

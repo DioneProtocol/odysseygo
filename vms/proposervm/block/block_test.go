@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/units"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/units"
 )
 
 func equal(require *require.Assertions, chainID ids.ID, want, have SignedBlock) {
@@ -41,10 +41,10 @@ func TestVerifyNoCertWithSignature(t *testing.T) {
 	builtBlock.Signature = []byte{0}
 
 	err = builtBlock.Verify(false, ids.Empty)
-	require.Error(err)
+	require.ErrorIs(err, errUnexpectedProposer)
 
 	err = builtBlock.Verify(true, ids.Empty)
-	require.Error(err)
+	require.ErrorIs(err, errMissingProposer)
 }
 
 func TestBlockSizeLimit(t *testing.T) {

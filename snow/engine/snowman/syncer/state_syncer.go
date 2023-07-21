@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package syncer
@@ -11,16 +11,17 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 var _ common.StateSyncer = (*stateSyncer)(nil)
@@ -142,13 +143,16 @@ func (ss *stateSyncer) StateSummaryFrontier(ctx context.Context, nodeID ids.Node
 			ss.uniqueSummariesHeights = append(ss.uniqueSummariesHeights, height)
 		}
 	} else {
-		ss.Ctx.Log.Debug("failed to parse summary",
-			zap.Error(err),
-		)
-		ss.Ctx.Log.Verbo("failed to parse summary",
-			zap.Binary("summary", summaryBytes),
-			zap.Error(err),
-		)
+		if ss.Ctx.Log.Enabled(logging.Verbo) {
+			ss.Ctx.Log.Verbo("failed to parse summary",
+				zap.Binary("summary", summaryBytes),
+				zap.Error(err),
+			)
+		} else {
+			ss.Ctx.Log.Debug("failed to parse summary",
+				zap.Error(err),
+			)
+		}
 	}
 
 	return ss.receivedStateSummaryFrontier(ctx)

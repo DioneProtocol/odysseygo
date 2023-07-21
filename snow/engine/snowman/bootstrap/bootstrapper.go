@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package bootstrap
@@ -13,16 +13,16 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/timer"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 // Parameters for delaying bootstrapping to avoid potential CPU burns
@@ -34,6 +34,8 @@ var (
 	errUnexpectedTimeout = errors.New("unexpected timeout fired")
 )
 
+// Invariant: The VM is not guaranteed to be initialized until Start has been
+// called, so it must be guaranteed the VM is not used until after Start.
 type bootstrapper struct {
 	Config
 
@@ -81,7 +83,7 @@ type bootstrapper struct {
 	bootstrappedOnce sync.Once
 }
 
-func New(ctx context.Context, config Config, onFinished func(ctx context.Context, lastReqID uint32) error) (common.BootstrapableEngine, error) {
+func New(config Config, onFinished func(ctx context.Context, lastReqID uint32) error) (common.BootstrapableEngine, error) {
 	metrics, err := newMetrics("bs", config.Ctx.Registerer)
 	if err != nil {
 		return nil, err
@@ -103,16 +105,6 @@ func New(ctx context.Context, config Config, onFinished func(ctx context.Context
 		executedStateTransitions: math.MaxInt32,
 	}
 
-	b.parser = &parser{
-		log:         config.Ctx.Log,
-		numAccepted: b.numAccepted,
-		numDropped:  b.numDropped,
-		vm:          b.VM,
-	}
-	if err := b.Blocked.SetParser(ctx, b.parser); err != nil {
-		return nil, err
-	}
-
 	config.Bootstrapable = b
 	b.Bootstrapper = common.NewCommonBootstrapper(config.Config)
 
@@ -129,6 +121,16 @@ func (b *bootstrapper) Start(ctx context.Context, startReqID uint32) error {
 	if err := b.VM.SetState(ctx, snow.Bootstrapping); err != nil {
 		return fmt.Errorf("failed to notify VM that bootstrapping has started: %w",
 			err)
+	}
+
+	b.parser = &parser{
+		log:         b.Ctx.Log,
+		numAccepted: b.numAccepted,
+		numDropped:  b.numDropped,
+		vm:          b.VM,
+	}
+	if err := b.Blocked.SetParser(ctx, b.parser); err != nil {
+		return err
 	}
 
 	// Set the starting height
@@ -456,7 +458,6 @@ func (b *bootstrapper) process(ctx context.Context, blk snowman.Block, processin
 		}
 
 		pushed, err := b.Blocked.Push(ctx, &blockJob{
-			parser:      b.parser,
 			log:         b.Ctx.Log,
 			numAccepted: b.numAccepted,
 			numDropped:  b.numDropped,
@@ -564,8 +565,7 @@ func (b *bootstrapper) checkFinish(ctx context.Context) error {
 		b.Config.Ctx,
 		b,
 		b.Config.SharedCfg.Restarted,
-		b.Ctx.ConsensusAcceptor,
-		b.Ctx.DecisionAcceptor,
+		b.Ctx.BlockAcceptor,
 	)
 	if err != nil || b.Halted() {
 		return err

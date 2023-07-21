@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snowstorm
@@ -6,27 +6,13 @@ package snowstorm
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
 )
-
-// Whitelister defines the interface for specifying whitelisted operations.
-type Whitelister interface {
-	// Returns [true] if the underlying instance does implement whitelisted
-	// conflicts.
-	HasWhitelist() bool
-
-	// Whitelist returns the set of transaction IDs that are explicitly
-	// whitelisted. Transactions that are not explicitly whitelisted are
-	// considered conflicting.
-	Whitelist(context.Context) (set.Set[ids.ID], error)
-}
 
 // Tx consumes state.
 type Tx interface {
 	choices.Decidable
-	Whitelister
 
 	// Dependencies is a list of transactions upon which this transaction
 	// depends. Each element of Dependencies must be verified before Verify is

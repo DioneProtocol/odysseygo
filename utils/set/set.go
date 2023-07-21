@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package set
@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 // The minimum capacity of a set
@@ -134,15 +134,7 @@ func (s Set[T]) CappedList(size int) []T {
 
 // Equals returns true if the sets contain the same elements
 func (s Set[T]) Equals(other Set[T]) bool {
-	if s.Len() != other.Len() {
-		return false
-	}
-	for elt := range other {
-		if _, contains := s[elt]; !contains {
-			return false
-		}
-	}
-	return true
+	return maps.Equal(s, other)
 }
 
 // Removes and returns an element.

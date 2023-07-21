@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package primary
@@ -8,16 +8,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func ExampleWallet() {
@@ -133,8 +133,8 @@ func ExampleWallet() {
 	addPermissionlessValidatorStartTime := time.Now()
 	startTime := time.Now().Add(time.Minute)
 	addSubnetValidatorTxID, err := pWallet.IssueAddPermissionlessValidatorTx(
-		&validator.SubnetValidator{
-			Validator: validator.Validator{
+		&txs.SubnetValidator{
+			Validator: txs.Validator{
 				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
 				Start:  uint64(startTime.Unix()),
 				End:    uint64(startTime.Add(5 * time.Second).Unix()),
@@ -153,24 +153,4 @@ func ExampleWallet() {
 		return
 	}
 	log.Printf("issued add subnet validator transaction %s in %s\n", addSubnetValidatorTxID, time.Since(addPermissionlessValidatorStartTime))
-
-	addPermissionlessDelegatorStartTime := time.Now()
-	addSubnetDelegatorTxID, err := pWallet.IssueAddPermissionlessDelegatorTx(
-		&validator.SubnetValidator{
-			Validator: validator.Validator{
-				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
-				Start:  uint64(startTime.Unix()),
-				End:    uint64(startTime.Add(5 * time.Second).Unix()),
-				Wght:   25 * units.MegaDione,
-			},
-			Subnet: createSubnetTxID,
-		},
-		createAssetTxID,
-		&secp256k1fx.OutputOwners{},
-	)
-	if err != nil {
-		log.Fatalf("failed to issue add subnet delegator with: %s\n", err)
-		return
-	}
-	log.Printf("issued add subnet validator delegator %s in %s\n", addSubnetDelegatorTxID, time.Since(addPermissionlessDelegatorStartTime))
 }

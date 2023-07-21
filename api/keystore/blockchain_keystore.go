@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package keystore
@@ -6,10 +6,10 @@ package keystore
 import (
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/encdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/logging"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/encdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
 )
 
 var _ BlockchainKeystore = (*blockchainKeystore)(nil)
@@ -31,7 +31,8 @@ type blockchainKeystore struct {
 }
 
 func (bks *blockchainKeystore) GetDatabase(username, password string) (*encdb.Database, error) {
-	bks.ks.log.Debug("Keystore: GetDatabase called",
+	bks.ks.log.Warn("deprecated keystore called",
+		zap.String("method", "getDatabase"),
 		logging.UserString("username", username),
 		zap.Stringer("blockchainID", bks.blockchainID),
 	)
@@ -40,7 +41,8 @@ func (bks *blockchainKeystore) GetDatabase(username, password string) (*encdb.Da
 }
 
 func (bks *blockchainKeystore) GetRawDatabase(username, password string) (database.Database, error) {
-	bks.ks.log.Debug("Keystore: GetRawDatabase called",
+	bks.ks.log.Warn("deprecated keystore called",
+		zap.String("method", "getRawDatabase"),
 		logging.UserString("username", username),
 		zap.Stringer("blockchainID", bks.blockchainID),
 	)

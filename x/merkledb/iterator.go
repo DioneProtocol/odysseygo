@@ -1,14 +1,14 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package merkledb
 
-import "github.com/dioneprotocol/dionego/database"
+import "github.com/DioneProtocol/odysseygo/database"
 
-var _ database.Iterator = &iterator{}
+var _ database.Iterator = (*iterator)(nil)
 
 type iterator struct {
-	db       *Database
+	db       *merkleDB
 	nodeIter database.Iterator
 	current  *node
 	err      error

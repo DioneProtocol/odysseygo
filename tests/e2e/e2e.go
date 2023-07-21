@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // e2e implements the e2e tests.
@@ -17,10 +17,10 @@ import (
 
 	runner_sdk "github.com/ava-labs/avalanche-network-runner-sdk"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/tests"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 type ClusterType byte
@@ -58,8 +58,8 @@ type testEnvironmentConfig struct {
 	clusterType               ClusterType
 	logLevel                  string
 	networkRunnerGRPCEndpoint string
-	dioneGoExecPath       string
-	dioneGoLogLevel       string
+	odysseyGoExecPath       string
+	odysseyGoLogLevel       string
 	testKeysFile              string
 
 	// we snapshot initial state, right after starting cluster
@@ -90,14 +90,14 @@ type TestEnvironment struct {
 func (te *TestEnvironment) ConfigCluster(
 	logLevel string,
 	networkRunnerGRPCEp string,
-	dioneGoExecPath string,
-	dioneGoLogLevel string,
+	odysseyGoExecPath string,
+	odysseyGoLogLevel string,
 	uris string,
 	testKeysFile string,
 ) error {
-	if dioneGoExecPath != "" {
-		if _, err := os.Stat(dioneGoExecPath); err != nil {
-			return fmt.Errorf("could not find dionego binary: %w", err)
+	if odysseyGoExecPath != "" {
+		if _, err := os.Stat(odysseyGoExecPath); err != nil {
+			return fmt.Errorf("could not find odysseygo binary: %w", err)
 		}
 	}
 
@@ -108,8 +108,8 @@ func (te *TestEnvironment) ConfigCluster(
 		te.clusterType = StandAlone
 		te.logLevel = logLevel
 		te.networkRunnerGRPCEndpoint = networkRunnerGRPCEp
-		te.dioneGoExecPath = dioneGoExecPath
-		te.dioneGoLogLevel = dioneGoLogLevel
+		te.odysseyGoExecPath = odysseyGoExecPath
+		te.odysseyGoLogLevel = odysseyGoLogLevel
 
 		err := te.setRunnerClient(te.logLevel, te.networkRunnerGRPCEndpoint)
 		if err != nil {
@@ -155,11 +155,11 @@ func (te *TestEnvironment) LoadKeys() error {
 func (te *TestEnvironment) StartCluster() error {
 	switch te.clusterType {
 	case StandAlone:
-		tests.Outf("{{magenta}}starting network-runner with %q{{/}}\n", te.dioneGoExecPath)
+		tests.Outf("{{magenta}}starting network-runner with %q{{/}}\n", te.odysseyGoExecPath)
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-		resp, err := te.GetRunnerClient().Start(ctx, te.dioneGoExecPath,
+		resp, err := te.GetRunnerClient().Start(ctx, te.odysseyGoExecPath,
 			runner_sdk.WithNumNodes(5),
-			runner_sdk.WithGlobalNodeConfig(fmt.Sprintf(`{"log-level":"%s"}`, te.dioneGoLogLevel)),
+			runner_sdk.WithGlobalNodeConfig(fmt.Sprintf(`{"log-level":"%s"}`, te.odysseyGoLogLevel)),
 		)
 		cancel()
 		if err != nil {

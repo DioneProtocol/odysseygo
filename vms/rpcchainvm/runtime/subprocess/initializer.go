@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subprocess
@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 )
 
 var _ runtime.Initializer = (*initializer)(nil)
@@ -35,7 +35,7 @@ func (i *initializer) Initialize(_ context.Context, protocolVersion uint, vmAddr
 	i.once.Do(func() {
 		if version.RPCChainVMProtocol != protocolVersion {
 			i.err = fmt.Errorf(
-				"%w dionego: %d, vm: %d",
+				"%w odysseygo: %d, vm: %d",
 				runtime.ErrProtocolVersionMismatch,
 				version.RPCChainVMProtocol,
 				protocolVersion,

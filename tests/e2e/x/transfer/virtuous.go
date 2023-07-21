@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements X-chain transfer tests.
@@ -10,28 +10,28 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/tests"
-	"github.com/dioneprotocol/dionego/tests/e2e"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/avm"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary/common"
+	"github.com/onsi/gomega"
 
 	ginkgo "github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
+
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 const (
-	metricVtxProcessing = "dione_X_vtx_processing"
-	metricVtxAccepted   = "dione_X_vtx_accepted_count"
-	metricVtxRejected   = "dione_X_vtx_rejected_count"
-)
+	totalRounds = 50
 
-const totalRounds = 50
+	metricBlksProcessing = "odyssey_X_blks_processing"
+	metricBlksAccepted   = "odyssey_X_blks_accepted_count"
+)
 
 var _ = e2e.DescribeXChain("[Virtuous Transfer Tx DIONE]", func() {
 	ginkgo.It("can issue a virtuous transfer tx for DIONE asset",
@@ -47,9 +47,8 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx DIONE]", func() {
 			gomega.Expect(rpcEps).ShouldNot(gomega.BeEmpty())
 
 			allMetrics := []string{
-				metricVtxProcessing,
-				metricVtxAccepted,
-				metricVtxRejected,
+				metricBlksProcessing,
+				metricBlksAccepted,
 			}
 
 			runFunc := func(round int) {
@@ -101,9 +100,9 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx DIONE]", func() {
 					gomega.Expect(err).Should(gomega.BeNil())
 					tests.Outf("{{green}}metrics at %q:{{/}} %v\n", ep, mm)
 
-					if mm[metricVtxProcessing] > 0 {
-						tests.Outf("{{red}}{{bold}}%q already has processing vtx!!!{{/}}\n", u)
-						ginkgo.Skip("the cluster has already ongoing vtx txs thus skipping to prevent conflicts...")
+					if mm[metricBlksProcessing] > 0 {
+						tests.Outf("{{red}}{{bold}}%q already has processing block!!!{{/}}\n", u)
+						ginkgo.Skip("the cluster has already ongoing blocks thus skipping to prevent conflicts...")
 					}
 
 					metricsBeforeTx[u] = mm
@@ -254,14 +253,12 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 
 					prev := metricsBeforeTx[u]
 
-					// +0 since X-chain tx must have been processed and accepted by now
-					gomega.Expect(mm[metricVtxProcessing]).Should(gomega.Equal(prev[metricVtxProcessing]))
+					// +0 since X-chain tx must have been processed and accepted
+					// by now
+					gomega.Expect(mm[metricBlksProcessing]).Should(gomega.Equal(prev[metricBlksProcessing]))
 
 					// +1 since X-chain tx must have been accepted by now
-					gomega.Expect(mm[metricVtxAccepted]).Should(gomega.Equal(prev[metricVtxAccepted] + 1))
-
-					// +0 since virtuous X-chain tx must not be rejected
-					gomega.Expect(mm[metricVtxRejected]).Should(gomega.Equal(prev[metricVtxRejected]))
+					gomega.Expect(mm[metricBlksAccepted]).Should(gomega.Equal(prev[metricBlksAccepted] + 1))
 
 					metricsBeforeTx[u] = mm
 				}

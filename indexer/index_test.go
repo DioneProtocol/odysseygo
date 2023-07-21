@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -8,16 +8,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/codec/linearcodec"
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/database/versiondb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 )
 
 func TestIndex(t *testing.T) {
@@ -49,8 +49,8 @@ func TestIndex(t *testing.T) {
 
 		lastAcceptedIndex, ok := idx.lastAcceptedIndex()
 		require.True(ok)
-		require.EqualValues(i, lastAcceptedIndex)
-		require.EqualValues(i+1, idx.nextAcceptedIndex)
+		require.Equal(i, lastAcceptedIndex)
+		require.Equal(i+1, idx.nextAcceptedIndex)
 
 		gotContainer, err := idx.GetContainerByID(containerID)
 		require.NoError(err)
@@ -58,7 +58,7 @@ func TestIndex(t *testing.T) {
 
 		gotIndex, err := idx.GetIndex(containerID)
 		require.NoError(err)
-		require.EqualValues(i, gotIndex)
+		require.Equal(i, gotIndex)
 
 		gotContainer, err = idx.GetContainerByIndex(i)
 		require.NoError(err)
@@ -104,7 +104,7 @@ func TestIndex(t *testing.T) {
 	for _, container := range containersList {
 		require.False(sawContainers.Contains(container.ID)) // Should only see this container once
 		require.Contains(containers, container.ID)
-		require.EqualValues(containers[container.ID], container.Bytes)
+		require.Equal(containers[container.ID], container.Bytes)
 		// Timestamps should be non-decreasing
 		require.True(container.Timestamp >= lastTimestamp)
 		lastTimestamp = container.Timestamp
@@ -132,7 +132,7 @@ func TestIndexGetContainerByRangeMaxPageSize(t *testing.T) {
 
 	// Page size too large
 	_, err = idx.GetContainerRange(0, MaxFetchedByRange+1)
-	require.Error(err)
+	require.ErrorIs(err, errNumToFetchInvalid)
 
 	// Make sure data is right
 	containers, err := idx.GetContainerRange(0, MaxFetchedByRange)
@@ -150,8 +150,8 @@ func TestIndexGetContainerByRangeMaxPageSize(t *testing.T) {
 	containers, err = idx.GetContainerRange(MaxFetchedByRange-1, MaxFetchedByRange)
 	require.NoError(err)
 	require.Len(containers, 2)
-	require.EqualValues(containers[1], containers2[MaxFetchedByRange-1])
-	require.EqualValues(containers[0], containers2[MaxFetchedByRange-2])
+	require.Equal(containers[1], containers2[MaxFetchedByRange-1])
+	require.Equal(containers[0], containers2[MaxFetchedByRange-2])
 }
 
 func TestDontIndexSameContainerTwice(t *testing.T) {
@@ -170,8 +170,8 @@ func TestDontIndexSameContainerTwice(t *testing.T) {
 	require.NoError(idx.Accept(ctx, containerID, []byte{1, 2, 3}))
 	require.NoError(idx.Accept(ctx, containerID, []byte{4, 5, 6}))
 	_, err = idx.GetContainerByIndex(1)
-	require.Error(err, "should not have accepted same container twice")
+	require.ErrorIs(err, errNoContainerAtIndex)
 	gotContainer, err := idx.GetContainerByID(containerID)
 	require.NoError(err)
-	require.EqualValues(gotContainer.Bytes, []byte{1, 2, 3}, "should not have accepted same container twice")
+	require.Equal([]byte{1, 2, 3}, gotContainer.Bytes)
 }

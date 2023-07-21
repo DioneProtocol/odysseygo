@@ -1,25 +1,30 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package registry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path"
 	"sync"
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/api/server"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/vms"
+	"github.com/DioneProtocol/odysseygo/api/server"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms"
 )
 
-var _ VMRegisterer = (*vmRegisterer)(nil)
+var (
+	_ VMRegisterer = (*vmRegisterer)(nil)
+
+	errNotVM = errors.New("not a VM")
+)
 
 // VMRegisterer defines functionality to install a virtual machine.
 type VMRegisterer interface {
@@ -36,9 +41,10 @@ type registerer interface {
 
 // VMRegistererConfig configures settings for VMRegisterer.
 type VMRegistererConfig struct {
-	APIServer server.Server
-	Log       logging.Logger
-	VMManager vms.Manager
+	APIServer    server.Server
+	Log          logging.Logger
+	VMFactoryLog logging.Logger
+	VMManager    vms.Manager
 }
 
 type vmRegisterer struct {
@@ -89,15 +95,14 @@ func (r *vmRegisterer) createStaticHandlers(
 	vmID ids.ID,
 	factory vms.Factory,
 ) (map[string]*common.HTTPHandler, error) {
-	// passing a nil ctx to the factory disables logging.
-	vm, err := factory.New(nil)
+	vm, err := factory.New(r.config.VMFactoryLog)
 	if err != nil {
 		return nil, err
 	}
 
 	commonVM, ok := vm.(common.VM)
 	if !ok {
-		return nil, fmt.Errorf("%s doesn't implement VM", vmID)
+		return nil, fmt.Errorf("%s is %w", vmID, errNotVM)
 	}
 
 	handlers, err := commonVM.CreateStaticHandlers(ctx)

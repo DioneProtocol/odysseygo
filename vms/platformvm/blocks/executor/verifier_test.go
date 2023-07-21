@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -12,22 +12,22 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/config"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/executor"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/mempool"
 )
 
 func TestVerifierVisitProposalBlock(t *testing.T) {
@@ -80,7 +80,7 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 	// Serialize this block with a dummy tx
 	// and replace it after creation with the mock tx.
 	// TODO allow serialization of mock txs.
-	apricotBlk, err := blocks.NewApricotProposalBlock(
+	odysseyBlk, err := blocks.NewOdysseyProposalBlock(
 		parentID,
 		2,
 		&txs.Tx{
@@ -89,20 +89,20 @@ func TestVerifierVisitProposalBlock(t *testing.T) {
 		},
 	)
 	require.NoError(err)
-	apricotBlk.Tx.Unsigned = blkTx
+	odysseyBlk.Tx.Unsigned = blkTx
 
 	// Set expectations for dependencies.
-	tx := apricotBlk.Txs()[0]
+	tx := odysseyBlk.Txs()[0]
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 	mempool.EXPECT().Remove([]*txs.Tx{tx}).Times(1)
 
 	// Visit the block
-	blk := manager.NewBlock(apricotBlk)
+	blk := manager.NewBlock(odysseyBlk)
 	err = blk.Verify(context.Background())
 	require.NoError(err)
-	require.Contains(verifier.backend.blkIDToState, apricotBlk.ID())
-	gotBlkState := verifier.backend.blkIDToState[apricotBlk.ID()]
-	require.Equal(apricotBlk, gotBlkState.statelessBlock)
+	require.Contains(verifier.backend.blkIDToState, odysseyBlk.ID())
+	gotBlkState := verifier.backend.blkIDToState[odysseyBlk.ID()]
+	require.Equal(odysseyBlk, gotBlkState.statelessBlock)
 	require.Equal(timestamp, gotBlkState.timestamp)
 
 	// Assert that the expected tx statuses are set.
@@ -148,7 +148,7 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: &config.Config{
-				ApricotPhase5Time: time.Now().Add(time.Hour),
+				OdysseyPhase1Time: time.Now().Add(time.Hour),
 				BanffTime:         mockable.MaxTime, // banff is not activated
 			},
 			Clk: &mockable.Clock{},
@@ -175,7 +175,7 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 	// Serialize this block with a dummy tx and replace it after creation with
 	// the mock tx.
 	// TODO allow serialization of mock txs.
-	apricotBlk, err := blocks.NewApricotAtomicBlock(
+	odysseyBlk, err := blocks.NewOdysseyAtomicBlock(
 		parentID,
 		2,
 		&txs.Tx{
@@ -184,23 +184,23 @@ func TestVerifierVisitAtomicBlock(t *testing.T) {
 		},
 	)
 	require.NoError(err)
-	apricotBlk.Tx.Unsigned = blkTx
+	odysseyBlk.Tx.Unsigned = blkTx
 
 	// Set expectations for dependencies.
 	timestamp := time.Now()
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 	parentStatelessBlk.EXPECT().Parent().Return(grandparentID).Times(1)
-	mempool.EXPECT().Remove([]*txs.Tx{apricotBlk.Tx}).Times(1)
-	onAccept.EXPECT().AddTx(apricotBlk.Tx, status.Committed).Times(1)
+	mempool.EXPECT().Remove([]*txs.Tx{odysseyBlk.Tx}).Times(1)
+	onAccept.EXPECT().AddTx(odysseyBlk.Tx, status.Committed).Times(1)
 	onAccept.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 
-	blk := manager.NewBlock(apricotBlk)
+	blk := manager.NewBlock(odysseyBlk)
 	err = blk.Verify(context.Background())
 	require.NoError(err)
 
-	require.Contains(verifier.backend.blkIDToState, apricotBlk.ID())
-	gotBlkState := verifier.backend.blkIDToState[apricotBlk.ID()]
-	require.Equal(apricotBlk, gotBlkState.statelessBlock)
+	require.Contains(verifier.backend.blkIDToState, odysseyBlk.ID())
+	gotBlkState := verifier.backend.blkIDToState[odysseyBlk.ID()]
+	require.Equal(odysseyBlk, gotBlkState.statelessBlock)
 	require.Equal(onAccept, gotBlkState.onAcceptState)
 	require.Equal(inputs, gotBlkState.inputs)
 	require.Equal(timestamp, gotBlkState.timestamp)
@@ -238,7 +238,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: &config.Config{
-				ApricotPhase5Time: time.Now().Add(time.Hour),
+				OdysseyPhase1Time: time.Now().Add(time.Hour),
 				BanffTime:         mockable.MaxTime, // banff is not activated
 			},
 			Clk: &mockable.Clock{},
@@ -277,7 +277,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 	// Serialize this block with a dummy tx
 	// and replace it after creation with the mock tx.
 	// TODO allow serialization of mock txs.
-	apricotBlk, err := blocks.NewApricotStandardBlock(
+	odysseyBlk, err := blocks.NewOdysseyStandardBlock(
 		parentID,
 		2, /*height*/
 		[]*txs.Tx{
@@ -288,22 +288,22 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		},
 	)
 	require.NoError(err)
-	apricotBlk.Transactions[0].Unsigned = blkTx
+	odysseyBlk.Transactions[0].Unsigned = blkTx
 
 	// Set expectations for dependencies.
 	timestamp := time.Now()
 	parentState.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
-	mempool.EXPECT().Remove(apricotBlk.Txs()).Times(1)
+	mempool.EXPECT().Remove(odysseyBlk.Txs()).Times(1)
 
-	blk := manager.NewBlock(apricotBlk)
+	blk := manager.NewBlock(odysseyBlk)
 	err = blk.Verify(context.Background())
 	require.NoError(err)
 
 	// Assert expected state.
-	require.Contains(verifier.backend.blkIDToState, apricotBlk.ID())
-	gotBlkState := verifier.backend.blkIDToState[apricotBlk.ID()]
-	require.Equal(apricotBlk, gotBlkState.statelessBlock)
+	require.Contains(verifier.backend.blkIDToState, odysseyBlk.ID())
+	gotBlkState := verifier.backend.blkIDToState[odysseyBlk.ID()]
+	require.Equal(odysseyBlk, gotBlkState.statelessBlock)
 	require.Equal(set.Set[ids.ID]{}, gotBlkState.inputs)
 	require.Equal(timestamp, gotBlkState.timestamp)
 
@@ -356,7 +356,7 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 		verifier: verifier,
 	}
 
-	apricotBlk, err := blocks.NewApricotCommitBlock(
+	odysseyBlk, err := blocks.NewOdysseyCommitBlock(
 		parentID,
 		2,
 	)
@@ -370,13 +370,13 @@ func TestVerifierVisitCommitBlock(t *testing.T) {
 	)
 
 	// Verify the block.
-	blk := manager.NewBlock(apricotBlk)
+	blk := manager.NewBlock(odysseyBlk)
 	err = blk.Verify(context.Background())
 	require.NoError(err)
 
 	// Assert expected state.
-	require.Contains(verifier.backend.blkIDToState, apricotBlk.ID())
-	gotBlkState := verifier.backend.blkIDToState[apricotBlk.ID()]
+	require.Contains(verifier.backend.blkIDToState, odysseyBlk.ID())
+	gotBlkState := verifier.backend.blkIDToState[odysseyBlk.ID()]
 	require.Equal(parentOnAbortState, gotBlkState.onAcceptState)
 	require.Equal(timestamp, gotBlkState.timestamp)
 
@@ -429,7 +429,7 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 		verifier: verifier,
 	}
 
-	apricotBlk, err := blocks.NewApricotAbortBlock(
+	odysseyBlk, err := blocks.NewOdysseyAbortBlock(
 		parentID,
 		2,
 	)
@@ -443,13 +443,13 @@ func TestVerifierVisitAbortBlock(t *testing.T) {
 	)
 
 	// Verify the block.
-	blk := manager.NewBlock(apricotBlk)
+	blk := manager.NewBlock(odysseyBlk)
 	err = blk.Verify(context.Background())
 	require.NoError(err)
 
 	// Assert expected state.
-	require.Contains(verifier.backend.blkIDToState, apricotBlk.ID())
-	gotBlkState := verifier.backend.blkIDToState[apricotBlk.ID()]
+	require.Contains(verifier.backend.blkIDToState, odysseyBlk.ID())
+	gotBlkState := verifier.backend.blkIDToState[odysseyBlk.ID()]
 	require.Equal(parentOnAbortState, gotBlkState.onAcceptState)
 	require.Equal(timestamp, gotBlkState.timestamp)
 
@@ -487,7 +487,7 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 		backend: backend,
 	}
 
-	blk, err := blocks.NewApricotAbortBlock(parentID /*not in memory or persisted state*/, 2 /*height*/)
+	blk, err := blocks.NewOdysseyAbortBlock(parentID /*not in memory or persisted state*/, 2 /*height*/)
 	require.NoError(err)
 
 	// Set expectations for dependencies.
@@ -496,7 +496,7 @@ func TestVerifyUnverifiedParent(t *testing.T) {
 
 	// Verify the block.
 	err = blk.Visit(verifier)
-	require.Error(err)
+	require.ErrorIs(err, database.ErrNotFound)
 }
 
 func TestBanffAbortBlockTimestampChecks(t *testing.T) {
@@ -592,7 +592,7 @@ func TestBanffAbortBlockTimestampChecks(t *testing.T) {
 	}
 }
 
-// TODO combine with TestApricotCommitBlockTimestampChecks
+// TODO combine with TestOdysseyCommitBlockTimestampChecks
 func TestBanffCommitBlockTimestampChecks(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -728,7 +728,7 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 	verifier := &verifier{
 		txExecutorBackend: &executor.Backend{
 			Config: &config.Config{
-				ApricotPhase5Time: time.Now().Add(time.Hour),
+				OdysseyPhase1Time: time.Now().Add(time.Hour),
 				BanffTime:         mockable.MaxTime, // banff is not activated
 			},
 			Clk: &mockable.Clock{},
@@ -763,7 +763,7 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 	// Serialize this block with a dummy tx
 	// and replace it after creation with the mock tx.
 	// TODO allow serialization of mock txs.
-	blk, err := blocks.NewApricotStandardBlock(
+	blk, err := blocks.NewOdysseyStandardBlock(
 		parentID,
 		2,
 		[]*txs.Tx{
@@ -782,11 +782,11 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 	parentState.EXPECT().GetTimestamp().Return(timestamp).Times(1)
 	parentStatelessBlk.EXPECT().Parent().Return(grandParentID).Times(1)
 
-	err = verifier.ApricotStandardBlock(blk)
+	err = verifier.OdysseyStandardBlock(blk)
 	require.ErrorIs(err, errConflictingParentTxs)
 }
 
-func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) {
+func TestVerifierVisitOdysseyStandardBlockWithProposalBlockParent(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -826,7 +826,7 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 		backend: backend,
 	}
 
-	blk, err := blocks.NewApricotStandardBlock(
+	blk, err := blocks.NewOdysseyStandardBlock(
 		parentID,
 		2,
 		[]*txs.Tx{
@@ -840,7 +840,7 @@ func TestVerifierVisitApricotStandardBlockWithProposalBlockParent(t *testing.T) 
 
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 
-	err = verifier.ApricotStandardBlock(blk)
+	err = verifier.OdysseyStandardBlock(blk)
 	require.ErrorIs(err, state.ErrMissingParentState)
 }
 
@@ -904,7 +904,7 @@ func TestVerifierVisitBanffStandardBlockWithProposalBlockParent(t *testing.T) {
 	require.ErrorIs(err, state.ErrMissingParentState)
 }
 
-func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
+func TestVerifierVisitOdysseyCommitBlockUnexpectedParentState(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -933,7 +933,7 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := blocks.NewApricotCommitBlock(
+	blk, err := blocks.NewOdysseyCommitBlock(
 		parentID,
 		2,
 	)
@@ -943,7 +943,7 @@ func TestVerifierVisitApricotCommitBlockUnexpectedParentState(t *testing.T) {
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 
 	// Verify the block.
-	err = verifier.ApricotCommitBlock(blk)
+	err = verifier.OdysseyCommitBlock(blk)
 	require.ErrorIs(err, state.ErrMissingParentState)
 }
 
@@ -993,7 +993,7 @@ func TestVerifierVisitBanffCommitBlockUnexpectedParentState(t *testing.T) {
 	require.ErrorIs(err, state.ErrMissingParentState)
 }
 
-func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
+func TestVerifierVisitOdysseyAbortBlockUnexpectedParentState(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -1022,7 +1022,7 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 		},
 	}
 
-	blk, err := blocks.NewApricotAbortBlock(
+	blk, err := blocks.NewOdysseyAbortBlock(
 		parentID,
 		2,
 	)
@@ -1032,7 +1032,7 @@ func TestVerifierVisitApricotAbortBlockUnexpectedParentState(t *testing.T) {
 	parentStatelessBlk.EXPECT().Height().Return(uint64(1)).Times(1)
 
 	// Verify the block.
-	err = verifier.ApricotAbortBlock(blk)
+	err = verifier.OdysseyAbortBlock(blk)
 	require.ErrorIs(err, state.ErrMissingParentState)
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/ids"
 )
 
 func TestAdd(t *testing.T) {
@@ -28,8 +28,7 @@ func TestAdd(t *testing.T) {
 	err = Add(m, subnetID, nodeID, nil, ids.Empty, 1)
 	require.NoError(err)
 
-	weight := s.Weight()
-	require.EqualValues(1, weight)
+	require.Equal(uint64(1), s.Weight())
 }
 
 func TestAddWeight(t *testing.T) {
@@ -55,8 +54,7 @@ func TestAddWeight(t *testing.T) {
 	err = AddWeight(m, subnetID, nodeID, 1)
 	require.NoError(err)
 
-	weight := s.Weight()
-	require.EqualValues(2, weight)
+	require.Equal(uint64(2), s.Weight())
 }
 
 func TestRemoveWeight(t *testing.T) {
@@ -79,14 +77,12 @@ func TestRemoveWeight(t *testing.T) {
 	err = RemoveWeight(m, subnetID, nodeID, 1)
 	require.NoError(err)
 
-	weight := s.Weight()
-	require.EqualValues(1, weight)
+	require.Equal(uint64(1), s.Weight())
 
 	err = RemoveWeight(m, subnetID, nodeID, 1)
 	require.NoError(err)
 
-	weight = s.Weight()
-	require.Zero(weight)
+	require.Zero(s.Weight())
 }
 
 func TestContains(t *testing.T) {

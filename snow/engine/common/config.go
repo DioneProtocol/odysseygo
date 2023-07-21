@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package common
@@ -6,9 +6,9 @@ package common
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/engine/common/tracker"
-	"github.com/dioneprotocol/dionego/snow/validators"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
 )
 
 // Config wraps the common configurations that are needed by a Snow consensus
@@ -54,7 +54,7 @@ func (c *Config) IsBootstrapped() bool {
 	return c.Ctx.State.Get().State == snow.NormalOp
 }
 
-// Shared among common.bootstrapper and snowman/dione bootstrapper
+// Shared among common.bootstrapper and snowman/odyssey bootstrapper
 type SharedConfig struct {
 	// Tracks the last requestID that was used in a request
 	RequestID uint32

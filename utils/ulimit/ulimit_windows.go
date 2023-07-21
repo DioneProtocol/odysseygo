@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 //go:build windows
@@ -6,7 +6,7 @@
 
 package ulimit
 
-import "github.com/dioneprotocol/dionego/utils/logging"
+import "github.com/DioneProtocol/odysseygo/utils/logging"
 
 const DefaultFDLimit = 16384
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -7,19 +7,24 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
-var _ utils.Sortable[Allocation] = Allocation{}
+var (
+	_ utils.Sortable[Allocation] = Allocation{}
+
+	errInvalidGenesisJSON = errors.New("could not unmarshal genesis JSON")
+)
 
 type LockedAmount struct {
 	Amount   uint64 `json:"amount"`
@@ -56,7 +61,6 @@ func (a Allocation) Less(other Allocation) bool {
 type Staker struct {
 	NodeID        ids.NodeID  `json:"nodeID"`
 	RewardAddress ids.ShortID `json:"rewardAddress"`
-	DelegationFee uint32      `json:"delegationFee"`
 }
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
@@ -68,7 +72,6 @@ func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
 	return UnparsedStaker{
 		NodeID:        s.NodeID,
 		RewardAddress: dioneAddr,
-		DelegationFee: s.DelegationFee,
 	}, err
 }
 
@@ -153,9 +156,9 @@ var (
 	// genesis.
 	MainnetConfig Config
 
-	// FujiConfig is the config that should be used to generate the fuji
+	// TestnetConfig is the config that should be used to generate the testnet
 	// genesis.
-	FujiConfig Config
+	TestnetConfig Config
 
 	// LocalConfig is the config that should be used to generate a local
 	// genesis.
@@ -164,13 +167,13 @@ var (
 
 func init() {
 	unparsedMainnetConfig := UnparsedConfig{}
-	unparsedFujiConfig := UnparsedConfig{}
+	unparsedTestnetConfig := UnparsedConfig{}
 	unparsedLocalConfig := UnparsedConfig{}
 
 	errs := wrappers.Errs{}
 	errs.Add(
 		json.Unmarshal(mainnetGenesisConfigJSON, &unparsedMainnetConfig),
-		json.Unmarshal(fujiGenesisConfigJSON, &unparsedFujiConfig),
+		json.Unmarshal(testnetGenesisConfigJSON, &unparsedTestnetConfig),
 		json.Unmarshal(localGenesisConfigJSON, &unparsedLocalConfig),
 	)
 	if errs.Errored() {
@@ -181,9 +184,9 @@ func init() {
 	errs.Add(err)
 	MainnetConfig = mainnetConfig
 
-	fujiConfig, err := unparsedFujiConfig.Parse()
+	testnetConfig, err := unparsedTestnetConfig.Parse()
 	errs.Add(err)
-	FujiConfig = fujiConfig
+	TestnetConfig = testnetConfig
 
 	localConfig, err := unparsedLocalConfig.Parse()
 	errs.Add(err)
@@ -198,8 +201,8 @@ func GetConfig(networkID uint32) *Config {
 	switch networkID {
 	case constants.MainnetID:
 		return &MainnetConfig
-	case constants.FujiID:
-		return &FujiConfig
+	case constants.TestnetID:
+		return &TestnetConfig
 	case constants.LocalID:
 		return &LocalConfig
 	default:
@@ -230,7 +233,7 @@ func GetConfigContent(genesisContent string) (*Config, error) {
 func parseGenesisJSONBytesToConfig(bytes []byte) (*Config, error) {
 	var unparsedConfig UnparsedConfig
 	if err := json.Unmarshal(bytes, &unparsedConfig); err != nil {
-		return nil, fmt.Errorf("could not unmarshal JSON: %w", err)
+		return nil, fmt.Errorf("%w: %s", errInvalidGenesisJSON, err)
 	}
 
 	config, err := unparsedConfig.Parse()

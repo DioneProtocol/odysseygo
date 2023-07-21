@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -18,38 +18,39 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/dioneprotocol/dionego/api/keystore/gkeystore"
-	"github.com/dioneprotocol/dionego/api/metrics"
-	"github.com/dioneprotocol/dionego/chains/atomic/gsharedmemory"
-	"github.com/dioneprotocol/dionego/database/corruptabledb"
-	"github.com/dioneprotocol/dionego/database/manager"
-	"github.com/dioneprotocol/dionego/database/rpcdb"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/ids/galiasreader"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/common/appsender"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/validators/gvalidators"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/version"
-	"github.com/dioneprotocol/dionego/vms/platformvm/warp/gwarp"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/ghttp"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/messenger"
+	"github.com/DioneProtocol/odysseygo/api/keystore/gkeystore"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/chains/atomic/gsharedmemory"
+	"github.com/DioneProtocol/odysseygo/database/corruptabledb"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/rpcdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/ids/galiasreader"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/appsender"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/validators/gvalidators"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp/gwarp"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
 
-	aliasreaderpb "github.com/dioneprotocol/dionego/proto/pb/aliasreader"
-	appsenderpb "github.com/dioneprotocol/dionego/proto/pb/appsender"
-	httppb "github.com/dioneprotocol/dionego/proto/pb/http"
-	keystorepb "github.com/dioneprotocol/dionego/proto/pb/keystore"
-	messengerpb "github.com/dioneprotocol/dionego/proto/pb/messenger"
-	rpcdbpb "github.com/dioneprotocol/dionego/proto/pb/rpcdb"
-	sharedmemorypb "github.com/dioneprotocol/dionego/proto/pb/sharedmemory"
-	validatorstatepb "github.com/dioneprotocol/dionego/proto/pb/validatorstate"
-	vmpb "github.com/dioneprotocol/dionego/proto/pb/vm"
-	warppb "github.com/dioneprotocol/dionego/proto/pb/warp"
+	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
+	appsenderpb "github.com/DioneProtocol/odysseygo/proto/pb/appsender"
+	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
+	keystorepb "github.com/DioneProtocol/odysseygo/proto/pb/keystore"
+	messengerpb "github.com/DioneProtocol/odysseygo/proto/pb/messenger"
+	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
+	sharedmemorypb "github.com/DioneProtocol/odysseygo/proto/pb/sharedmemory"
+	validatorstatepb "github.com/DioneProtocol/odysseygo/proto/pb/validatorstate"
+	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
+	warppb "github.com/DioneProtocol/odysseygo/proto/pb/warp"
 )
 
 var (
@@ -105,6 +106,10 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 		return nil, err
 	}
 	nodeID, err := ids.ToNodeID(req.NodeId)
+	if err != nil {
+		return nil, err
+	}
+	publicKey, err := bls.PublicKeyFromBytes(req.PublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -222,6 +227,7 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 		SubnetID:  subnetID,
 		ChainID:   chainID,
 		NodeID:    nodeID,
+		PublicKey: publicKey,
 
 		XChainID:    xChainID,
 		CChainID:    cChainID,

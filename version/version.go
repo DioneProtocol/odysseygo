@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package version
@@ -28,7 +28,7 @@ type Semantic struct {
 }
 
 // The only difference here between Semantic and Application is that Semantic
-// prepends "v" rather than "dione/".
+// prepends "v" rather than "odyssey/".
 func (s *Semantic) String() string {
 	strIntf := s.str.Load()
 	if strIntf != nil {

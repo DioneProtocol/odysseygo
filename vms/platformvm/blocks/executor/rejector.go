@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -6,8 +6,8 @@ package executor
 import (
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
 )
 
 var _ blocks.Visitor = (*rejector)(nil)
@@ -35,24 +35,24 @@ func (r *rejector) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	return r.rejectBlock(b, "banff standard")
 }
 
-func (r *rejector) ApricotAbortBlock(b *blocks.ApricotAbortBlock) error {
-	return r.rejectBlock(b, "apricot abort")
+func (r *rejector) OdysseyAbortBlock(b *blocks.OdysseyAbortBlock) error {
+	return r.rejectBlock(b, "odyssey abort")
 }
 
-func (r *rejector) ApricotCommitBlock(b *blocks.ApricotCommitBlock) error {
-	return r.rejectBlock(b, "apricot commit")
+func (r *rejector) OdysseyCommitBlock(b *blocks.OdysseyCommitBlock) error {
+	return r.rejectBlock(b, "odyssey commit")
 }
 
-func (r *rejector) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
-	return r.rejectBlock(b, "apricot proposal")
+func (r *rejector) OdysseyProposalBlock(b *blocks.OdysseyProposalBlock) error {
+	return r.rejectBlock(b, "odyssey proposal")
 }
 
-func (r *rejector) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
-	return r.rejectBlock(b, "apricot standard")
+func (r *rejector) OdysseyStandardBlock(b *blocks.OdysseyStandardBlock) error {
+	return r.rejectBlock(b, "odyssey standard")
 }
 
-func (r *rejector) ApricotAtomicBlock(b *blocks.ApricotAtomicBlock) error {
-	return r.rejectBlock(b, "apricot atomic")
+func (r *rejector) OdysseyAtomicBlock(b *blocks.OdysseyAtomicBlock) error {
+	return r.rejectBlock(b, "odyssey atomic")
 }
 
 func (r *rejector) rejectBlock(b blocks.Block, blockType string) error {

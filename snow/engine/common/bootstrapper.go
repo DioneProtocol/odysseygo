@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package common
@@ -10,10 +10,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 const (
@@ -40,7 +40,7 @@ type Bootstrapper interface {
 	Restart(ctx context.Context, reset bool) error
 }
 
-// It collects mechanisms common to both snowman and dione bootstrappers
+// It collects mechanisms common to both snowman and odyssey bootstrappers
 type bootstrapper struct {
 	Config
 	Halter
@@ -310,7 +310,7 @@ func (b *bootstrapper) Startup(ctx context.Context) error {
 		b.Ctx.Log.Info("bootstrapping skipped",
 			zap.String("reason", "no provided bootstraps"),
 		)
-		return b.Bootstrapable.ForceAccepted(ctx, nil)
+		return nil //return b.Bootstrapable.ForceAccepted(ctx, nil)
 	}
 
 	b.Config.SharedCfg.RequestID++

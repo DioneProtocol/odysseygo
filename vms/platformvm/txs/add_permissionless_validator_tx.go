@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -6,20 +6,17 @@ package txs
 import (
 	"errors"
 	"fmt"
-	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/fx"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -37,7 +34,7 @@ type AddPermissionlessValidatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
 	// Describes the validator
-	Validator validator.Validator `serialize:"true" json:"validator"`
+	Validator `serialize:"true" json:"validator"`
 	// ID of the subnet this validator is validating
 	Subnet ids.ID `serialize:"true" json:"subnetID"`
 	// If the [Subnet] is the primary network, [Signer] is the BLS key for this
@@ -51,12 +48,6 @@ type AddPermissionlessValidatorTx struct {
 	StakeOuts []*dione.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send validation rewards when done validating
 	ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
-	// Where to send delegation rewards when done validating
-	DelegatorRewardsOwner fx.Owner `serialize:"true" json:"delegationRewardsOwner"`
-	// Fee this validator charges delegators as a percentage, times 10,000
-	// For example, if this validator has DelegationShares=300,000 then they
-	// take 30% of rewards from delegators
-	DelegationShares uint32 `serialize:"true" json:"shares"`
 }
 
 // InitCtx sets the FxID fields in the inputs and outputs of this
@@ -69,7 +60,6 @@ func (tx *AddPermissionlessValidatorTx) InitCtx(ctx *snow.Context) {
 		out.InitCtx(ctx)
 	}
 	tx.ValidatorRewardsOwner.InitCtx(ctx)
-	tx.DelegatorRewardsOwner.InitCtx(ctx)
 }
 
 func (tx *AddPermissionlessValidatorTx) SubnetID() ids.ID {
@@ -86,18 +76,6 @@ func (tx *AddPermissionlessValidatorTx) PublicKey() (*bls.PublicKey, bool, error
 	}
 	key := tx.Signer.Key()
 	return key, key != nil, nil
-}
-
-func (tx *AddPermissionlessValidatorTx) StartTime() time.Time {
-	return tx.Validator.StartTime()
-}
-
-func (tx *AddPermissionlessValidatorTx) EndTime() time.Time {
-	return tx.Validator.EndTime()
-}
-
-func (tx *AddPermissionlessValidatorTx) Weight() uint64 {
-	return tx.Validator.Wght
 }
 
 func (tx *AddPermissionlessValidatorTx) PendingPriority() Priority {
@@ -122,14 +100,6 @@ func (tx *AddPermissionlessValidatorTx) ValidationRewardsOwner() fx.Owner {
 	return tx.ValidatorRewardsOwner
 }
 
-func (tx *AddPermissionlessValidatorTx) DelegationRewardsOwner() fx.Owner {
-	return tx.DelegatorRewardsOwner
-}
-
-func (tx *AddPermissionlessValidatorTx) Shares() uint32 {
-	return tx.DelegationShares
-}
-
 // SyntacticVerify returns nil iff [tx] is valid
 func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *snow.Context) error {
 	switch {
@@ -141,15 +111,13 @@ func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *snow.Context) error
 		return errEmptyNodeID
 	case len(tx.StakeOuts) == 0: // Ensure there is provided stake
 		return errNoStake
-	case tx.DelegationShares > reward.PercentDenominator:
-		return errTooManyShares
 	}
 
 	if err := tx.BaseTx.SyntacticVerify(ctx); err != nil {
 		return fmt.Errorf("failed to verify BaseTx: %w", err)
 	}
-	if err := verify.All(&tx.Validator, tx.Signer, tx.ValidatorRewardsOwner, tx.DelegatorRewardsOwner); err != nil {
-		return fmt.Errorf("failed to verify validator, signer, or rewards owners: %w", err)
+	if err := verify.All(&tx.Validator, tx.Signer, tx.ValidatorRewardsOwner); err != nil {
+		return fmt.Errorf("failed to verify validator, signer, or rewards owner: %w", err)
 	}
 
 	hasKey := tx.Signer.Key() != nil
@@ -188,8 +156,8 @@ func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *snow.Context) error
 	switch {
 	case !dione.IsSortedTransferableOutputs(tx.StakeOuts, Codec):
 		return errOutputsNotSorted
-	case totalStakeWeight != tx.Validator.Wght:
-		return fmt.Errorf("%w: weight %d != stake %d", errValidatorWeightMismatch, tx.Validator.Wght, totalStakeWeight)
+	case totalStakeWeight != tx.Wght:
+		return fmt.Errorf("%w: weight %d != stake %d", errValidatorWeightMismatch, tx.Wght, totalStakeWeight)
 	}
 
 	// cache that this is valid

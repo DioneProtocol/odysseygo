@@ -1,9 +1,9 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package mempool
 
-import "github.com/dioneprotocol/dionego/vms/platformvm/txs"
+import "github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 
 var _ txs.Visitor = (*remover)(nil)
 
@@ -18,11 +18,6 @@ func (r *remover) AddValidatorTx(*txs.AddValidatorTx) error {
 }
 
 func (r *remover) AddSubnetValidatorTx(*txs.AddSubnetValidatorTx) error {
-	r.m.removeStakerTx(r.tx)
-	return nil
-}
-
-func (r *remover) AddDelegatorTx(*txs.AddDelegatorTx) error {
 	r.m.removeStakerTx(r.tx)
 	return nil
 }
@@ -58,11 +53,6 @@ func (r *remover) TransformSubnetTx(*txs.TransformSubnetTx) error {
 }
 
 func (r *remover) AddPermissionlessValidatorTx(*txs.AddPermissionlessValidatorTx) error {
-	r.m.removeStakerTx(r.tx)
-	return nil
-}
-
-func (r *remover) AddPermissionlessDelegatorTx(*txs.AddPermissionlessDelegatorTx) error {
 	r.m.removeStakerTx(r.tx)
 	return nil
 }

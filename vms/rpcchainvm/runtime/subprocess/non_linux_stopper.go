@@ -1,8 +1,8 @@
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
 //go:build !linux
 // +build !linux
-
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
 
 package subprocess
 
@@ -12,7 +12,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
 )
 
 func NewCmd(path string, args ...string) *exec.Cmd {

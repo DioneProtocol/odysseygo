@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -12,24 +12,24 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/dioneprotocol/dionego/genesis"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/tests"
-	"github.com/dioneprotocol/dionego/tests/e2e"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/avm"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
@@ -195,8 +195,8 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 			ginkgo.By("add permissionless validator", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				addSubnetValidatorTxID, err := pWallet.IssueAddPermissionlessValidatorTx(
-					&validator.SubnetValidator{
-						Validator: validator.Validator{
+					&txs.SubnetValidator{
+						Validator: txs.Validator{
 							NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
 							Start:  uint64(validatorStartTime.Unix()),
 							End:    uint64(validatorStartTime.Add(5 * time.Second).Unix()),
@@ -216,32 +216,6 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				txStatus, err := pChainClient.GetTxStatus(ctx, addSubnetValidatorTxID)
-				cancel()
-				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
-			})
-
-			delegatorStartTime := validatorStartTime
-			ginkgo.By("add permissionless delegator", func() {
-				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				addSubnetDelegatorTxID, err := pWallet.IssueAddPermissionlessDelegatorTx(
-					&validator.SubnetValidator{
-						Validator: validator.Validator{
-							NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
-							Start:  uint64(delegatorStartTime.Unix()),
-							End:    uint64(delegatorStartTime.Add(5 * time.Second).Unix()),
-							Wght:   25 * units.MegaDione,
-						},
-						Subnet: subnetID,
-					},
-					subnetAssetID,
-					&secp256k1fx.OutputOwners{},
-					common.WithContext(ctx),
-				)
-				cancel()
-				gomega.Expect(err).Should(gomega.BeNil())
-
-				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, addSubnetDelegatorTxID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})

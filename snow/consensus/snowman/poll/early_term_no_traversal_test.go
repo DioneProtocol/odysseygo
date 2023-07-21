@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package poll
@@ -6,8 +6,8 @@ package poll
 import (
 	"testing"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/bag"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/bag"
 )
 
 func TestEarlyTermNoTraversalResults(t *testing.T) {
@@ -57,9 +57,9 @@ func TestEarlyTermNoTraversalString(t *testing.T) {
 
 	poll.Vote(vdr1, vtxID)
 
-	expected := `waiting on Bag: (Size = 1)
+	expected := `waiting on Bag[ids.NodeID]: (Size = 1)
     NodeID-BaMPFdqMUQ46BV8iRcwbVfsam55kMqcp: 1
-received Bag: (Size = 1)
+received Bag[ids.ID]: (Size = 1)
     SYXsAycDPUu4z2ZksJD5fh5nTDcH3vCFHnpcVye5XuJ2jArg: 1`
 	if result := poll.String(); expected != result {
 		t.Fatalf("Poll should have returned %s but returned %s", expected, result)

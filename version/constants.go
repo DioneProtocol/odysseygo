@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package version
@@ -9,19 +9,19 @@ import (
 
 	_ "embed"
 
-	"github.com/dioneprotocol/dionego/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 )
 
 // RPCChainVMProtocol should be bumped anytime changes are made which require
-// the plugin vm to upgrade to latest dionego release to be compatible.
-const RPCChainVMProtocol uint = 23
+// the plugin vm to upgrade to latest odysseygo release to be compatible.
+const RPCChainVMProtocol uint = 26
 
 // These are globals that describe network upgrades and node versions
 var (
 	Current = &Semantic{
 		Major: 1,
-		Minor: 9,
-		Patch: 9,
+		Minor: 10,
+		Patch: 2,
 	}
 	CurrentApp = &Application{
 		Major: Current.Major,
@@ -30,12 +30,12 @@ var (
 	}
 	MinimumCompatibleVersion = &Application{
 		Major: 1,
-		Minor: 9,
+		Minor: 10,
 		Patch: 0,
 	}
 	PrevMinimumCompatibleVersion = &Application{
 		Major: 1,
-		Minor: 8,
+		Minor: 9,
 		Patch: 0,
 	}
 
@@ -56,51 +56,32 @@ var (
 	//go:embed compatibility.json
 	rpcChainVMProtocolCompatibilityBytes []byte
 	// RPCChainVMProtocolCompatibility maps RPCChainVMProtocol versions to the
-	// set of dionego versions that supported that version. This is not used
-	// by dionego, but is useful for downstream libraries.
+	// set of odysseygo versions that supported that version. This is not used
+	// by odysseygo, but is useful for downstream libraries.
 	RPCChainVMProtocolCompatibility map[uint][]*Semantic
 
-	ApricotPhase3Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.August, 24, 14, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(2021, time.August, 16, 19, 0, 0, 0, time.UTC),
-	}
-	ApricotPhase3DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
-
-	ApricotPhase4Times = map[uint32]time.Time{
+	OdysseyPhase1Times = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2021, time.September, 22, 21, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
+		constants.TestnetID:    time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
-	ApricotPhase4DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
-	ApricotPhase4MinPChainHeight = map[uint32]uint64{
+	OdysseyPhase1DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
+	OdysseyPhase1MinPChainHeight = map[uint32]uint64{
 		constants.MainnetID: 793005,
-		constants.FujiID:    47437,
+		constants.TestnetID:    47437,
 	}
-	ApricotPhase4DefaultMinPChainHeight uint64
-
-	ApricotPhase5Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.December, 2, 18, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(2021, time.November, 24, 15, 0, 0, 0, time.UTC),
-	}
-	ApricotPhase5DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
-
-	ApricotPhase6Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
-	}
-	ApricotPhase6DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
+	OdysseyPhase1DefaultMinPChainHeight uint64
 
 	BanffTimes = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2022, time.October, 18, 16, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
+		constants.TestnetID:    time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
 	}
 	BanffDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
-	// FIXME: update this before release
-	XChainMigrationTimes = map[uint32]time.Time{
-		constants.MainnetID: time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
-		constants.FujiID:    time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
+	CortinaTimes = map[uint32]time.Time{
+		constants.MainnetID: time.Date(2023, time.April, 25, 15, 0, 0, 0, time.UTC),
+		constants.TestnetID:    time.Date(2023, time.April, 6, 15, 0, 0, 0, time.UTC),
 	}
-	XChainMigrationDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
+	CortinaDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 )
 
 func init() {
@@ -124,39 +105,18 @@ func init() {
 	}
 }
 
-func GetApricotPhase3Time(networkID uint32) time.Time {
-	if upgradeTime, exists := ApricotPhase3Times[networkID]; exists {
+func GetOdysseyPhase1Time(networkID uint32) time.Time {
+	if upgradeTime, exists := OdysseyPhase1Times[networkID]; exists {
 		return upgradeTime
 	}
-	return ApricotPhase3DefaultTime
+	return OdysseyPhase1DefaultTime
 }
 
-func GetApricotPhase4Time(networkID uint32) time.Time {
-	if upgradeTime, exists := ApricotPhase4Times[networkID]; exists {
-		return upgradeTime
-	}
-	return ApricotPhase4DefaultTime
-}
-
-func GetApricotPhase4MinPChainHeight(networkID uint32) uint64 {
-	if minHeight, exists := ApricotPhase4MinPChainHeight[networkID]; exists {
+func GetOdysseyPhase1MinPChainHeight(networkID uint32) uint64 {
+	if minHeight, exists := OdysseyPhase1MinPChainHeight[networkID]; exists {
 		return minHeight
 	}
-	return ApricotPhase4DefaultMinPChainHeight
-}
-
-func GetApricotPhase5Time(networkID uint32) time.Time {
-	if upgradeTime, exists := ApricotPhase5Times[networkID]; exists {
-		return upgradeTime
-	}
-	return ApricotPhase5DefaultTime
-}
-
-func GetApricotPhase6Time(networkID uint32) time.Time {
-	if upgradeTime, exists := ApricotPhase6Times[networkID]; exists {
-		return upgradeTime
-	}
-	return ApricotPhase6DefaultTime
+	return OdysseyPhase1DefaultMinPChainHeight
 }
 
 func GetBanffTime(networkID uint32) time.Time {
@@ -166,18 +126,18 @@ func GetBanffTime(networkID uint32) time.Time {
 	return BanffDefaultTime
 }
 
-func GetXChainMigrationTime(networkID uint32) time.Time {
-	if upgradeTime, exists := XChainMigrationTimes[networkID]; exists {
+func GetCortinaTime(networkID uint32) time.Time {
+	if upgradeTime, exists := CortinaTimes[networkID]; exists {
 		return upgradeTime
 	}
-	return XChainMigrationDefaultTime
+	return CortinaDefaultTime
 }
 
 func GetCompatibility(networkID uint32) Compatibility {
 	return NewCompatibility(
 		CurrentApp,
 		MinimumCompatibleVersion,
-		GetBanffTime(networkID),
+		GetCortinaTime(networkID),
 		PrevMinimumCompatibleVersion,
 	)
 }

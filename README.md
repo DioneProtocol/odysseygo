@@ -1,15 +1,15 @@
 <div align="center">
-  <img src="resources/DioneLogo.png?raw=true">
+  <img src="resources/OdysseyLogo.png?raw=true">
 </div>
 
 ---
 
-Node implementation for the [Dione](https://dioneprotocol.com) network -
+Node implementation for the [Odyssey](https://dioneprotocol.com) network -
 a blockchains platform with high throughput, and blazing fast transactions.
 
 ## Installation
 
-Dione is an incredibly lightweight protocol, so the minimum computer requirements are quite modest.
+Odyssey is an incredibly lightweight protocol, so the minimum computer requirements are quite modest.
 Note that as network usage increases, hardware requirements may change.
 
 The minimum recommended hardware specification for nodes connected to Mainnet is:
@@ -20,9 +20,9 @@ The minimum recommended hardware specification for nodes connected to Mainnet is
 - OS: Ubuntu 20.04/22.04 or macOS >= 12
 - Network: Reliable IPv4 or IPv6 network connection, with an open public port.
 
-If you plan to build DioneGo from source, you will also need the following software:
+If you plan to build OdysseyGo from source, you will also need the following software:
 
-- [Go](https://golang.org/doc/install) version >= 1.18.1
+- [Go](https://golang.org/doc/install) version >= 1.19.6
 - [gcc](https://gcc.gnu.org/)
 - g++
 
@@ -30,66 +30,66 @@ If you plan to build DioneGo from source, you will also need the following softw
 
 #### Clone The Repository
 
-Clone the DioneGo repository:
+Clone the OdysseyGo repository:
 
 ```sh
-git clone git@github.com:dioneprotocol/dionego.git
-cd dionego
+git clone git@github.com:DioneProtocol/odysseyego.git
+cd odysseyego
 ```
 
 This will clone and checkout the `master` branch.
 
-#### Building DioneGo
+#### Building OdysseyGo
 
-Build DioneGo by running the build script:
+Build OdysseyGo by running the build script:
 
 ```sh
 ./scripts/build.sh
 ```
 
-The `dionego` binary is now in the `build` directory. To run:
+The `odysseyego` binary is now in the `build` directory. To run:
 
 ```sh
-./build/dionego
+./build/odysseyego
 ```
 
 ### Binary Repository
 
-Install DioneGo using an `apt` repository.
+Install OdysseyGo using an `apt` repository.
 
 #### Adding the APT Repository
 
-If you have already added the APT repository, you do not need to add it again.
+If you already have the APT repository added, you do not need to add it again.
 
 To add the repository on Ubuntu, run:
 
 ```sh
 sudo su -
-wget -qO - https://downloads.dioneprotocol.com/dionego.gpg.key | tee /etc/apt/trusted.gpg.d/dionego.asc
-source /etc/os-release && echo "deb https://downloads.dioneprotocol.com/apt $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/dione.list
+wget -qO - https://downloads.dioneprotocol.com/odysseyego.gpg.key | tee /etc/apt/trusted.gpg.d/odysseyego.asc
+source /etc/os-release && echo "deb https://downloads.dioneprotocol.com/apt $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/odysseye.list
 exit
 ```
 
 #### Installing the Latest Version
 
-After adding the APT repository, install dionego by running:
+After adding the APT repository, install `odysseyego` by running:
 
 ```sh
 sudo apt update
-sudo apt install dionego
+sudo apt install odysseyego
 ```
 
 ### Binary Install
 
-Download the [latest build](https://github.com/dioneprotocol/dionego/releases/latest) for your operating system and architecture.
+Download the [latest build](https://github.com/DioneProtocol/odysseygo/releases/latest) for your operating system and architecture.
 
-The Dione binary to be executed is named `dionego`.
+The Odyssey binary to be executed is named `odysseyego`.
 
 ### Docker Install
 
-Make sure docker is installed on the machine - so commands like `docker run` etc. are available.
+Make sure Docker is installed on the machine - so commands like `docker run` etc. are available.
 
-Building the docker image of latest dionego branch can be done by running:
+Building the Docker image of latest `odysseyego` branch can be done by running:
 
 ```sh
 ./scripts/build_image.sh
@@ -101,32 +101,32 @@ To check the built image, run:
 docker image ls
 ```
 
-The image should be tagged as `dioneprotocol/dionego:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Dione source it was built from. To run the dione node, run:
+The image should be tagged as `dioneprotocol/odysseyego:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Odyssey source it was built from. To run the Odyssey node, run:
 
 ```sh
-docker run -ti -p 9650:9650 -p 9651:9651 dioneprotocol/dionego:xxxxxxxx /dionego/build/dionego
+docker run -ti -p 9650:9650 -p 9651:9651 dioneprotocol/odysseyego:xxxxxxxx /odysseyego/build/odysseyego
 ```
 
-## Running Dione
+## Running Odyssey
 
 ### Connecting to Mainnet
 
-To connect to the Dione Mainnet, run:
+To connect to the Odyssey Mainnet, run:
 
 ```sh
-./build/dionego
+./build/odysseyego
 ```
 
 You should see some pretty ASCII art and log messages.
 
 You can use `Ctrl+C` to kill the node.
 
-### Connecting to Fuji
+### Connecting to Testnet
 
-To connect to the Fuji Testnet, run:
+To connect to the Testnet, run:
 
 ```sh
-./build/dionego --network-id=fuji
+./build/odysseyego --network-id=testnet
 ```
 
 ### Creating a Local Testnet
@@ -135,9 +135,9 @@ See [this tutorial.](https://docs.dioneprotocol.com/build/tutorials/platform/cre
 
 ## Bootstrapping
 
-A node needs to catch up to the latest network state before it can participate in consensus and serve API calls. This process, called bootstrapping, currently takes several days for a new node connected to Mainnet.
+A node needs to catch up to the latest network state before it can participate in consensus and serve API calls. This process (called bootstrapping) currently takes several days for a new node connected to Mainnet.
 
-A node will not [report healthy](https://docs.dioneprotocol.com/build/dionego-apis/health) until it is done bootstrapping.
+A node will not [report healthy](https://docs.dioneprotocol.com/build/odysseyego-apis/health) until it is done bootstrapping.
 
 Improvements that reduce the amount of time it takes to bootstrap are under development.
 
@@ -145,7 +145,7 @@ The bottleneck during bootstrapping is typically database IO. Using a more power
 
 ## Generating Code
 
-Dionego uses multiple tools to generate efficient and boilerplate code.
+OdysseyGo uses multiple tools to generate efficient and boilerplate code.
 
 ### Running protobuf codegen
 
@@ -182,8 +182,8 @@ For more information, refer to the [GRPC Golang Quick Start Guide](https://grpc.
 ### Running protobuf codegen from docker
 
 ```sh
-docker build -t dione:protobuf_codegen -f api/Dockerfile.buf .
-docker run -t -i -v $(pwd):/opt/dione -w/opt/dione dione:protobuf_codegen bash -c "scripts/protobuf_codegen.sh"
+docker build -t odysseye:protobuf_codegen -f api/Dockerfile.buf .
+docker run -t -i -v $(pwd):/opt/odysseye -w/opt/odysseye odysseye:protobuf_codegen bash -c "scripts/protobuf_codegen.sh"
 ```
 
 ### Running mock codegen
@@ -196,7 +196,7 @@ This should only be necessary when modifying exported interfaces or after modify
 
 ### Version Semantics
 
-DioneGo is first and foremost a client for the Dione network. The versioning of DioneGo follows that of the Dione network.
+OdysseyGo is first and foremost a client for the Odyssey network. The versioning of OdysseyGo follows that of the Odyssey network.
 
 - `v0.x.x` indicates a development network version.
 - `v1.x.x` indicates a production network version.
@@ -205,15 +205,15 @@ DioneGo is first and foremost a client for the Dione network. The versioning of 
 
 ### Library Compatibility Guarantees
 
-Because DioneGo's version denotes the network version, it is expected that interfaces exported by DioneGo's packages may change in `Patch` version updates.
+Because OdysseyGo's version denotes the network version, it is expected that interfaces exported by OdysseyGo's packages may change in `Patch` version updates.
 
 ### API Compatibility Guarantees
 
-APIs exposed when running DioneGo will maintain backwards compatibility, unless the functionality is explicitly deprecated and announced when removed.
+APIs exposed when running OdysseyGo will maintain backwards compatibility, unless the functionality is explicitly deprecated and announced when removed.
 
 ## Supported Platforms
 
-DioneGo can run on different platforms, with different support tiers:
+OdysseyGo can run on different platforms, with different support tiers:
 
 - **Tier 1**: Fully supported by the maintainers, guaranteed to pass all tests including e2e and stress tests.
 - **Tier 2**: Passes all unit and integration tests but not necessarily e2e tests.
@@ -221,7 +221,7 @@ DioneGo can run on different platforms, with different support tiers:
 - **Not supported**: May not build and not tested, considered _unsafe_. To be supported in the future.
 
 The following table lists currently supported platforms and their corresponding
-DioneGo support tiers:
+OdysseyGo support tiers:
 
 | Architecture | Operating system | Support tier  |
 | :----------: | :--------------: | :-----------: |
@@ -235,14 +235,14 @@ DioneGo support tiers:
 
 To officially support a new platform, one must satisfy the following requirements:
 
-| DioneGo continuous integration | Tier 1  | Tier 2  | Tier 3  |
-| ---------------------------------- | :-----: | :-----: | :-----: |
-| Build passes                       | &check; | &check; | &check; |
-| Unit and integration tests pass    | &check; | &check; |         |
-| End-to-end and stress tests pass   | &check; |         |         |
+| OdysseyGo continuous integration | Tier 1  | Tier 2  | Tier 3  |
+|----------------------------------| :-----: | :-----: | :-----: |
+| Build passes                     | &check; | &check; | &check; |
+| Unit and integration tests pass  | &check; | &check; |         |
+| End-to-end and stress tests pass | &check; |         |         |
 
 ## Security Bugs
 
 **We and our community welcome responsible disclosures.**
 
-Please refer to our [Security Policy](SECURITY.md) and [Security Advisories](https://github.com/dioneprotocol/dionego/security/advisories).
+Please refer to our [Security Policy](SECURITY.md) and [Security Advisories](https://github.com/DioneProtocol/odysseygo/security/advisories).

@@ -1,11 +1,11 @@
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
+// See the file LICENSE for licensing terms.
+
 //go:build linux
 // +build linux
 
 // ^ SIGTERM signal is not available on Windows
 // ^ syscall.SysProcAttr only has field Pdeathsig on Linux
-
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
 
 package subprocess
 
@@ -16,14 +16,14 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/runtime"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 )
 
 func NewCmd(path string, args ...string) *exec.Cmd {
 	cmd := exec.Command(path, args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Pdeathsig: syscall.SIGINT}
+	cmd.SysProcAttr = &syscall.SysProcAttr{Pdeathsig: syscall.SIGTERM}
 	return cmd
 }
 
@@ -32,7 +32,7 @@ func stop(ctx context.Context, log logging.Logger, cmd *exec.Cmd) {
 	go func() {
 		// attempt graceful shutdown
 		errs := wrappers.Errs{}
-		err := cmd.Process.Signal(syscall.SIGINT)
+		err := cmd.Process.Signal(syscall.SIGTERM)
 		errs.Add(err)
 		_, err = cmd.Process.Wait()
 		errs.Add(err)

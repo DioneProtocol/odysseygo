@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/staking"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/staking"
 )
 
 func TestBuild(t *testing.T) {
@@ -49,7 +49,7 @@ func TestBuild(t *testing.T) {
 	require.NoError(err)
 
 	err = builtBlock.Verify(false, chainID)
-	require.Error(err)
+	require.ErrorIs(err, errUnexpectedProposer)
 }
 
 func TestBuildUnsigned(t *testing.T) {
@@ -73,7 +73,7 @@ func TestBuildUnsigned(t *testing.T) {
 	require.NoError(err)
 
 	err = builtBlock.Verify(true, ids.Empty)
-	require.Error(err)
+	require.ErrorIs(err, errMissingProposer)
 }
 
 func TestBuildHeader(t *testing.T) {

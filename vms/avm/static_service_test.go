@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -6,11 +6,11 @@ package avm
 import (
 	"testing"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
 )
 
 var addrStrArray = []string{
@@ -20,7 +20,7 @@ var addrStrArray = []string{
 	"Jz9ayEDt7dx9hDx45aXALujWmL9ZUuqe7",
 }
 
-var testHRP = constants.NetworkIDToHRP[networkID]
+var testHRP = constants.NetworkIDToHRP[constants.UnitTestID]
 
 func TestBuildGenesis(t *testing.T) {
 	ss := CreateStaticService()

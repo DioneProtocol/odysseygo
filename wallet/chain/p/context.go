@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -6,9 +6,9 @@ package p
 import (
 	stdcontext "context"
 
-	"github.com/dioneprotocol/dionego/api/info"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/avm"
+	"github.com/DioneProtocol/odysseygo/api/info"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
 )
 
 var _ Context = (*context)(nil)
@@ -21,22 +21,18 @@ type Context interface {
 	TransformSubnetTxFee() uint64
 	CreateBlockchainTxFee() uint64
 	AddPrimaryNetworkValidatorFee() uint64
-	AddPrimaryNetworkDelegatorFee() uint64
 	AddSubnetValidatorFee() uint64
-	AddSubnetDelegatorFee() uint64
 }
 
 type context struct {
 	networkID                     uint32
-	dioneAssetID                   ids.ID
+	dioneAssetID                  ids.ID
 	baseTxFee                     uint64
 	createSubnetTxFee             uint64
 	transformSubnetTxFee          uint64
 	createBlockchainTxFee         uint64
 	addPrimaryNetworkValidatorFee uint64
-	addPrimaryNetworkDelegatorFee uint64
 	addSubnetValidatorFee         uint64
-	addSubnetDelegatorFee         uint64
 }
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
@@ -73,9 +69,7 @@ func NewContextFromClients(
 		uint64(txFees.TransformSubnetTxFee),
 		uint64(txFees.CreateBlockchainTxFee),
 		uint64(txFees.AddPrimaryNetworkValidatorFee),
-		uint64(txFees.AddPrimaryNetworkDelegatorFee),
 		uint64(txFees.AddSubnetValidatorFee),
-		uint64(txFees.AddSubnetDelegatorFee),
 	), nil
 }
 
@@ -87,9 +81,7 @@ func NewContext(
 	transformSubnetTxFee uint64,
 	createBlockchainTxFee uint64,
 	addPrimaryNetworkValidatorFee uint64,
-	addPrimaryNetworkDelegatorFee uint64,
 	addSubnetValidatorFee uint64,
-	addSubnetDelegatorFee uint64,
 ) Context {
 	return &context{
 		networkID:                     networkID,
@@ -99,9 +91,7 @@ func NewContext(
 		transformSubnetTxFee:          transformSubnetTxFee,
 		createBlockchainTxFee:         createBlockchainTxFee,
 		addPrimaryNetworkValidatorFee: addPrimaryNetworkValidatorFee,
-		addPrimaryNetworkDelegatorFee: addPrimaryNetworkDelegatorFee,
 		addSubnetValidatorFee:         addSubnetValidatorFee,
-		addSubnetDelegatorFee:         addSubnetDelegatorFee,
 	}
 }
 
@@ -133,14 +123,6 @@ func (c *context) AddPrimaryNetworkValidatorFee() uint64 {
 	return c.addPrimaryNetworkValidatorFee
 }
 
-func (c *context) AddPrimaryNetworkDelegatorFee() uint64 {
-	return c.addPrimaryNetworkDelegatorFee
-}
-
 func (c *context) AddSubnetValidatorFee() uint64 {
 	return c.addSubnetValidatorFee
-}
-
-func (c *context) AddSubnetDelegatorFee() uint64 {
-	return c.addSubnetDelegatorFee
 }

@@ -1,26 +1,23 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/hashing"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/avm/fxs"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/nftfx"
-	"github.com/dioneprotocol/dionego/vms/propertyfx"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
-
-var errNilTx = errors.New("nil tx is not valid")
 
 type UnsignedTx interface {
 	snow.ContextInitializable
@@ -37,14 +34,6 @@ type UnsignedTx interface {
 	// TODO: deprecate after x-chain linearization
 	InputUTXOs() []*dione.UTXOID
 
-	SyntacticVerify(
-		ctx *snow.Context,
-		c codec.Manager,
-		txFeeAssetID ids.ID,
-		txFee uint64,
-		creationTxFee uint64,
-		numFxs int,
-	) error
 	// Visit calls [visitor] with this transaction's concrete type
 	Visit(visitor Visitor) error
 }
@@ -58,7 +47,7 @@ type Tx struct {
 	Unsigned UnsignedTx          `serialize:"true" json:"unsignedTx"`
 	Creds    []*fxs.FxCredential `serialize:"true" json:"credentials"` // The credentials of this transaction
 
-	id    ids.ID
+	TxID  ids.ID `json:"id"`
 	bytes []byte
 }
 
@@ -79,14 +68,14 @@ func (t *Tx) Initialize(c codec.Manager) error {
 }
 
 func (t *Tx) SetBytes(unsignedBytes, signedBytes []byte) {
-	t.id = hashing.ComputeHash256Array(signedBytes)
+	t.TxID = hashing.ComputeHash256Array(signedBytes)
 	t.bytes = signedBytes
 	t.Unsigned.SetBytes(unsignedBytes)
 }
 
 // ID returns the unique ID of this tx
 func (t *Tx) ID() ids.ID {
-	return t.id
+	return t.TxID
 }
 
 // Bytes returns the binary representation of this tx
@@ -101,38 +90,6 @@ func (t *Tx) UTXOs() []*dione.UTXO {
 	// returned from the utxoGetter.
 	_ = t.Unsigned.Visit(&u)
 	return u.utxos
-}
-
-// SyntacticVerify verifies that this transaction is well-formed.
-func (t *Tx) SyntacticVerify(
-	ctx *snow.Context,
-	c codec.Manager,
-	txFeeAssetID ids.ID,
-	txFee uint64,
-	creationTxFee uint64,
-	numFxs int,
-) error {
-	if t == nil || t.Unsigned == nil {
-		return errNilTx
-	}
-
-	if err := t.Unsigned.SyntacticVerify(ctx, c, txFeeAssetID, txFee, creationTxFee, numFxs); err != nil {
-		return err
-	}
-
-	for _, cred := range t.Creds {
-		if err := cred.Verify(); err != nil {
-			return err
-		}
-	}
-
-	if numCreds := t.Unsigned.NumCredentials(); numCreds != len(t.Creds) {
-		return fmt.Errorf("tx has %d credentials but %d inputs. Should be same",
-			len(t.Creds),
-			numCreds,
-		)
-	}
-	return nil
 }
 
 func (t *Tx) SignSECP256K1Fx(c codec.Manager, signers [][]*secp256k1.PrivateKey) error {

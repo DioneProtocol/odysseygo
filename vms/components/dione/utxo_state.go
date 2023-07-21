@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dione
@@ -6,13 +6,13 @@ package dione
 import (
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/cache/metercacher"
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/linkeddb"
-	"github.com/dioneprotocol/dionego/database/prefixdb"
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/linkeddb"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
 )
 
 const (
@@ -47,6 +47,14 @@ type UTXOReader interface {
 type UTXOGetter interface {
 	// GetUTXO attempts to load a utxo.
 	GetUTXO(utxoID ids.ID) (*UTXO, error)
+}
+
+type UTXOAdder interface {
+	AddUTXO(utxo *UTXO)
+}
+
+type UTXODeleter interface {
+	DeleteUTXO(utxoID ids.ID)
 }
 
 // UTXOWriter is a thin wrapper around a database to provide storage and
@@ -166,6 +174,9 @@ func (s *utxoState) PutUTXO(utxo *UTXO) error {
 
 func (s *utxoState) DeleteUTXO(utxoID ids.ID) error {
 	utxo, err := s.GetUTXO(utxoID)
+	if err == database.ErrNotFound {
+		return nil
+	}
 	if err != nil {
 		return err
 	}

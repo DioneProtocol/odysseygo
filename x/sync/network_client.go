@@ -1,4 +1,4 @@
-// (c) 2021-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sync
@@ -14,18 +14,18 @@ import (
 
 	"golang.org/x/sync/semaphore"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 // Minimum amount of time to handle a request
 const minRequestHandlingDuration = 100 * time.Millisecond
 
 var (
-	_ NetworkClient = &networkClient{}
+	_ NetworkClient = (*networkClient)(nil)
 
 	ErrAcquiringSemaphore = errors.New("error acquiring semaphore")
 	ErrRequestFailed      = errors.New("request failed")
@@ -111,7 +111,7 @@ func (c *networkClient) AppResponse(_ context.Context, nodeID ids.NodeID, reques
 	return nil
 }
 
-// AppRequestFailed can be called by the dionego -> VM in following cases:
+// AppRequestFailed can be called by the odysseygo -> VM in following cases:
 // - node is benched
 // - failed to send message to [nodeID] due to a network issue
 // - timeout
@@ -186,11 +186,6 @@ func (c *networkClient) RequestAny(
 // If the limit on active requests is reached, this function blocks until
 // a slot becomes available.
 func (c *networkClient) Request(ctx context.Context, nodeID ids.NodeID, request []byte) ([]byte, error) {
-	// TODO danlaine: is it possible for this condition to occur?
-	if nodeID == ids.EmptyNodeID {
-		return nil, fmt.Errorf("cannot send request to empty nodeID, nodeID=%s, requestLen=%d", nodeID, len(request))
-	}
-
 	// Take a slot from total [activeRequests] and block until a slot becomes available.
 	if err := c.activeRequests.Acquire(ctx, 1); err != nil {
 		return nil, ErrAcquiringSemaphore

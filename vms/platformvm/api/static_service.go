@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package api
@@ -8,32 +8,32 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/formatting"
-	"github.com/dioneprotocol/dionego/utils/formatting/address"
-	"github.com/dioneprotocol/dionego/utils/json"
-	"github.com/dioneprotocol/dionego/utils/math"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/genesis"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/stakeable"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/txheap"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/txheap"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
-// Note that since an Dione network has exactly one Platform Chain,
+// Note that since an Odyssey network has exactly one Platform Chain,
 // and the Platform Chain defines the genesis state of the network
 // (who is staking, which chains exist, etc.), defining the genesis
 // state of the Platform Chain is the same as defining the genesis
 // state of the network.
 
 var (
-	errUTXOHasNoValue       = errors.New("genesis UTXO has no value")
-	errValidatorAddsNoValue = errors.New("validator would have already unstaked")
-	errStakeOverflow        = errors.New("validator stake exceeds limit")
+	errUTXOHasNoValue         = errors.New("genesis UTXO has no value")
+	errValidatorHasNoWeight   = errors.New("validator has not weight")
+	errValidatorAlreadyExited = errors.New("validator would have already unstaked")
+	errStakeOverflow          = errors.New("validator stake exceeds limit")
 
 	_ utils.Sortable[UTXO] = UTXO{}
 )
@@ -109,26 +109,15 @@ type Owner struct {
 // APIs.
 type PermissionlessValidator struct {
 	Staker
-	// Deprecated: RewardOwner has been replaced by ValidationRewardOwner and
-	//             DelegationRewardOwner.
+	// Deprecated: RewardOwner has been replaced by ValidationRewardOwner.
 	RewardOwner *Owner `json:"rewardOwner,omitempty"`
 	// The owner of the rewards from the validation period, if applicable.
-	ValidationRewardOwner *Owner `json:"validationRewardOwner,omitempty"`
-	// The owner of the rewards from delegations during the validation period,
-	// if applicable.
-	DelegationRewardOwner *Owner                    `json:"delegationRewardOwner,omitempty"`
+	ValidationRewardOwner *Owner                    `json:"validationRewardOwner,omitempty"`
 	PotentialReward       *json.Uint64              `json:"potentialReward,omitempty"`
-	DelegationFee         json.Float32              `json:"delegationFee"`
-	ExactDelegationFee    *json.Uint32              `json:"exactDelegationFee,omitempty"`
 	Uptime                *json.Float32             `json:"uptime,omitempty"`
 	Connected             bool                      `json:"connected"`
 	Staked                []UTXO                    `json:"staked,omitempty"`
 	Signer                *signer.ProofOfPossession `json:"signer,omitempty"`
-
-	// The delegators delegating to this validator
-	DelegatorCount  *json.Uint64        `json:"delegatorCount,omitempty"`
-	DelegatorWeight *json.Uint64        `json:"delegatorWeight,omitempty"`
-	Delegators      *[]PrimaryDelegator `json:"delegators,omitempty"`
 }
 
 // PermissionedValidator is the repr. of a permissioned validator sent over APIs.
@@ -137,13 +126,6 @@ type PermissionedValidator struct {
 	// The owner the staking reward, if applicable, will go to
 	Connected bool          `json:"connected"`
 	Uptime    *json.Float32 `json:"uptime,omitempty"`
-}
-
-// PrimaryDelegator is the repr. of a primary network delegator sent over APIs.
-type PrimaryDelegator struct {
-	Staker
-	RewardOwner     *Owner       `json:"rewardOwner,omitempty"`
-	PotentialReward *json.Uint64 `json:"potentialReward,omitempty"`
 }
 
 // Chain defines a chain that exists
@@ -169,7 +151,7 @@ type Chain struct {
 // [Chains] are the chains that exist at genesis.
 // [Time] is the Platform Chain's time at network genesis.
 type BuildGenesisArgs struct {
-	DioneAssetID   ids.ID                    `json:"dioneAssetID"`
+	DioneAssetID  ids.ID                    `json:"dioneAssetID"`
 	NetworkID     json.Uint32               `json:"networkID"`
 	UTXOs         []UTXO                    `json:"utxos"`
 	Validators    []PermissionlessValidator `json:"validators"`
@@ -195,7 +177,7 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 	return ids.ToShortID(addrBytes)
 }
 
-// BuildGenesis build the genesis state of the Platform Chain (and thereby the Dione network.)
+// BuildGenesis build the genesis state of the Platform Chain (and thereby the Odyssey network.)
 func (*StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, reply *BuildGenesisReply) error {
 	// Specify the UTXOs on the Platform chain that exist at genesis.
 	utxos := make([]*genesis.UTXO, 0, len(args.UTXOs))
@@ -242,6 +224,7 @@ func (*StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, repl
 	// Specify the validators that are validating the primary network at genesis.
 	vdrs := txheap.NewByEndTime()
 	for _, vdr := range args.Validators {
+		fmt.Println("Validator id: ", vdr)
 		weight := uint64(0)
 		stake := make([]*dione.TransferableOutput, len(vdr.Staked))
 		utils.Sort(vdr.Staked)
@@ -278,10 +261,10 @@ func (*StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, repl
 		}
 
 		if weight == 0 {
-			return errValidatorAddsNoValue
+			return errValidatorHasNoWeight
 		}
 		if uint64(vdr.EndTime) <= uint64(args.Time) {
-			return errValidatorAddsNoValue
+			return errValidatorAlreadyExited
 		}
 
 		owner := &secp256k1fx.OutputOwners{
@@ -297,25 +280,19 @@ func (*StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, repl
 		}
 		utils.Sort(owner.Addrs)
 
-		delegationFee := uint32(0)
-		if vdr.ExactDelegationFee != nil {
-			delegationFee = uint32(*vdr.ExactDelegationFee)
-		}
-
 		tx := &txs.Tx{Unsigned: &txs.AddValidatorTx{
 			BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
-			Validator: validator.Validator{
+			Validator: txs.Validator{
 				NodeID: vdr.NodeID,
 				Start:  uint64(args.Time),
 				End:    uint64(vdr.EndTime),
 				Wght:   weight,
 			},
-			StakeOuts:        stake,
-			RewardsOwner:     owner,
-			DelegationShares: delegationFee,
+			StakeOuts:    stake,
+			RewardsOwner: owner,
 		}}
 		if err := tx.Initialize(txs.GenesisCodec); err != nil {
 			return err

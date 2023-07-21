@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -11,13 +11,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/status"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 func TestDiffMissingState(t *testing.T) {
@@ -150,106 +150,6 @@ func TestDiffPendingValidator(t *testing.T) {
 	state.EXPECT().GetPendingValidator(pendingValidator.SubnetID, pendingValidator.NodeID).Return(nil, database.ErrNotFound).Times(1)
 	_, err = d.GetPendingValidator(pendingValidator.SubnetID, pendingValidator.NodeID)
 	require.ErrorIs(err, database.ErrNotFound)
-}
-
-func TestDiffCurrentDelegator(t *testing.T) {
-	require := require.New(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	currentDelegator := &Staker{
-		TxID:     ids.GenerateTestID(),
-		SubnetID: ids.GenerateTestID(),
-		NodeID:   ids.GenerateTestNodeID(),
-	}
-
-	state := NewMockState(ctrl)
-	// Called in NewDiff
-	state.EXPECT().GetTimestamp().Return(time.Now()).Times(1)
-
-	states := NewMockVersions(ctrl)
-	lastAcceptedID := ids.GenerateTestID()
-	states.EXPECT().GetState(lastAcceptedID).Return(state, true).AnyTimes()
-
-	d, err := NewDiff(lastAcceptedID, states)
-	require.NoError(err)
-
-	// Put a current delegator
-	d.PutCurrentDelegator(currentDelegator)
-
-	// Assert that we get the current delegator back
-	// Mock iterator for [state] returns no delegators.
-	stateCurrentDelegatorIter := NewMockStakerIterator(ctrl)
-	stateCurrentDelegatorIter.EXPECT().Next().Return(false).Times(2)
-	stateCurrentDelegatorIter.EXPECT().Release().Times(2)
-	state.EXPECT().GetCurrentDelegatorIterator(
-		currentDelegator.SubnetID,
-		currentDelegator.NodeID,
-	).Return(stateCurrentDelegatorIter, nil).Times(2)
-	gotCurrentDelegatorIter, err := d.GetCurrentDelegatorIterator(currentDelegator.SubnetID, currentDelegator.NodeID)
-	require.NoError(err)
-	// The iterator should have the 1 delegator we put in [d]
-	require.True(gotCurrentDelegatorIter.Next())
-	require.Equal(gotCurrentDelegatorIter.Value(), currentDelegator)
-
-	// Delete the current delegator
-	d.DeleteCurrentDelegator(currentDelegator)
-
-	// Make sure the deletion worked.
-	// The iterator should have no elements.
-	gotCurrentDelegatorIter, err = d.GetCurrentDelegatorIterator(currentDelegator.SubnetID, currentDelegator.NodeID)
-	require.NoError(err)
-	require.False(gotCurrentDelegatorIter.Next())
-}
-
-func TestDiffPendingDelegator(t *testing.T) {
-	require := require.New(t)
-	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
-	pendingDelegator := &Staker{
-		TxID:     ids.GenerateTestID(),
-		SubnetID: ids.GenerateTestID(),
-		NodeID:   ids.GenerateTestNodeID(),
-	}
-
-	state := NewMockState(ctrl)
-	// Called in NewDiff
-	state.EXPECT().GetTimestamp().Return(time.Now()).Times(1)
-
-	states := NewMockVersions(ctrl)
-	lastAcceptedID := ids.GenerateTestID()
-	states.EXPECT().GetState(lastAcceptedID).Return(state, true).AnyTimes()
-
-	d, err := NewDiff(lastAcceptedID, states)
-	require.NoError(err)
-
-	// Put a pending delegator
-	d.PutPendingDelegator(pendingDelegator)
-
-	// Assert that we get the pending delegator back
-	// Mock iterator for [state] returns no delegators.
-	statePendingDelegatorIter := NewMockStakerIterator(ctrl)
-	statePendingDelegatorIter.EXPECT().Next().Return(false).Times(2)
-	statePendingDelegatorIter.EXPECT().Release().Times(2)
-	state.EXPECT().GetPendingDelegatorIterator(
-		pendingDelegator.SubnetID,
-		pendingDelegator.NodeID,
-	).Return(statePendingDelegatorIter, nil).Times(2)
-	gotPendingDelegatorIter, err := d.GetPendingDelegatorIterator(pendingDelegator.SubnetID, pendingDelegator.NodeID)
-	require.NoError(err)
-	// The iterator should have the 1 delegator we put in [d]
-	require.True(gotPendingDelegatorIter.Next())
-	require.Equal(gotPendingDelegatorIter.Value(), pendingDelegator)
-
-	// Delete the pending delegator
-	d.DeletePendingDelegator(pendingDelegator)
-
-	// Make sure the deletion worked.
-	// The iterator should have no elements.
-	gotPendingDelegatorIter, err = d.GetPendingDelegatorIterator(pendingDelegator.SubnetID, pendingDelegator.NodeID)
-	require.NoError(err)
-	require.False(gotPendingDelegatorIter.Next())
 }
 
 func TestDiffSubnet(t *testing.T) {
@@ -467,7 +367,7 @@ func TestDiffUTXO(t *testing.T) {
 
 		// Make sure it's gone
 		_, err = d.GetUTXO(utxo.InputID())
-		require.Error(err)
+		require.ErrorIs(err, database.ErrNotFound)
 	}
 }
 

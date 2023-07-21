@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package syncer
@@ -9,13 +9,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/engine/common"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/getter"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/getter"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 const (
@@ -89,9 +89,9 @@ func buildTestsObjects(t *testing.T, commonCfg *common.Config) (
 	commonSyncer := New(cfg, func(context.Context, uint32) error {
 		return nil
 	})
-	syncer, ok := commonSyncer.(*stateSyncer)
-	require.True(t, ok)
-	require.True(t, syncer.stateSyncVM != nil)
+	require.IsType(t, &stateSyncer{}, commonSyncer)
+	syncer := commonSyncer.(*stateSyncer)
+	require.NotNil(t, syncer.stateSyncVM)
 
 	fullVM.GetOngoingSyncStateSummaryF = func(context.Context) (block.StateSummary, error) {
 		return nil, database.ErrNotFound

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package consistent
@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 var (
@@ -211,11 +211,8 @@ func TestGetOnEmptyRingReturnsError(t *testing.T) {
 		key:  "foo",
 		hash: 0,
 	}
-
-	node, err := ring.Get(foo)
-
-	require.Equal(t, nil, node)
-	require.Equal(t, errEmptyRing, err)
+	_, err := ring.Get(foo)
+	require.ErrorIs(t, err, errEmptyRing)
 }
 
 // Tests that trying to call Remove on a node that doesn't exist should return false.

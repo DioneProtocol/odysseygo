@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txs
@@ -7,7 +7,6 @@ package txs
 type Visitor interface {
 	AddValidatorTx(*AddValidatorTx) error
 	AddSubnetValidatorTx(*AddSubnetValidatorTx) error
-	AddDelegatorTx(*AddDelegatorTx) error
 	CreateChainTx(*CreateChainTx) error
 	CreateSubnetTx(*CreateSubnetTx) error
 	ImportTx(*ImportTx) error
@@ -17,5 +16,4 @@ type Visitor interface {
 	RemoveSubnetValidatorTx(*RemoveSubnetValidatorTx) error
 	TransformSubnetTx(*TransformSubnetTx) error
 	AddPermissionlessValidatorTx(*AddPermissionlessValidatorTx) error
-	AddPermissionlessDelegatorTx(*AddPermissionlessDelegatorTx) error
 }

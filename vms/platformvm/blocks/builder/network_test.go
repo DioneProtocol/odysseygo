@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package builder
@@ -9,13 +9,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/vms/platformvm/message"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/message"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 
-	txbuilder "github.com/dioneprotocol/dionego/vms/platformvm/txs/builder"
+	txbuilder "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/builder"
 )
 
 func getValidTx(txBuilder txbuilder.Builder, t *testing.T) *txs.Tx {
@@ -67,7 +67,7 @@ func TestMempoolValidGossipedTxIsAddedToMempool(t *testing.T) {
 	env.ctx.Lock.Lock()
 
 	// and gossiped if it has just been discovered
-	require.True(gossipedBytes != nil)
+	require.NotNil(gossipedBytes)
 
 	// show gossiped bytes can be decoded to the original tx
 	replyIntf, err := message.Parse(gossipedBytes)
@@ -93,7 +93,7 @@ func TestMempoolInvalidGossipedTxIsNotAddedToMempool(t *testing.T) {
 	// create a tx and mark as invalid
 	tx := getValidTx(env.txBuilder, t)
 	txID := tx.ID()
-	env.Builder.MarkDropped(txID, "dropped for testing")
+	env.Builder.MarkDropped(txID, errTestingDropped)
 
 	// show that the invalid tx is not requested
 	nodeID := ids.GenerateTestNodeID()
@@ -129,7 +129,7 @@ func TestMempoolNewLocaTxIsGossiped(t *testing.T) {
 
 	err := env.Builder.AddUnverifiedTx(tx)
 	require.NoError(err)
-	require.True(gossipedBytes != nil)
+	require.NotNil(gossipedBytes)
 
 	// show gossiped bytes can be decoded to the original tx
 	replyIntf, err := message.Parse(gossipedBytes)
@@ -147,5 +147,5 @@ func TestMempoolNewLocaTxIsGossiped(t *testing.T) {
 	err = env.Builder.Add(tx)
 	require.NoError(err)
 
-	require.True(gossipedBytes == nil)
+	require.Nil(gossipedBytes)
 }

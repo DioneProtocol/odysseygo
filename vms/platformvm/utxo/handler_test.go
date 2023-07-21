@@ -1,24 +1,26 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package utxo
 
 import (
-	"math"
 	"testing"
 	"time"
 
+	stdmath "math"
+
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/utils/crypto/secp256k1"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/stakeable"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var _ txs.UnsignedTx = (*dummyUnsignedTx)(nil)
@@ -62,7 +64,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		outs            []*dione.TransferableOutput
 		creds           []verify.Verifiable
 		producedAmounts map[ids.ID]uint64
-		shouldErr       bool
+		expectedErr     error
 	}{
 		{
 			description:     "no inputs, no outputs, no fee",
@@ -71,7 +73,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			outs:            []*dione.TransferableOutput{},
 			creds:           []verify.Verifiable{},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 		{
 			description: "no inputs, no outputs, positive fee",
@@ -82,7 +84,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "wrong utxo assetID, one input, no outputs, no fee",
@@ -103,7 +105,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     errAssetIDMismatch,
 		},
 		{
 			description: "one wrong assetID input, no outputs, no fee",
@@ -124,7 +126,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     errAssetIDMismatch,
 		},
 		{
 			description: "one input, one wrong assetID output, no fee",
@@ -152,7 +154,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "attempt to consume locked output as unlocked",
@@ -176,7 +178,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     errLockedFundsNotMarkedAsLocked,
 		},
 		{
 			description: "attempt to modify locktime",
@@ -203,7 +205,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     errLocktimeMismatch,
 		},
 		{
 			description: "one input, no outputs, positive fee",
@@ -226,7 +228,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "wrong number of credentials",
@@ -247,7 +249,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: errWrongNumberCredentials,
 		},
 		{
 			description: "wrong number of UTXOs",
@@ -265,7 +267,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: errWrongNumberUTXOs,
 		},
 		{
 			description: "invalid credential",
@@ -288,7 +290,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: secp256k1fx.ErrNilCredential,
 		},
 		{
 			description: "invalid signature",
@@ -324,7 +326,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: secp256k1.ErrInvalidSig,
 		},
 		{
 			description: "one input, no outputs, positive fee",
@@ -347,7 +349,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "locked one input, no outputs, no fee",
@@ -374,7 +376,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 		{
 			description: "locked one input, no outputs, positive fee",
@@ -403,7 +405,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "one locked and one unlocked input, one locked output, positive fee",
@@ -459,7 +461,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "one locked and one unlocked input, one locked output, positive fee, partially locked",
@@ -515,7 +517,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "one unlocked input, one locked output, zero fee",
@@ -550,7 +552,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 		{
 			description: "attempted overflow",
@@ -580,7 +582,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				{
 					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
-						Amt: math.MaxUint64,
+						Amt: stdmath.MaxUint64,
 					},
 				},
 			},
@@ -588,7 +590,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     math.ErrOverflow,
 		},
 		{
 			description: "attempted mint",
@@ -623,7 +625,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     ErrInsufficientLockedFunds,
 		},
 		{
 			description: "attempted mint through locking",
@@ -658,7 +660,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
-							Amt: math.MaxUint64,
+							Amt: stdmath.MaxUint64,
 						},
 					},
 				},
@@ -667,7 +669,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     math.ErrOverflow,
 		},
 		{
 			description: "attempted mint through mixed locking (low then high)",
@@ -699,7 +701,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
-							Amt: math.MaxUint64,
+							Amt: stdmath.MaxUint64,
 						},
 					},
 				},
@@ -708,7 +710,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     ErrInsufficientLockedFunds,
 		},
 		{
 			description: "attempted mint through mixed locking (high then low)",
@@ -732,7 +734,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				{
 					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
-						Amt: math.MaxUint64,
+						Amt: stdmath.MaxUint64,
 					},
 				},
 				{
@@ -749,7 +751,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     ErrInsufficientLockedFunds,
 		},
 		{
 			description: "transfer non-dione asset",
@@ -781,7 +783,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 		{
 			description: "lock non-dione asset",
@@ -816,7 +818,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 		{
 			description: "attempted asset conversion",
@@ -848,7 +850,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{},
-			shouldErr:       true,
+			expectedErr:     ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "attempted asset conversion with burn",
@@ -875,7 +877,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "two inputs, one output with custom asset, with fee",
@@ -922,7 +924,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "one input, fee, custom asset",
@@ -949,7 +951,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				h.ctx.DIONEAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "one input, custom fee",
@@ -976,7 +978,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				customAssetID: 1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "one input, custom fee, wrong burn",
@@ -1003,7 +1005,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			producedAmounts: map[ids.ID]uint64{
 				customAssetID: 1,
 			},
-			shouldErr: true,
+			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "two inputs, multiple fee",
@@ -1044,7 +1046,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				h.ctx.DIONEAssetID: 1,
 				customAssetID:     1,
 			},
-			shouldErr: false,
+			expectedErr: nil,
 		},
 		{
 			description: "one unlock input, one locked output, zero fee, unlocked, custom asset",
@@ -1079,7 +1081,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: make(map[ids.ID]uint64),
-			shouldErr:       false,
+			expectedErr:     nil,
 		},
 	}
 
@@ -1096,12 +1098,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				test.creds,
 				test.producedAmounts,
 			)
-
-			if test.shouldErr {
-				require.Error(err)
-			} else {
-				require.NoError(err)
-			}
+			require.ErrorIs(err, test.expectedErr)
 		})
 	}
 }

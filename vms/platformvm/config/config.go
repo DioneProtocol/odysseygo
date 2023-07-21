@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
@@ -6,14 +6,14 @@ package config
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/chains"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/uptime"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/chains"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/uptime"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 // Struct collecting all foundational parameters of PlatformVM
@@ -33,7 +33,7 @@ type Config struct {
 	UptimeLockedCalculator uptime.LockedCalculator
 
 	// True if the node is being run with staking enabled
-	StakingEnabled bool
+	SybilProtectionEnabled bool
 
 	// Set of subnets that this node is validating
 	TrackedSubnets set.Set[ids.ID]
@@ -41,41 +41,29 @@ type Config struct {
 	// Fee that is burned by every non-state creating transaction
 	TxFee uint64
 
-	// Fee that must be burned by every state creating transaction before AP3
+	// Fee that must be burned by every state creating transaction
 	CreateAssetTxFee uint64
 
-	// Fee that must be burned by every subnet creating transaction after AP3
+	// Fee that must be burned by every subnet creating transaction
 	CreateSubnetTxFee uint64
 
 	// Fee that must be burned by every transform subnet transaction
 	TransformSubnetTxFee uint64
 
-	// Fee that must be burned by every blockchain creating transaction after AP3
+	// Fee that must be burned by every blockchain creating transaction
 	CreateBlockchainTxFee uint64
 
 	// Transaction fee for adding a primary network validator
 	AddPrimaryNetworkValidatorFee uint64
 
-	// Transaction fee for adding a primary network delegator
-	AddPrimaryNetworkDelegatorFee uint64
-
 	// Transaction fee for adding a subnet validator
 	AddSubnetValidatorFee uint64
-
-	// Transaction fee for adding a subnet delegator
-	AddSubnetDelegatorFee uint64
 
 	// The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake uint64
 
 	// The maximum amount of tokens that can be bonded on a validator
 	MaxValidatorStake uint64
-
-	// Minimum stake, in nDIONE, that can be delegated on the primary network
-	MinDelegatorStake uint64
-
-	// Minimum fee that can be charged for delegation
-	MinDelegationFee uint32
 
 	// UptimePercentage is the minimum uptime required to be rewarded for staking
 	UptimePercentage float64
@@ -89,14 +77,14 @@ type Config struct {
 	// Config for the minting function
 	RewardConfig reward.Config
 
-	// Time of the AP3 network upgrade
-	ApricotPhase3Time time.Time
-
-	// Time of the AP5 network upgrade
-	ApricotPhase5Time time.Time
+	// Time of the OP1 network upgrade
+	OdysseyPhase1Time time.Time
 
 	// Time of the Banff network upgrade
 	BanffTime time.Time
+
+	// Time of the Cortina network upgrade
+	CortinaTime time.Time
 
 	// Subnet ID --> Minimum portion of the subnet's stake this node must be
 	// connected to in order to report healthy.
@@ -117,12 +105,8 @@ type Config struct {
 	UseCurrentHeight bool
 }
 
-func (c *Config) IsApricotPhase3Activated(timestamp time.Time) bool {
-	return !timestamp.Before(c.ApricotPhase3Time)
-}
-
-func (c *Config) IsApricotPhase5Activated(timestamp time.Time) bool {
-	return !timestamp.Before(c.ApricotPhase5Time)
+func (c *Config) IsOdysseyPhase1Activated(timestamp time.Time) bool {
+	return !timestamp.Before(c.OdysseyPhase1Time)
 }
 
 func (c *Config) IsBanffActivated(timestamp time.Time) bool {
@@ -130,14 +114,14 @@ func (c *Config) IsBanffActivated(timestamp time.Time) bool {
 }
 
 func (c *Config) GetCreateBlockchainTxFee(timestamp time.Time) uint64 {
-	if c.IsApricotPhase3Activated(timestamp) {
+	if c.IsOdysseyPhase1Activated(timestamp) {
 		return c.CreateBlockchainTxFee
 	}
 	return c.CreateAssetTxFee
 }
 
 func (c *Config) GetCreateSubnetTxFee(timestamp time.Time) uint64 {
-	if c.IsApricotPhase3Activated(timestamp) {
+	if c.IsOdysseyPhase1Activated(timestamp) {
 		return c.CreateSubnetTxFee
 	}
 	return c.CreateAssetTxFee
@@ -146,7 +130,7 @@ func (c *Config) GetCreateSubnetTxFee(timestamp time.Time) uint64 {
 // Create the blockchain described in [tx], but only if this node is a member of
 // the subnet that validates the chain
 func (c *Config) CreateChain(chainID ids.ID, tx *txs.CreateChainTx) {
-	if c.StakingEnabled && // Staking is enabled, so nodes might not validate all chains
+	if c.SybilProtectionEnabled && // Sybil protection is enabled, so nodes might not validate all chains
 		constants.PrimaryNetworkID != tx.SubnetID && // All nodes must validate the primary network
 		!c.TrackedSubnets.Contains(tx.SubnetID) { // This node doesn't validate this blockchain
 		return

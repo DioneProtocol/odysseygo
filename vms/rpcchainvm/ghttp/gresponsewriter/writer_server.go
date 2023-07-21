@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package gresponsewriter
@@ -12,15 +12,15 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/ghttp/gconn"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/ghttp/greader"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/ghttp/gwriter"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp/gconn"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp/greader"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp/gwriter"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
 
-	responsewriterpb "github.com/dioneprotocol/dionego/proto/pb/http/responsewriter"
-	readerpb "github.com/dioneprotocol/dionego/proto/pb/io/reader"
-	writerpb "github.com/dioneprotocol/dionego/proto/pb/io/writer"
-	connpb "github.com/dioneprotocol/dionego/proto/pb/net/conn"
+	responsewriterpb "github.com/DioneProtocol/odysseygo/proto/pb/http/responsewriter"
+	readerpb "github.com/DioneProtocol/odysseygo/proto/pb/io/reader"
+	writerpb "github.com/DioneProtocol/odysseygo/proto/pb/io/writer"
+	connpb "github.com/DioneProtocol/odysseygo/proto/pb/net/conn"
 )
 
 var (

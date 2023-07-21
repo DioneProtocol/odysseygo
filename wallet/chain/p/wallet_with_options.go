@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -6,13 +6,12 @@ package p
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/components/dione"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
-	"github.com/dioneprotocol/dionego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var _ Wallet = (*walletWithOptions)(nil)
@@ -50,21 +49,19 @@ func (w *walletWithOptions) IssueBaseTx(
 }
 
 func (w *walletWithOptions) IssueAddValidatorTx(
-	vdr *validator.Validator,
+	vdr *txs.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
-	shares uint32,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueAddValidatorTx(
 		vdr,
 		rewardsOwner,
-		shares,
 		common.UnionOptions(w.options, options)...,
 	)
 }
 
 func (w *walletWithOptions) IssueAddSubnetValidatorTx(
-	vdr *validator.SubnetValidator,
+	vdr *txs.SubnetValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueAddSubnetValidatorTx(
@@ -81,18 +78,6 @@ func (w *walletWithOptions) IssueRemoveSubnetValidatorTx(
 	return w.Wallet.IssueRemoveSubnetValidatorTx(
 		nodeID,
 		subnetID,
-		common.UnionOptions(w.options, options)...,
-	)
-}
-
-func (w *walletWithOptions) IssueAddDelegatorTx(
-	vdr *validator.Validator,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	options ...common.Option,
-) (ids.ID, error) {
-	return w.Wallet.IssueAddDelegatorTx(
-		vdr,
-		rewardsOwner,
 		common.UnionOptions(w.options, options)...,
 	)
 }
@@ -160,8 +145,6 @@ func (w *walletWithOptions) IssueTransformSubnetTx(
 	maxValidatorStake uint64,
 	minStakeDuration time.Duration,
 	maxStakeDuration time.Duration,
-	minDelegationFee uint32,
-	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
@@ -177,8 +160,6 @@ func (w *walletWithOptions) IssueTransformSubnetTx(
 		maxValidatorStake,
 		minStakeDuration,
 		maxStakeDuration,
-		minDelegationFee,
-		minDelegatorStake,
 		maxValidatorWeightFactor,
 		uptimeRequirement,
 		common.UnionOptions(w.options, options)...,
@@ -186,12 +167,10 @@ func (w *walletWithOptions) IssueTransformSubnetTx(
 }
 
 func (w *walletWithOptions) IssueAddPermissionlessValidatorTx(
-	vdr *validator.SubnetValidator,
+	vdr *txs.SubnetValidator,
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
-	delegationRewardsOwner *secp256k1fx.OutputOwners,
-	shares uint32,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueAddPermissionlessValidatorTx(
@@ -199,22 +178,6 @@ func (w *walletWithOptions) IssueAddPermissionlessValidatorTx(
 		signer,
 		assetID,
 		validationRewardsOwner,
-		delegationRewardsOwner,
-		shares,
-		common.UnionOptions(w.options, options)...,
-	)
-}
-
-func (w *walletWithOptions) IssueAddPermissionlessDelegatorTx(
-	vdr *validator.SubnetValidator,
-	assetID ids.ID,
-	rewardsOwner *secp256k1fx.OutputOwners,
-	options ...common.Option,
-) (ids.ID, error) {
-	return w.Wallet.IssueAddPermissionlessDelegatorTx(
-		vdr,
-		assetID,
-		rewardsOwner,
 		common.UnionOptions(w.options, options)...,
 	)
 }

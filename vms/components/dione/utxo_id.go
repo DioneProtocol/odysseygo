@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package dione
@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (
@@ -68,12 +68,12 @@ func UTXOIDFromString(s string) (*UTXOID, error) {
 
 	txID, err := ids.FromString(ss[0])
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", errFailedDecodingUTXOIDTxID, err)
+		return nil, fmt.Errorf("%w: %v", errFailedDecodingUTXOIDTxID, err)
 	}
 
 	idx, err := strconv.ParseUint(ss[1], 10, 32)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", errFailedDecodingUTXOIDIndex, err)
+		return nil, fmt.Errorf("%w: %v", errFailedDecodingUTXOIDIndex, err)
 	}
 
 	return &UTXOID{

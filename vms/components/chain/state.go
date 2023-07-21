@@ -1,21 +1,22 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chain
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/cache"
-	"github.com/dioneprotocol/dionego/cache/metercacher"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
 )
 
 // State implements an efficient caching layer used to wrap a VM
@@ -194,14 +195,17 @@ func NewMeteredState(
 	return c, nil
 }
 
-// SetLastAcceptedBlock sets the last accepted block to [lastAcceptedBlock]. This should be called
-// with an internal block - not a wrapped block returned from state.
+var errSetAcceptedWithProcessing = errors.New("cannot set last accepted block with blocks processing")
+
+// SetLastAcceptedBlock sets the last accepted block to [lastAcceptedBlock].
+// This should be called with an internal block - not a wrapped block returned
+// from state.
 //
-// This also flushes [lastAcceptedBlock] from missingBlocks and unverifiedBlocks to
-// ensure that their contents stay valid.
+// This also flushes [lastAcceptedBlock] from missingBlocks and unverifiedBlocks
+// to ensure that their contents stay valid.
 func (s *State) SetLastAcceptedBlock(lastAcceptedBlock snowman.Block) error {
 	if len(s.verifiedBlocks) != 0 {
-		return fmt.Errorf("cannot set chain state last accepted block with non-zero number of verified blocks in processing: %d", len(s.verifiedBlocks))
+		return fmt.Errorf("%w: %d", errSetAcceptedWithProcessing, len(s.verifiedBlocks))
 	}
 
 	// [lastAcceptedBlock] is no longer missing or unverified, so we evict it from the corresponding

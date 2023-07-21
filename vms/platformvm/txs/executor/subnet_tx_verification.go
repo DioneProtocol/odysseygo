@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -7,11 +7,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -70,7 +70,7 @@ func verifySubnetAuthorization(
 	subnetIntf, _, err := chainState.GetTx(subnetID)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"%w %q: %s",
+			"%w %q: %v",
 			errCantFindSubnet,
 			subnetID,
 			err,
@@ -83,7 +83,7 @@ func verifySubnetAuthorization(
 	}
 
 	if err := backend.Fx.VerifyPermission(sTx.Unsigned, subnetAuth, subnetCred, subnet.Owner); err != nil {
-		return nil, fmt.Errorf("%w: %s", errUnauthorizedSubnetModification, err)
+		return nil, fmt.Errorf("%w: %v", errUnauthorizedSubnetModification, err)
 	}
 
 	return sTx.Creds[:baseTxCredsLen], nil

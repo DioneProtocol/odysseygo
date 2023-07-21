@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package nftfx
@@ -7,11 +7,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/dioneprotocol/dionego/vms/types"
+	"github.com/DioneProtocol/odysseygo/vms/types"
 
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 const (
@@ -33,7 +33,7 @@ type TransferOutput struct {
 
 // MarshalJSON marshals Amt and the embedded OutputOwners struct
 // into a JSON readable format
-// If OutputOwners cannot be serialised then this will return error
+// If OutputOwners cannot be serialized then this will return error
 func (out *TransferOutput) MarshalJSON() ([]byte, error) {
 	result, err := out.OutputOwners.Fields()
 	if err != nil {

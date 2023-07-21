@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -6,8 +6,8 @@ package executor
 import (
 	"fmt"
 
-	"github.com/dioneprotocol/dionego/snow/consensus/snowman"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
 )
 
 var _ blocks.Visitor = (*verifier)(nil)
@@ -55,20 +55,20 @@ func (*options) BanffStandardBlock(*blocks.BanffStandardBlock) error {
 	return snowman.ErrNotOracle
 }
 
-func (*options) ApricotAbortBlock(*blocks.ApricotAbortBlock) error {
+func (*options) OdysseyAbortBlock(*blocks.OdysseyAbortBlock) error {
 	return snowman.ErrNotOracle
 }
 
-func (*options) ApricotCommitBlock(*blocks.ApricotCommitBlock) error {
+func (*options) OdysseyCommitBlock(*blocks.OdysseyCommitBlock) error {
 	return snowman.ErrNotOracle
 }
 
-func (o *options) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
+func (o *options) OdysseyProposalBlock(b *blocks.OdysseyProposalBlock) error {
 	blkID := b.ID()
 	nextHeight := b.Height() + 1
 
 	var err error
-	o.commitBlock, err = blocks.NewApricotCommitBlock(blkID, nextHeight)
+	o.commitBlock, err = blocks.NewOdysseyCommitBlock(blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create commit block: %w",
@@ -76,7 +76,7 @@ func (o *options) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
 		)
 	}
 
-	o.abortBlock, err = blocks.NewApricotAbortBlock(blkID, nextHeight)
+	o.abortBlock, err = blocks.NewOdysseyAbortBlock(blkID, nextHeight)
 	if err != nil {
 		return fmt.Errorf(
 			"failed to create abort block: %w",
@@ -86,10 +86,10 @@ func (o *options) ApricotProposalBlock(b *blocks.ApricotProposalBlock) error {
 	return nil
 }
 
-func (*options) ApricotStandardBlock(*blocks.ApricotStandardBlock) error {
+func (*options) OdysseyStandardBlock(*blocks.OdysseyStandardBlock) error {
 	return snowman.ErrNotOracle
 }
 
-func (*options) ApricotAtomicBlock(*blocks.ApricotAtomicBlock) error {
+func (*options) OdysseyAtomicBlock(*blocks.OdysseyAtomicBlock) error {
 	return snowman.ErrNotOracle
 }

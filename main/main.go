@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package main
@@ -10,9 +10,11 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/dioneprotocol/dionego/app/runner"
-	"github.com/dioneprotocol/dionego/config"
-	"github.com/dioneprotocol/dionego/version"
+	"golang.org/x/term"
+
+	"github.com/DioneProtocol/odysseygo/app"
+	"github.com/DioneProtocol/odysseygo/config"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 func main() {
@@ -28,8 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	runnerConfig := config.GetRunnerConfig(v)
-	if runnerConfig.DisplayVersionAndExit {
+	if v.GetBool(config.VersionKey) {
 		fmt.Print(version.String)
 		os.Exit(0)
 	}
@@ -40,5 +41,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	runner.Run(nodeConfig)
+	nodeApp := app.New(nodeConfig) // Create node wrapper
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Println(app.Header)
+	}
+
+	exitCode := app.Run(nodeApp)
+	os.Exit(exitCode)
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -15,8 +15,10 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/utils/compression"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
 )
 
 var (
@@ -62,7 +64,7 @@ func BenchmarkMarshalVersion(b *testing.B) {
 
 	useBuilder := os.Getenv("USE_BUILDER") != ""
 
-	codec, err := newMsgBuilder("", prometheus.NewRegistry(), 10*time.Second)
+	codec, err := newMsgBuilder(logging.NoLog{}, "", prometheus.NewRegistry(), 10*time.Second)
 	require.NoError(err)
 
 	b.Logf("proto length %d-byte (use builder %v)", msgLen, useBuilder)
@@ -70,7 +72,7 @@ func BenchmarkMarshalVersion(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if useBuilder {
-			_, err = codec.createOutbound(&msg, false, false)
+			_, err = codec.createOutbound(&msg, compression.TypeNone, false)
 		} else {
 			_, err = proto.Marshal(&msg)
 		}
@@ -119,7 +121,7 @@ func BenchmarkUnmarshalVersion(b *testing.B) {
 	require.NoError(err)
 
 	useBuilder := os.Getenv("USE_BUILDER") != ""
-	codec, err := newMsgBuilder("", prometheus.NewRegistry(), 10*time.Second)
+	codec, err := newMsgBuilder(logging.NoLog{}, "", prometheus.NewRegistry(), 10*time.Second)
 	require.NoError(err)
 
 	b.StartTimer()

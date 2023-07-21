@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package linearcodec
@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/dioneprotocol/dionego/codec"
-	"github.com/dioneprotocol/dionego/codec/reflectcodec"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/codec/reflectcodec"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 const (
@@ -79,7 +79,7 @@ func (c *linearCodec) RegisterType(val interface{}) error {
 
 	valType := reflect.TypeOf(val)
 	if _, exists := c.typeToTypeID[valType]; exists {
-		return fmt.Errorf("type %v has already been registered", valType)
+		return fmt.Errorf("%w: %v", codec.ErrDuplicateType, valType)
 	}
 
 	c.typeIDToType[c.nextTypeID] = valType
@@ -120,7 +120,11 @@ func (c *linearCodec) UnpackPrefix(p *wrappers.Packer, valueType reflect.Type) (
 	}
 	// Ensure type actually does implement the interface
 	if !implementingType.Implements(valueType) {
-		return reflect.Value{}, fmt.Errorf("couldn't unmarshal interface: %s does not implement interface %s", implementingType, valueType)
+		return reflect.Value{}, fmt.Errorf("couldn't unmarshal interface: %s %w %s",
+			implementingType,
+			codec.ErrDoesNotImplementInterface,
+			valueType,
+		)
 	}
 	return reflect.New(implementingType).Elem(), nil // instance of the proper type
 }

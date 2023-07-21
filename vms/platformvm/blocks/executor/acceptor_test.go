@@ -1,31 +1,30 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
 
 import (
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/chains/atomic"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/timer/mockable"
-	"github.com/dioneprotocol/dionego/utils/window"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/metrics"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/validators"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestAcceptorVisitProposalBlock(t *testing.T) {
@@ -35,16 +34,9 @@ func TestAcceptorVisitProposalBlock(t *testing.T) {
 
 	lastAcceptedID := ids.GenerateTestID()
 
-	blk, err := blocks.NewApricotProposalBlock(
+	blk, err := blocks.NewOdysseyProposalBlock(
 		lastAcceptedID,
 		1,
-		&txs.Tx{
-			Unsigned: &txs.AddDelegatorTx{
-				// Without the line below, this function will error.
-				DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-			},
-			Creds: []verify.Verifiable{},
-		},
 	)
 	require.NoError(err)
 
@@ -61,11 +53,11 @@ func TestAcceptorVisitProposalBlock(t *testing.T) {
 			},
 			state: s,
 		},
-		metrics:          metrics.Noop,
-		recentlyAccepted: nil,
+		metrics:    metrics.Noop,
+		validators: validators.TestManager,
 	}
 
-	err = acceptor.ApricotProposalBlock(blk)
+	err = acceptor.OdysseyProposalBlock(blk)
 	require.NoError(err)
 
 	require.Equal(blkID, acceptor.backend.lastAccepted)
@@ -98,24 +90,13 @@ func TestAcceptorVisitAtomicBlock(t *testing.T) {
 				SharedMemory: sharedMemory,
 			},
 		},
-		metrics: metrics.Noop,
-		recentlyAccepted: window.New[ids.ID](window.Config{
-			Clock:   &mockable.Clock{},
-			MaxSize: 1,
-			TTL:     time.Hour,
-		}),
+		metrics:    metrics.Noop,
+		validators: validators.TestManager,
 	}
 
-	blk, err := blocks.NewApricotAtomicBlock(
+	blk, err := blocks.NewOdysseyAtomicBlock(
 		parentID,
 		1,
-		&txs.Tx{
-			Unsigned: &txs.AddDelegatorTx{
-				// Without the line below, this function will error.
-				DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-			},
-			Creds: []verify.Verifiable{},
-		},
 	)
 	require.NoError(err)
 
@@ -125,8 +106,8 @@ func TestAcceptorVisitAtomicBlock(t *testing.T) {
 	s.EXPECT().SetHeight(blk.Height()).Times(1)
 	s.EXPECT().AddStatelessBlock(blk, choices.Accepted).Times(1)
 
-	err = acceptor.ApricotAtomicBlock(blk)
-	require.Error(err, "should fail because the block isn't in the state map")
+	err = acceptor.OdysseyAtomicBlock(blk)
+	require.ErrorIs(err, errMissingBlockState)
 
 	// Set [blk]'s state in the map as though it had been verified.
 	onAcceptState := state.NewMockDiff(ctrl)
@@ -159,7 +140,7 @@ func TestAcceptorVisitAtomicBlock(t *testing.T) {
 	onAcceptState.EXPECT().Apply(s).Times(1)
 	sharedMemory.EXPECT().Apply(atomicRequests, batch).Return(nil).Times(1)
 
-	err = acceptor.ApricotAtomicBlock(blk)
+	err = acceptor.OdysseyAtomicBlock(blk)
 	require.NoError(err)
 }
 
@@ -183,27 +164,14 @@ func TestAcceptorVisitStandardBlock(t *testing.T) {
 				SharedMemory: sharedMemory,
 			},
 		},
-		metrics: metrics.Noop,
-		recentlyAccepted: window.New[ids.ID](window.Config{
-			Clock:   clk,
-			MaxSize: 1,
-			TTL:     time.Hour,
-		}),
+		metrics:    metrics.Noop,
+		validators: validators.TestManager,
 	}
 
 	blk, err := blocks.NewBanffStandardBlock(
 		clk.Time(),
 		parentID,
 		1,
-		[]*txs.Tx{
-			{
-				Unsigned: &txs.AddDelegatorTx{
-					// Without the line below, this function will error.
-					DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-				},
-				Creds: []verify.Verifiable{},
-			},
-		},
 	)
 	require.NoError(err)
 
@@ -214,7 +182,7 @@ func TestAcceptorVisitStandardBlock(t *testing.T) {
 	s.EXPECT().AddStatelessBlock(blk, choices.Accepted).Times(1)
 
 	err = acceptor.BanffStandardBlock(blk)
-	require.Error(err, "should fail because the block isn't in the state map")
+	require.ErrorIs(err, errMissingBlockState)
 
 	// Set [blk]'s state in the map as though it had been verified.
 	onAcceptState := state.NewMockDiff(ctrl)
@@ -278,40 +246,17 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 				SharedMemory: sharedMemory,
 			},
 		},
-		metrics: metrics.Noop,
-		recentlyAccepted: window.New[ids.ID](window.Config{
-			Clock:   &mockable.Clock{},
-			MaxSize: 1,
-			TTL:     time.Hour,
-		}),
+		metrics:      metrics.Noop,
+		validators:   validators.TestManager,
 		bootstrapped: &utils.Atomic[bool]{},
 	}
 
-	blk, err := blocks.NewApricotCommitBlock(parentID, 1 /*height*/)
+	blk, err := blocks.NewOdysseyCommitBlock(parentID, 1 /*height*/)
 	require.NoError(err)
 
-	blkID := blk.ID()
-	err = acceptor.ApricotCommitBlock(blk)
-	require.Error(err, "should fail because the block isn't in the state map")
+	err = acceptor.OdysseyCommitBlock(blk)
+	require.ErrorIs(err, state.ErrMissingParentState)
 
-	// Set [blk]'s state in the map as though it had been verified.
-	onAcceptState := state.NewMockDiff(ctrl)
-	childID := ids.GenerateTestID()
-	acceptor.backend.blkIDToState[blkID] = &blockState{
-		onAcceptState: onAcceptState,
-	}
-	// Give [blk] a child.
-	childOnAcceptState := state.NewMockDiff(ctrl)
-	childOnAbortState := state.NewMockDiff(ctrl)
-	childOnCommitState := state.NewMockDiff(ctrl)
-	childState := &blockState{
-		onAcceptState: childOnAcceptState,
-		proposalBlockState: proposalBlockState{
-			onAbortState:  childOnAbortState,
-			onCommitState: childOnCommitState,
-		},
-	}
-	acceptor.backend.blkIDToState[childID] = childState
 	// Set [blk]'s parent in the state map.
 	parentOnAcceptState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
@@ -326,6 +271,31 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 		},
 	}
 	acceptor.backend.blkIDToState[parentID] = parentState
+
+	blkID := blk.ID()
+	// Set expected calls on dependencies.
+	// Make sure the parent is accepted first.
+	gomock.InOrder(
+		parentStatelessBlk.EXPECT().ID().Return(parentID).Times(2),
+		s.EXPECT().SetLastAccepted(parentID).Times(1),
+		parentStatelessBlk.EXPECT().Height().Return(blk.Height()-1).Times(1),
+		s.EXPECT().SetHeight(blk.Height()-1).Times(1),
+		s.EXPECT().AddStatelessBlock(parentState.statelessBlock, choices.Accepted).Times(1),
+
+		s.EXPECT().SetLastAccepted(blkID).Times(1),
+		s.EXPECT().SetHeight(blk.Height()).Times(1),
+		s.EXPECT().AddStatelessBlock(blk, choices.Accepted).Times(1),
+	)
+
+	err = acceptor.OdysseyCommitBlock(blk)
+	require.ErrorIs(err, errMissingBlockState)
+
+	// Set [blk]'s state in the map as though it had been verified.
+	acceptor.backend.blkIDToState[parentID] = parentState
+	onAcceptState := state.NewMockDiff(ctrl)
+	acceptor.backend.blkIDToState[blkID] = &blockState{
+		onAcceptState: onAcceptState,
+	}
 
 	// Set expected calls on dependencies.
 	// Make sure the parent is accepted first.
@@ -344,7 +314,7 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 		s.EXPECT().Commit().Return(nil).Times(1),
 	)
 
-	err = acceptor.ApricotCommitBlock(blk)
+	err = acceptor.OdysseyCommitBlock(blk)
 	require.NoError(err)
 	require.Equal(blk.ID(), acceptor.backend.lastAccepted)
 }
@@ -368,40 +338,17 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 				SharedMemory: sharedMemory,
 			},
 		},
-		metrics: metrics.Noop,
-		recentlyAccepted: window.New[ids.ID](window.Config{
-			Clock:   &mockable.Clock{},
-			MaxSize: 1,
-			TTL:     time.Hour,
-		}),
+		metrics:      metrics.Noop,
+		validators:   validators.TestManager,
 		bootstrapped: &utils.Atomic[bool]{},
 	}
 
-	blk, err := blocks.NewApricotAbortBlock(parentID, 1 /*height*/)
+	blk, err := blocks.NewOdysseyAbortBlock(parentID, 1 /*height*/)
 	require.NoError(err)
 
-	blkID := blk.ID()
-	err = acceptor.ApricotAbortBlock(blk)
-	require.Error(err, "should fail because the block isn't in the state map")
+	err = acceptor.OdysseyAbortBlock(blk)
+	require.ErrorIs(err, state.ErrMissingParentState)
 
-	// Set [blk]'s state in the map as though it had been verified.
-	onAcceptState := state.NewMockDiff(ctrl)
-	childID := ids.GenerateTestID()
-	acceptor.backend.blkIDToState[blkID] = &blockState{
-		onAcceptState: onAcceptState,
-	}
-	// Give [blk] a child.
-	childOnAcceptState := state.NewMockDiff(ctrl)
-	childOnAbortState := state.NewMockDiff(ctrl)
-	childOnCommitState := state.NewMockDiff(ctrl)
-	childState := &blockState{
-		onAcceptState: childOnAcceptState,
-		proposalBlockState: proposalBlockState{
-			onAbortState:  childOnAbortState,
-			onCommitState: childOnCommitState,
-		},
-	}
-	acceptor.backend.blkIDToState[childID] = childState
 	// Set [blk]'s parent in the state map.
 	parentOnAcceptState := state.NewMockDiff(ctrl)
 	parentOnAbortState := state.NewMockDiff(ctrl)
@@ -416,6 +363,32 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 		},
 	}
 	acceptor.backend.blkIDToState[parentID] = parentState
+
+	blkID := blk.ID()
+	// Set expected calls on dependencies.
+	// Make sure the parent is accepted first.
+	gomock.InOrder(
+		parentStatelessBlk.EXPECT().ID().Return(parentID).Times(2),
+		s.EXPECT().SetLastAccepted(parentID).Times(1),
+		parentStatelessBlk.EXPECT().Height().Return(blk.Height()-1).Times(1),
+		s.EXPECT().SetHeight(blk.Height()-1).Times(1),
+		s.EXPECT().AddStatelessBlock(parentState.statelessBlock, choices.Accepted).Times(1),
+
+		s.EXPECT().SetLastAccepted(blkID).Times(1),
+		s.EXPECT().SetHeight(blk.Height()).Times(1),
+		s.EXPECT().AddStatelessBlock(blk, choices.Accepted).Times(1),
+	)
+
+	err = acceptor.OdysseyAbortBlock(blk)
+	require.ErrorIs(err, errMissingBlockState)
+
+	// Set [blk]'s state in the map as though it had been verified.
+	acceptor.backend.blkIDToState[parentID] = parentState
+
+	onAcceptState := state.NewMockDiff(ctrl)
+	acceptor.backend.blkIDToState[blkID] = &blockState{
+		onAcceptState: onAcceptState,
+	}
 
 	// Set expected calls on dependencies.
 	// Make sure the parent is accepted first.
@@ -434,7 +407,7 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 		s.EXPECT().Commit().Return(nil).Times(1),
 	)
 
-	err = acceptor.ApricotAbortBlock(blk)
+	err = acceptor.OdysseyAbortBlock(blk)
 	require.NoError(err)
 	require.Equal(blk.ID(), acceptor.backend.lastAccepted)
 }

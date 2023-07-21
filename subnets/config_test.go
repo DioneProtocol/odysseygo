@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package subnets
@@ -8,44 +8,37 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow/consensus/dione"
-	"github.com/dioneprotocol/dionego/snow/consensus/snowball"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
-var validParameters = dione.Parameters{
-	Parents:   2,
-	BatchSize: 1,
-	Parameters: snowball.Parameters{
-		K:                     1,
-		Alpha:                 1,
-		BetaVirtuous:          1,
-		BetaRogue:             1,
-		ConcurrentRepolls:     1,
-		OptimalProcessing:     1,
-		MaxOutstandingItems:   1,
-		MaxItemProcessingTime: 1,
-	},
+var validParameters = snowball.Parameters{
+	K:                     1,
+	Alpha:                 1,
+	BetaVirtuous:          1,
+	BetaRogue:             1,
+	ConcurrentRepolls:     1,
+	OptimalProcessing:     1,
+	MaxOutstandingItems:   1,
+	MaxItemProcessingTime: 1,
 }
 
 func TestValid(t *testing.T) {
 	tests := []struct {
-		name string
-		s    Config
-		err  string
+		name        string
+		s           Config
+		expectedErr error
 	}{
 		{
 			name: "invalid consensus parameters",
 			s: Config{
-				ConsensusParameters: dione.Parameters{
-					Parameters: snowball.Parameters{
-						K:     2,
-						Alpha: 1,
-					},
+				ConsensusParameters: snowball.Parameters{
+					K:     2,
+					Alpha: 1,
 				},
 			},
-			err: "consensus parameters are invalid",
+			expectedErr: snowball.ErrParametersInvalid,
 		},
 		{
 			name: "invalid allowed node IDs",
@@ -54,7 +47,7 @@ func TestValid(t *testing.T) {
 				ValidatorOnly:       false,
 				ConsensusParameters: validParameters,
 			},
-			err: errAllowedNodesWhenNotValidatorOnly.Error(),
+			expectedErr: errAllowedNodesWhenNotValidatorOnly,
 		},
 		{
 			name: "valid",
@@ -62,16 +55,13 @@ func TestValid(t *testing.T) {
 				ConsensusParameters: validParameters,
 				ValidatorOnly:       false,
 			},
+			expectedErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.s.Valid()
-			if tt.err != "" {
-				require.ErrorContains(t, err, tt.err)
-			} else {
-				require.NoError(t, err)
-			}
+			require.ErrorIs(t, err, tt.expectedErr)
 		})
 	}
 }

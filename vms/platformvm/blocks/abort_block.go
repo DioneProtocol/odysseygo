@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package blocks
@@ -6,19 +6,19 @@ package blocks
 import (
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
 	_ BanffBlock = (*BanffAbortBlock)(nil)
-	_ Block      = (*ApricotAbortBlock)(nil)
+	_ Block      = (*OdysseyAbortBlock)(nil)
 )
 
 type BanffAbortBlock struct {
 	Time              uint64 `serialize:"true" json:"time"`
-	ApricotAbortBlock `serialize:"true"`
+	OdysseyAbortBlock `serialize:"true"`
 }
 
 func (b *BanffAbortBlock) Timestamp() time.Time {
@@ -36,7 +36,7 @@ func NewBanffAbortBlock(
 ) (*BanffAbortBlock, error) {
 	blk := &BanffAbortBlock{
 		Time: uint64(timestamp.Unix()),
-		ApricotAbortBlock: ApricotAbortBlock{
+		OdysseyAbortBlock: OdysseyAbortBlock{
 			CommonBlock: CommonBlock{
 				PrntID: parentID,
 				Hght:   height,
@@ -46,33 +46,33 @@ func NewBanffAbortBlock(
 	return blk, initialize(blk)
 }
 
-type ApricotAbortBlock struct {
+type OdysseyAbortBlock struct {
 	CommonBlock `serialize:"true"`
 }
 
-func (b *ApricotAbortBlock) initialize(bytes []byte) error {
+func (b *OdysseyAbortBlock) initialize(bytes []byte) error {
 	b.CommonBlock.initialize(bytes)
 	return nil
 }
 
-func (*ApricotAbortBlock) InitCtx(*snow.Context) {}
+func (*OdysseyAbortBlock) InitCtx(*snow.Context) {}
 
-func (*ApricotAbortBlock) Txs() []*txs.Tx {
+func (*OdysseyAbortBlock) Txs() []*txs.Tx {
 	return nil
 }
 
-func (b *ApricotAbortBlock) Visit(v Visitor) error {
-	return v.ApricotAbortBlock(b)
+func (b *OdysseyAbortBlock) Visit(v Visitor) error {
+	return v.OdysseyAbortBlock(b)
 }
 
-// NewApricotAbortBlock is kept for testing purposes only.
-// Following Banff activation and subsequent code cleanup, Apricot Abort blocks
+// NewOdysseyAbortBlock is kept for testing purposes only.
+// Following Banff activation and subsequent code cleanup, Odyssey Abort blocks
 // should be only verified (upon bootstrap), never created anymore
-func NewApricotAbortBlock(
+func NewOdysseyAbortBlock(
 	parentID ids.ID,
 	height uint64,
-) (*ApricotAbortBlock, error) {
-	blk := &ApricotAbortBlock{
+) (*OdysseyAbortBlock, error) {
+	blk := &OdysseyAbortBlock{
 		CommonBlock: CommonBlock{
 			PrntID: parentID,
 			Hght:   height,

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package profiler
@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/dioneprotocol/dionego/utils/filesystem"
+	"github.com/DioneProtocol/odysseygo/utils/filesystem"
 )
 
 // Config that is used to describe the options of the continuous profiler.

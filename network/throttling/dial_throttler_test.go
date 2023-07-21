@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package throttling
@@ -86,7 +86,7 @@ func TestDialThrottlerCancel(t *testing.T) {
 		// Should block because 5 already taken within last second
 		err := throttler.Acquire(ctx)
 		// Should error because we call cancel() below
-		require.Error(t, err)
+		require.ErrorIs(t, err, context.Canceled)
 		acquiredChan <- struct{}{}
 	}()
 
@@ -95,7 +95,7 @@ func TestDialThrottlerCancel(t *testing.T) {
 	select {
 	case <-acquiredChan:
 	case <-time.After(10 * time.Millisecond):
-		t.Fatal("Acquire should have returned immediately upon context cancelation")
+		t.Fatal("Acquire should have returned immediately upon context cancellation")
 	}
 	close(acquiredChan)
 }

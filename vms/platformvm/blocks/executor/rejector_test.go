@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -11,16 +11,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/snow"
-	"github.com/dioneprotocol/dionego/snow/choices"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/vms/components/verify"
-	"github.com/dioneprotocol/dionego/vms/platformvm/blocks"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs/mempool"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestRejectBlock(t *testing.T) {
@@ -38,13 +38,6 @@ func TestRejectBlock(t *testing.T) {
 					time.Now(),
 					ids.GenerateTestID(),
 					1,
-					&txs.Tx{
-						Unsigned: &txs.AddDelegatorTx{
-							// Without the line below, this function will error.
-							DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-						},
-						Creds: []verify.Verifiable{},
-					},
 				)
 			},
 			rejectFunc: func(r *rejector, b blocks.Block) error {
@@ -54,20 +47,13 @@ func TestRejectBlock(t *testing.T) {
 		{
 			name: "atomic block",
 			newBlockFunc: func() (blocks.Block, error) {
-				return blocks.NewApricotAtomicBlock(
+				return blocks.NewOdysseyAtomicBlock(
 					ids.GenerateTestID(),
 					1,
-					&txs.Tx{
-						Unsigned: &txs.AddDelegatorTx{
-							// Without the line below, this function will error.
-							DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-						},
-						Creds: []verify.Verifiable{},
-					},
 				)
 			},
 			rejectFunc: func(r *rejector, b blocks.Block) error {
-				return r.ApricotAtomicBlock(b.(*blocks.ApricotAtomicBlock))
+				return r.OdysseyAtomicBlock(b.(*blocks.OdysseyAtomicBlock))
 			},
 		},
 		{
@@ -77,15 +63,6 @@ func TestRejectBlock(t *testing.T) {
 					time.Now(),
 					ids.GenerateTestID(),
 					1,
-					[]*txs.Tx{
-						{
-							Unsigned: &txs.AddDelegatorTx{
-								// Without the line below, this function will error.
-								DelegationRewardsOwner: &secp256k1fx.OutputOwners{},
-							},
-							Creds: []verify.Verifiable{},
-						},
-					},
 				)
 			},
 			rejectFunc: func(r *rejector, b blocks.Block) error {

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package merkledb
@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database/memdb"
-	"github.com/dioneprotocol/dionego/ids"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
 )
 
 func Test_History_Simple(t *testing.T) {
@@ -21,10 +21,9 @@ func Test_History_Simple(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  300,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 300,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -118,10 +117,9 @@ func Test_History_Large(t *testing.T) {
 			context.Background(),
 			memdb.New(),
 			Config{
-				Tracer:         newNoopTracer(),
-				HistoryLength:  1500,
-				ValueCacheSize: 1000,
-				NodeCacheSize:  1000,
+				Tracer:        newNoopTracer(),
+				HistoryLength: 1500,
+				NodeCacheSize: 1000,
 			},
 		)
 		require.NoError(err)
@@ -176,10 +174,9 @@ func Test_History_Bad_GetValueChanges_Input(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  5,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 5,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -226,10 +223,10 @@ func Test_History_Bad_GetValueChanges_Input(t *testing.T) {
 	require.NoError(err)
 
 	_, err = db.history.getValueChanges(startRoot, endRoot, nil, nil, -1)
-	require.Error(err, ErrInvalidMaxLength)
+	require.ErrorIs(err, ErrInvalidMaxLength)
 
 	_, err = db.history.getValueChanges(endRoot, startRoot, nil, nil, 1)
-	require.Error(err, ErrStartRootNotFound)
+	require.ErrorIs(err, ErrStartRootNotFound)
 
 	// trigger the first root to be deleted by exiting the lookback window
 	batch = db.NewBatch()
@@ -238,14 +235,14 @@ func Test_History_Bad_GetValueChanges_Input(t *testing.T) {
 	err = batch.Write()
 	require.NoError(err)
 
-	// now this root should no lnger be present
+	// now this root should no longer be present
 	_, err = db.history.getValueChanges(toBeDeletedRoot, endRoot, nil, nil, 1)
-	require.Error(err, ErrRootIDNotPresent)
+	require.ErrorIs(err, ErrStartRootNotFound)
 
 	// same start/end roots should yield an empty changelist
 	changes, err := db.history.getValueChanges(endRoot, endRoot, nil, nil, 10)
 	require.NoError(err)
-	require.Len(changes.values, 0)
+	require.Empty(changes.values)
 }
 
 func Test_History_Trigger_History_Queue_Looping(t *testing.T) {
@@ -255,10 +252,9 @@ func Test_History_Trigger_History_Queue_Looping(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  2,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 2,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -308,7 +304,7 @@ func Test_History_Trigger_History_Queue_Looping(t *testing.T) {
 
 	// proof from first root shouldn't be generatable since it should have been removed from the history
 	_, err = db.GetRangeProofAtRoot(context.Background(), origRootID, []byte("k"), []byte("key3"), 10)
-	require.Error(err, ErrRootIDNotPresent)
+	require.ErrorIs(err, ErrRootIDNotPresent)
 }
 
 func Test_History_Values_Lookup_Over_Queue_Break(t *testing.T) {
@@ -318,10 +314,9 @@ func Test_History_Values_Lookup_Over_Queue_Break(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  4,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 4,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -379,10 +374,9 @@ func Test_History_RepeatedRoot(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -443,10 +437,9 @@ func Test_History_ExcessDeletes(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -490,10 +483,9 @@ func Test_History_DontIncludeAllNodes(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -529,10 +521,9 @@ func Test_History_Branching2Nodes(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -568,10 +559,9 @@ func Test_History_Branching3Nodes(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -607,10 +597,9 @@ func Test_History_MaxLength(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  2,
-			ValueCacheSize: 1000,
-			NodeCacheSize:  1000,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 2,
+			NodeCacheSize: 1000,
 		},
 	)
 	require.NoError(err)
@@ -648,10 +637,9 @@ func Test_Change_List(t *testing.T) {
 		context.Background(),
 		memdb.New(),
 		Config{
-			Tracer:         newNoopTracer(),
-			HistoryLength:  100,
-			ValueCacheSize: minCacheSize,
-			NodeCacheSize:  minCacheSize,
+			Tracer:        newNoopTracer(),
+			HistoryLength: 100,
+			NodeCacheSize: minCacheSize,
 		},
 	)
 	require.NoError(err)
@@ -704,7 +692,7 @@ func Test_Change_List(t *testing.T) {
 
 	changes, err := db.history.getValueChanges(startRoot, endRoot, nil, nil, 8)
 	require.NoError(err)
-	require.Equal(8, len(changes.values))
+	require.Len(changes.values, 8)
 }
 
 func TestHistoryRecord(t *testing.T) {

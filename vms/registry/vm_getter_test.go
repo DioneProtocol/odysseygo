@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package registry
@@ -11,12 +11,15 @@ import (
 
 	"github.com/golang/mock/gomock"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/filesystem"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/vms"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/filesystem"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/vms"
 )
 
 var (
@@ -143,13 +146,23 @@ func initVMGetterTest(t *testing.T) *vmGetterTestResources {
 
 	mockReader := filesystem.NewMockReader(ctrl)
 	mockManager := vms.NewMockManager(ctrl)
+	mockRegistry := prometheus.NewRegistry()
+	mockCPUTracker, err := resource.NewManager(
+		logging.NoLog{},
+		"",
+		time.Hour,
+		time.Hour,
+		time.Hour,
+		mockRegistry,
+	)
+	require.NoError(t, err)
 
 	getter := NewVMGetter(
 		VMGetterConfig{
 			FileReader:      mockReader,
 			Manager:         mockManager,
 			PluginDirectory: pluginDir,
-			CPUTracker:      resource.NewManager("", time.Hour, time.Hour, time.Hour),
+			CPUTracker:      mockCPUTracker,
 		},
 	)
 

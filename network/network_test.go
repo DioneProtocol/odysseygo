@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -6,6 +6,7 @@ package network
 import (
 	"context"
 	"crypto"
+	"crypto/rsa"
 	"net"
 	"sync"
 	"testing"
@@ -15,25 +16,25 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/message"
-	"github.com/dioneprotocol/dionego/network/dialer"
-	"github.com/dioneprotocol/dionego/network/peer"
-	"github.com/dioneprotocol/dionego/network/throttling"
-	"github.com/dioneprotocol/dionego/proto/pb/p2p"
-	"github.com/dioneprotocol/dionego/snow/networking/router"
-	"github.com/dioneprotocol/dionego/snow/networking/tracker"
-	"github.com/dioneprotocol/dionego/snow/uptime"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/subnets"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/logging"
-	"github.com/dioneprotocol/dionego/utils/math/meter"
-	"github.com/dioneprotocol/dionego/utils/resource"
-	"github.com/dioneprotocol/dionego/utils/set"
-	"github.com/dioneprotocol/dionego/utils/units"
-	"github.com/dioneprotocol/dionego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/network/dialer"
+	"github.com/DioneProtocol/odysseygo/network/peer"
+	"github.com/DioneProtocol/odysseygo/network/throttling"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow/networking/router"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/uptime"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/math/meter"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 var (
@@ -110,7 +111,7 @@ var (
 		PingFrequency:      constants.DefaultPingFrequency,
 		AllowPrivateIPs:    true,
 
-		CompressionEnabled: true,
+		CompressionType: constants.DefaultNetworkCompressionType,
 
 		UptimeCalculator:  uptime.NewManager(uptime.NewTestState()),
 		UptimeMetricFreq:  30 * time.Second,
@@ -183,9 +184,10 @@ func newMessageCreator(t *testing.T) message.Creator {
 	t.Helper()
 
 	mc, err := message.NewCreator(
+		logging.NoLog{},
 		prometheus.NewRegistry(),
 		"",
-		true,
+		constants.DefaultNetworkCompressionType,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -339,7 +341,7 @@ func TestSend(t *testing.T) {
 	toSend := set.Set[ids.NodeID]{}
 	toSend.Add(nodeIDs[1])
 	sentTo := net0.Send(outboundGetMsg, toSend, constants.PrimaryNetworkID, subnets.NoOpAllower)
-	require.EqualValues(toSend, sentTo)
+	require.Equal(toSend, sentTo)
 
 	inboundGetMsg := <-received
 	require.Equal(message.GetOp, inboundGetMsg.Op())
@@ -419,11 +421,221 @@ func TestTrackVerifiesSignatures(t *testing.T) {
 		Signature: nil,
 	}})
 	// The signature is wrong so this peer tracking info isn't useful.
-	require.Error(err)
+	require.ErrorIs(err, rsa.ErrVerification)
 
 	network.peersLock.RLock()
 	require.Empty(network.trackedIPs)
 	network.peersLock.RUnlock()
+
+	for _, net := range networks {
+		net.StartClose()
+	}
+	wg.Wait()
+}
+
+func TestTrackDoesNotDialPrivateIPs(t *testing.T) {
+	require := require.New(t)
+
+	dialer, listeners, nodeIDs, configs := newTestNetwork(t, 2)
+
+	networks := make([]Network, len(configs))
+	for i, config := range configs {
+		msgCreator := newMessageCreator(t)
+		registry := prometheus.NewRegistry()
+
+		g, err := peer.NewGossipTracker(registry, "foobar")
+		require.NoError(err)
+
+		log := logging.NoLog{}
+		gossipTrackerCallback := peer.GossipTrackerCallback{
+			Log:           log,
+			GossipTracker: g,
+		}
+
+		beacons := validators.NewSet()
+		err = beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1)
+		require.NoError(err)
+
+		primaryVdrs := validators.NewSet()
+		primaryVdrs.RegisterCallbackListener(&gossipTrackerCallback)
+		for _, nodeID := range nodeIDs {
+			err := primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1)
+			require.NoError(err)
+		}
+
+		vdrs := validators.NewManager()
+		_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
+
+		config := config
+
+		config.GossipTracker = g
+		config.Beacons = beacons
+		config.Validators = vdrs
+		config.AllowPrivateIPs = false
+
+		net, err := NewNetwork(
+			config,
+			msgCreator,
+			registry,
+			log,
+			listeners[i],
+			dialer,
+			&testHandler{
+				InboundHandler: nil,
+				ConnectedF: func(ids.NodeID, *version.Application, ids.ID) {
+					require.FailNow("unexpectedly connected to a peer")
+				},
+				DisconnectedF: nil,
+			},
+		)
+		require.NoError(err)
+		networks[i] = net
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(networks))
+	for i, net := range networks {
+		if i != 0 {
+			config := configs[0]
+			net.ManuallyTrack(config.MyNodeID, config.MyIPPort.IPPort())
+		}
+
+		go func(net Network) {
+			defer wg.Done()
+
+			err := net.Dispatch()
+			require.NoError(err)
+		}(net)
+	}
+
+	network := networks[1].(*network)
+	require.Eventually(
+		func() bool {
+			network.peersLock.RLock()
+			defer network.peersLock.RUnlock()
+
+			nodeID := nodeIDs[0]
+			require.Contains(network.trackedIPs, nodeID)
+			ip := network.trackedIPs[nodeID]
+			return ip.getDelay() != 0
+		},
+		10*time.Second,
+		50*time.Millisecond,
+	)
+
+	for _, net := range networks {
+		net.StartClose()
+	}
+	wg.Wait()
+}
+
+func TestDialDeletesNonValidators(t *testing.T) {
+	require := require.New(t)
+
+	dialer, listeners, nodeIDs, configs := newTestNetwork(t, 2)
+
+	primaryVdrs := validators.NewSet()
+	for _, nodeID := range nodeIDs {
+		err := primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1)
+		require.NoError(err)
+	}
+
+	networks := make([]Network, len(configs))
+	for i, config := range configs {
+		msgCreator := newMessageCreator(t)
+		registry := prometheus.NewRegistry()
+
+		g, err := peer.NewGossipTracker(registry, "foobar")
+		require.NoError(err)
+
+		log := logging.NoLog{}
+		gossipTrackerCallback := peer.GossipTrackerCallback{
+			Log:           log,
+			GossipTracker: g,
+		}
+
+		beacons := validators.NewSet()
+		err = beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1)
+		require.NoError(err)
+
+		primaryVdrs.RegisterCallbackListener(&gossipTrackerCallback)
+
+		vdrs := validators.NewManager()
+		_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
+
+		config := config
+
+		config.GossipTracker = g
+		config.Beacons = beacons
+		config.Validators = vdrs
+		config.AllowPrivateIPs = false
+
+		net, err := NewNetwork(
+			config,
+			msgCreator,
+			registry,
+			log,
+			listeners[i],
+			dialer,
+			&testHandler{
+				InboundHandler: nil,
+				ConnectedF: func(ids.NodeID, *version.Application, ids.ID) {
+					require.FailNow("unexpectedly connected to a peer")
+				},
+				DisconnectedF: nil,
+			},
+		)
+		require.NoError(err)
+		networks[i] = net
+	}
+
+	config := configs[0]
+	signer := peer.NewIPSigner(config.MyIPPort, config.TLSKey)
+	ip, err := signer.GetSignedIP()
+	require.NoError(err)
+
+	wg := sync.WaitGroup{}
+	wg.Add(len(networks))
+	for i, net := range networks {
+		if i != 0 {
+			peerAcks, err := net.Track(config.MyNodeID, []*ips.ClaimedIPPort{{
+				Cert:      config.TLSConfig.Certificates[0].Leaf,
+				IPPort:    ip.IPPort,
+				Timestamp: ip.Timestamp,
+				Signature: ip.Signature,
+			}})
+			require.NoError(err)
+			// peerAcks is empty because we aren't actually connected to
+			// MyNodeID yet
+			require.Empty(peerAcks)
+		}
+
+		go func(net Network) {
+			defer wg.Done()
+
+			err := net.Dispatch()
+			require.NoError(err)
+		}(net)
+	}
+
+	// Give the dialer time to run one iteration. This is racy, but should ony
+	// be possible to flake as a false negative (test passes when it shouldn't).
+	time.Sleep(50 * time.Millisecond)
+
+	network := networks[1].(*network)
+	require.NoError(primaryVdrs.RemoveWeight(nodeIDs[0], 1))
+	require.Eventually(
+		func() bool {
+			network.peersLock.RLock()
+			defer network.peersLock.RUnlock()
+
+			nodeID := nodeIDs[0]
+			_, ok := network.trackedIPs[nodeID]
+			return !ok
+		},
+		10*time.Second,
+		50*time.Millisecond,
+	)
 
 	for _, net := range networks {
 		net.StartClose()

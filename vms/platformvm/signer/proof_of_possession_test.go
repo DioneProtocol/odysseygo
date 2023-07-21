@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package signer
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 )
 
 func TestProofOfPossession(t *testing.T) {
@@ -22,17 +22,20 @@ func TestProofOfPossession(t *testing.T) {
 	blsPOP, err = newProofOfPossession()
 	require.NoError(err)
 	blsPOP.ProofOfPossession = [bls.SignatureLen]byte{}
-	require.Error(blsPOP.Verify())
+	err = blsPOP.Verify()
+	require.ErrorIs(err, bls.ErrFailedSignatureDecompress)
 
 	blsPOP, err = newProofOfPossession()
 	require.NoError(err)
 	blsPOP.PublicKey = [bls.PublicKeyLen]byte{}
-	require.Error(blsPOP.Verify())
+	err = blsPOP.Verify()
+	require.ErrorIs(err, bls.ErrFailedPublicKeyDecompress)
 
 	newBLSPOP, err := newProofOfPossession()
 	require.NoError(err)
 	newBLSPOP.ProofOfPossession = blsPOP.ProofOfPossession
-	require.ErrorIs(newBLSPOP.Verify(), errInvalidProofOfPossession)
+	err = newBLSPOP.Verify()
+	require.ErrorIs(err, errInvalidProofOfPossession)
 }
 
 func TestNewProofOfPossessionDeterministic(t *testing.T) {

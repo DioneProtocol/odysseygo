@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package atomic
@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/units"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/units"
 )
 
 // SharedMemoryTests is a list of all shared memory tests
@@ -193,6 +193,7 @@ func TestSharedMemoryLargeIndexed(t *testing.T, chainID0, chainID1 ids.ID, sm0, 
 
 func TestSharedMemoryCantDuplicatePut(t *testing.T, _, chainID1 ids.ID, sm0, _ SharedMemory, _ database.Database) {
 	require := require.New(t)
+
 	err := sm0.Apply(map[ids.ID]*Requests{chainID1: {PutRequests: []*Element{
 		{
 			Key:   []byte{0},
@@ -203,26 +204,32 @@ func TestSharedMemoryCantDuplicatePut(t *testing.T, _, chainID1 ids.ID, sm0, _ S
 			Value: []byte{2},
 		},
 	}}})
-	require.Error(err, "shouldn't be able to write duplicated keys")
+	// TODO: require error to be errDuplicatedOperation
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
+
 	err = sm0.Apply(map[ids.ID]*Requests{chainID1: {PutRequests: []*Element{{
 		Key:   []byte{0},
 		Value: []byte{1},
 	}}}})
 	require.NoError(err)
+
 	err = sm0.Apply(map[ids.ID]*Requests{chainID1: {PutRequests: []*Element{{
 		Key:   []byte{0},
 		Value: []byte{1},
 	}}}})
-	require.Error(err, "shouldn't be able to write duplicated keys")
+	// TODO: require error to be errDuplicatedOperation
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
 }
 
 func TestSharedMemoryCantDuplicateRemove(t *testing.T, _, chainID1 ids.ID, sm0, _ SharedMemory, _ database.Database) {
 	require := require.New(t)
+
 	err := sm0.Apply(map[ids.ID]*Requests{chainID1: {RemoveRequests: [][]byte{{0}}}})
 	require.NoError(err)
 
 	err = sm0.Apply(map[ids.ID]*Requests{chainID1: {RemoveRequests: [][]byte{{0}}}})
-	require.Error(err, "shouldn't be able to remove duplicated keys")
+	// TODO: require error to be errDuplicatedOperation
+	require.Error(err) //nolint:forbidigo // currently returns grpc errors too
 }
 
 func TestSharedMemoryCommitOnPut(t *testing.T, _, chainID1 ids.ID, sm0, _ SharedMemory, db database.Database) {

@@ -4,7 +4,7 @@ package vm.runtime;
 
 import "google/protobuf/empty.proto";
 
-option go_package = "github.com/dioneprotocol/dionego/proto/pb/vm/manager";
+option go_package = "github.com/DioneProtocol/odysseygo/proto/pb/vm/manager";
 
 // Manages the lifecycle of a subnet VM process.
 service Runtime {
@@ -13,7 +13,7 @@ service Runtime {
 }
 
 message InitializeRequest {
-  // ProtocolVersion is used to identify incompatibilities with DioneGo and a VM.
+  // ProtocolVersion is used to identify incompatibilities with OdysseyGo and a VM.
   uint32 protocol_version = 1;
   // Address of the gRPC server endpoint serving the handshake logic.
   // Example: 127.0.0.1:50001

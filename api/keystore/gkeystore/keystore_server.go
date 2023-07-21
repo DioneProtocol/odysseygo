@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package gkeystore
@@ -6,13 +6,13 @@ package gkeystore
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/api/keystore"
-	"github.com/dioneprotocol/dionego/database"
-	"github.com/dioneprotocol/dionego/database/rpcdb"
-	"github.com/dioneprotocol/dionego/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/rpcdb"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
 
-	keystorepb "github.com/dioneprotocol/dionego/proto/pb/keystore"
-	rpcdbpb "github.com/dioneprotocol/dionego/proto/pb/rpcdb"
+	keystorepb "github.com/DioneProtocol/odysseygo/proto/pb/keystore"
+	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
 )
 
 var _ keystorepb.KeystoreServer = (*Server)(nil)

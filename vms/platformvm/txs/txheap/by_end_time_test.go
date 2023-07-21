@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package txheap
@@ -9,10 +9,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
-	"github.com/dioneprotocol/dionego/vms/platformvm/validator"
-	"github.com/dioneprotocol/dionego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestByStopTime(t *testing.T) {
@@ -23,7 +22,7 @@ func TestByStopTime(t *testing.T) {
 	baseTime := time.Now()
 
 	utx0 := &txs.AddValidatorTx{
-		Validator: validator.Validator{
+		Validator: txs.Validator{
 			NodeID: ids.NodeID{0},
 			Start:  uint64(baseTime.Unix()),
 			End:    uint64(baseTime.Unix()) + 1,
@@ -35,7 +34,7 @@ func TestByStopTime(t *testing.T) {
 	require.NoError(err)
 
 	utx1 := &txs.AddValidatorTx{
-		Validator: validator.Validator{
+		Validator: txs.Validator{
 			NodeID: ids.NodeID{1},
 			Start:  uint64(baseTime.Unix()),
 			End:    uint64(baseTime.Unix()) + 2,
@@ -47,7 +46,7 @@ func TestByStopTime(t *testing.T) {
 	require.NoError(err)
 
 	utx2 := &txs.AddValidatorTx{
-		Validator: validator.Validator{
+		Validator: txs.Validator{
 			NodeID: ids.NodeID{1},
 			Start:  uint64(baseTime.Unix()),
 			End:    uint64(baseTime.Unix()) + 3,

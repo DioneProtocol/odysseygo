@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package handler
@@ -8,15 +8,20 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/dioneprotocol/dionego/message"
-	"github.com/dioneprotocol/dionego/utils/metric"
-	"github.com/dioneprotocol/dionego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 type metrics struct {
 	expired      prometheus.Counter
 	asyncExpired prometheus.Counter
-	messages     map[message.Op]metric.Averager
+	messages     map[message.Op]*messageProcessing
+}
+
+type messageProcessing struct {
+	processingTime  metric.Averager
+	msgHandlingTime metric.Averager
 }
 
 func newMetrics(namespace string, reg prometheus.Registerer) (*metrics, error) {
@@ -37,16 +42,26 @@ func newMetrics(namespace string, reg prometheus.Registerer) (*metrics, error) {
 		reg.Register(asyncExpired),
 	)
 
-	messages := make(map[message.Op]metric.Averager, len(message.ConsensusOps))
+	messages := make(map[message.Op]*messageProcessing, len(message.ConsensusOps))
 	for _, op := range message.ConsensusOps {
 		opStr := op.String()
-		messages[op] = metric.NewAveragerWithErrs(
-			namespace,
-			opStr,
-			fmt.Sprintf("time (in ns) of processing a %s", opStr),
-			reg,
-			&errs,
-		)
+		messageProcessing := &messageProcessing{
+			processingTime: metric.NewAveragerWithErrs(
+				namespace,
+				opStr,
+				fmt.Sprintf("time (in ns) spent handling a %s", opStr),
+				reg,
+				&errs,
+			),
+			msgHandlingTime: metric.NewAveragerWithErrs(
+				namespace,
+				fmt.Sprintf("%s_msg_handling", opStr),
+				fmt.Sprintf("time (in ns) spent handling a %s after grabbing the lock", opStr),
+				reg,
+				&errs,
+			),
+		}
+		messages[op] = messageProcessing
 	}
 
 	return &metrics{

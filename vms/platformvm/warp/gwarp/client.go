@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package gwarp
@@ -6,9 +6,9 @@ package gwarp
 import (
 	"context"
 
-	"github.com/dioneprotocol/dionego/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
 
-	pb "github.com/dioneprotocol/dionego/proto/pb/warp"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/warp"
 )
 
 var _ warp.Signer = (*Client)(nil)

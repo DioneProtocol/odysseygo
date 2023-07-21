@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package info
@@ -7,9 +7,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/rpc"
-	"github.com/dioneprotocol/dionego/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
 )
 
 var _ Client = (*client)(nil)

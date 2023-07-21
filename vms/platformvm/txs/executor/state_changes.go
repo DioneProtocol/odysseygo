@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package executor
@@ -8,16 +8,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/utils/constants"
-	"github.com/dioneprotocol/dionego/vms/platformvm/reward"
-	"github.com/dioneprotocol/dionego/vms/platformvm/state"
-	"github.com/dioneprotocol/dionego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
-	errChildBlockAfterStakerChangeTime = errors.New("proposed timestamp later than next staker change time")
-	errChildBlockBeyondSyncBound       = errors.New("proposed timestamp is too far in the future relative to local time")
+	ErrChildBlockAfterStakerChangeTime = errors.New("proposed timestamp later than next staker change time")
+	ErrChildBlockBeyondSyncBound       = errors.New("proposed timestamp is too far in the future relative to local time")
 )
 
 // VerifyNewChainTime returns nil if the [newChainTime] is a valid chain time
@@ -38,7 +38,7 @@ func VerifyNewChainTime(
 	if newChainTime.After(nextStakerChangeTime) {
 		return fmt.Errorf(
 			"%w, proposed timestamp (%s), next staker change time (%s)",
-			errChildBlockAfterStakerChangeTime,
+			ErrChildBlockAfterStakerChangeTime,
 			newChainTime,
 			nextStakerChangeTime,
 		)
@@ -49,7 +49,7 @@ func VerifyNewChainTime(
 	if newChainTime.After(maxNewChainTime) {
 		return fmt.Errorf(
 			"%w, proposed time (%s), local time (%s)",
-			errChildBlockBeyondSyncBound,
+			ErrChildBlockBeyondSyncBound,
 			newChainTime,
 			now,
 		)
@@ -65,9 +65,7 @@ type StateChanges interface {
 type stateChanges struct {
 	updatedSupplies           map[ids.ID]uint64
 	currentValidatorsToAdd    []*state.Staker
-	currentDelegatorsToAdd    []*state.Staker
 	pendingValidatorsToRemove []*state.Staker
-	pendingDelegatorsToRemove []*state.Staker
 	currentValidatorsToRemove []*state.Staker
 }
 
@@ -82,21 +80,13 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	for _, pendingValidatorToRemove := range s.pendingValidatorsToRemove {
 		stateDiff.DeletePendingValidator(pendingValidatorToRemove)
 	}
-	for _, currentDelegatorToAdd := range s.currentDelegatorsToAdd {
-		stateDiff.PutCurrentDelegator(currentDelegatorToAdd)
-	}
-	for _, pendingDelegatorToRemove := range s.pendingDelegatorsToRemove {
-		stateDiff.DeletePendingDelegator(pendingDelegatorToRemove)
-	}
 	for _, currentValidatorToRemove := range s.currentValidatorsToRemove {
 		stateDiff.DeleteCurrentValidator(currentValidatorToRemove)
 	}
 }
 
 func (s *stateChanges) Len() int {
-	return len(s.currentValidatorsToAdd) + len(s.currentDelegatorsToAdd) +
-		len(s.pendingValidatorsToRemove) + len(s.pendingDelegatorsToRemove) +
-		len(s.currentValidatorsToRemove)
+	return len(s.currentValidatorsToAdd) + len(s.pendingValidatorsToRemove) + len(s.currentValidatorsToRemove)
 }
 
 // AdvanceTimeTo does not modify [parentState].
@@ -174,10 +164,6 @@ func AdvanceTimeTo(
 			changes.currentValidatorsToAdd = append(changes.currentValidatorsToAdd, &stakerToAdd)
 			changes.pendingValidatorsToRemove = append(changes.pendingValidatorsToRemove, stakerToRemove)
 
-		case txs.PrimaryNetworkDelegatorApricotPendingPriority, txs.PrimaryNetworkDelegatorBanffPendingPriority, txs.SubnetPermissionlessDelegatorPendingPriority:
-			changes.currentDelegatorsToAdd = append(changes.currentDelegatorsToAdd, &stakerToAdd)
-			changes.pendingDelegatorsToRemove = append(changes.pendingDelegatorsToRemove, stakerToRemove)
-
 		default:
 			return nil, fmt.Errorf("expected staker priority got %d", stakerToRemove.Priority)
 		}
@@ -223,7 +209,7 @@ func GetRewardsCalculator(
 	}
 	transformSubnet, ok := transformSubnetIntf.Unsigned.(*txs.TransformSubnetTx)
 	if !ok {
-		return nil, errIsNotTransformSubnetTx
+		return nil, ErrIsNotTransformSubnetTx
 	}
 
 	return reward.NewCalculator(reward.Config{

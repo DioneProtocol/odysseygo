@@ -1,11 +1,9 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package secp256k1
 
-import (
-	"github.com/dioneprotocol/dionego/utils/cb58"
-)
+import "github.com/DioneProtocol/odysseygo/utils/cb58"
 
 func TestKeys() []*PrivateKey {
 	var (

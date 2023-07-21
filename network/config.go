@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
+// Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -8,15 +8,16 @@ import (
 	"crypto/tls"
 	"time"
 
-	"github.com/dioneprotocol/dionego/ids"
-	"github.com/dioneprotocol/dionego/network/dialer"
-	"github.com/dioneprotocol/dionego/network/peer"
-	"github.com/dioneprotocol/dionego/network/throttling"
-	"github.com/dioneprotocol/dionego/snow/networking/tracker"
-	"github.com/dioneprotocol/dionego/snow/uptime"
-	"github.com/dioneprotocol/dionego/snow/validators"
-	"github.com/dioneprotocol/dionego/utils/ips"
-	"github.com/dioneprotocol/dionego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/network/dialer"
+	"github.com/DioneProtocol/odysseygo/network/peer"
+	"github.com/DioneProtocol/odysseygo/network/throttling"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/uptime"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/compression"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 // HealthConfig describes parameters for network layer health checks.
@@ -125,9 +126,9 @@ type Config struct {
 	PingFrequency      time.Duration     `json:"pingFrequency"`
 	AllowPrivateIPs    bool              `json:"allowPrivateIPs"`
 
-	// CompressionEnabled will compress available outbound messages when set to
-	// true.
-	CompressionEnabled bool `json:"compressionEnabled"`
+	// The compression type to use when compressing outbound messages.
+	// Assumes all peers support this compression type.
+	CompressionType compression.Type `json:"compressionType"`
 
 	// TLSKey is this node's TLS key that is used to sign IPs.
 	TLSKey crypto.Signer `json:"-"`
@@ -136,7 +137,7 @@ type Config struct {
 	TrackedSubnets set.Set[ids.ID] `json:"-"`
 	Beacons        validators.Set  `json:"-"`
 
-	// Validators are the current validators in the Dione network
+	// Validators are the current validators in the Odyssey network
 	Validators validators.Manager `json:"-"`
 
 	UptimeCalculator uptime.Calculator `json:"-"`
