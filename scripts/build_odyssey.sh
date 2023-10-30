@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -euo pipefail
 
 print_usage() {
   printf "Usage: build_odyssey [OPTIONS]
@@ -26,11 +24,10 @@ done
 
 # Changes to the minimum golang version must also be replicated in
 # scripts/build_odyssey.sh (here)
-# scripts/local.Dockerfile
 # Dockerfile
 # README.md
 # go.mod
-go_version_minimum="1.19.6"
+go_version_minimum="1.20.8"
 
 go_version() {
     go version | sed -nE -e 's/[^0-9.]+([0-9.]+).+/\1/p'
@@ -53,11 +50,11 @@ if version_lt "$(go_version)" "$go_version_minimum"; then
     exit 1
 fi
 
-# OdysseyGo root folder
+# Odysseygo root folder
 ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
 source "$ODYSSEY_PATH"/scripts/constants.sh
 
 build_args="$race"
 echo "Building OdysseyGo..."
-go build $build_args -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit $static_ld_flags" -o "$odysseygo_path" "$ODYSSEY_PATH/main/"*.go
+go build $build_args -ldflags "-X github.com/ava-labs/odysseygo/version.GitCommit=$git_commit $static_ld_flags" -o "$odysseygo_path" "$ODYSSEY_PATH/main/"*.go

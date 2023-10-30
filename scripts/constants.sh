@@ -5,20 +5,8 @@
 
 ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
 
-# Where OdysseyGo binary goes
+# Where AvalancheGo binary goes
 odysseygo_path="$ODYSSEY_PATH/build/odysseygo"
-plugin_dir=${PLUGIN_DIR:-$HOME/.odysseygo/plugins}
-evm_path=${EVM_PATH:-$plugin_dir/evm}
-coreth_version=${CORETH_VERSION:-'v0.12.2-rc.0'}
-
-# Set the PATHS
-GOPATH="$(go env GOPATH)"
-coreth_path=${CORETH_PATH:-"$GOPATH/pkg/mod/github.com/DioneProtocol/coreth@$coreth_version"}
-
-# DioneProtocol docker hub
-# DioneProtocol/odysseygo - defaults to local as to avoid unintentional pushes
-# You should probably set it - export DOCKER_REPO='dioneprotocol/odysseygo'
-odysseygo_dockerhub_repo=${DOCKER_REPO:-"odysseygo"}
 
 # Current branch
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI
