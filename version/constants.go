@@ -61,25 +61,25 @@ var (
 	RPCChainVMProtocolCompatibility map[uint][]*Semantic
 
 	OdysseyPhase1Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.September, 22, 21, 0, 0, 0, time.UTC),
-		constants.TestnetID:    time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
+		constants.MainnetID: time.Date(2023, time.October, 26, 11, 46, 0, 0, time.UTC),
+		constants.TestnetID: time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
 	OdysseyPhase1DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 	OdysseyPhase1MinPChainHeight = map[uint32]uint64{
-		constants.MainnetID: 793005,
-		constants.TestnetID:    47437,
+		constants.MainnetID: 0,
+		constants.TestnetID: 0,
 	}
 	OdysseyPhase1DefaultMinPChainHeight uint64
 
 	BanffTimes = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2022, time.October, 18, 16, 0, 0, 0, time.UTC),
-		constants.TestnetID:    time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
+		constants.MainnetID: time.Date(2023, time.October, 26, 11, 46, 0, 0, time.UTC),
+		constants.TestnetID: time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
 	}
 	BanffDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	CortinaTimes = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2023, time.April, 25, 15, 0, 0, 0, time.UTC),
-		constants.TestnetID:    time.Date(2023, time.April, 6, 15, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2023, time.October, 26, 11, 54, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2023, time.April, 6, 15, 0, 0, 0, time.UTC),
 	}
 	CortinaDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 )
