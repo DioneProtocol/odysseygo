@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-set -o errexit
-set -o nounset
-set -o pipefail
+set -euo pipefail
 
 print_usage() {
   printf "Usage: build [OPTIONS]
@@ -24,7 +22,7 @@ while getopts 'r' flag; do
   esac
 done
 
-# OdysseyGo root folder
+# Odysseygo root folder
 ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
 source "$ODYSSEY_PATH"/scripts/constants.sh
