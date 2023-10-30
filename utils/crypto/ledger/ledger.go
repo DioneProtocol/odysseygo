@@ -6,7 +6,7 @@ package ledger
 import (
 	"fmt"
 
-	ledger "github.com/DioneProtocol/ledger-odyssey/go"
+	ledger "github.com/ava-labs/ledger-avalanche/go"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
@@ -25,11 +25,11 @@ var _ keychain.Ledger = (*Ledger)(nil)
 // Ledger is a wrapper around the low-level Ledger Device interface that
 // provides Odyssey-specific access.
 type Ledger struct {
-	device *ledger.LedgerOdyssey
+	device *ledger.LedgerAvalanche
 }
 
 func New() (keychain.Ledger, error) {
-	device, err := ledger.FindLedgerOdysseyApp()
+	device, err := ledger.FindLedgerAvalancheApp()
 	return &Ledger{
 		device: device,
 	}, err
