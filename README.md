@@ -30,7 +30,9 @@ If you plan to build OdysseyGo from source, you will also need the following sof
 
 ####  Prerequisites
 Supported OS: Ubuntu server 22.04
+
 Permissions: `root` user
+
 Directory: default directory (`/root`)
 
 #### Clone The Repository
@@ -47,12 +49,12 @@ cd odyssey-avax-fork
 
 #### Prepare script
 
-3. Go to the scripts folder:
+3. Go to the `scripts` folder:
 ```sh
 cd scripts
 ```
 4. Configure IP addresses of the node configuration:
-- open `run_config.json` using any text editor and specify internal IP address by editing the lines (one for each node), for example:
+- open `run_config.json` and specify internal IP address by editing the corresponding lines (one for each node), for example:
 ```sh
 "ip": "127.0.0.1",
 ```
@@ -80,6 +82,7 @@ chmod +x install.sh
 #### Check status
 
 8. To check that nodes are running:
+
 In bash enter:
 - for a validator (select from 0-4):
 ```sh
@@ -91,12 +94,12 @@ systemctl status node-validator-0.service
 systemctl status node-<nodename>.service
 ```
 
-In browser: Go to http://<IP:port>/ext/health, find
+In browser: go to `http://IP:port/ext/health`, find
 ```sh
  "healthy":true
 ```
 
-9. Logs are available at /root/odyssey-avax-fork/db/<node>/logs
+9. Logs are available at /root/odyssey-avax-fork/db/node/logs
 
 #### Move data to another volume if needed
 
