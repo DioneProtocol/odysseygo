@@ -26,6 +26,106 @@ If you plan to build OdysseyGo from source, you will also need the following sof
 - [gcc](https://gcc.gnu.org/)
 - g++
 
+### Installing with script
+
+####  Prerequisites
+Supported OS: Ubuntu server 22.04
+Permissions: `root` user
+Directory: default directory (`/root`)
+
+#### Clone The Repository
+
+1. Using bash terminal install git utility:
+```sh
+apt update && apt install git -y
+```
+2. Then clone the repository:
+```sh
+git clone https://git.sfxdx.com/green-energy1/odyssey-avax-fork
+cd odyssey-avax-fork
+```
+
+#### Prepare script
+
+3. Go to the scripts folder:
+```sh
+cd scripts
+```
+4. Configure IP addresses of the node configuration:
+- open `run_config.json` using any text editor and specify internal IP address by editing the lines (one for each node), for example:
+```sh
+"ip": "127.0.0.1",
+```
+to
+```sh
+"ip": "10.10.15.10",
+```
+Please also ensure that ports specified in `httpPort` are also opened in firewall to allow incoming connections.
+
+It is also necessary to check `go-ethereum` core git repository link by verifying the corresponding head lines of `install.sh` (`go` version can also be modified there).
+
+5. Provide the execution rights:
+```sh
+chmod +x install.sh
+```
+
+#### Build and install nodes
+
+6. Launch the installation script:
+```sh
+./install.sh
+```
+7. Follow the instructions on the screen.
+
+#### Check status
+
+8. To check that nodes are running:
+In bash enter:
+- for a validator (select from 0-4):
+```sh
+systemctl status node-validator-0.service
+```
+
+- for a node:
+```sh
+systemctl status node-<nodename>.service
+```
+
+In browser: Go to http://<IP:port>/ext/health, find
+```sh
+ "healthy":true
+```
+
+9. Logs are available at /root/odyssey-avax-fork/db/<node>/logs
+
+#### Move data to another volume if needed
+
+10. Stop all node services:
+```sh
+systemctl stop node-validator-0.service
+systemctl stop node-validator-1.service
+...
+systemctl stop node-<nodename>.service
+...
+```
+
+11. Move `db` folder and create symbolic link:
+```sh
+mv /root/odyssey-avax-fork/db /new-location/
+ln -s /new-location/db /root/odyssey-avax-fork/
+```
+
+12 Start all node services:
+```sh
+systemctl start node-validator-0.service
+systemctl start node-validator-1.service
+...
+systemctl start node-<nodename>.service
+...
+```
+
+13. Check status as described at `step 8`.
+
 ### Building From Source
 
 #### Clone The Repository
