@@ -37,7 +37,7 @@ Directory: default directory (`/root`)
 
 #### Clone The Repository
 
-1. Using bash terminal install git utility:
+1. Using `bash` terminal install git utility:
 ```sh
 apt update && apt install git -y
 ```
@@ -83,7 +83,7 @@ chmod +x install.sh
 
 8. To check that nodes are running:
 
-In bash enter:
+In `bash`:
 - for a validator (select from 0-4):
 ```sh
 systemctl status node-validator-0.service
@@ -99,7 +99,7 @@ In browser: go to `http://IP:port/ext/health`, find
  "healthy":true
 ```
 
-9. Logs are available at /root/odyssey-avax-fork/db/node/logs
+9. Logs are available at `/root/odyssey-avax-fork/db/node/logs`
 
 #### Move data to another volume if needed
 
