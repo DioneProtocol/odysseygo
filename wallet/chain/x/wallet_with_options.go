@@ -5,7 +5,7 @@ package x
 
 import (
 	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"

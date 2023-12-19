@@ -44,7 +44,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms/components/chain"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp/gwarp"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp/gwarp"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
@@ -201,9 +201,9 @@ func (vm *VMClient) Initialize(
 		ChainId:      chainCtx.ChainID[:],
 		NodeId:       chainCtx.NodeID.Bytes(),
 		PublicKey:    bls.PublicKeyToBytes(chainCtx.PublicKey),
-		XChainId:     chainCtx.XChainID[:],
-		CChainId:     chainCtx.CChainID[:],
-		DioneAssetId:  chainCtx.DIONEAssetID[:],
+		AChainId:     chainCtx.AChainID[:],
+		DChainId:     chainCtx.DChainID[:],
+		DioneAssetId: chainCtx.DIONEAssetID[:],
 		ChainDataDir: chainCtx.ChainDataDir,
 		GenesisBytes: genesisBytes,
 		UpgradeBytes: upgradeBytes,
@@ -429,7 +429,7 @@ func (vm *VMClient) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 // method will be called instead.
 func (vm *VMClient) buildBlockWithContext(ctx context.Context, blockCtx *block.Context) (snowman.Block, error) {
 	resp, err := vm.client.BuildBlock(ctx, &vmpb.BuildBlockRequest{
-		PChainHeight: &blockCtx.PChainHeight,
+		OChainHeight: &blockCtx.OChainHeight,
 	})
 	if err != nil {
 		return nil, err
@@ -911,7 +911,7 @@ func (b *blockClient) ShouldVerifyWithContext(context.Context) (bool, error) {
 func (b *blockClient) VerifyWithContext(ctx context.Context, blockCtx *block.Context) error {
 	resp, err := b.vm.client.BlockVerify(ctx, &vmpb.BlockVerifyRequest{
 		Bytes:        b.bytes,
-		PChainHeight: &blockCtx.PChainHeight,
+		OChainHeight: &blockCtx.OChainHeight,
 	})
 	if err != nil {
 		return err

@@ -33,7 +33,7 @@ type LockedAmount struct {
 
 type Allocation struct {
 	ETHAddr        ids.ShortID    `json:"ethAddr"`
-	DIONEAddr       ids.ShortID    `json:"dioneAddr"`
+	DIONEAddr      ids.ShortID    `json:"dioneAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -45,7 +45,7 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
 	dioneAddr, err := address.Format(
-		"X",
+		"A",
 		constants.GetHRP(networkID),
 		a.DIONEAddr.Bytes(),
 	)
@@ -65,7 +65,7 @@ type Staker struct {
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
 	dioneAddr, err := address.Format(
-		"X",
+		"A",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
@@ -87,7 +87,7 @@ type Config struct {
 	InitialStakedFunds         []ids.ShortID `json:"initialStakedFunds"`
 	InitialStakers             []Staker      `json:"initialStakers"`
 
-	CChainGenesis string `json:"cChainGenesis"`
+	DChainGenesis string `json:"dChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -101,7 +101,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		InitialStakeDurationOffset: c.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]string, len(c.InitialStakedFunds)),
 		InitialStakers:             make([]UnparsedStaker, len(c.InitialStakers)),
-		CChainGenesis:              c.CChainGenesis,
+		DChainGenesis:              c.DChainGenesis,
 		Message:                    c.Message,
 	}
 	for i, a := range c.Allocations {
@@ -113,7 +113,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 	}
 	for i, isa := range c.InitialStakedFunds {
 		dioneAddr, err := address.Format(
-			"X",
+			"A",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
 		)

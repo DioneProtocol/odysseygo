@@ -12,7 +12,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 )
 
 // PrivateKey-vmRQiZeXEXYMyJhEiqdC2z5JhuDbxL8ix9UVvjgMu2Er1NepE => P-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2

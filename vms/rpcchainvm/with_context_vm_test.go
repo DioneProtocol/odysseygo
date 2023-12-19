@@ -29,7 +29,7 @@ var (
 	_ block.WithVerifyContext = ContextEnabledBlockMock{}
 
 	blockContext = &block.Context{
-		PChainHeight: 1,
+		OChainHeight: 1,
 	}
 
 	blkID    = ids.ID{1}

@@ -14,9 +14,9 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
@@ -34,12 +34,12 @@ func ExampleWallet() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain and the X-chain wallets
-	pWallet := wallet.P()
-	xWallet := wallet.X()
+	// Get the O-chain and the A-chain wallets
+	pWallet := wallet.O()
+	xWallet := wallet.A()
 
 	// Pull out useful constants to use when issuing transactions.
-	xChainID := xWallet.BlockchainID()
+	aChainID := xWallet.BlockchainID()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
@@ -47,7 +47,7 @@ func ExampleWallet() {
 		},
 	}
 
-	// Create a custom asset to send to the P-chain.
+	// Create a custom asset to send to the O-chain.
 	createAssetStartTime := time.Now()
 	createAssetTxID, err := xWallet.IssueCreateAssetTx(
 		"RnM",
@@ -63,15 +63,15 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to create new X-chain asset with: %s\n", err)
+		log.Fatalf("failed to create new A-chain asset with: %s\n", err)
 		return
 	}
-	log.Printf("created X-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
+	log.Printf("created A-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
 
-	// Send 100 MegaDione to the P-chain.
+	// Send 100 MegaDione to the O-chain.
 	exportStartTime := time.Now()
 	exportTxID, err := xWallet.IssueExportTx(
-		constants.PlatformChainID,
+		constants.OmegaChainID,
 		[]*dione.TransferableOutput{
 			{
 				Asset: dione.Asset{
@@ -85,19 +85,19 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to issue X->P export transaction with: %s\n", err)
+		log.Fatalf("failed to issue A->O export transaction with: %s\n", err)
 		return
 	}
-	log.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
+	log.Printf("issued A->O export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
-	// Import the 100 MegaDione from the X-chain into the P-chain.
+	// Import the 100 MegaDione from the A-chain into the O-chain.
 	importStartTime := time.Now()
-	importTxID, err := pWallet.IssueImportTx(xChainID, owner)
+	importTxID, err := pWallet.IssueImportTx(aChainID, owner)
 	if err != nil {
-		log.Fatalf("failed to issue X->P import transaction with: %s\n", err)
+		log.Fatalf("failed to issue A->O import transaction with: %s\n", err)
 		return
 	}
-	log.Printf("issued X->P import %s in %s\n", importTxID, time.Since(importStartTime))
+	log.Printf("issued A->O import %s in %s\n", importTxID, time.Since(importStartTime))
 
 	createSubnetStartTime := time.Now()
 	createSubnetTxID, err := pWallet.IssueCreateSubnetTx(owner)

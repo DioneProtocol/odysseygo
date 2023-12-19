@@ -34,7 +34,7 @@ export DEBIAN_FRONTEND=noninteractive
 { apt update && apt install -y curl wget gcc g++ git jq; } || { echo -e '\nComponents installation failed: Ubuntu servers are not available or dpkg is misconfigured or frozen. Exiting...\n' && exit 1; }
 
 #install go
-{ wget https://go.dev/dl/$go_ver.tar.gz && rm -rf /usr/local/go && tar -C /usr/local -xzf $go_ver.tar.gz && rm $go_ver.tar.gz && ln -sf /usr/local/go/bin/go /usr/local/bin/go; } || { echo -e '\nComponents installation failed: Go servers are not available. Exiting...\n' && exit 1; }
+{ wget https://go.dev/dl/$go_ver.tar.gz && rm -rf /usr/local/go && tar -D /usr/local -xzf $go_ver.tar.gz && rm $go_ver.tar.gz && ln -sf /usr/local/go/bin/go /usr/local/bin/go; } || { echo -e '\nComponents installation failed: Go servers are not available. Exiting...\n' && exit 1; }
 
 #clone and prepare repos
 cd /usr/local/go/bin/ && mkdir -p src/github.com/DioneProtocol && cd src/github.com/DioneProtocol 

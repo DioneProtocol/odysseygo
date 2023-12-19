@@ -4,8 +4,8 @@
 package x
 
 import (
-	"github.com/DioneProtocol/odysseygo/vms/avm/blocks"
-	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/fxs"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"

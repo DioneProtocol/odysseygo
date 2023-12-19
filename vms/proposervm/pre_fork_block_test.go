@@ -362,7 +362,7 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 	postForkStatelessChild, err := block.Build(
 		coreGenBlk.ID(),
 		coreBlk.Timestamp(),
-		0, // pChainHeight
+		0, // oChainHeight
 		proVM.stakingCertLeaf,
 		coreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -794,7 +794,7 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 	slb, err := block.Build(
 		firstBlock.ID(), // refer unknown parent
 		firstBlock.Timestamp(),
-		0, // pChainHeight,
+		0, // oChainHeight,
 		proVM.stakingCertLeaf,
 		coreBlk.opts[0].Bytes(),
 		proVM.ctx.ChainID,
@@ -818,13 +818,13 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 
 // Assert that when the underlying VM implements ChainVMWithBuildBlockContext
 // and the proposervm is activated, we only call the VM's BuildBlockWithContext
-// when a P-chain height can be correctly provided from the parent block.
+// when a O-chain height can be correctly provided from the parent block.
 func TestPreForkBlock_BuildBlockWithContext(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	pChainHeight := uint64(1337)
+	oChainHeight := uint64(1337)
 	blkID := ids.GenerateTestID()
 	innerBlk := snowman.NewMockBlock(ctrl)
 	innerBlk.EXPECT().ID().Return(blkID).AnyTimes()
@@ -832,11 +832,11 @@ func TestPreForkBlock_BuildBlockWithContext(t *testing.T) {
 	builtBlk := snowman.NewMockBlock(ctrl)
 	builtBlk.EXPECT().Bytes().Return([]byte{1, 2, 3}).AnyTimes()
 	builtBlk.EXPECT().ID().Return(ids.GenerateTestID()).AnyTimes()
-	builtBlk.EXPECT().Height().Return(pChainHeight).AnyTimes()
+	builtBlk.EXPECT().Height().Return(oChainHeight).AnyTimes()
 	innerVM := mocks.NewMockChainVM(ctrl)
 	innerVM.EXPECT().BuildBlock(gomock.Any()).Return(builtBlk, nil).AnyTimes()
 	vdrState := validators.NewMockState(ctrl)
-	vdrState.EXPECT().GetMinimumHeight(context.Background()).Return(pChainHeight, nil).AnyTimes()
+	vdrState.EXPECT().GetMinimumHeight(context.Background()).Return(oChainHeight, nil).AnyTimes()
 
 	vm := &VM{
 		ChainVM: innerVM,
@@ -851,7 +851,7 @@ func TestPreForkBlock_BuildBlockWithContext(t *testing.T) {
 		vm:    vm,
 	}
 
-	// Should call BuildBlock since proposervm won't have a P-chain height
+	// Should call BuildBlock since proposervm won't have a O-chain height
 	gotChild, err := blk.buildChild(context.Background())
 	require.NoError(err)
 	require.Equal(builtBlk, gotChild.(*postForkBlock).innerBlk)

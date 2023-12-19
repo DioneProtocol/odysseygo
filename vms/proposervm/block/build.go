@@ -17,14 +17,14 @@ import (
 func BuildUnsigned(
 	parentID ids.ID,
 	timestamp time.Time,
-	pChainHeight uint64,
+	oChainHeight uint64,
 	blockBytes []byte,
 ) (SignedBlock, error) {
 	var block SignedBlock = &statelessBlock{
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			PChainHeight: pChainHeight,
+			OChainHeight: oChainHeight,
 			Certificate:  nil,
 			Block:        blockBytes,
 		},
@@ -41,7 +41,7 @@ func BuildUnsigned(
 func Build(
 	parentID ids.ID,
 	timestamp time.Time,
-	pChainHeight uint64,
+	oChainHeight uint64,
 	cert *x509.Certificate,
 	blockBytes []byte,
 	chainID ids.ID,
@@ -51,7 +51,7 @@ func Build(
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			PChainHeight: pChainHeight,
+			OChainHeight: oChainHeight,
 			Certificate:  cert.Raw,
 			Block:        blockBytes,
 		},

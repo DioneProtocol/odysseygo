@@ -9,7 +9,7 @@ import (
 	_ "embed"
 
 	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 )
 
 var (

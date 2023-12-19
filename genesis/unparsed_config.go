@@ -15,7 +15,7 @@ var errInvalidETHAddress = errors.New("invalid eth address")
 
 type UnparsedAllocation struct {
 	ETHAddr        string         `json:"ethAddr"`
-	DIONEAddr       string         `json:"dioneAddr"`
+	DIONEAddr      string         `json:"dioneAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -60,7 +60,7 @@ type UnparsedStaker struct {
 
 func (us UnparsedStaker) Parse() (Staker, error) {
 	s := Staker{
-		NodeID:        us.NodeID,
+		NodeID: us.NodeID,
 	}
 
 	_, _, dioneAddrBytes, err := address.Parse(us.RewardAddress)
@@ -87,7 +87,7 @@ type UnparsedConfig struct {
 	InitialStakedFunds         []string         `json:"initialStakedFunds"`
 	InitialStakers             []UnparsedStaker `json:"initialStakers"`
 
-	CChainGenesis string `json:"cChainGenesis"`
+	DChainGenesis string `json:"dChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -101,7 +101,7 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		InitialStakeDurationOffset: uc.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]ids.ShortID, len(uc.InitialStakedFunds)),
 		InitialStakers:             make([]Staker, len(uc.InitialStakers)),
-		CChainGenesis:              uc.CChainGenesis,
+		DChainGenesis:              uc.DChainGenesis,
 		Message:                    uc.Message,
 	}
 	for i, ua := range uc.Allocations {

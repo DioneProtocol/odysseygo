@@ -49,7 +49,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/utils/storage"
 	"github.com/DioneProtocol/odysseygo/utils/timer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 	"github.com/DioneProtocol/odysseygo/vms/proposervm"
 )
 
@@ -100,11 +100,11 @@ func getConsensusConfig(v *viper.Viper) snowball.Parameters {
 	return snowball.Parameters{
 		K:     v.GetInt(SnowSampleSizeKey),
 		Alpha: v.GetInt(SnowQuorumSizeKey),
-		// During the X-chain linearization we require BetaVirtuous and
+		// During the A-chain linearization we require BetaVirtuous and
 		// BetaRogue to be equal. Therefore we use the more conservative
 		// BetaRogue value for both BetaVirtuous and BetaRogue.
 		//
-		// TODO: After the X-chain linearization use the
+		// TODO: After the A-chain linearization use the
 		// SnowVirtuousCommitThresholdKey as before.
 		BetaVirtuous:            v.GetInt(SnowRogueCommitThresholdKey),
 		BetaRogue:               v.GetInt(SnowRogueCommitThresholdKey),

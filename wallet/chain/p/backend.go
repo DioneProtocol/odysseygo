@@ -13,7 +13,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 )
 
 var _ Backend = (*backend)(nil)
@@ -26,7 +26,7 @@ type ChainUTXOs interface {
 	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*dione.UTXO, error)
 }
 
-// Backend defines the full interface required to support a P-chain wallet.
+// Backend defines the full interface required to support a O-chain wallet.
 type Backend interface {
 	ChainUTXOs
 	BuilderBackend
@@ -64,7 +64,7 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *txs.Tx) error {
 	}
 
 	producedUTXOSlice := tx.UTXOs()
-	err = b.addUTXOs(ctx, constants.PlatformChainID, producedUTXOSlice)
+	err = b.addUTXOs(ctx, constants.OmegaChainID, producedUTXOSlice)
 	if err != nil {
 		return err
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 )
 
 var _ txs.Visitor = (*backendVisitor)(nil)
@@ -93,7 +93,7 @@ func (b *backendVisitor) AddPermissionlessValidatorTx(tx *txs.AddPermissionlessV
 func (b *backendVisitor) baseTx(tx *txs.BaseTx) error {
 	return b.b.removeUTXOs(
 		b.ctx,
-		constants.PlatformChainID,
+		constants.OmegaChainID,
 		tx.InputIDs(),
 	)
 }
