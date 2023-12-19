@@ -25,7 +25,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/logging"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
 )
 
 var errNoChainProvided = errors.New("argument 'chain' not given")

@@ -15,11 +15,11 @@ import (
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 
-// This example program continuously polls for the next X-Chain block
+// This example program continuously polls for the next A-Chain block
 // and prints the ID of the block and its transactions.
 func main() {
 	var (
-		uri       = fmt.Sprintf("%s/ext/index/X/block", primary.LocalAPIURI)
+		uri       = fmt.Sprintf("%s/ext/index/A/block", primary.LocalAPIURI)
 		client    = indexer.NewClient(uri)
 		ctx       = context.Background()
 		nextIndex uint64
@@ -37,14 +37,14 @@ func main() {
 			log.Fatalf("failed to parse proposervm block: %s\n", err)
 		}
 
-		avmBlockBytes := proposerVMBlock.Block()
-		avmBlock, err := x.Parser.ParseBlock(avmBlockBytes)
+		alphaBlockBytes := proposerVMBlock.Block()
+		alphaBlock, err := x.Parser.ParseBlock(alphaBlockBytes)
 		if err != nil {
-			log.Fatalf("failed to parse avm block: %s\n", err)
+			log.Fatalf("failed to parse alpha block: %s\n", err)
 		}
 
-		acceptedTxs := avmBlock.Txs()
-		log.Printf("accepted block %s with %d transactions\n", avmBlock.ID(), len(acceptedTxs))
+		acceptedTxs := alphaBlock.Txs()
+		log.Printf("accepted block %s with %d transactions\n", alphaBlock.ID(), len(acceptedTxs))
 
 		for _, tx := range acceptedTxs {
 			log.Printf("accepted transaction %s\n", tx.ID())

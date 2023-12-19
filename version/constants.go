@@ -54,7 +54,7 @@ var (
 	}
 
 	//go:embed compatibility.json
-	rpcChainVMProtocolCompatibilityBytes []byte
+	rpdChainVMProtocolCompatibilityBytes []byte
 	// RPCChainVMProtocolCompatibility maps RPCChainVMProtocol versions to the
 	// set of odysseygo versions that supported that version. This is not used
 	// by odysseygo, but is useful for downstream libraries.
@@ -65,11 +65,11 @@ var (
 		constants.TestnetID: time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
 	OdysseyPhase1DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
-	OdysseyPhase1MinPChainHeight = map[uint32]uint64{
+	OdysseyPhase1MinOChainHeight = map[uint32]uint64{
 		constants.MainnetID: 0,
 		constants.TestnetID: 0,
 	}
-	OdysseyPhase1DefaultMinPChainHeight uint64
+	OdysseyPhase1DefaultMinOChainHeight uint64
 
 	BanffTimes = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2023, time.October, 26, 11, 46, 0, 0, time.UTC),
@@ -86,13 +86,13 @@ var (
 
 func init() {
 	var parsedRPCChainVMCompatibility map[uint][]string
-	err := json.Unmarshal(rpcChainVMProtocolCompatibilityBytes, &parsedRPCChainVMCompatibility)
+	err := json.Unmarshal(rpdChainVMProtocolCompatibilityBytes, &parsedRPCChainVMCompatibility)
 	if err != nil {
 		panic(err)
 	}
 
 	RPCChainVMProtocolCompatibility = make(map[uint][]*Semantic)
-	for rpcChainVMProtocol, versionStrings := range parsedRPCChainVMCompatibility {
+	for rpdChainVMProtocol, versionStrings := range parsedRPCChainVMCompatibility {
 		versions := make([]*Semantic, len(versionStrings))
 		for i, versionString := range versionStrings {
 			version, err := Parse(versionString)
@@ -101,7 +101,7 @@ func init() {
 			}
 			versions[i] = version
 		}
-		RPCChainVMProtocolCompatibility[rpcChainVMProtocol] = versions
+		RPCChainVMProtocolCompatibility[rpdChainVMProtocol] = versions
 	}
 }
 
@@ -112,11 +112,11 @@ func GetOdysseyPhase1Time(networkID uint32) time.Time {
 	return OdysseyPhase1DefaultTime
 }
 
-func GetOdysseyPhase1MinPChainHeight(networkID uint32) uint64 {
-	if minHeight, exists := OdysseyPhase1MinPChainHeight[networkID]; exists {
+func GetOdysseyPhase1MinOChainHeight(networkID uint32) uint64 {
+	if minHeight, exists := OdysseyPhase1MinOChainHeight[networkID]; exists {
 		return minHeight
 	}
-	return OdysseyPhase1DefaultMinPChainHeight
+	return OdysseyPhase1DefaultMinOChainHeight
 }
 
 func GetBanffTime(networkID uint32) time.Time {

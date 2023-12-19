@@ -103,21 +103,21 @@ func (b *preForkBlock) verifyPostForkChild(ctx context.Context, child *postForkB
 	}
 
 	childID := child.ID()
-	childPChainHeight := child.PChainHeight()
-	currentPChainHeight, err := b.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
+	childOChainHeight := child.OChainHeight()
+	currentOChainHeight, err := b.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
 	if err != nil {
 		b.vm.ctx.Log.Error("block verification failed",
-			zap.String("reason", "failed to get current P-Chain height"),
+			zap.String("reason", "failed to get current O-Chain height"),
 			zap.Stringer("blkID", childID),
 			zap.Error(err),
 		)
 		return err
 	}
-	if childPChainHeight > currentPChainHeight {
-		return errPChainHeightNotReached
+	if childOChainHeight > currentOChainHeight {
+		return errOChainHeightNotReached
 	}
-	if childPChainHeight < b.vm.minimumPChainHeight {
-		return errPChainHeightTooLow
+	if childOChainHeight < b.vm.minimumOChainHeight {
+		return errOChainHeightTooLow
 	}
 
 	// Make sure [b] is the parent of [child]'s inner block
@@ -189,9 +189,9 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 		newTimestamp = parentTimestamp
 	}
 
-	// The child's P-Chain height is proposed as the optimal P-Chain height that
+	// The child's O-Chain height is proposed as the optimal O-Chain height that
 	// is at least the minimum height
-	pChainHeight, err := b.vm.optimalPChainHeight(ctx, b.vm.minimumPChainHeight)
+	oChainHeight, err := b.vm.optimalOChainHeight(ctx, b.vm.minimumOChainHeight)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 	statelessBlock, err := block.BuildUnsigned(
 		parentID,
 		newTimestamp,
-		pChainHeight,
+		oChainHeight,
 		innerBlock.Bytes(),
 	)
 	if err != nil {
@@ -229,7 +229,7 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 	return blk, nil
 }
 
-func (*preForkBlock) pChainHeight(context.Context) (uint64, error) {
+func (*preForkBlock) oChainHeight(context.Context) (uint64, error) {
 	return 0, nil
 }
 

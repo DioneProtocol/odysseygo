@@ -383,7 +383,7 @@ func (jm *JobsWithMissing) Commit() error {
 // Note: the jobs queue ensures that no job with missing dependencies will be placed
 // on the runnable stack in the first place.
 // However, for specific VM implementations blocks may be committed via a two stage commit
-// (ex. platformvm Proposal and Commit/Abort blocks). This can cause an issue where if the first stage
+// (ex. omegavm Proposal and Commit/Abort blocks). This can cause an issue where if the first stage
 // is executed immediately before the node dies, it will be removed from the runnable stack
 // without writing the state transition to the VM's database. When the node restarts, the
 // VM will not have marked the first block (the proposal block as accepted), but it could

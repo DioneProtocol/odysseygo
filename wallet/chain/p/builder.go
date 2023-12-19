@@ -16,9 +16,9 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/math"
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
@@ -33,7 +33,7 @@ var (
 	_ Builder = (*builder)(nil)
 )
 
-// Builder provides a convenient interface for building unsigned P-chain
+// Builder provides a convenient interface for building unsigned O-chain
 // transactions.
 type Builder interface {
 	// GetBalance calculates the amount of each asset that this builder has
@@ -51,7 +51,7 @@ type Builder interface {
 		options ...common.Option,
 	) (map[ids.ID]uint64, error)
 
-	// NewBaseTx creates a new simple value transfer. Because the P-chain
+	// NewBaseTx creates a new simple value transfer. Because the O-chain
 	// doesn't intend for balance transfers to occur, this method is expensive
 	// and abuses the creation of subnets.
 	//
@@ -202,7 +202,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// P-chain transactions.
+// O-chain transactions.
 type BuilderBackend interface {
 	Context
 	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*dione.UTXO, error)
@@ -231,7 +231,7 @@ func (b *builder) GetBalance(
 	options ...common.Option,
 ) (map[ids.ID]uint64, error) {
 	ops := common.NewOptions(options)
-	return b.getBalance(constants.PlatformChainID, ops)
+	return b.getBalance(constants.OmegaChainID, ops)
 }
 
 func (b *builder) GetImportableBalance(
@@ -270,7 +270,7 @@ func (b *builder) NewBaseTx(
 	return &txs.CreateSubnetTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -301,14 +301,14 @@ func (b *builder) NewAddValidatorTx(
 	return &txs.AddValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
 		}},
-		Validator:        *vdr,
-		StakeOuts:        stakeOutputs,
-		RewardsOwner:     rewardsOwner,
+		Validator:    *vdr,
+		StakeOuts:    stakeOutputs,
+		RewardsOwner: rewardsOwner,
 	}, nil
 }
 
@@ -334,7 +334,7 @@ func (b *builder) NewAddSubnetValidatorTx(
 	return &txs.AddSubnetValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -367,7 +367,7 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 	return &txs.RemoveSubnetValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -377,7 +377,6 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 		SubnetAuth: subnetAuth,
 	}, nil
 }
-
 
 func (b *builder) NewCreateChainTx(
 	subnetID ids.ID,
@@ -406,7 +405,7 @@ func (b *builder) NewCreateChainTx(
 	return &txs.CreateChainTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -438,7 +437,7 @@ func (b *builder) NewCreateSubnetTx(
 	return &txs.CreateSubnetTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -461,7 +460,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		dioneAssetID     = b.backend.DIONEAssetID()
+		dioneAssetID    = b.backend.DIONEAssetID()
 		txFee           = b.backend.BaseTxFee()
 
 		importedInputs  = make([]*dione.TransferableInput, 0, len(utxos))
@@ -508,8 +507,8 @@ func (b *builder) NewImportTx(
 	}
 
 	var (
-		inputs       []*dione.TransferableInput
-		outputs      = make([]*dione.TransferableOutput, 0, len(importedAmounts))
+		inputs        []*dione.TransferableInput
+		outputs       = make([]*dione.TransferableOutput, 0, len(importedAmounts))
 		importedDIONE = importedAmounts[dioneAssetID]
 	)
 	if importedDIONE > txFee {
@@ -543,7 +542,7 @@ func (b *builder) NewImportTx(
 	return &txs.ImportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -581,7 +580,7 @@ func (b *builder) NewExportTx(
 	return &txs.ExportTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         changeOutputs,
 			Memo:         ops.Memo(),
@@ -608,7 +607,7 @@ func (b *builder) NewTransformSubnetTx(
 ) (*txs.TransformSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
 		b.backend.DIONEAssetID(): b.backend.TransformSubnetTxFee(),
-		assetID:                 maxSupply - initialSupply,
+		assetID:                  maxSupply - initialSupply,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -625,7 +624,7 @@ func (b *builder) NewTransformSubnetTx(
 	return &txs.TransformSubnetTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -673,7 +672,7 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 	return &txs.AddPermissionlessValidatorTx{
 		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.OmegaChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
@@ -755,7 +754,7 @@ func (b *builder) spend(
 	stakeOutputs []*dione.TransferableOutput,
 	err error,
 ) {
-	utxos, err := b.backend.UTXOs(options.Context(), constants.PlatformChainID)
+	utxos, err := b.backend.UTXOs(options.Context(), constants.OmegaChainID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -956,7 +955,7 @@ func (b *builder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                     // sort inputs
+	utils.Sort(inputs)                                      // sort inputs
 	dione.SortTransferableOutputs(changeOutputs, txs.Codec) // sort the change outputs
 	dione.SortTransferableOutputs(stakeOutputs, txs.Codec)  // sort stake outputs
 	return inputs, changeOutputs, stakeOutputs, nil

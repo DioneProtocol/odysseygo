@@ -95,14 +95,14 @@ func (*postForkOption) verifyPreForkChild(context.Context, *preForkBlock) error 
 
 func (b *postForkOption) verifyPostForkChild(ctx context.Context, child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentPChainHeight, err := b.pChainHeight(ctx)
+	parentOChainHeight, err := b.oChainHeight(ctx)
 	if err != nil {
 		return err
 	}
 	return b.postForkCommonComponents.Verify(
 		ctx,
 		parentTimestamp,
-		parentPChainHeight,
+		parentOChainHeight,
 		child,
 	)
 }
@@ -113,7 +113,7 @@ func (*postForkOption) verifyPostForkOption(context.Context, *postForkOption) er
 }
 
 func (b *postForkOption) buildChild(ctx context.Context) (Block, error) {
-	parentPChainHeight, err := b.pChainHeight(ctx)
+	parentOChainHeight, err := b.oChainHeight(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -121,17 +121,17 @@ func (b *postForkOption) buildChild(ctx context.Context) (Block, error) {
 		ctx,
 		b.ID(),
 		b.Timestamp(),
-		parentPChainHeight,
+		parentOChainHeight,
 	)
 }
 
-// This block's P-Chain height is its parent's P-Chain height
-func (b *postForkOption) pChainHeight(ctx context.Context) (uint64, error) {
+// This block's O-Chain height is its parent's O-Chain height
+func (b *postForkOption) oChainHeight(ctx context.Context) (uint64, error) {
 	parent, err := b.vm.getBlock(ctx, b.ParentID())
 	if err != nil {
 		return 0, err
 	}
-	return parent.pChainHeight(ctx)
+	return parent.oChainHeight(ctx)
 }
 
 func (b *postForkOption) setStatus(status choices.Status) {

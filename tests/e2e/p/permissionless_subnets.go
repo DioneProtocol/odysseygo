@@ -19,20 +19,20 @@ import (
 	"github.com/DioneProtocol/odysseygo/tests/e2e"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/status"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
-var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
+var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 	ginkgo.It("subnets operations",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
@@ -64,11 +64,11 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 			})
 
-			pWallet := baseWallet.P()
-			pChainClient := platformvm.NewClient(nodeURI)
-			xWallet := baseWallet.X()
-			xChainClient := avm.NewClient(nodeURI, xWallet.BlockchainID().String())
-			xChainID := xWallet.BlockchainID()
+			pWallet := baseWallet.O()
+			oChainClient := omegavm.NewClient(nodeURI)
+			xWallet := baseWallet.A()
+			aChainClient := alpha.NewClient(nodeURI, xWallet.BlockchainID().String())
+			aChainID := xWallet.BlockchainID()
 
 			owner := &secp256k1fx.OutputOwners{
 				Threshold: 1,
@@ -89,7 +89,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(subnetID, err).Should(gomega.Not(gomega.Equal(constants.PrimaryNetworkID)))
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, subnetID)
+				txStatus, err := oChainClient.GetTxStatus(ctx, subnetID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})
@@ -116,15 +116,15 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := xChainClient.GetTxStatus(ctx, subnetAssetID)
+				txStatus, err := aChainClient.GetTxStatus(ctx, subnetAssetID)
 				cancel()
 				gomega.Expect(txStatus, err).To(gomega.Equal(choices.Accepted))
 			})
 
-			ginkgo.By(fmt.Sprintf("Send 100 MegaDione of asset %s to the P-chain", subnetAssetID), func() {
+			ginkgo.By(fmt.Sprintf("Send 100 MegaDione of asset %s to the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
 				exportTxID, err := xWallet.IssueExportTx(
-					constants.PlatformChainID,
+					constants.OmegaChainID,
 					[]*dione.TransferableOutput{
 						{
 							Asset: dione.Asset{
@@ -142,15 +142,15 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := xChainClient.GetTxStatus(ctx, exportTxID)
+				txStatus, err := aChainClient.GetTxStatus(ctx, exportTxID)
 				cancel()
 				gomega.Expect(txStatus, err).To(gomega.Equal(choices.Accepted))
 			})
 
-			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the X-chain into the P-chain", subnetAssetID), func() {
+			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the A-chain into the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
 				importTxID, err := pWallet.IssueImportTx(
-					xChainID,
+					aChainID,
 					owner,
 					common.WithContext(ctx),
 				)
@@ -158,7 +158,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, importTxID)
+				txStatus, err := oChainClient.GetTxStatus(ctx, importTxID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})
@@ -186,7 +186,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, transformSubnetTxID)
+				txStatus, err := oChainClient.GetTxStatus(ctx, transformSubnetTxID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})
@@ -215,7 +215,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				ctx, cancel = context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				txStatus, err := pChainClient.GetTxStatus(ctx, addSubnetValidatorTxID)
+				txStatus, err := oChainClient.GetTxStatus(ctx, addSubnetValidatorTxID)
 				cancel()
 				gomega.Expect(txStatus.Status, err).To(gomega.Equal(status.Committed))
 			})

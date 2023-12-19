@@ -16,9 +16,9 @@ Developers can implement VMs in any language, and use libraries and tech stacks 
 ## Validators
 All Dione Protocol validators as members of the Dione Protocol primary network are required to run three VMs:
 
-Coreth: Defines the Contract Chain (C-Chain); supports smart contract functionality and is EVM-compatible.
-Platform VM: Defines the Platform Chain (P-Chain); supports operations on staking and Subnets.
-Dione VM: Defines the Exchange Chain (X-Chain); supports operations on Dione Native Tokens.
+Coreth: Defines the Contract Chain (D-Chain); supports smart contract functionality and is EVM-compatible.
+Omega VM: Defines the Omega Chain (O-Chain); supports operations on staking and Subnets.
+Alpha VM: Defines the Exchange Chain (A-Chain); supports operations on Dione Native Tokens.
 Validators are able to install additional VMs on their node to validate additional Subnets in the Dione ecosystem. In exchange, validators receive staking rewards in the form of a reward token configured by Subnets.
 
 ## Consensus
@@ -51,6 +51,6 @@ Dione Protocol utilize Avalanche Snowman Consensus Protocol as Primary network a
 ## Refrences
 [Avalanchego](https://github.com/ava-labs/avalanchego)
 [Coreth](https://github.com/ava-labs/coreth)
-[Subnets](https://github.com/ava-labs/subnet-evm)
+[Subnets](https://github.com/ava-labs/subnet-delta)
 [Avalanche Docs](https://docs.avax.network/)
 [Snowman Consensus Algorithm Explained](https://docs.avax.network/overview/getting-started/avalanche-consensus#algorithm-explained)

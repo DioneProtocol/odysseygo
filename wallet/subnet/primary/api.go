@@ -12,17 +12,17 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/rpc"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 )
 
 const (
 	MainnetAPIURI = "https://api.dioneprotocol.com"
-	TestnetAPIURI    = "https://test.api.dioneprotocol.com"
+	TestnetAPIURI = "https://test.api.dioneprotocol.com"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
@@ -31,8 +31,8 @@ const (
 // TODO: Refactor UTXOClient definition to allow the client implementations to
 // perform their own assertions.
 var (
-	_ UTXOClient = platformvm.Client(nil)
-	_ UTXOClient = avm.Client(nil)
+	_ UTXOClient = omegavm.Client(nil)
+	_ UTXOClient = alpha.Client(nil)
 )
 
 type UTXOClient interface {
@@ -49,7 +49,7 @@ type UTXOClient interface {
 
 func FetchState(ctx context.Context, uri string, addrs set.Set[ids.ShortID]) (p.Context, x.Context, UTXOs, error) {
 	infoClient := info.NewClient(uri)
-	xClient := avm.NewClient(uri, "X")
+	xClient := alpha.NewClient(uri, "A")
 
 	pCTX, err := p.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
@@ -69,8 +69,8 @@ func FetchState(ctx context.Context, uri string, addrs set.Set[ids.ShortID]) (p.
 		codec  codec.Manager
 	}{
 		{
-			id:     constants.PlatformChainID,
-			client: platformvm.NewClient(uri),
+			id:     constants.OmegaChainID,
+			client: omegavm.NewClient(uri),
 			codec:  txs.Codec,
 		},
 		{

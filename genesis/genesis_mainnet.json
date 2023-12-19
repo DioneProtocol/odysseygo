@@ -3,7 +3,7 @@
 	"allocations": [
 		{
 			"ethAddr": "0xD14251ECD06ed4b57D4c8b2Fcda35BaCf97c930b",
-			"dioneAddr": "X-dione1wfs693kdjzj2zmtxk30fp8jlc2qkq0ykk0yhyt",
+			"dioneAddr": "A-dione1wfs693kdjzj2zmtxk30fp8jlc2qkq0ykk0yhyt",
 			"initialAmount": 0,
 			"unlockSchedule": [
 				{
@@ -14,7 +14,7 @@
 		},
 		{
 			"ethAddr": "0x7702277eb1fF821C6b21abE6a367ed993C88be0c",
-			"dioneAddr": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv",
+			"dioneAddr": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv",
 			"initialAmount": 300000000000000000,
 			"unlockSchedule": [
 				{
@@ -28,7 +28,7 @@
 		},
 		{
 			"ethAddr": "0xA2d5608d7C0af2931e54E2a1B19f4F5eEc5436B5",
-			"dioneAddr": "X-dione1qyk45qgud6xwlsawcxh92pvc39fqfttc4q4end",
+			"dioneAddr": "A-dione1qyk45qgud6xwlsawcxh92pvc39fqfttc4q4end",
 			"initialAmount": 10000000000000000,
 			"unlockSchedule": [
 				{
@@ -42,30 +42,30 @@
 	"initialStakeDuration": 7776000,
 	"initialStakeDurationOffset": 5400,
 	"initialStakedFunds": [
-		"X-dione1wfs693kdjzj2zmtxk30fp8jlc2qkq0ykk0yhyt"
+		"A-dione1wfs693kdjzj2zmtxk30fp8jlc2qkq0ykk0yhyt"
 	],
 	"initialStakers": [
 		{
 			"nodeID": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
-			"rewardAddress": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
+			"rewardAddress": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
 		},
 		{
 			"nodeID": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
-			"rewardAddress": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
+			"rewardAddress": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
 		},
 		{
 			"nodeID": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
-			"rewardAddress": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
+			"rewardAddress": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
 		},
 		{
 			"nodeID": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
-			"rewardAddress": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
+			"rewardAddress": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
 		},
 		{
 			"nodeID": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
-			"rewardAddress": "X-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
+			"rewardAddress": "A-dione1mp96zwpny4dc8dj0zvmsk2t6ytccvgdhg9h2kv"
 		}
 	],
-	"cChainGenesis": "{\"alloc\":{\"9a4c5c5e744f95d9b09a6cb82f46bb294441ef61\":{\"balance\":\"0x295BE96E64066972000000\"}},\"config\":{\"chainId\":43112,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC\":{\"balance\":\"0x295BE96E64066972000000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}",
+	"dChainGenesis": "{\"alloc\":{\"9a4c5c5e744f95d9b09a6cb82f46bb294441ef61\":{\"balance\":\"0x295BE96E64066972000000\"}},\"config\":{\"chainId\":43112,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC\":{\"balance\":\"0x295BE96E64066972000000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}",
 	"message": "From Snowflake to Odyssey. Per consensum ad astra."
 }

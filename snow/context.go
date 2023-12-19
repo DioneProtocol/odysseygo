@@ -16,7 +16,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp"
 )
 
 // ContextInitializable represents an object that can be initialized
@@ -37,8 +37,8 @@ type Context struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey
 
-	XChainID    ids.ID
-	CChainID    ids.ID
+	AChainID     ids.ID
+	DChainID     ids.ID
 	DIONEAssetID ids.ID
 
 	Log          logging.Logger
@@ -51,7 +51,7 @@ type Context struct {
 	WarpSigner warp.Signer
 
 	// snowman++ attributes
-	ValidatorState validators.State // interface for P-Chain validators
+	ValidatorState validators.State // interface for O-Chain validators
 	// Chain-specific directory where arbitrary data can be written
 	ChainDataDir string
 }
@@ -118,11 +118,11 @@ func DefaultContextTest() *Context {
 
 func DefaultConsensusContextTest() *ConsensusContext {
 	return &ConsensusContext{
-		Context:             DefaultContextTest(),
-		Registerer:          prometheus.NewRegistry(),
+		Context:           DefaultContextTest(),
+		Registerer:        prometheus.NewRegistry(),
 		OdysseyRegisterer: prometheus.NewRegistry(),
-		BlockAcceptor:       noOpAcceptor{},
-		TxAcceptor:          noOpAcceptor{},
-		VertexAcceptor:      noOpAcceptor{},
+		BlockAcceptor:     noOpAcceptor{},
+		TxAcceptor:        noOpAcceptor{},
+		VertexAcceptor:    noOpAcceptor{},
 	}
 }

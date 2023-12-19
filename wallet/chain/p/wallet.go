@@ -9,10 +9,10 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/status"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
@@ -33,7 +33,7 @@ type Wallet interface {
 	Signer() Signer
 
 	// IssueBaseTx creates, signs, and issues a new simple value transfer.
-	// Because the P-chain doesn't intend for balance transfers to occur, this
+	// Because the O-chain doesn't intend for balance transfers to occur, this
 	// method is expensive and abuses the creation of subnets.
 	//
 	// - [outputs] specifies all the recipients and amounts that should be sent
@@ -203,7 +203,7 @@ type Wallet interface {
 func NewWallet(
 	builder Builder,
 	signer Signer,
-	client platformvm.Client,
+	client omegavm.Client,
 	backend Backend,
 ) Wallet {
 	return &wallet{
@@ -218,7 +218,7 @@ type wallet struct {
 	Backend
 	builder Builder
 	signer  Signer
-	client  platformvm.Client
+	client  omegavm.Client
 }
 
 func (w *wallet) Builder() Builder {

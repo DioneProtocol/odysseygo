@@ -422,7 +422,7 @@ func TestSnowballCloseTrinary(t *testing.T) {
 
 	//       *
 	//      / \
-	//     C   *
+	//     D   *
 	//        / \
 	//       Y   M
 
