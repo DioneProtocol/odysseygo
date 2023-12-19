@@ -43,8 +43,8 @@ type client struct {
 // calls.
 // [uri] is the path to make API calls to.
 // For example:
-//   - http://1.2.3.4:9650/ext/index/C/block
-//   - http://1.2.3.4:9650/ext/index/X/tx
+//   - http://1.2.3.4:9650/ext/index/D/block
+//   - http://1.2.3.4:9650/ext/index/A/tx
 func NewClient(uri string) Client {
 	return &client{
 		requester: rpc.NewEndpointRequester(uri),

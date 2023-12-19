@@ -9,8 +9,8 @@ import (
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
@@ -18,15 +18,15 @@ import (
 // Aliases returns the default aliases based on the network ID
 func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, error) {
 	apiAliases := map[string][]string{
-		path.Join(constants.ChainAliasPrefix, constants.PlatformChainID.String()): {
-			"P",
-			"platform",
-			path.Join(constants.ChainAliasPrefix, "P"),
-			path.Join(constants.ChainAliasPrefix, "platform"),
+		path.Join(constants.ChainAliasPrefix, constants.OmegaChainID.String()): {
+			"O",
+			"omega",
+			path.Join(constants.ChainAliasPrefix, "O"),
+			path.Join(constants.ChainAliasPrefix, "omega"),
 		},
 	}
 	chainAliases := map[ids.ID][]string{
-		constants.PlatformChainID: {"P", "platform"},
+		constants.OmegaChainID: {"O", "omega"},
 	}
 
 	genesis, err := genesis.Parse(genesisBytes) // TODO let's not re-create genesis to do aliasing
@@ -38,42 +38,42 @@ func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, err
 		chainID := chain.ID()
 		endpoint := path.Join(constants.ChainAliasPrefix, chainID.String())
 		switch uChain.VMID {
-		case constants.AVMID:
+		case constants.ALPHAID:
 			apiAliases[endpoint] = []string{
-				"X",
-				"avm",
-				path.Join(constants.ChainAliasPrefix, "X"),
-				path.Join(constants.ChainAliasPrefix, "avm"),
+				"A",
+				"alpha",
+				path.Join(constants.ChainAliasPrefix, "A"),
+				path.Join(constants.ChainAliasPrefix, "alpha"),
 			}
-			chainAliases[chainID] = GetXChainAliases()
-		case constants.EVMID:
+			chainAliases[chainID] = GetAChainAliases()
+		case constants.DELTAID:
 			apiAliases[endpoint] = []string{
-				"C",
-				"evm",
-				path.Join(constants.ChainAliasPrefix, "C"),
-				path.Join(constants.ChainAliasPrefix, "evm"),
+				"D",
+				"delta",
+				path.Join(constants.ChainAliasPrefix, "D"),
+				path.Join(constants.ChainAliasPrefix, "delta"),
 			}
-			chainAliases[chainID] = GetCChainAliases()
+			chainAliases[chainID] = GetDChainAliases()
 		}
 	}
 	return apiAliases, chainAliases, nil
 }
 
-func GetCChainAliases() []string {
-	return []string{"C", "evm"}
+func GetDChainAliases() []string {
+	return []string{"D", "delta"}
 }
 
-func GetXChainAliases() []string {
-	return []string{"X", "avm"}
+func GetAChainAliases() []string {
+	return []string{"A", "alpha"}
 }
 
 func GetVMAliases() map[ids.ID][]string {
 	return map[ids.ID][]string{
-		constants.PlatformVMID: {"platform"},
-		constants.AVMID:        {"avm"},
-		constants.EVMID:        {"evm"},
-		secp256k1fx.ID:         {"secp256k1fx"},
-		nftfx.ID:               {"nftfx"},
-		propertyfx.ID:          {"propertyfx"},
+		constants.OmegaVMID: {"omega"},
+		constants.ALPHAID:   {"alpha"},
+		constants.DELTAID:   {"delta"},
+		secp256k1fx.ID:      {"secp256k1fx"},
+		nftfx.ID:            {"nftfx"},
+		propertyfx.ID:       {"propertyfx"},
 	}
 }

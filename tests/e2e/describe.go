@@ -7,14 +7,14 @@ import (
 	ginkgo "github.com/onsi/ginkgo/v2"
 )
 
-// DescribeXChain annotates the tests for X-Chain.
+// DescribeAChain annotates the tests for A-Chain.
 // Can run with any type of cluster (e.g., local, testnet, mainnet).
-func DescribeXChain(text string, body func()) bool {
-	return ginkgo.Describe("[X-Chain] "+text, body)
+func DescribeAChain(text string, body func()) bool {
+	return ginkgo.Describe("[A-Chain] "+text, body)
 }
 
-// DescribePChain annotates the tests for P-Chain.
+// DescribeOChain annotates the tests for O-Chain.
 // Can run with any type of cluster (e.g., local, testnet, mainnet).
-func DescribePChain(text string, body func()) bool {
-	return ginkgo.Describe("[P-Chain] "+text, body)
+func DescribeOChain(text string, body func()) bool {
+	return ginkgo.Describe("[O-Chain] "+text, body)
 }

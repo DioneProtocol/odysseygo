@@ -43,7 +43,7 @@ const (
 // Variables to be exported
 var (
 	PrimaryNetworkID = ids.Empty
-	PlatformChainID  = ids.Empty
+	OmegaChainID     = ids.Empty
 
 	NetworkIDToNetworkName = map[uint32]string{
 		MainnetID:  MainnetName,

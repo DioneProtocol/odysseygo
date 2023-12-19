@@ -8,7 +8,7 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/api/info"
 	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 )
 
 var _ Context = (*context)(nil)
@@ -24,33 +24,33 @@ type Context interface {
 type context struct {
 	networkID        uint32
 	blockchainID     ids.ID
-	dioneAssetID      ids.ID
+	dioneAssetID     ids.ID
 	baseTxFee        uint64
 	createAssetTxFee uint64
 }
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	xChainClient := avm.NewClient(uri, "X")
-	return NewContextFromClients(ctx, infoClient, xChainClient)
+	aChainClient := alpha.NewClient(uri, "A")
+	return NewContextFromClients(ctx, infoClient, aChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	xChainClient avm.Client,
+	aChainClient alpha.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	chainID, err := infoClient.GetBlockchainID(ctx, "X")
+	chainID, err := infoClient.GetBlockchainID(ctx, "A")
 	if err != nil {
 		return nil, err
 	}
 
-	asset, err := xChainClient.GetAssetDescription(ctx, "DIONE")
+	asset, err := aChainClient.GetAssetDescription(ctx, "DIONE")
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func NewContext(
 	return &context{
 		networkID:        networkID,
 		blockchainID:     blockchainID,
-		dioneAssetID:      dioneAssetID,
+		dioneAssetID:     dioneAssetID,
 		baseTxFee:        baseTxFee,
 		createAssetTxFee: createAssetTxFee,
 	}

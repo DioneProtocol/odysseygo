@@ -19,7 +19,7 @@ func TestBuild(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
@@ -32,7 +32,7 @@ func TestBuild(t *testing.T) {
 	builtBlock, err := Build(
 		parentID,
 		timestamp,
-		pChainHeight,
+		oChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,
@@ -41,7 +41,7 @@ func TestBuild(t *testing.T) {
 	require.NoError(err)
 
 	require.Equal(parentID, builtBlock.ParentID())
-	require.Equal(pChainHeight, builtBlock.PChainHeight())
+	require.Equal(oChainHeight, builtBlock.OChainHeight())
 	require.Equal(timestamp, builtBlock.Timestamp())
 	require.Equal(innerBlockBytes, builtBlock.Block())
 
@@ -55,16 +55,16 @@ func TestBuild(t *testing.T) {
 func TestBuildUnsigned(t *testing.T) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
 	require := require.New(t)
 
-	builtBlock, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
+	builtBlock, err := BuildUnsigned(parentID, timestamp, oChainHeight, innerBlockBytes)
 	require.NoError(err)
 
 	require.Equal(parentID, builtBlock.ParentID())
-	require.Equal(pChainHeight, builtBlock.PChainHeight())
+	require.Equal(oChainHeight, builtBlock.OChainHeight())
 	require.Equal(timestamp, builtBlock.Timestamp())
 	require.Equal(innerBlockBytes, builtBlock.Block())
 	require.Equal(ids.EmptyNodeID, builtBlock.Proposer())

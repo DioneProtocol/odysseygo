@@ -52,7 +52,7 @@ var (
 	genesisUnixTimestamp int64 = 1000
 	genesisTimestamp           = time.Unix(genesisUnixTimestamp, 0)
 
-	defaultPChainHeight uint64 = 2000
+	defaultOChainHeight uint64 = 2000
 
 	errUnknownBlock      = errors.New("unknown block")
 	errUnverifiedBlock   = errors.New("unverified block")
@@ -71,7 +71,7 @@ func init() {
 func initTestProposerVM(
 	t *testing.T,
 	proBlkStartTime time.Time,
-	minPChainHeight uint64,
+	minOChainHeight uint64,
 ) (
 	*fullVM,
 	*validators.TestState,
@@ -133,7 +133,7 @@ func initTestProposerVM(
 	proVM := New(
 		coreVM,
 		proBlkStartTime,
-		minPChainHeight,
+		minOChainHeight,
 		DefaultMinBlockDelay,
 		pTestCert.PrivateKey.(crypto.Signer),
 		pTestCert.Leaf,
@@ -146,7 +146,7 @@ func initTestProposerVM(
 		return coreGenBlk.HeightV, nil
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -535,7 +535,7 @@ func TestCoreBlockFailureCauseProposerBlockParseFailure(t *testing.T) {
 	slb, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // pChainHeight,
+		100, // oChainHeight,
 		proVM.stakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -580,7 +580,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb1, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // pChainHeight,
+		100, // oChainHeight,
 		proVM.stakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -601,7 +601,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb2, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		200, // pChainHeight,
+		200, // oChainHeight,
 		proVM.stakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -685,15 +685,15 @@ func TestTwoProBlocksWithSameParentCanBothVerify(t *testing.T) {
 		}
 	}
 
-	pChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
+	oChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
 	if err != nil {
-		t.Fatal("could not retrieve pChain height")
+		t.Fatal("could not retrieve oChain height")
 	}
 
 	netSlb, err := statelessblock.BuildUnsigned(
 		proVM.preferred,
 		netcoreBlk.Timestamp(),
-		pChainHeight,
+		oChainHeight,
 		netcoreBlk.Bytes(),
 	)
 	if err != nil {
@@ -946,7 +946,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 		return coreGenBlk.Height(), nil
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -1236,7 +1236,7 @@ func TestInnerVMRollback(t *testing.T) {
 		T: t,
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -1601,7 +1601,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		gBlock.ID(),
 		gBlock.Timestamp(),
-		defaultPChainHeight,
+		defaultOChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1621,7 +1621,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 		t.Fatalf("could not verify valid block due to %s", err)
 	}
 
-	// append Z/C to Y/B
+	// append Z/D to Y/B
 	zBlock := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
@@ -1716,7 +1716,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(maxSkew),
-		defaultPChainHeight,
+		defaultOChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1739,7 +1739,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err = statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(proposer.MaxDelay),
-		defaultPChainHeight,
+		defaultOChainHeight,
 		yBlock.Bytes(),
 	)
 
@@ -1862,9 +1862,9 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 	}
 }
 
-// Ensure that given the chance, built blocks will reference a lagged P-chain
+// Ensure that given the chance, built blocks will reference a lagged O-chain
 // height.
-func TestLaggedPChainHeight(t *testing.T) {
+func TestLaggedOChainHeight(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
@@ -1889,8 +1889,8 @@ func TestLaggedPChainHeight(t *testing.T) {
 	require.IsType(&postForkBlock{}, blockIntf)
 	block := blockIntf.(*postForkBlock)
 
-	pChainHeight := block.PChainHeight()
-	require.Equal(pChainHeight, coreGenBlk.Height())
+	oChainHeight := block.OChainHeight()
+	require.Equal(oChainHeight, coreGenBlk.Height())
 }
 
 // Ensure that rejecting a block does not modify the accepted block ID for the
@@ -1976,7 +1976,7 @@ func TestRejectedHeightNotIndexed(t *testing.T) {
 		return coreGenBlk.HeightV, nil
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -2073,7 +2073,7 @@ func TestRejectedHeightNotIndexed(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		coreGenBlk.ID(),
 		coreGenBlk.Timestamp(),
-		defaultPChainHeight,
+		defaultOChainHeight,
 		yBlock.Bytes(),
 	)
 	require.NoError(err)
@@ -2191,7 +2191,7 @@ func TestRejectedOptionHeightNotIndexed(t *testing.T) {
 		return coreGenBlk.HeightV, nil
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
@@ -2344,7 +2344,7 @@ func TestVMInnerBlkCache(t *testing.T) {
 	vm := New(
 		innerVM,
 		time.Time{}, // fork is active
-		0,           // minimum P-Chain height
+		0,           // minimum O-Chain height
 		DefaultMinBlockDelay,
 		pTestCert.PrivateKey.(crypto.Signer),
 		pTestCert.Leaf,
@@ -2389,7 +2389,7 @@ func TestVMInnerBlkCache(t *testing.T) {
 	blkNearTip, err := statelessblock.Build(
 		ids.GenerateTestID(), // parent
 		time.Time{},          // timestamp
-		1,                    // pChainHeight,
+		1,                    // oChainHeight,
 		vm.stakingCertLeaf,   // cert
 		blkNearTipInnerBytes, // inner blk bytes
 		vm.ctx.ChainID,       // chain ID
@@ -2456,7 +2456,7 @@ func TestVMInnerBlkCacheDeduplicationRegression(t *testing.T) {
 	bStatelessBlock, err := statelessblock.BuildUnsigned(
 		gBlock.ID(),
 		gBlock.Timestamp(),
-		defaultPChainHeight,
+		defaultOChainHeight,
 		xBlock.Bytes(),
 	)
 	require.NoError(err)
@@ -2527,7 +2527,7 @@ func TestVM_VerifyBlockWithContext(t *testing.T) {
 	vm := New(
 		innerVM,
 		time.Time{}, // fork is active
-		0,           // minimum P-Chain height
+		0,           // minimum O-Chain height
 		DefaultMinBlockDelay,
 		pTestCert.PrivateKey.(crypto.Signer),
 		pTestCert.Leaf,
@@ -2566,7 +2566,7 @@ func TestVM_VerifyBlockWithContext(t *testing.T) {
 	require.NoError(err)
 
 	{
-		pChainHeight := uint64(0)
+		oChainHeight := uint64(0)
 		innerBlk := blockWithVerifyContext{
 			MockBlock:             snowman.NewMockBlock(ctrl),
 			MockWithVerifyContext: mocks.NewMockWithVerifyContext(ctrl),
@@ -2574,7 +2574,7 @@ func TestVM_VerifyBlockWithContext(t *testing.T) {
 		innerBlk.MockWithVerifyContext.EXPECT().ShouldVerifyWithContext(gomock.Any()).Return(true, nil).Times(2)
 		innerBlk.MockWithVerifyContext.EXPECT().VerifyWithContext(context.Background(),
 			&block.Context{
-				PChainHeight: pChainHeight,
+				OChainHeight: oChainHeight,
 			},
 		).Return(nil)
 		innerBlk.MockBlock.EXPECT().Parent().Return(ids.GenerateTestID()).AnyTimes()
@@ -2588,25 +2588,25 @@ func TestVM_VerifyBlockWithContext(t *testing.T) {
 		err = vm.verifyAndRecordInnerBlk(
 			context.Background(),
 			&block.Context{
-				PChainHeight: pChainHeight,
+				OChainHeight: oChainHeight,
 			},
 			blk,
 		)
 		require.NoError(err)
 
-		// Call VerifyWithContext again but with a different P-Chain height
+		// Call VerifyWithContext again but with a different O-Chain height
 		blk.EXPECT().setInnerBlk(innerBlk).AnyTimes()
-		pChainHeight++
+		oChainHeight++
 		innerBlk.MockWithVerifyContext.EXPECT().VerifyWithContext(context.Background(),
 			&block.Context{
-				PChainHeight: pChainHeight,
+				OChainHeight: oChainHeight,
 			},
 		).Return(nil)
 
 		err = vm.verifyAndRecordInnerBlk(
 			context.Background(),
 			&block.Context{
-				PChainHeight: pChainHeight,
+				OChainHeight: oChainHeight,
 			},
 			blk,
 		)
@@ -2631,7 +2631,7 @@ func TestVM_VerifyBlockWithContext(t *testing.T) {
 		err = vm.verifyAndRecordInnerBlk(
 			context.Background(),
 			&block.Context{
-				PChainHeight: 1,
+				OChainHeight: 1,
 			},
 			blk,
 		)

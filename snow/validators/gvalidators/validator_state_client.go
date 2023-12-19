@@ -79,7 +79,7 @@ func (c *Client) GetValidatorSet(
 			// This is a performance optimization to avoid the cost of compression
 			// and key re-verification with PublicKeyFromBytes. We can safely
 			// assume that the BLS Public Keys are verified before being added
-			// to the P-Chain and served by the gRPC server.
+			// to the O-Chain and served by the gRPC server.
 			publicKey = new(bls.PublicKey).Deserialize(validator.PublicKey)
 			if publicKey == nil {
 				return nil, errFailedPublicKeyDeserialize

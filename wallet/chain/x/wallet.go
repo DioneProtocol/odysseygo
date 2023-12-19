@@ -8,8 +8,8 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
-	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
@@ -147,7 +147,7 @@ type Wallet interface {
 func NewWallet(
 	builder Builder,
 	signer Signer,
-	client avm.Client,
+	client alpha.Client,
 	backend Backend,
 ) Wallet {
 	return &wallet{
@@ -162,7 +162,7 @@ type wallet struct {
 	Backend
 	builder Builder
 	signer  Signer
-	client  avm.Client
+	client  alpha.Client
 }
 
 func (w *wallet) Builder() Builder {

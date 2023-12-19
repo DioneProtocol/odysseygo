@@ -146,7 +146,7 @@ type Config struct {
 
 	// Genesis information
 	GenesisBytes []byte `json:"-"`
-	DioneAssetID  ids.ID `json:"dioneAssetID"`
+	DioneAssetID ids.ID `json:"dioneAssetID"`
 
 	// ID of the network this node should connect to
 	NetworkID uint32 `json:"networkID"`
@@ -218,11 +218,11 @@ type Config struct {
 
 	TraceConfig trace.Config `json:"traceConfig"`
 
-	// See comment on [MinPercentConnectedStakeHealthy] in platformvm.Config
+	// See comment on [MinPercentConnectedStakeHealthy] in omegavm.Config
 	// TODO: consider moving to subnet config
 	MinPercentConnectedStakeHealthy map[ids.ID]float64 `json:"minPercentConnectedStakeHealthy"`
 
-	// See comment on [UseCurrentHeight] in platformvm.Config
+	// See comment on [UseCurrentHeight] in omegavm.Config
 	UseCurrentHeight bool `json:"useCurrentHeight"`
 
 	// ProvidedFlags contains all the flags set by the user

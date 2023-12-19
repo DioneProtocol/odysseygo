@@ -9,9 +9,9 @@ import (
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
@@ -21,8 +21,8 @@ var _ Wallet = (*wallet)(nil)
 
 // Wallet provides chain wallets for the primary network.
 type Wallet interface {
-	P() p.Wallet
-	X() x.Wallet
+	O() p.Wallet
+	A() x.Wallet
 }
 
 type wallet struct {
@@ -30,11 +30,11 @@ type wallet struct {
 	x x.Wallet
 }
 
-func (w *wallet) P() p.Wallet {
+func (w *wallet) O() p.Wallet {
 	return w.p
 }
 
-func (w *wallet) X() x.Wallet {
+func (w *wallet) A() x.Wallet {
 	return w.x
 }
 
@@ -55,14 +55,14 @@ func NewWalletFromURI(ctx context.Context, uri string, kc keychain.Keychain) (Wa
 	return NewWalletWithState(uri, pCTX, xCTX, utxos, kc), nil
 }
 
-// Creates a wallet with pre-loaded/cached P-chain transactions.
+// Creates a wallet with pre-loaded/cached O-chain transactions.
 func NewWalletWithTxs(ctx context.Context, uri string, kc keychain.Keychain, preloadTXs ...ids.ID) (Wallet, error) {
 	pCTX, xCTX, utxos, err := FetchState(ctx, uri, kc.Addresses())
 	if err != nil {
 		return nil, err
 	}
 	pTXs := make(map[ids.ID]*txs.Tx)
-	pClient := platformvm.NewClient(uri)
+	pClient := omegavm.NewClient(uri)
 	for _, id := range preloadTXs {
 		txBytes, err := pClient.GetTx(ctx, id)
 		if err != nil {
@@ -77,7 +77,7 @@ func NewWalletWithTxs(ctx context.Context, uri string, kc keychain.Keychain, pre
 	return NewWalletWithTxsAndState(uri, pCTX, xCTX, utxos, kc, pTXs), nil
 }
 
-// Creates a wallet with pre-loaded/cached P-chain transactions and state.
+// Creates a wallet with pre-loaded/cached O-chain transactions and state.
 func NewWalletWithTxsAndState(
 	uri string,
 	pCTX p.Context,
@@ -87,18 +87,18 @@ func NewWalletWithTxsAndState(
 	pTXs map[ids.ID]*txs.Tx,
 ) Wallet {
 	addrs := kc.Addresses()
-	pUTXOs := NewChainUTXOs(constants.PlatformChainID, utxos)
+	pUTXOs := NewChainUTXOs(constants.OmegaChainID, utxos)
 	pBackend := p.NewBackend(pCTX, pUTXOs, pTXs)
 	pBuilder := p.NewBuilder(addrs, pBackend)
 	pSigner := p.NewSigner(kc, pBackend)
-	pClient := platformvm.NewClient(uri)
+	pClient := omegavm.NewClient(uri)
 
-	xChainID := xCTX.BlockchainID()
-	xUTXOs := NewChainUTXOs(xChainID, utxos)
-	xBackend := x.NewBackend(xCTX, xChainID, xUTXOs)
+	aChainID := xCTX.BlockchainID()
+	xUTXOs := NewChainUTXOs(aChainID, utxos)
+	xBackend := x.NewBackend(xCTX, aChainID, xUTXOs)
 	xBuilder := x.NewBuilder(addrs, xBackend)
 	xSigner := x.NewSigner(kc, xBackend)
-	xClient := avm.NewClient(uri, "X")
+	xClient := alpha.NewClient(uri, "A")
 
 	return NewWallet(
 		p.NewWallet(pBuilder, pSigner, pClient, pBackend),
@@ -121,8 +121,8 @@ func NewWalletWithState(
 // Creates a Wallet with the given set of options
 func NewWalletWithOptions(w Wallet, options ...common.Option) Wallet {
 	return NewWallet(
-		p.NewWalletWithOptions(w.P(), options...),
-		x.NewWalletWithOptions(w.X(), options...),
+		p.NewWalletWithOptions(w.O(), options...),
+		x.NewWalletWithOptions(w.A(), options...),
 	)
 }
 

@@ -65,7 +65,7 @@ type VM struct {
 	ssVM           block.StateSyncableVM
 
 	activationTime      time.Time
-	minimumPChainHeight uint64
+	minimumOChainHeight uint64
 	minBlkDelay         time.Duration
 	// block signer
 	stakingLeafSigner crypto.Signer
@@ -112,7 +112,7 @@ type VM struct {
 func New(
 	vm block.ChainVM,
 	activationTime time.Time,
-	minimumPChainHeight uint64,
+	minimumOChainHeight uint64,
 	minBlkDelay time.Duration,
 	stakingLeafSigner crypto.Signer,
 	stakingCertLeaf *x509.Certificate,
@@ -129,7 +129,7 @@ func New(
 		ssVM:           ssVM,
 
 		activationTime:      activationTime,
-		minimumPChainHeight: minimumPChainHeight,
+		minimumOChainHeight: minimumOChainHeight,
 		minBlkDelay:         minBlkDelay,
 		stakingLeafSigner:   stakingLeafSigner,
 		stakingCertLeaf:     stakingCertLeaf,
@@ -288,29 +288,29 @@ func (vm *VM) SetPreference(ctx context.Context, preferred ids.ID) error {
 		return err
 	}
 
-	pChainHeight, err := blk.pChainHeight(ctx)
+	oChainHeight, err := blk.oChainHeight(ctx)
 	if err != nil {
 		return err
 	}
 
 	// reset scheduler
-	minDelay, err := vm.Windower.Delay(ctx, blk.Height()+1, pChainHeight, vm.ctx.NodeID)
+	minDelay, err := vm.Windower.Delay(ctx, blk.Height()+1, oChainHeight, vm.ctx.NodeID)
 	if err != nil {
 		vm.ctx.Log.Debug("failed to fetch the expected delay",
 			zap.Error(err),
 		)
 		// A nil error is returned here because it is possible that
 		// bootstrapping caused the last accepted block to move past the latest
-		// P-chain height. This will cause building blocks to return an error
-		// until the P-chain's height has advanced.
+		// O-chain height. This will cause building blocks to return an error
+		// until the O-chain's height has advanced.
 		return nil
 	}
 
-	// Note: The P-chain does not currently try to target any block time. It
+	// Note: The O-chain does not currently try to target any block time. It
 	// notifies the consensus engine as soon as a new block may be built. To
 	// avoid fast runs of blocks there is an additional minimum delay that
 	// validators can specify. This delay may be an issue for high performance,
-	// custom VMs. Until the P-chain is modified to target a specific block
+	// custom VMs. Until the O-chain is modified to target a specific block
 	// time, ProposerMinBlockDelay can be configured in the subnet config.
 	if minDelay < vm.minBlkDelay {
 		minDelay = vm.minBlkDelay
@@ -745,7 +745,7 @@ func (vm *VM) verifyAndRecordInnerBlk(ctx context.Context, blockCtx *block.Conte
 	//            invariant that successful verification will eventually result
 	//            in accepted or rejected being called.
 	if shouldVerifyWithCtx {
-		// This block needs to know the P-Chain height during verification.
+		// This block needs to know the O-Chain height during verification.
 		// Note that [VerifyWithContext] with context may be called multiple
 		// times with multiple contexts.
 		err = blkWithCtx.VerifyWithContext(ctx, blockCtx)
@@ -776,13 +776,13 @@ func (vm *VM) notifyInnerBlockReady() {
 	}
 }
 
-func (vm *VM) optimalPChainHeight(ctx context.Context, minPChainHeight uint64) (uint64, error) {
+func (vm *VM) optimalOChainHeight(ctx context.Context, minOChainHeight uint64) (uint64, error) {
 	minimumHeight, err := vm.ctx.ValidatorState.GetMinimumHeight(ctx)
 	if err != nil {
 		return 0, err
 	}
 
-	return math.Max(minimumHeight, minPChainHeight), nil
+	return math.Max(minimumHeight, minOChainHeight), nil
 }
 
 // parseInnerBlock attempts to parse the provided bytes as an inner block. If

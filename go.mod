@@ -134,5 +134,3 @@ require (
 )
 
 replace github.com/DioneProtocol/coreth => ../coreth
-
-replace github.com/DioneProtocol/ledger-odyssey/go => ../ledger-odyssey/go

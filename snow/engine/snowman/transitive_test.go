@@ -2867,7 +2867,7 @@ func TestEngineBubbleVotesThroughInvalidBlock(t *testing.T) {
 }
 
 // Test that in the following scenario, if block B fails verification, votes
-// will still be bubbled through from block C to the valid block A. This is a
+// will still be bubbled through from block D to the valid block A. This is a
 // regression test to ensure that the consensus engine correctly handles the
 // case that votes can be bubbled correctly through a chain that cannot pass
 // verification until one of its ancestors has been marked as accepted.

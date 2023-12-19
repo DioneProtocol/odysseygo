@@ -35,24 +35,24 @@ func TestPostForkCommonComponents_buildChild(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	pChainHeight := uint64(1337)
+	oChainHeight := uint64(1337)
 	parentID := ids.GenerateTestID()
 	parentTimestamp := time.Now()
 	blkID := ids.GenerateTestID()
 	innerBlk := snowman.NewMockBlock(ctrl)
 	innerBlk.EXPECT().ID().Return(blkID).AnyTimes()
-	innerBlk.EXPECT().Height().Return(pChainHeight - 1).AnyTimes()
+	innerBlk.EXPECT().Height().Return(oChainHeight - 1).AnyTimes()
 	builtBlk := snowman.NewMockBlock(ctrl)
 	builtBlk.EXPECT().Bytes().Return([]byte{1, 2, 3}).AnyTimes()
 	builtBlk.EXPECT().ID().Return(ids.GenerateTestID()).AnyTimes()
-	builtBlk.EXPECT().Height().Return(pChainHeight).AnyTimes()
+	builtBlk.EXPECT().Height().Return(oChainHeight).AnyTimes()
 	innerVM := mocks.NewMockChainVM(ctrl)
 	innerBlockBuilderVM := mocks.NewMockBuildBlockWithContextChainVM(ctrl)
 	innerBlockBuilderVM.EXPECT().BuildBlockWithContext(gomock.Any(), &block.Context{
-		PChainHeight: pChainHeight - 1,
+		OChainHeight: oChainHeight - 1,
 	}).Return(builtBlk, nil).AnyTimes()
 	vdrState := validators.NewMockState(ctrl)
-	vdrState.EXPECT().GetMinimumHeight(context.Background()).Return(pChainHeight, nil).AnyTimes()
+	vdrState.EXPECT().GetMinimumHeight(context.Background()).Return(oChainHeight, nil).AnyTimes()
 	windower := proposer.NewMockWindower(ctrl)
 	windower.EXPECT().Delay(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(time.Duration(0), nil).AnyTimes()
 
@@ -80,7 +80,7 @@ func TestPostForkCommonComponents_buildChild(t *testing.T) {
 		context.Background(),
 		parentID,
 		parentTimestamp,
-		pChainHeight-1,
+		oChainHeight-1,
 	)
 	require.NoError(err)
 	require.Equal(builtBlk, gotChild.(*postForkBlock).innerBlk)

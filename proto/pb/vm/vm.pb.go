@@ -250,8 +250,8 @@ type InitializeRequest struct {
 	// public_key is the BLS public key that would correspond with any signatures
 	// produced by the warp messaging signer
 	PublicKey    []byte               `protobuf:"bytes,5,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
-	XChainId     []byte               `protobuf:"bytes,6,opt,name=x_chain_id,json=xChainId,proto3" json:"x_chain_id,omitempty"`
-	CChainId     []byte               `protobuf:"bytes,7,opt,name=c_chain_id,json=cChainId,proto3" json:"c_chain_id,omitempty"`
+	AChainId     []byte               `protobuf:"bytes,6,opt,name=x_chain_id,json=xChainId,proto3" json:"x_chain_id,omitempty"`
+	DChainId     []byte               `protobuf:"bytes,7,opt,name=c_chain_id,json=cChainId,proto3" json:"c_chain_id,omitempty"`
 	DioneAssetId  []byte               `protobuf:"bytes,8,opt,name=dione_asset_id,json=dioneAssetId,proto3" json:"dione_asset_id,omitempty"`
 	ChainDataDir string               `protobuf:"bytes,9,opt,name=chain_data_dir,json=chainDataDir,proto3" json:"chain_data_dir,omitempty"`
 	GenesisBytes []byte               `protobuf:"bytes,10,opt,name=genesis_bytes,json=genesisBytes,proto3" json:"genesis_bytes,omitempty"`
@@ -331,16 +331,16 @@ func (x *InitializeRequest) GetPublicKey() []byte {
 	return nil
 }
 
-func (x *InitializeRequest) GetXChainId() []byte {
+func (x *InitializeRequest) GetAChainId() []byte {
 	if x != nil {
-		return x.XChainId
+		return x.AChainId
 	}
 	return nil
 }
 
-func (x *InitializeRequest) GetCChainId() []byte {
+func (x *InitializeRequest) GetDChainId() []byte {
 	if x != nil {
-		return x.CChainId
+		return x.DChainId
 	}
 	return nil
 }
@@ -820,7 +820,7 @@ type BuildBlockRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PChainHeight *uint64 `protobuf:"varint,1,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
+	OChainHeight *uint64 `protobuf:"varint,1,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
 }
 
 func (x *BuildBlockRequest) Reset() {
@@ -855,9 +855,9 @@ func (*BuildBlockRequest) Descriptor() ([]byte, []int) {
 	return file_vm_vm_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *BuildBlockRequest) GetPChainHeight() uint64 {
-	if x != nil && x.PChainHeight != nil {
-		return *x.PChainHeight
+func (x *BuildBlockRequest) GetOChainHeight() uint64 {
+	if x != nil && x.OChainHeight != nil {
+		return *x.OChainHeight
 	}
 	return 0
 }
@@ -1282,7 +1282,7 @@ type BlockVerifyRequest struct {
 	Bytes []byte `protobuf:"bytes,1,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	// If set, the VM server casts the block to a [block.WithVerifyContext] and
 	// calls [VerifyWithContext] instead of [Verify].
-	PChainHeight *uint64 `protobuf:"varint,2,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
+	OChainHeight *uint64 `protobuf:"varint,2,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
 }
 
 func (x *BlockVerifyRequest) Reset() {
@@ -1324,9 +1324,9 @@ func (x *BlockVerifyRequest) GetBytes() []byte {
 	return nil
 }
 
-func (x *BlockVerifyRequest) GetPChainHeight() uint64 {
-	if x != nil && x.PChainHeight != nil {
-		return *x.PChainHeight
+func (x *BlockVerifyRequest) GetOChainHeight() uint64 {
+	if x != nil && x.OChainHeight != nil {
+		return *x.OChainHeight
 	}
 	return 0
 }

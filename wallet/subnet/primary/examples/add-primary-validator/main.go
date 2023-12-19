@@ -12,7 +12,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/genesis"
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
@@ -45,8 +45,8 @@ func main() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain wallet
-	pWallet := wallet.P()
+	// Get the O-chain wallet
+	pWallet := wallet.O()
 	dioneAssetID := pWallet.DIONEAssetID()
 
 	addValidatorStartTime := time.Now()

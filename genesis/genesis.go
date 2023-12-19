@@ -15,21 +15,21 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 	"github.com/DioneProtocol/odysseygo/utils/json"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
-	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/fxs"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/api"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/api"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	xchaintxs "github.com/DioneProtocol/odysseygo/vms/avm/txs"
-	pchaintxs "github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	xchaintxs "github.com/DioneProtocol/odysseygo/vms/alpha/txs"
+	pchaintxs "github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 )
 
 const (
 	defaultEncoding    = formatting.Hex
-	configChainIDAlias = "X"
+	configChainIDAlias = "A"
 )
 
 var (
@@ -38,7 +38,7 @@ var (
 	errNoSupply                        = errors.New("initial supply must be > 0")
 	errNoStakeDuration                 = errors.New("initial stake duration must be > 0")
 	errNoStakers                       = errors.New("initial stakers must be > 0")
-	errNoCChainGenesis                 = errors.New("C-Chain genesis cannot be empty")
+	errNoDChainGenesis                 = errors.New("D-Chain genesis cannot be empty")
 	errNoTxs                           = errors.New("genesis creates no transactions")
 	errNoAllocationToStake             = errors.New("no allocation to stake")
 	errDuplicateInitiallyStakedAddress = errors.New("duplicate initially staked address")
@@ -173,18 +173,18 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 		return fmt.Errorf("initial staked funds validation failed: %w", err)
 	}
 
-	if len(config.CChainGenesis) == 0 {
-		return errNoCChainGenesis
+	if len(config.DChainGenesis) == 0 {
+		return errNoDChainGenesis
 	}
 
 	return nil
 }
 
-// FromFile returns the genesis data of the Platform Chain.
+// FromFile returns the genesis data of the Omega Chain.
 //
-// Since an Dione network has exactly one Platform Chain, and the Platform
+// Since an Dione network has exactly one Omega Chain, and the Omega
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Omega Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFile accepts:
@@ -197,7 +197,7 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 //
 // FromFile returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
@@ -222,11 +222,11 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 	return FromConfig(config)
 }
 
-// FromFlag returns the genesis data of the Platform Chain.
+// FromFlag returns the genesis data of the Omega Chain.
 //
-// Since an Dione network has exactly one Platform Chain, and the Platform
+// Since an Dione network has exactly one Omega Chain, and the Omega
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Omega Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFlag accepts:
@@ -239,7 +239,7 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 //
 // FromFlag returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
@@ -266,7 +266,7 @@ func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig
 
 // FromConfig returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromConfig(config *Config) ([]byte, ids.ID, error) {
@@ -274,13 +274,13 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 	amount := uint64(0)
 
-	// Specify the genesis state of the AVM
-	avmArgs := avm.BuildGenesisArgs{
+	// Specify the genesis state of the ALPHA
+	alphaArgs := alpha.BuildGenesisArgs{
 		NetworkID: json.Uint32(config.NetworkID),
 		Encoding:  defaultEncoding,
 	}
 	{
-		dione := avm.AssetDefinition{
+		dione := alpha.AssetDefinition{
 			Name:         "Dione",
 			Symbol:       "DIONE",
 			Denomination: 9,
@@ -301,7 +301,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				return nil, ids.ID{}, err
 			}
 
-			dione.InitialState["fixedCap"] = append(dione.InitialState["fixedCap"], avm.Holder{
+			dione.InitialState["fixedCap"] = append(dione.InitialState["fixedCap"], alpha.Holder{
 				Amount:  json.Uint64(allocation.InitialAmount),
 				Address: addr,
 			})
@@ -314,21 +314,21 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("couldn't parse memo bytes to string: %w", err)
 		}
-		avmArgs.GenesisData = map[string]avm.AssetDefinition{
-			"DIONE": dione, // The AVM starts out with one asset: DIONE
+		alphaArgs.GenesisData = map[string]alpha.AssetDefinition{
+			"DIONE": dione, // The ALPHA starts out with one asset: DIONE
 		}
 	}
-	avmReply := avm.BuildGenesisReply{}
+	alphaReply := alpha.BuildGenesisReply{}
 
-	avmSS := avm.CreateStaticService()
-	err := avmSS.BuildGenesis(nil, &avmArgs, &avmReply)
+	alphaSS := alpha.CreateStaticService()
+	err := alphaSS.BuildGenesis(nil, &alphaArgs, &alphaReply)
 	if err != nil {
 		return nil, ids.ID{}, err
 	}
 
-	bytes, err := formatting.Decode(defaultEncoding, avmReply.Bytes)
+	bytes, err := formatting.Decode(defaultEncoding, alphaReply.Bytes)
 	if err != nil {
-		return nil, ids.ID{}, fmt.Errorf("couldn't parse avm genesis reply: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("couldn't parse alpha genesis reply: %w", err)
 	}
 	dioneAssetID, err := DIONEAssetID(bytes)
 	if err != nil {
@@ -345,9 +345,9 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	initiallyStaked.Add(config.InitialStakedFunds...)
 	skippedAllocations := []Allocation(nil)
 
-	// Specify the initial state of the Platform Chain
+	// Specify the initial state of the Omega Chain
 	platformvmArgs := api.BuildGenesisArgs{
-		DioneAssetID:   dioneAssetID,
+		DioneAssetID:  dioneAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
 		Time:          json.Uint64(config.StartTime),
 		InitialSupply: json.Uint64(initialSupply),
@@ -427,45 +427,45 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 					Threshold: 1,
 					Addresses: []string{destAddrStr},
 				},
-				Staked:             utxos,
+				Staked: utxos,
 			},
 		)
 	}
 
 	// Specify the chains that exist upon this network's creation
-	genesisStr, err := formatting.Encode(defaultEncoding, []byte(config.CChainGenesis))
+	genesisStr, err := formatting.Encode(defaultEncoding, []byte(config.DChainGenesis))
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("couldn't encode message: %w", err)
 	}
 	platformvmArgs.Chains = []api.Chain{
 		{
-			GenesisData: avmReply.Bytes,
+			GenesisData: alphaReply.Bytes,
 			SubnetID:    constants.PrimaryNetworkID,
-			VMID:        constants.AVMID,
+			VMID:        constants.ALPHAID,
 			FxIDs: []ids.ID{
 				secp256k1fx.ID,
 				nftfx.ID,
 				propertyfx.ID,
 			},
-			Name: "X-Chain",
+			Name: "A-Chain",
 		},
 		{
 			GenesisData: genesisStr,
 			SubnetID:    constants.PrimaryNetworkID,
-			VMID:        constants.EVMID,
-			Name:        "C-Chain",
+			VMID:        constants.DELTAID,
+			Name:        "D-Chain",
 		},
 	}
 
 	platformvmReply := api.BuildGenesisReply{}
 	platformvmSS := api.StaticService{}
 	if err := platformvmSS.BuildGenesis(nil, &platformvmArgs, &platformvmReply); err != nil {
-		return nil, ids.ID{}, fmt.Errorf("problem while building platform chain's genesis state: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("problem while building omega chain's genesis state: %w", err)
 	}
 
 	genesisBytes, err := formatting.Decode(platformvmReply.Encoding, platformvmReply.Bytes)
 	if err != nil {
-		return nil, ids.ID{}, fmt.Errorf("problem parsing platformvm genesis bytes: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("problem parsing omegavm genesis bytes: %w", err)
 	}
 
 	return genesisBytes, dioneAssetID, nil
@@ -486,7 +486,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 	currentNodeAmount := uint64(0)
 	for _, allocation := range allocations {
 		currentAllocation := allocation
-		// Already added to the X-chain
+		// Already added to the A-chain
 		currentAllocation.InitialAmount = 0
 		// Going to be added until the correct amount is reached
 		currentAllocation.UnlockSchedule = nil
@@ -509,7 +509,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 				currentNodeAmount = 0
 
 				currentAllocation = allocation
-				// Already added to the X-chain
+				// Already added to the A-chain
 				currentAllocation.InitialAmount = 0
 				// Going to be added until the correct amount is reached
 				currentAllocation.UnlockSchedule = nil
@@ -548,7 +548,7 @@ func VMGenesis(genesisBytes []byte, vmID ids.ID) (*pchaintxs.Tx, error) {
 	return nil, fmt.Errorf("couldn't find blockchain with VM ID %s", vmID)
 }
 
-func DIONEAssetID(avmGenesisBytes []byte) (ids.ID, error) {
+func DIONEAssetID(alphaGenesisBytes []byte) (ids.ID, error) {
 	parser, err := xchaintxs.NewParser([]fxs.Fx{
 		&secp256k1fx.Fx{},
 	})
@@ -557,8 +557,8 @@ func DIONEAssetID(avmGenesisBytes []byte) (ids.ID, error) {
 	}
 
 	genesisCodec := parser.GenesisCodec()
-	genesis := avm.Genesis{}
-	if _, err := genesisCodec.Unmarshal(avmGenesisBytes, &genesis); err != nil {
+	genesis := alpha.Genesis{}
+	if _, err := genesisCodec.Unmarshal(alphaGenesisBytes, &genesis); err != nil {
 		return ids.Empty, err
 	}
 

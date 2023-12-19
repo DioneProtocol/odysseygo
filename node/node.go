@@ -71,18 +71,18 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/registry"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
 	ipcsapi "github.com/DioneProtocol/odysseygo/api/ipcs"
-	avmconfig "github.com/DioneProtocol/odysseygo/vms/avm/config"
-	platformconfig "github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	alphaconfig "github.com/DioneProtocol/odysseygo/vms/alpha/config"
+	omegaconfig "github.com/DioneProtocol/odysseygo/vms/omegavm/config"
 )
 
 var (
@@ -555,20 +555,20 @@ func (n *Node) initIndexer() error {
 	return nil
 }
 
-// Initializes the Platform chain.
+// Initializes the Omega chain.
 // Its genesis data specifies the other chains that should be created.
 func (n *Node) initChains(genesisBytes []byte) error {
 	n.Log.Info("initializing chains")
 
 	platformChain := chains.ChainParameters{
-		ID:            constants.PlatformChainID,
+		ID:            constants.OmegaChainID,
 		SubnetID:      constants.PrimaryNetworkID,
 		GenesisData:   genesisBytes, // Specifies other chains to create
-		VMID:          constants.PlatformVMID,
+		VMID:          constants.OmegaVMID,
 		CustomBeacons: n.beacons,
 	}
 
-	// Start the chain creator with the Platform Chain
+	// Start the chain creator with the Omega Chain
 	return n.chainManager.StartChainCreator(platformChain)
 }
 
@@ -653,27 +653,27 @@ func (n *Node) addDefaultVMAliases() error {
 }
 
 // Create the chainManager and register the following VMs:
-// AVM, Simple Payments DAG, Simple Payments Chain, and Platform VM
+// ALPHA, Simple Payments DAG, Simple Payments Chain, and Omega VM
 // Assumes n.DBManager, n.vdrs all initialized (non-nil)
 func (n *Node) initChainManager(dioneAssetID ids.ID) error {
-	createAVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.AVMID)
+	createAVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.ALPHAID)
 	if err != nil {
 		return err
 	}
-	xChainID := createAVMTx.ID()
+	aChainID := createAVMTx.ID()
 
-	createEVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.EVMID)
+	createEVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DELTAID)
 	if err != nil {
 		return err
 	}
-	cChainID := createEVMTx.ID()
+	dChainID := createEVMTx.ID()
 
 	// If any of these chains die, the node shuts down
 	criticalChains := set.Set[ids.ID]{}
 	criticalChains.Add(
-		constants.PlatformChainID,
-		xChainID,
-		cChainID,
+		constants.OmegaChainID,
+		aChainID,
+		dChainID,
 	)
 
 	// Manages network timeouts
@@ -727,8 +727,8 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		Keystore:                                n.keystore,
 		AtomicMemory:                            n.sharedMemory,
 		DIONEAssetID:                            dioneAssetID,
-		XChainID:                                xChainID,
-		CChainID:                                cChainID,
+		AChainID:                                aChainID,
+		DChainID:                                dChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,
@@ -737,15 +737,15 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		ShutdownNodeFunc:                        n.Shutdown,
 		MeterVMEnabled:                          n.Config.MeterVMEnabled,
 		Metrics:                                 n.MetricsGatherer,
-		SubnetConfigs:                            n.Config.SubnetConfigs,
-		ChainConfigs:                             n.Config.ChainConfigs,
+		SubnetConfigs:                           n.Config.SubnetConfigs,
+		ChainConfigs:                            n.Config.ChainConfigs,
 		AcceptedFrontierGossipFrequency:         n.Config.AcceptedFrontierGossipFrequency,
 		ConsensusAppConcurrency:                 n.Config.ConsensusAppConcurrency,
 		BootstrapMaxTimeGetAncestors:            n.Config.BootstrapMaxTimeGetAncestors,
 		BootstrapAncestorsMaxContainersSent:     n.Config.BootstrapAncestorsMaxContainersSent,
 		BootstrapAncestorsMaxContainersReceived: n.Config.BootstrapAncestorsMaxContainersReceived,
 		OdysseyPhase1Time:                       version.GetOdysseyPhase1Time(n.Config.NetworkID),
-		OdysseyPhase1MinPChainHeight:            version.GetOdysseyPhase1MinPChainHeight(n.Config.NetworkID),
+		OdysseyPhase1MinOChainHeight:            version.GetOdysseyPhase1MinOChainHeight(n.Config.NetworkID),
 		ResourceTracker:                         n.resourceTracker,
 		StateSyncBeacons:                        n.Config.StateSyncIDs,
 		TracingEnabled:                          n.Config.TraceConfig.Enabled,
@@ -764,7 +764,7 @@ func (n *Node) initVMs() error {
 
 	vdrs := n.vdrs
 
-	// If sybil protection is disabled, we provide the P-chain its own local
+	// If sybil protection is disabled, we provide the O-chain its own local
 	// validator manager that will not be used by the rest of the node. This
 	// allows the node's validator sets to be determined by network connections.
 	if !n.Config.SybilProtectionEnabled {
@@ -783,8 +783,8 @@ func (n *Node) initVMs() error {
 	// Register the VMs that Odyssey supports
 	errs := wrappers.Errs{}
 	errs.Add(
-		vmRegisterer.Register(context.TODO(), constants.PlatformVMID, &platformvm.Factory{
-			Config: platformconfig.Config{
+		vmRegisterer.Register(context.TODO(), constants.OmegaVMID, &omegavm.Factory{
+			Config: omegaconfig.Config{
 				Chains:                          n.chainManager,
 				Validators:                      vdrs,
 				UptimeLockedCalculator:          n.uptimeCalculator,
@@ -802,7 +802,7 @@ func (n *Node) initVMs() error {
 				MaxValidatorStake:               n.Config.MaxValidatorStake,
 				MinStakeDuration:                n.Config.MinStakeDuration,
 				MaxStakeDuration:                n.Config.MaxStakeDuration,
-				RewardConfig:                     n.Config.RewardConfig,
+				RewardConfig:                    n.Config.RewardConfig,
 				OdysseyPhase1Time:               version.GetOdysseyPhase1Time(n.Config.NetworkID),
 				BanffTime:                       version.GetBanffTime(n.Config.NetworkID),
 				CortinaTime:                     version.GetCortinaTime(n.Config.NetworkID),
@@ -810,13 +810,13 @@ func (n *Node) initVMs() error {
 				UseCurrentHeight:                n.Config.UseCurrentHeight,
 			},
 		}),
-		vmRegisterer.Register(context.TODO(), constants.AVMID, &avm.Factory{
-			Config: avmconfig.Config{
+		vmRegisterer.Register(context.TODO(), constants.ALPHAID, &alpha.Factory{
+			Config: alphaconfig.Config{
 				TxFee:            n.Config.TxFee,
 				CreateAssetTxFee: n.Config.CreateAssetTxFee,
 			},
 		}),
-		vmRegisterer.Register(context.TODO(), constants.EVMID, &coreth.Factory{}),
+		vmRegisterer.Register(context.TODO(), constants.DELTAID, &coreth.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), secp256k1fx.ID, &secp256k1fx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), nftfx.ID, &nftfx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), propertyfx.ID, &propertyfx.Factory{}),
@@ -1364,7 +1364,7 @@ func (n *Node) Initialize(
 	n.health.Start(context.TODO(), n.Config.HealthCheckFreq)
 	n.initProfiler()
 
-	// Start the Platform chain
+	// Start the Omega chain
 	if err := n.initChains(n.Config.GenesisBytes); err != nil {
 		return fmt.Errorf("couldn't initialize chains: %w", err)
 	}

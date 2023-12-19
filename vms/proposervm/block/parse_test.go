@@ -21,7 +21,7 @@ func TestParse(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
@@ -34,7 +34,7 @@ func TestParse(t *testing.T) {
 	builtBlock, err := Build(
 		parentID,
 		timestamp,
-		pChainHeight,
+		oChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,
@@ -108,10 +108,10 @@ func TestParseUnsigned(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
-	builtBlock, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
+	builtBlock, err := BuildUnsigned(parentID, timestamp, oChainHeight, innerBlockBytes)
 	require.NoError(err)
 
 	builtBlockBytes := builtBlock.Bytes()

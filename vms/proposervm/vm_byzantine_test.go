@@ -433,7 +433,7 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 //
 // O1.parent = B (non-Oracle), O1.inner = first option of X (invalid)
 // O2.parent = A (original), O2.inner = first option of X (valid)
-// O3.parent = C (Oracle), O3.inner = first option of X (invalid parent)
+// O3.parent = D (Oracle), O3.inner = first option of X (invalid parent)
 func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
 	proVM.Set(coreGenBlk.Timestamp())

@@ -13,7 +13,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/utils/math"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
@@ -29,7 +29,7 @@ var (
 	_ Builder = (*builder)(nil)
 )
 
-// Builder provides a convenient interface for building unsigned X-chain
+// Builder provides a convenient interface for building unsigned A-chain
 // transactions.
 type Builder interface {
 	// GetFTBalance calculates the amount of each fungible asset that this
@@ -149,7 +149,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// X-chain transactions.
+// A-chain transactions.
 type BuilderBackend interface {
 	Context
 
@@ -357,7 +357,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		dioneAssetID     = b.backend.DIONEAssetID()
+		dioneAssetID    = b.backend.DIONEAssetID()
 		txFee           = b.backend.BaseTxFee()
 
 		importedInputs  = make([]*dione.TransferableInput, 0, len(utxos))
@@ -405,8 +405,8 @@ func (b *builder) NewImportTx(
 	}
 
 	var (
-		inputs       []*dione.TransferableInput
-		outputs      = make([]*dione.TransferableOutput, 0, len(importedAmounts))
+		inputs        []*dione.TransferableInput
+		outputs       = make([]*dione.TransferableOutput, 0, len(importedAmounts))
 		importedDIONE = importedAmounts[dioneAssetID]
 	)
 	if importedDIONE > txFee {
@@ -615,7 +615,7 @@ func (b *builder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                    // sort inputs
+	utils.Sort(inputs)                                     // sort inputs
 	dione.SortTransferableOutputs(outputs, Parser.Codec()) // sort the change outputs
 	return inputs, outputs, nil
 }

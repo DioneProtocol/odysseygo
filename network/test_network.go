@@ -191,7 +191,7 @@ func NewTestNetwork(
 	networkConfig.Validators = validatorManager
 	networkConfig.Validators.Add(constants.PrimaryNetworkID, currentValidators)
 	networkConfig.Beacons = beacons
-	// This never actually does anything because we never initialize the P-chain
+	// This never actually does anything because we never initialize the O-chain
 	networkConfig.UptimeCalculator = uptime.NoOpCalculator
 
 	// TODO actually monitor usage
