@@ -48,7 +48,6 @@ var (
 		StakingConfig: StakingConfig{
 			UptimeRequirement: .8, // 80%
 			MinValidatorStake: 2 * units.KiloDione,
-			MaxValidatorStake: 3 * units.MegaDione,
 			MinStakeDuration:  24 * time.Hour,
 			MaxStakeDuration:  365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
