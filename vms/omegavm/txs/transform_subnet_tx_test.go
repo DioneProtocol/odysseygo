@@ -103,7 +103,6 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		MinConsumptionRate:       1_000,
 		MaxConsumptionRate:       1_000_000,
 		MinValidatorStake:        1,
-		MaxValidatorStake:        0xffffffffffffffff,
 		MinStakeDuration:         1,
 		MaxStakeDuration:         365 * 24 * 60 * 60,
 		MaxValidatorWeightFactor: 1,
@@ -321,7 +320,6 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		MinConsumptionRate:       0,
 		MaxConsumptionRate:       0,
 		MinValidatorStake:        1,
-		MaxValidatorStake:        0x1000000000000000,
 		MinStakeDuration:         1,
 		MaxStakeDuration:         1,
 		MaxValidatorWeightFactor: 255,
@@ -683,40 +681,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 			err: errMinValidatorStakeAboveSupply,
 		},
 		{
-			name: "minValidatorStake > maxValidatorStake",
-			txFunc: func(*gomock.Controller) *TransformSubnetTx {
-				return &TransformSubnetTx{
-					BaseTx:             validBaseTx,
-					Subnet:             ids.GenerateTestID(),
-					AssetID:            ids.GenerateTestID(),
-					InitialSupply:      10,
-					MaximumSupply:      10,
-					MinConsumptionRate: 0,
-					MaxConsumptionRate: reward.PercentDenominator,
-					MinValidatorStake:  2,
-					MaxValidatorStake:  1,
-				}
-			},
-			err: errMinValidatorStakeAboveMax,
-		},
-		{
-			name: "maxValidatorStake > maximumSupply",
-			txFunc: func(*gomock.Controller) *TransformSubnetTx {
-				return &TransformSubnetTx{
-					BaseTx:             validBaseTx,
-					Subnet:             ids.GenerateTestID(),
-					AssetID:            ids.GenerateTestID(),
-					InitialSupply:      10,
-					MaximumSupply:      10,
-					MinConsumptionRate: 0,
-					MaxConsumptionRate: reward.PercentDenominator,
-					MinValidatorStake:  2,
-					MaxValidatorStake:  11,
-				}
-			},
-			err: errMaxValidatorStakeTooLarge,
-		},
-		{
 			name: "minStakeDuration == 0",
 			txFunc: func(*gomock.Controller) *TransformSubnetTx {
 				return &TransformSubnetTx{
@@ -728,7 +692,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate: 0,
 					MaxConsumptionRate: reward.PercentDenominator,
 					MinValidatorStake:  2,
-					MaxValidatorStake:  10,
 					MinStakeDuration:   0,
 				}
 			},
@@ -746,7 +709,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate: 0,
 					MaxConsumptionRate: reward.PercentDenominator,
 					MinValidatorStake:  2,
-					MaxValidatorStake:  10,
 					MinStakeDuration:   2,
 					MaxStakeDuration:   1,
 				}
@@ -765,7 +727,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate:       0,
 					MaxConsumptionRate:       reward.PercentDenominator,
 					MinValidatorStake:        2,
-					MaxValidatorStake:        10,
 					MinStakeDuration:         1,
 					MaxStakeDuration:         2,
 					MaxValidatorWeightFactor: 0,
@@ -785,7 +746,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate:       0,
 					MaxConsumptionRate:       reward.PercentDenominator,
 					MinValidatorStake:        2,
-					MaxValidatorStake:        10,
 					MinStakeDuration:         1,
 					MaxStakeDuration:         2,
 					MaxValidatorWeightFactor: 1,
@@ -809,7 +769,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate:       0,
 					MaxConsumptionRate:       reward.PercentDenominator,
 					MinValidatorStake:        2,
-					MaxValidatorStake:        10,
 					MinStakeDuration:         1,
 					MaxStakeDuration:         2,
 					MaxValidatorWeightFactor: 1,
@@ -831,7 +790,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate:       0,
 					MaxConsumptionRate:       reward.PercentDenominator,
 					MinValidatorStake:        2,
-					MaxValidatorStake:        10,
 					MinStakeDuration:         1,
 					MaxStakeDuration:         2,
 					MaxValidatorWeightFactor: 1,
@@ -855,7 +813,6 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					MinConsumptionRate:       0,
 					MaxConsumptionRate:       reward.PercentDenominator,
 					MinValidatorStake:        2,
-					MaxValidatorStake:        10,
 					MinStakeDuration:         1,
 					MaxStakeDuration:         2,
 					MaxValidatorWeightFactor: 1,

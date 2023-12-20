@@ -15,9 +15,6 @@ type StakingConfig struct {
 	UptimeRequirement float64 `json:"uptimeRequirement"`
 	// Minimum stake, in nDIONE, required to validate the primary network
 	MinValidatorStake uint64 `json:"minValidatorStake"`
-	// Maximum stake, in nDIONE, allowed to be placed on a single validator in
-	// the primary network
-	MaxValidatorStake uint64 `json:"maxValidatorStake"`
 	// MinStakeDuration is the minimum amount of time a validator can validate
 	// for in a single period.
 	MinStakeDuration time.Duration `json:"minStakeDuration"`

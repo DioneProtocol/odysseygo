@@ -5,7 +5,6 @@ package executor
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -1108,7 +1107,6 @@ func newTransformSubnetTx(t *testing.T) (*txs.TransformSubnetTx, *txs.Tx) {
 		MinConsumptionRate:       0,
 		MaxConsumptionRate:       reward.PercentDenominator,
 		MinValidatorStake:        2,
-		MaxValidatorStake:        10,
 		MinStakeDuration:         1,
 		MaxStakeDuration:         2,
 		MaxValidatorWeightFactor: 1,

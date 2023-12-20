@@ -58,10 +58,6 @@ func verifyAddValidatorTx(
 		// Ensure validator is staking at least the minimum amount
 		return nil, ErrWeightTooSmall
 
-	case tx.Validator.Wght > backend.Config.MaxValidatorStake:
-		// Ensure validator isn't staking too much
-		return nil, ErrWeightTooLarge
-
 	case duration < backend.Config.MinStakeDuration:
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
@@ -347,10 +343,6 @@ func verifyAddPermissionlessValidatorTx(
 		// Ensure validator is staking at least the minimum amount
 		return ErrWeightTooSmall
 
-	case tx.Validator.Wght > validatorRules.maxValidatorStake:
-		// Ensure validator isn't staking too much
-		return ErrWeightTooLarge
-
 	case duration < validatorRules.minStakeDuration:
 		// Ensure staking length is not too short
 		return ErrStakeTooShort
@@ -440,7 +432,6 @@ func verifyAddPermissionlessValidatorTx(
 type addValidatorRules struct {
 	assetID           ids.ID
 	minValidatorStake uint64
-	maxValidatorStake uint64
 	minStakeDuration  time.Duration
 	maxStakeDuration  time.Duration
 }
@@ -454,7 +445,6 @@ func getValidatorRules(
 		return &addValidatorRules{
 			assetID:           backend.Ctx.DIONEAssetID,
 			minValidatorStake: backend.Config.MinValidatorStake,
-			maxValidatorStake: backend.Config.MaxValidatorStake,
 			minStakeDuration:  backend.Config.MinStakeDuration,
 			maxStakeDuration:  backend.Config.MaxStakeDuration,
 		}, nil
@@ -472,7 +462,6 @@ func getValidatorRules(
 	return &addValidatorRules{
 		assetID:           transformSubnet.AssetID,
 		minValidatorStake: transformSubnet.MinValidatorStake,
-		maxValidatorStake: transformSubnet.MaxValidatorStake,
 		minStakeDuration:  time.Duration(transformSubnet.MinStakeDuration) * time.Second,
 		maxStakeDuration:  time.Duration(transformSubnet.MaxStakeDuration) * time.Second,
 	}, nil
