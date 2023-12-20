@@ -42,7 +42,6 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 		unsignedTransformTx = &txs.TransformSubnetTx{
 			AssetID:           customAssetID,
 			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
 			MinStakeDuration:  3,
 			MaxStakeDuration:  4,
 		}
@@ -195,7 +194,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake + 1
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake + 1
 				return &tx
 			},
 			expectedErr: ErrWeightTooLarge,
@@ -221,7 +220,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake
 				// Note the duration is 1 less than the minimum
 				tx.Validator.Start = 1
 				tx.Validator.End = uint64(unsignedTransformTx.MinStakeDuration)
@@ -250,7 +249,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake
 				// Note the duration is more than the maximum
 				tx.Validator.Start = 1
 				tx.Validator.End = 2 + uint64(unsignedTransformTx.MaxStakeDuration)
@@ -523,7 +522,6 @@ func TestGetValidatorRules(t *testing.T) {
 	var (
 		config = &config.Config{
 			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
 			MinStakeDuration:  time.Second,
 			MaxStakeDuration:  2 * time.Second,
 		}
@@ -548,7 +546,6 @@ func TestGetValidatorRules(t *testing.T) {
 			expectedRules: &addValidatorRules{
 				assetID:           dioneAssetID,
 				minValidatorStake: config.MinValidatorStake,
-				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  config.MinStakeDuration,
 				maxStakeDuration:  config.MaxStakeDuration,
 			},
@@ -575,7 +572,6 @@ func TestGetValidatorRules(t *testing.T) {
 					Unsigned: &txs.TransformSubnetTx{
 						AssetID:           customAssetID,
 						MinValidatorStake: config.MinValidatorStake,
-						MaxValidatorStake: config.MaxValidatorStake,
 						MinStakeDuration:  1337,
 						MaxStakeDuration:  42,
 					},
@@ -586,7 +582,6 @@ func TestGetValidatorRules(t *testing.T) {
 			expectedRules: &addValidatorRules{
 				assetID:           customAssetID,
 				minValidatorStake: config.MinValidatorStake,
-				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  time.Duration(1337) * time.Second,
 				maxStakeDuration:  time.Duration(42) * time.Second,
 			},

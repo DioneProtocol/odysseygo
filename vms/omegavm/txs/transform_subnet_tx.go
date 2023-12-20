@@ -26,8 +26,6 @@ var (
 	errMaxConsumptionRateTooLarge        = fmt.Errorf("max consumption rate must be less than or equal to %d", reward.PercentDenominator)
 	errMinValidatorStakeZero             = errors.New("min validator stake must be non-0")
 	errMinValidatorStakeAboveSupply      = errors.New("min validator stake must be less than or equal to initial supply")
-	errMinValidatorStakeAboveMax         = errors.New("min validator stake must be less than or equal to max validator stake")
-	errMaxValidatorStakeTooLarge         = errors.New("max validator stake must be less than or equal to max supply")
 	errMinStakeDurationZero              = errors.New("min stake duration must be non-0")
 	errMinStakeDurationTooLarge          = errors.New("min stake duration must be less than or equal to max stake duration")
 	errMaxValidatorWeightFactorZero      = errors.New("max validator weight factor must be non-0")
@@ -70,12 +68,6 @@ type TransformSubnetTx struct {
 	// - Must be > 0
 	// - Must be <= [InitialSupply]
 	MinValidatorStake uint64 `serialize:"true" json:"minValidatorStake"`
-	// MaxValidatorStake is the maximum amount of funds a single validator can
-	// be allocated.
-	// Restrictions:
-	// - Must be >= [MinValidatorStake]
-	// - Must be <= [MaximumSupply]
-	MaxValidatorStake uint64 `serialize:"true" json:"maxValidatorStake"`
 	// MinStakeDuration is the minimum number of seconds a staker can stake for.
 	// Restrictions:
 	// - Must be > 0
@@ -123,10 +115,6 @@ func (tx *TransformSubnetTx) SyntacticVerify(ctx *snow.Context) error {
 		return errMinValidatorStakeZero
 	case tx.MinValidatorStake > tx.InitialSupply:
 		return errMinValidatorStakeAboveSupply
-	case tx.MinValidatorStake > tx.MaxValidatorStake:
-		return errMinValidatorStakeAboveMax
-	case tx.MaxValidatorStake > tx.MaximumSupply:
-		return errMaxValidatorStakeTooLarge
 	case tx.MinStakeDuration == 0:
 		return errMinStakeDurationZero
 	case tx.MinStakeDuration > tx.MaxStakeDuration:

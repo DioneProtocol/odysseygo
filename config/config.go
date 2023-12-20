@@ -79,7 +79,6 @@ var (
 	errSybilProtectionDisabledOnPublicNetwork = errors.New("sybil protection disabled on public network")
 	errAuthPasswordTooWeak                    = errors.New("API auth password is not strong enough")
 	errInvalidUptimeRequirement               = errors.New("uptime requirement must be in the range [0, 1]")
-	errMinValidatorStakeAboveMax              = errors.New("minimum validator stake can't be greater than maximum validator stake")
 	errInvalidMinStakeDuration                = errors.New("min stake duration must be > 0")
 	errMinStakeDurationAboveMax               = errors.New("max stake duration can't be less than min stake duration")
 	errStakeMaxConsumptionTooLarge            = fmt.Errorf("max stake consumption must be less than or equal to %d", reward.PercentDenominator)
@@ -818,7 +817,6 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 	if networkID != constants.MainnetID && networkID != constants.TestnetID {
 		config.UptimeRequirement = v.GetFloat64(UptimeRequirementKey)
 		config.MinValidatorStake = v.GetUint64(MinValidatorStakeKey)
-		config.MaxValidatorStake = v.GetUint64(MaxValidatorStakeKey)
 		config.MinStakeDuration = v.GetDuration(MinStakeDurationKey)
 		config.MaxStakeDuration = v.GetDuration(MaxStakeDurationKey)
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
@@ -828,8 +826,6 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:
 			return node.StakingConfig{}, errInvalidUptimeRequirement
-		case config.MinValidatorStake > config.MaxValidatorStake:
-			return node.StakingConfig{}, errMinValidatorStakeAboveMax
 		case config.MinStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
 		case config.MaxStakeDuration < config.MinStakeDuration:
