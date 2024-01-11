@@ -201,15 +201,6 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 //     (ie the genesis state of the network)
 //  2. The asset ID of AVAX
 func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
-	switch networkID {
-	case constants.MainnetID, constants.TestnetID, constants.LocalID:
-		return nil, ids.ID{}, fmt.Errorf(
-			"%w: %s",
-			errOverridesStandardNetworkConfig,
-			constants.NetworkName(networkID),
-		)
-	}
-
 	config, err := GetConfigFile(filepath)
 	if err != nil {
 		return nil, ids.ID{}, fmt.Errorf("unable to load provided genesis config at %s: %w", filepath, err)
@@ -243,15 +234,6 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 //     (ie the genesis state of the network)
 //  2. The asset ID of AVAX
 func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
-	switch networkID {
-	case constants.MainnetID, constants.TestnetID, constants.LocalID:
-		return nil, ids.ID{}, fmt.Errorf(
-			"%w: %s",
-			errOverridesStandardNetworkConfig,
-			constants.NetworkName(networkID),
-		)
-	}
-
 	customConfig, err := GetConfigContent(genesisContent)
 	if err != nil {
 		return nil, ids.ID{}, fmt.Errorf("unable to load genesis content from flag: %w", err)
