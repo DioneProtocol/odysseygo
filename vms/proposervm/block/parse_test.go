@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/codec"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/staking"
+	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/staking"
 )
 
 func TestParse(t *testing.T) {
@@ -21,20 +21,20 @@ func TestParse(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	oChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
 	tlsCert, err := staking.NewTLSCert()
 	require.NoError(err)
 
-	cert := tlsCert.Leaf
+	cert := staking.CertificateFromX509(tlsCert.Leaf)
 	key := tlsCert.PrivateKey.(crypto.Signer)
 
 	builtBlock, err := Build(
 		parentID,
 		timestamp,
-		oChainHeight,
+		pChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,
@@ -108,10 +108,10 @@ func TestParseUnsigned(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	oChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
-	builtBlock, err := BuildUnsigned(parentID, timestamp, oChainHeight, innerBlockBytes)
+	builtBlock, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
 	require.NoError(err)
 
 	builtBlockBytes := builtBlock.Bytes()

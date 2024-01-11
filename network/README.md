@@ -1,4 +1,4 @@
-# Odyssey Networking
+# Avalanche Networking
 
 ## Table of Contents
 
@@ -15,15 +15,15 @@
 
 ## Overview
 
-Odyssey is a decentralized [p2p](https://en.wikipedia.org/wiki/Peer-to-peer) (peer-to-peer) network of nodes that work together to run the Odyssey blockchain protocol.
+Avalanche is a decentralized [p2p](https://en.wikipedia.org/wiki/Peer-to-peer) (peer-to-peer) network of nodes that work together to run the Avalanche blockchain protocol.
 
 The `network` package implements the networking layer of the protocol which allows a node to discover, connect to, and communicate with other peers.
 
 ## Peers
 
-Peers are defined as members of the network that communicate with one another to participate in the Odyssey protocol.
+Peers are defined as members of the network that communicate with one another to participate in the Avalanche protocol.
 
-Peers communicate by enqueuing messages between one another. Each peer on either side of the connection asynchronously reads and writes messages to and from the remote peer. Messages include both application-level messages used to support the Odyssey protocol, as well as networking-level messages used to implement the peer-to-peer communication layer.
+Peers communicate by enqueuing messages between one another. Each peer on either side of the connection asynchronously reads and writes messages to and from the remote peer. Messages include both application-level messages used to support the Avalanche protocol, as well as networking-level messages used to implement the peer-to-peer communication layer.
 
 ```mermaid
 sequenceDiagram
@@ -41,9 +41,9 @@ sequenceDiagram
 
 #### Bootstrapping
 
-When starting an Odyssey node, a node needs to be able to initiate some process that eventually allows itself to become a participating member of the network. In traditional web2 systems, it's common to use a web service by hitting the service's DNS and being routed to an available server behind a load balancer. In decentralized p2p systems however, connecting to a node is more complex as no single entity owns the network. [Odyssey consensus](https://docs.dioneprotocol.com/overview/getting-started/odyssey-consensus) requires a node to repeatedly sample peers in the network, so each node needs some way of discovering and connecting to every other peer to participate in the protocol.
+When starting an Avalanche node, a node needs to be able to initiate some process that eventually allows itself to become a participating member of the network. In traditional web2 systems, it's common to use a web service by hitting the service's DNS and being routed to an available server behind a load balancer. In decentralized p2p systems however, connecting to a node is more complex as no single entity owns the network. [Avalanche consensus](https://docs.avax.network/overview/getting-started/avalanche-consensus) requires a node to repeatedly sample peers in the network, so each node needs some way of discovering and connecting to every other peer to participate in the protocol.
 
-In Odyssey, nodes connect to an initial set of bootstrapper nodes known as **beacons** (this is user-configurable). Once connected to a set of beacons, a node is able to discover other nodes in the network. Over time, a node eventually discovers other peers in the network through `PeerList` messages it receives through:
+In Avalanche, nodes connect to an initial set of bootstrapper nodes known as **beacons** (this is user-configurable). Once connected to a set of beacons, a node is able to discover other nodes in the network. Over time, a node eventually discovers other peers in the network through `PeerList` messages it receives through:
 
 - The handshake initiated between two peers when attempting to connect to a peer (see [Connecting](#connecting)).
 - Periodic `PeerList` gossip messages that every peer sends to the peers it's connected to (see [Connected](#connected)).
@@ -54,14 +54,14 @@ In Odyssey, nodes connect to an initial set of bootstrapper nodes known as **bea
 
 Upon connection to any peer, a handshake is performed between the node attempting to establish the outbound connection to the peer and the peer receiving the inbound connection.
 
-When attempting to establish the connection, the first message that the node attempting to connect to the peer in the network is a `Version` message describing compatibility of the candidate node with the peer. As an example, nodes that are attempting to connect with an incompatible version of OdysseyGo or a significantly skewed local clock are rejected by the peer.
+When attempting to establish the connection, the first message that the node attempting to connect to the peer in the network is a `Version` message describing compatibility of the candidate node with the peer. As an example, nodes that are attempting to connect with an incompatible version of AvalancheGo or a significantly skewed local clock are rejected by the peer.
 
 ```mermaid
 sequenceDiagram
 Note over Node,Peer: Initiate Handshake
 Note left of Node: I want to connect to you!
 Note over Node,Peer: Version message
-Node->>Peer: OdysseyGo v1.0.0
+Node->>Peer: AvalancheGo v1.0.0
 Note right of Peer: My version v1.9.4 is incompatible with your version v1.0.0.
 Peer-xNode: Connection dropped
 Note over Node,Peer: Handshake Failed
@@ -74,12 +74,12 @@ sequenceDiagram
 Note over Node,Peer: Initiate Handshake
 Note left of Node: I want to connect to you!
 Note over Node,Peer: Version message
-Node->>Peer: OdysseyGo v1.9.4
+Node->>Peer: AvalancheGo v1.9.4
 Note right of Peer: LGTM!
 Note over Node,Peer: PeerList message
-Peer->>Node: Peer-A, Peer-Y, Peer-Z
+Peer->>Node: Peer-X, Peer-Y, Peer-Z
 Note over Node,Peer: Handshake Complete
-Node->>Peer: ACK Peer-A, Peer-Y, Peer-Z
+Node->>Peer: ACK Peer-X, Peer-Y, Peer-Z
 ```
 
 Once the node attempting to join the network receives this `PeerList` message, the handshake is complete and the node is now connected to the peer. The node attempts to connect to the new peers discovered in the `PeerList` message. Each connection results in another peer handshake, which results in the node incrementally discovering more and more peers in the network as more and more `PeerList` messages are exchanged.

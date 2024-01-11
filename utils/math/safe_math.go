@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/exp/constraints"
 
-	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/ava-labs/avalanchego/utils"
 )
 
 var (

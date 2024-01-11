@@ -6,25 +6,25 @@ package block
 import (
 	"crypto"
 	"crypto/rand"
-	"crypto/x509"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 func BuildUnsigned(
 	parentID ids.ID,
 	timestamp time.Time,
-	oChainHeight uint64,
+	pChainHeight uint64,
 	blockBytes []byte,
 ) (SignedBlock, error) {
 	var block SignedBlock = &statelessBlock{
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			OChainHeight: oChainHeight,
+			PChainHeight: pChainHeight,
 			Certificate:  nil,
 			Block:        blockBytes,
 		},
@@ -41,8 +41,8 @@ func BuildUnsigned(
 func Build(
 	parentID ids.ID,
 	timestamp time.Time,
-	oChainHeight uint64,
-	cert *x509.Certificate,
+	pChainHeight uint64,
+	cert *staking.Certificate,
 	blockBytes []byte,
 	chainID ids.ID,
 	key crypto.Signer,
@@ -51,7 +51,7 @@ func Build(
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			OChainHeight: oChainHeight,
+			PChainHeight: pChainHeight,
 			Certificate:  cert.Raw,
 			Block:        blockBytes,
 		},

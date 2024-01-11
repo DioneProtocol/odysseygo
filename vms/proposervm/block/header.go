@@ -3,7 +3,7 @@
 
 package block
 
-import "github.com/DioneProtocol/odysseygo/ids"
+import "github.com/ava-labs/avalanchego/ids"
 
 type Header interface {
 	ChainID() ids.ID

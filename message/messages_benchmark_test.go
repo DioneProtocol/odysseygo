@@ -15,10 +15,10 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/utils/compression"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/utils/compression"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 var (
@@ -128,10 +128,10 @@ func BenchmarkUnmarshalVersion(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		if useBuilder {
 			_, err = codec.parseInbound(rawMsg, dummyNodeID, dummyOnFinishedHandling)
+			require.NoError(err)
 		} else {
 			var msg p2p.Message
-			err = proto.Unmarshal(rawMsg, &msg)
+			require.NoError(proto.Unmarshal(rawMsg, &msg))
 		}
-		require.NoError(err)
 	}
 }

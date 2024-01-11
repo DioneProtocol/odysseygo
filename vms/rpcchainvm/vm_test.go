@@ -12,20 +12,20 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/exp/slices"
-
-	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime/subprocess"
+	"go.uber.org/mock/gomock"
 
-	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
+	"golang.org/x/exp/slices"
+
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block/mocks"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/grpcutils"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/runtime"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/runtime/subprocess"
+
+	vmpb "github.com/ava-labs/avalanchego/proto/pb/vm"
 )
 
 const (
@@ -41,7 +41,7 @@ const (
 	batchedParseBlockCachingTestKey                = "batchedParseBlockCachingTest"
 )
 
-var TestServerPluginMap = map[string]func(*testing.T, bool) (block.ChainVM, *gomock.Controller){
+var TestServerPluginMap = map[string]func(*testing.T, bool) block.ChainVM{
 	stateSyncEnabledTestKey:                        stateSyncEnabledTestPlugin,
 	getOngoingSyncStateSummaryTestKey:              getOngoingSyncStateSummaryTestPlugin,
 	getLastStateSummaryTestKey:                     getLastStateSummaryTestPlugin,
@@ -92,12 +92,11 @@ func TestHelperProcess(t *testing.T) {
 		select {}
 	}
 
-	mockedVM, ctrl := TestServerPluginMap[testKey](t, true /*loadExpectations*/)
+	mockedVM := TestServerPluginMap[testKey](t, true /*loadExpectations*/)
 	err := Serve(context.Background(), mockedVM)
 	if err != nil {
 		os.Exit(1)
 	}
-	ctrl.Finish()
 
 	os.Exit(0)
 }
@@ -118,9 +117,7 @@ func TestVMServerInterface(t *testing.T) {
 	}
 	slices.Sort(gotMethods)
 
-	if !reflect.DeepEqual(gotMethods, wantMethods) {
-		t.Errorf("\ngot: %q\nwant: %q", gotMethods, wantMethods)
-	}
+	require.Equal(t, wantMethods, gotMethods)
 }
 
 func TestRuntimeSubprocessBootstrap(t *testing.T) {
@@ -176,13 +173,11 @@ func TestRuntimeSubprocessBootstrap(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			vm := mocks.NewMockChainVM(ctrl)
-			defer ctrl.Finish()
 
 			listener, err := grpcutils.NewListener()
 			require.NoError(err)
 
-			err = os.Setenv(runtime.EngineAddressKey, listener.Addr().String())
-			require.NoError(err)
+			require.NoError(os.Setenv(runtime.EngineAddressKey, listener.Addr().String()))
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()

@@ -4,10 +4,10 @@
 package syncer
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 type Config struct {

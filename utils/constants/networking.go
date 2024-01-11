@@ -7,8 +7,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/utils/compression"
-	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/ava-labs/avalanchego/utils/compression"
+	"github.com/ava-labs/avalanchego/utils/units"
 )
 
 // Const variables to be exported
@@ -26,11 +26,6 @@ const (
 	DefaultByteSliceCap    = 128
 
 	MaxContainersLen = int(4 * DefaultMaxMessageSize / 5)
-
-	// MinConnectedStakeBuffer is the safety buffer for calculation of MinConnectedStake.
-	// This increases the required stake percentage above alpha/k. Must be [0-1]
-	// 0 means MinConnectedStake = alpha/k, 1 means MinConnectedStake = 1 (fully connected)
-	MinConnectedStakeBuffer = .2
 
 	DefaultNetworkPeerListNumValidatorIPs        = 15
 	DefaultNetworkPeerListValidatorGossipSize    = 20
@@ -55,10 +50,8 @@ const (
 	DefaultNetworkTimeoutCoefficient    = 2
 	DefaultNetworkReadHandshakeTimeout  = 15 * time.Second
 
-	DefaultNetworkCompressionEnabled        = true // TODO remove when NetworkCompressionEnabledKey is removed
-	DefaultNetworkCompressionType           = compression.TypeGzip
+	DefaultNetworkCompressionType           = compression.TypeZstd
 	DefaultNetworkMaxClockDifference        = time.Minute
-	DefaultNetworkAllowPrivateIPs           = true
 	DefaultNetworkRequireValidatorToConnect = false
 	DefaultNetworkPeerReadBufferSize        = 8 * units.KiB
 	DefaultNetworkPeerWriteBufferSize       = 8 * units.KiB

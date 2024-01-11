@@ -8,19 +8,19 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/database/manager"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
-	"github.com/DioneProtocol/odysseygo/version"
-	"github.com/DioneProtocol/odysseygo/vms/components/chain"
+	"go.uber.org/mock/gomock"
+
+	"github.com/ava-labs/avalanchego/database/manager"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block/mocks"
+	"github.com/ava-labs/avalanchego/version"
+	"github.com/ava-labs/avalanchego/vms/components/chain"
 )
 
 var (
@@ -38,7 +38,7 @@ var (
 	time2 = time.Unix(2, 0)
 )
 
-func batchedParseBlockCachingTestPlugin(t *testing.T, loadExpectations bool) (block.ChainVM, *gomock.Controller) {
+func batchedParseBlockCachingTestPlugin(t *testing.T, loadExpectations bool) block.ChainVM {
 	// test key is "batchedParseBlockCachingTestKey"
 
 	// create mock
@@ -76,7 +76,7 @@ func batchedParseBlockCachingTestPlugin(t *testing.T, loadExpectations bool) (bl
 		)
 	}
 
-	return vm, ctrl
+	return vm
 }
 
 func TestBatchedParseBlockCaching(t *testing.T) {
@@ -90,8 +90,7 @@ func TestBatchedParseBlockCaching(t *testing.T) {
 	ctx := snow.DefaultContextTest()
 	dbManager := manager.NewMemDB(version.Semantic1_0_0)
 
-	err := vm.Initialize(context.Background(), ctx, dbManager, nil, nil, nil, nil, nil, nil)
-	require.NoError(err)
+	require.NoError(vm.Initialize(context.Background(), ctx, dbManager, nil, nil, nil, nil, nil, nil))
 
 	// Call should parse the first block
 	blk, err := vm.ParseBlock(context.Background(), blkBytes1)

@@ -10,14 +10,14 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/api"
-	"github.com/DioneProtocol/odysseygo/api/server"
-	"github.com/DioneProtocol/odysseygo/chains"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/ipcs"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/utils/json"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/api/server"
+	"github.com/ava-labs/avalanchego/chains"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/ipcs"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 // IPCServer maintains the IPCs

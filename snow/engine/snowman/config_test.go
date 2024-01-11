@@ -4,11 +4,11 @@
 package snowman
 
 import (
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowball"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 func DefaultConfigs() Config {
@@ -19,15 +19,14 @@ func DefaultConfigs() Config {
 		Validators: validators.NewSet(),
 		VM:         &block.TestVM{},
 		Params: snowball.Parameters{
-			K:                       1,
-			Alpha:                   1,
-			BetaVirtuous:            1,
-			BetaRogue:               2,
-			ConcurrentRepolls:       1,
-			OptimalProcessing:       100,
-			MaxOutstandingItems:     1,
-			MaxItemProcessingTime:   1,
-			MixedQueryNumPushNonVdr: 1,
+			K:                     1,
+			Alpha:                 1,
+			BetaVirtuous:          1,
+			BetaRogue:             2,
+			ConcurrentRepolls:     1,
+			OptimalProcessing:     100,
+			MaxOutstandingItems:   1,
+			MaxItemProcessingTime: 1,
 		},
 		Consensus: &snowman.Topological{},
 	}

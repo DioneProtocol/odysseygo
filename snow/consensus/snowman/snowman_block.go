@@ -4,9 +4,9 @@
 package snowman
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowball"
 )
 
 // Tracks the state of a snowman block

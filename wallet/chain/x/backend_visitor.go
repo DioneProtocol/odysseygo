@@ -6,9 +6,9 @@ package x
 import (
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/avm/txs"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
 var _ txs.Visitor = (*backendVisitor)(nil)
@@ -47,12 +47,12 @@ func (b *backendVisitor) ExportTx(tx *txs.ExportTx) error {
 		err := b.b.AddUTXO(
 			b.ctx,
 			tx.DestinationChain,
-			&dione.UTXO{
-				UTXOID: dione.UTXOID{
+			&avax.UTXO{
+				UTXOID: avax.UTXOID{
 					TxID:        b.txID,
 					OutputIndex: uint32(len(tx.Outs) + i),
 				},
-				Asset: dione.Asset{ID: out.AssetID()},
+				Asset: avax.Asset{ID: out.AssetID()},
 				Out:   out.Out,
 			},
 		)

@@ -15,17 +15,15 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/staking"
-	"github.com/DioneProtocol/odysseygo/utils/compression"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/utils/compression"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 func TestMessage(t *testing.T) {
 	t.Parallel()
-
-	require := require.New(t)
 
 	mb, err := newMsgBuilder(
 		logging.NoLog{},
@@ -33,7 +31,7 @@ func TestMessage(t *testing.T) {
 		prometheus.NewRegistry(),
 		5*time.Second,
 	)
-	require.NoError(err)
+	require.NoError(t, err)
 
 	testID := ids.GenerateTestID()
 	compressibleContainers := [][]byte{
@@ -43,10 +41,10 @@ func TestMessage(t *testing.T) {
 	}
 
 	testCertRaw, testKeyRaw, err := staking.NewCertAndKeyBytes()
-	require.NoError(err)
+	require.NoError(t, err)
 
 	testTLSCert, err := staking.LoadTLSCertFromBytes(testKeyRaw, testCertRaw)
-	require.NoError(err)
+	require.NoError(t, err)
 
 	nowUnix := time.Now().Unix()
 
@@ -401,7 +399,7 @@ func TestMessage(t *testing.T) {
 						ChainId:    testID[:],
 						RequestId:  1,
 						Deadline:   1,
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -415,9 +413,9 @@ func TestMessage(t *testing.T) {
 			msg: &p2p.Message{
 				Message: &p2p.Message_AcceptedFrontier_{
 					AcceptedFrontier_: &p2p.AcceptedFrontier{
-						ChainId:      testID[:],
-						RequestId:    1,
-						ContainerIds: [][]byte{testID[:], testID[:]},
+						ChainId:     testID[:],
+						RequestId:   1,
+						ContainerId: testID[:],
 					},
 				},
 			},
@@ -435,7 +433,7 @@ func TestMessage(t *testing.T) {
 						RequestId:    1,
 						Deadline:     1,
 						ContainerIds: [][]byte{testID[:], testID[:]},
-						EngineType:   p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType:   p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -469,7 +467,7 @@ func TestMessage(t *testing.T) {
 						RequestId:   1,
 						Deadline:    1,
 						ContainerId: testID[:],
-						EngineType:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -535,7 +533,7 @@ func TestMessage(t *testing.T) {
 						RequestId:   1,
 						Deadline:    1,
 						ContainerId: testID[:],
-						EngineType:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -552,7 +550,7 @@ func TestMessage(t *testing.T) {
 						ChainId:    testID[:],
 						RequestId:  1,
 						Container:  []byte{0},
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -569,7 +567,7 @@ func TestMessage(t *testing.T) {
 						ChainId:    testID[:],
 						RequestId:  1,
 						Container:  compressibleContainers[0],
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -586,7 +584,7 @@ func TestMessage(t *testing.T) {
 						ChainId:    testID[:],
 						RequestId:  1,
 						Container:  compressibleContainers[0],
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -604,7 +602,7 @@ func TestMessage(t *testing.T) {
 						RequestId:  1,
 						Deadline:   1,
 						Container:  []byte{0},
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -622,7 +620,7 @@ func TestMessage(t *testing.T) {
 						RequestId:  1,
 						Deadline:   1,
 						Container:  compressibleContainers[0],
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -640,7 +638,7 @@ func TestMessage(t *testing.T) {
 						RequestId:  1,
 						Deadline:   1,
 						Container:  compressibleContainers[0],
-						EngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -658,7 +656,7 @@ func TestMessage(t *testing.T) {
 						RequestId:   1,
 						Deadline:    1,
 						ContainerId: testID[:],
-						EngineType:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+						EngineType:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 					},
 				},
 			},
@@ -672,9 +670,9 @@ func TestMessage(t *testing.T) {
 			msg: &p2p.Message{
 				Message: &p2p.Message_Chits{
 					Chits: &p2p.Chits{
-						ChainId:               testID[:],
-						RequestId:             1,
-						PreferredContainerIds: [][]byte{testID[:], testID[:]},
+						ChainId:     testID[:],
+						RequestId:   1,
+						PreferredId: testID[:],
 					},
 				},
 			},
@@ -829,7 +827,9 @@ func TestMessage(t *testing.T) {
 	}
 
 	for _, tv := range tests {
-		require.True(t.Run(tv.desc, func(t2 *testing.T) {
+		t.Run(tv.desc, func(t *testing.T) {
+			require := require.New(t)
+
 			encodedMsg, err := mb.createOutbound(tv.msg, tv.compressionType, tv.bypassThrottling)
 			require.NoError(err)
 
@@ -842,8 +842,42 @@ func TestMessage(t *testing.T) {
 			parsedMsg, err := mb.parseInbound(encodedMsg.Bytes(), ids.EmptyNodeID, func() {})
 			require.NoError(err)
 			require.Equal(tv.op, parsedMsg.Op())
-		}))
+		})
 	}
+}
+
+// Tests the Stringer interface on inbound messages
+func TestInboundMessageToString(t *testing.T) {
+	t.Parallel()
+
+	require := require.New(t)
+
+	mb, err := newMsgBuilder(
+		logging.NoLog{},
+		"test",
+		prometheus.NewRegistry(),
+		5*time.Second,
+	)
+	require.NoError(err)
+
+	// msg that will become the tested InboundMessage
+	msg := &p2p.Message{
+		Message: &p2p.Message_Pong{
+			Pong: &p2p.Pong{
+				Uptime: 100,
+			},
+		},
+	}
+	msgBytes, err := proto.Marshal(msg)
+	require.NoError(err)
+
+	inboundMsg, err := mb.parseInbound(msgBytes, ids.EmptyNodeID, func() {})
+	require.NoError(err)
+
+	require.Equal("NodeID-111111111111111111116DBWJs Op: pong Message: uptime:100", inboundMsg.String())
+
+	internalMsg := InternalGetStateSummaryFrontierFailed(ids.EmptyNodeID, ids.Empty, 1)
+	require.Equal("NodeID-111111111111111111116DBWJs Op: get_state_summary_frontier_failed Message: ChainID: 11111111111111111111111111111111LpoYY RequestID: 1", internalMsg.String())
 }
 
 func TestEmptyInboundMessage(t *testing.T) {

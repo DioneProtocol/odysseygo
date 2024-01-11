@@ -6,7 +6,7 @@ package choices
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 // Decidable represents element that can be decided.

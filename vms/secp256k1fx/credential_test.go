@@ -8,23 +8,21 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/codec"
-	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
-	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/codec/linearcodec"
+	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/ava-labs/avalanchego/vms/components/verify"
 )
 
 func TestCredentialVerify(t *testing.T) {
-	require := require.New(t)
 	cred := Credential{}
-	require.NoError(cred.Verify())
+	require.NoError(t, cred.Verify())
 }
 
 func TestCredentialVerifyNil(t *testing.T) {
-	require := require.New(t)
 	cred := (*Credential)(nil)
 	err := cred.Verify()
-	require.ErrorIs(err, ErrNilCredential)
+	require.ErrorIs(t, err, ErrNilCredential)
 }
 
 func TestCredentialSerialize(t *testing.T) {
@@ -91,8 +89,7 @@ func TestCredentialSerialize(t *testing.T) {
 }
 
 func TestCredentialNotState(t *testing.T) {
-	require := require.New(t)
 	intf := interface{}(&Credential{})
 	_, ok := intf.(verify.State)
-	require.False(ok)
+	require.False(t, ok)
 }

@@ -10,10 +10,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/api"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
-	"github.com/DioneProtocol/odysseygo/utils/password"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/password"
 )
 
 // strongPassword defines a password used for the following tests that
@@ -40,11 +40,10 @@ func TestServiceCreateUser(t *testing.T) {
 	s := service{ks: ks.(*keystore)}
 
 	{
-		err := s.CreateUser(nil, &api.UserPass{
+		require.NoError(s.CreateUser(nil, &api.UserPass{
 			Username: "bob",
 			Password: strongPassword,
-		}, &api.EmptyReply{})
-		require.NoError(err)
+		}, &api.EmptyReply{}))
 	}
 
 	{
@@ -123,11 +122,10 @@ func TestServiceCreateDuplicate(t *testing.T) {
 	s := service{ks: ks.(*keystore)}
 
 	{
-		err := s.CreateUser(nil, &api.UserPass{
+		require.NoError(s.CreateUser(nil, &api.UserPass{
 			Username: "bob",
 			Password: strongPassword,
-		}, &api.EmptyReply{})
-		require.NoError(err)
+		}, &api.EmptyReply{}))
 	}
 
 	{
@@ -161,11 +159,10 @@ func TestServiceUseBlockchainDB(t *testing.T) {
 	s := service{ks: ks.(*keystore)}
 
 	{
-		err := s.CreateUser(nil, &api.UserPass{
+		require.NoError(s.CreateUser(nil, &api.UserPass{
 			Username: "bob",
 			Password: strongPassword,
-		}, &api.EmptyReply{})
-		require.NoError(err)
+		}, &api.EmptyReply{}))
 	}
 
 	{
@@ -193,11 +190,10 @@ func TestServiceExportImport(t *testing.T) {
 		s := service{ks: ks.(*keystore)}
 
 		{
-			err := s.CreateUser(nil, &api.UserPass{
+			require.NoError(s.CreateUser(nil, &api.UserPass{
 				Username: "bob",
 				Password: strongPassword,
-			}, &api.EmptyReply{})
-			require.NoError(err)
+			}, &api.EmptyReply{}))
 		}
 
 		{
@@ -243,15 +239,14 @@ func TestServiceExportImport(t *testing.T) {
 		}
 
 		{
-			err := newS.ImportUser(nil, &ImportUserArgs{
+			require.NoError(newS.ImportUser(nil, &ImportUserArgs{
 				UserPass: api.UserPass{
 					Username: "bob",
 					Password: strongPassword,
 				},
 				User:     exportReply.User,
 				Encoding: encoding,
-			}, &api.EmptyReply{})
-			require.NoError(err)
+			}, &api.EmptyReply{}))
 		}
 
 		{

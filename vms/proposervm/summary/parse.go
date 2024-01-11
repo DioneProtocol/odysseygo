@@ -6,7 +6,7 @@ package summary
 import (
 	"fmt"
 
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/hashing"
 )
 
 func Parse(bytes []byte) (StateSummary, error) {

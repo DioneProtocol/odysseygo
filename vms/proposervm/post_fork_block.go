@@ -6,10 +6,10 @@ package proposervm
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
 )
 
 var _ PostForkBlock = (*postForkBlock)(nil)
@@ -34,16 +34,8 @@ func (b *postForkBlock) acceptOuterBlk() error {
 	// Update in-memory references
 	b.status = choices.Accepted
 	b.vm.lastAcceptedTime = b.Timestamp()
-	b.vm.lastAcceptedHeight = b.Height()
 
-	blkID := b.ID()
-	delete(b.vm.verifiedBlocks, blkID)
-
-	// Persist this block, its height index, and its status
-	if err := b.vm.State.SetLastAccepted(blkID); err != nil {
-		return err
-	}
-	return b.vm.storePostForkBlock(b)
+	return b.vm.acceptPostForkBlock(b)
 }
 
 func (b *postForkBlock) acceptInnerBlk(ctx context.Context) error {
@@ -127,11 +119,11 @@ func (*postForkBlock) verifyPreForkChild(context.Context, *preForkBlock) error {
 
 func (b *postForkBlock) verifyPostForkChild(ctx context.Context, child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentOChainHeight := b.OChainHeight()
+	parentPChainHeight := b.PChainHeight()
 	return b.postForkCommonComponents.Verify(
 		ctx,
 		parentTimestamp,
-		parentOChainHeight,
+		parentPChainHeight,
 		child,
 	)
 }
@@ -157,12 +149,12 @@ func (b *postForkBlock) buildChild(ctx context.Context) (Block, error) {
 		ctx,
 		b.ID(),
 		b.Timestamp(),
-		b.OChainHeight(),
+		b.PChainHeight(),
 	)
 }
 
-func (b *postForkBlock) oChainHeight(context.Context) (uint64, error) {
-	return b.OChainHeight(), nil
+func (b *postForkBlock) pChainHeight(context.Context) (uint64, error) {
+	return b.PChainHeight(), nil
 }
 
 func (b *postForkBlock) setStatus(status choices.Status) {

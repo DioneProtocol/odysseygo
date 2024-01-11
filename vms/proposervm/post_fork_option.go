@@ -7,9 +7,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"go.uber.org/zap"
+
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
 )
 
 var _ PostForkBlock = (*postForkOption)(nil)
@@ -39,16 +41,8 @@ func (b *postForkOption) Accept(ctx context.Context) error {
 func (b *postForkOption) acceptOuterBlk() error {
 	// Update in-memory references
 	b.status = choices.Accepted
-	b.vm.lastAcceptedHeight = b.Height()
 
-	blkID := b.ID()
-	delete(b.vm.verifiedBlocks, blkID)
-
-	// Persist this block, its height index, and its status
-	if err := b.vm.State.SetLastAccepted(blkID); err != nil {
-		return err
-	}
-	return b.vm.storePostForkBlock(b)
+	return b.vm.acceptPostForkBlock(b)
 }
 
 func (b *postForkOption) acceptInnerBlk(ctx context.Context) error {
@@ -95,14 +89,14 @@ func (*postForkOption) verifyPreForkChild(context.Context, *preForkBlock) error 
 
 func (b *postForkOption) verifyPostForkChild(ctx context.Context, child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentOChainHeight, err := b.oChainHeight(ctx)
+	parentPChainHeight, err := b.pChainHeight(ctx)
 	if err != nil {
 		return err
 	}
 	return b.postForkCommonComponents.Verify(
 		ctx,
 		parentTimestamp,
-		parentOChainHeight,
+		parentPChainHeight,
 		child,
 	)
 }
@@ -113,25 +107,31 @@ func (*postForkOption) verifyPostForkOption(context.Context, *postForkOption) er
 }
 
 func (b *postForkOption) buildChild(ctx context.Context) (Block, error) {
-	parentOChainHeight, err := b.oChainHeight(ctx)
+	parentID := b.ID()
+	parentPChainHeight, err := b.pChainHeight(ctx)
 	if err != nil {
+		b.vm.ctx.Log.Error("unexpected build block failure",
+			zap.String("reason", "failed to fetch parent's P-chain height"),
+			zap.Stringer("parentID", parentID),
+			zap.Error(err),
+		)
 		return nil, err
 	}
 	return b.postForkCommonComponents.buildChild(
 		ctx,
-		b.ID(),
+		parentID,
 		b.Timestamp(),
-		parentOChainHeight,
+		parentPChainHeight,
 	)
 }
 
-// This block's O-Chain height is its parent's O-Chain height
-func (b *postForkOption) oChainHeight(ctx context.Context) (uint64, error) {
+// This block's P-Chain height is its parent's P-Chain height
+func (b *postForkOption) pChainHeight(ctx context.Context) (uint64, error) {
 	parent, err := b.vm.getBlock(ctx, b.ParentID())
 	if err != nil {
 		return 0, err
 	}
-	return parent.oChainHeight(ctx)
+	return parent.pChainHeight(ctx)
 }
 
 func (b *postForkOption) setStatus(status choices.Status) {

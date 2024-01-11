@@ -12,31 +12,31 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/database/memdb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/staking"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/database/memdb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
 )
 
 func testBlockState(a *require.Assertions, bs BlockState) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	oChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
 	tlsCert, err := staking.NewTLSCert()
 	a.NoError(err)
 
-	cert := tlsCert.Leaf
+	cert := staking.CertificateFromX509(tlsCert.Leaf)
 	key := tlsCert.PrivateKey.(crypto.Signer)
 
 	b, err := block.Build(
 		parentID,
 		timestamp,
-		oChainHeight,
+		pChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,

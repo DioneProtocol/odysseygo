@@ -8,9 +8,9 @@ import (
 	"math"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 
-	safemath "github.com/DioneProtocol/odysseygo/utils/math"
+	safemath "github.com/ava-labs/avalanchego/utils/math"
 )
 
 var (

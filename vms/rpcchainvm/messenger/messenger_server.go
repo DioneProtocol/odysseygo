@@ -7,9 +7,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
 
-	messengerpb "github.com/DioneProtocol/odysseygo/proto/pb/messenger"
+	messengerpb "github.com/ava-labs/avalanchego/proto/pb/messenger"
 )
 
 var (

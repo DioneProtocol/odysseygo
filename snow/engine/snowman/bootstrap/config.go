@@ -4,9 +4,9 @@
 package bootstrap
 
 import (
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common/queue"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/common/queue"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
 )
 
 type Config struct {

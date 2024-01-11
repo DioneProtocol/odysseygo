@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"runtime/pprof"
 
-	"github.com/DioneProtocol/odysseygo/utils/perms"
+	"github.com/ava-labs/avalanchego/utils/perms"
 )
 
 const (

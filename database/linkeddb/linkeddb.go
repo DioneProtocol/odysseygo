@@ -9,8 +9,8 @@ import (
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
-	"github.com/DioneProtocol/odysseygo/cache"
-	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/ava-labs/avalanchego/cache"
+	"github.com/ava-labs/avalanchego/database"
 )
 
 const (

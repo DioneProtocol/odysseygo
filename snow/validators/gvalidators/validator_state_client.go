@@ -9,11 +9,11 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/crypto/bls"
 
-	pb "github.com/DioneProtocol/odysseygo/proto/pb/validatorstate"
+	pb "github.com/ava-labs/avalanchego/proto/pb/validatorstate"
 )
 
 var (
@@ -79,7 +79,7 @@ func (c *Client) GetValidatorSet(
 			// This is a performance optimization to avoid the cost of compression
 			// and key re-verification with PublicKeyFromBytes. We can safely
 			// assume that the BLS Public Keys are verified before being added
-			// to the O-Chain and served by the gRPC server.
+			// to the P-Chain and served by the gRPC server.
 			publicKey = new(bls.PublicKey).Deserialize(validator.PublicKey)
 			if publicKey == nil {
 				return nil, errFailedPublicKeyDeserialize

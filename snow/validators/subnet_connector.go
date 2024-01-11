@@ -6,7 +6,7 @@ package validators
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 // SubnetConnector represents a handler that is called when a connection is

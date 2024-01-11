@@ -6,7 +6,7 @@ package secp256k1fx
 import (
 	"errors"
 
-	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/ava-labs/avalanchego/snow"
 )
 
 var ErrNoValueInput = errors.New("input has no value")

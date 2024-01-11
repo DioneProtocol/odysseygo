@@ -4,22 +4,23 @@
 package snowman
 
 import (
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowball"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 // Config wraps all the parameters needed for a snowman engine
 type Config struct {
 	common.AllGetsServer
 
-	Ctx        *snow.ConsensusContext
-	VM         block.ChainVM
-	Sender     common.Sender
-	Validators validators.Set
-	Params     snowball.Parameters
-	Consensus  snowman.Consensus
+	Ctx         *snow.ConsensusContext
+	VM          block.ChainVM
+	Sender      common.Sender
+	Validators  validators.Set
+	Params      snowball.Parameters
+	Consensus   snowman.Consensus
+	PartialSync bool
 }

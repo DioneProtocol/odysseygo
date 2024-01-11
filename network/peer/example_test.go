@@ -9,10 +9,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
 )
 
 func ExampleStartTestPeer() {

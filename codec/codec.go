@@ -6,7 +6,7 @@ package codec
 import (
 	"errors"
 
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 var (

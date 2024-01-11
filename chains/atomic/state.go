@@ -7,13 +7,13 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/database/linkeddb"
-	"github.com/DioneProtocol/odysseygo/database/prefixdb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/database/linkeddb"
+	"github.com/ava-labs/avalanchego/database/prefixdb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 var errDuplicatedOperation = errors.New("duplicated operation on provided value")
@@ -124,15 +124,15 @@ func (s *state) SetValue(e *Element) error {
 //
 // This ensures that we can consume a UTXO before it has been added into shared
 // memory in bootstrapping.
-// Ex. O-Chain attempts to consume atomic UTXO from the D-Chain in block 100.
-// O-Chain executes before the D-Chain, so when bootstrapping it must be able to
+// Ex. P-Chain attempts to consume atomic UTXO from the C-Chain in block 100.
+// P-Chain executes before the C-Chain, so when bootstrapping it must be able to
 // verify and accept this block before the node has processed the block on the
-// D-Chain where the atomic UTXO is added to shared memory.
-// Additionally, when the D-Chain actually does add the atomic UTXO to shared
+// C-Chain where the atomic UTXO is added to shared memory.
+// Additionally, when the C-Chain actually does add the atomic UTXO to shared
 // memory, RemoveValue must handle the case that the atomic UTXO was marked as
 // deleted before it was actually added.
-// To do this, the node essentially adds a tombstone marker when the O-Chain
-// consumes the non-existent UTXO, which is deleted when the D-Chain actually
+// To do this, the node essentially adds a tombstone marker when the P-Chain
+// consumes the non-existent UTXO, which is deleted when the C-Chain actually
 // adds the atomic UTXO to shared memory.
 //
 // This implies that chains interacting with shared memory must be able to

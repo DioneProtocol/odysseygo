@@ -9,17 +9,17 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/indexer"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/indexer"
+	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
 )
 
-// This example program continuously polls for the next O-Chain block
+// This example program continuously polls for the next P-Chain block
 // and prints the ID of the block and its transactions.
 func main() {
 	var (
-		uri       = fmt.Sprintf("%s/ext/index/O/block", primary.LocalAPIURI)
+		uri       = fmt.Sprintf("%s/ext/index/P/block", primary.LocalAPIURI)
 		client    = indexer.NewClient(uri)
 		ctx       = context.Background()
 		nextIndex uint64
@@ -40,7 +40,7 @@ func main() {
 
 		platformvmBlock, err := blocks.Parse(blocks.Codec, platformvmBlockBytes)
 		if err != nil {
-			log.Fatalf("failed to parse omegavm block: %s\n", err)
+			log.Fatalf("failed to parse platformvm block: %s\n", err)
 		}
 
 		acceptedTxs := platformvmBlock.Txs()

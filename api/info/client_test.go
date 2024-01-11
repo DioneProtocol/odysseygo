@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/ava-labs/avalanchego/utils/rpc"
 )
 
 type mockClient struct {
@@ -46,7 +46,7 @@ func TestClient(t *testing.T) {
 	}
 
 	{
-		bootstrapped, err := c.IsBootstrapped(context.Background(), "A")
+		bootstrapped, err := c.IsBootstrapped(context.Background(), "X")
 		require.NoError(err)
 		require.True(bootstrapped)
 	}
@@ -54,7 +54,7 @@ func TestClient(t *testing.T) {
 	mc.reply.IsBootstrapped = false
 
 	{
-		bootstrapped, err := c.IsBootstrapped(context.Background(), "A")
+		bootstrapped, err := c.IsBootstrapped(context.Background(), "X")
 		require.NoError(err)
 		require.False(bootstrapped)
 	}
@@ -64,7 +64,7 @@ func TestClient(t *testing.T) {
 	}
 
 	{
-		bootstrapped, err := AwaitBootstrapped(context.Background(), c, "A", time.Microsecond)
+		bootstrapped, err := AwaitBootstrapped(context.Background(), c, "X", time.Microsecond)
 		require.NoError(err)
 		require.True(bootstrapped)
 	}

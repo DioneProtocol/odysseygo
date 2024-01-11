@@ -8,11 +8,11 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/ipcs/socket"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/ipcs/socket"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 var _ snow.Acceptor = (*EventSockets)(nil)
@@ -116,7 +116,7 @@ func newEventIPCSocket(
 	chainID ids.ID,
 	name string,
 	snowmanAcceptorGroup snow.AcceptorGroup,
-	odysseyAcceptorGroup snow.AcceptorGroup,
+	avalancheAcceptorGroup snow.AcceptorGroup,
 ) (*eventSocket, error) {
 	var (
 		url     = ipcURL(ctx, chainID, name)
@@ -136,7 +136,7 @@ func newEventIPCSocket(
 			errs := wrappers.Errs{}
 			errs.Add(
 				snowmanAcceptorGroup.DeregisterAcceptor(chainID, ipcName),
-				odysseyAcceptorGroup.DeregisterAcceptor(chainID, ipcName),
+				avalancheAcceptorGroup.DeregisterAcceptor(chainID, ipcName),
 			)
 			return errs.Err
 		},
@@ -156,7 +156,7 @@ func newEventIPCSocket(
 		return nil, err
 	}
 
-	if err := odysseyAcceptorGroup.RegisterAcceptor(chainID, ipcName, eis, false); err != nil {
+	if err := avalancheAcceptorGroup.RegisterAcceptor(chainID, ipcName, eis, false); err != nil {
 		if err := eis.stop(); err != nil {
 			return nil, err
 		}

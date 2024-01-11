@@ -8,12 +8,15 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 type Scheduler interface {
 	Dispatch(startTime time.Time)
+
+	// Client must guarantee that [SetBuildBlockTime]
+	// is never called after [Close]
 	SetBuildBlockTime(t time.Time)
 	Close()
 }

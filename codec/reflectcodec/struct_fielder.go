@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/ava-labs/avalanchego/codec"
 )
 
 const (

@@ -12,8 +12,8 @@ import (
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
 )
 
 var (
@@ -112,7 +112,7 @@ func (b *tracedBlock) VerifyWithContext(ctx context.Context, blockCtx *block.Con
 	ctx, span := b.vm.tracer.Start(ctx, b.vm.verifyWithContextTag, oteltrace.WithAttributes(
 		attribute.Stringer("blkID", b.ID()),
 		attribute.Int64("height", int64(b.Height())),
-		attribute.Int64("oChainHeight", int64(blockCtx.OChainHeight)),
+		attribute.Int64("pChainHeight", int64(blockCtx.PChainHeight)),
 	))
 	defer span.End()
 

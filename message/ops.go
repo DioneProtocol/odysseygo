@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 // Op is an opcode
@@ -296,7 +296,7 @@ func (op Op) String() string {
 	}
 }
 
-func Unwrap(m *p2p.Message) (interface{}, error) {
+func Unwrap(m *p2p.Message) (fmt.Stringer, error) {
 	switch msg := m.GetMessage().(type) {
 	// Handshake:
 	case *p2p.Message_Ping:

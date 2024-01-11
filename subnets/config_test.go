@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowball"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 var validParameters = snowball.Parameters{
@@ -43,7 +43,7 @@ func TestValid(t *testing.T) {
 		{
 			name: "invalid allowed node IDs",
 			s: Config{
-				AllowedNodes:        set.Set[ids.NodeID]{ids.GenerateTestNodeID(): struct{}{}},
+				AllowedNodes:        set.Of(ids.GenerateTestNodeID()),
 				ValidatorOnly:       false,
 				ConsensusParameters: validParameters,
 			},

@@ -6,10 +6,10 @@ package p
 import (
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
 )
 
 var _ txs.Visitor = (*backendVisitor)(nil)
@@ -34,6 +34,10 @@ func (b *backendVisitor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 }
 
 func (b *backendVisitor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) error {
+	return b.baseTx(&tx.BaseTx)
+}
+
+func (b *backendVisitor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 	return b.baseTx(&tx.BaseTx)
 }
 
@@ -66,12 +70,12 @@ func (b *backendVisitor) ExportTx(tx *txs.ExportTx) error {
 		err := b.b.AddUTXO(
 			b.ctx,
 			tx.DestinationChain,
-			&dione.UTXO{
-				UTXOID: dione.UTXOID{
+			&avax.UTXO{
+				UTXOID: avax.UTXOID{
 					TxID:        b.txID,
 					OutputIndex: uint32(len(tx.Outs) + i),
 				},
-				Asset: dione.Asset{ID: out.AssetID()},
+				Asset: avax.Asset{ID: out.AssetID()},
 				Out:   out.Out,
 			},
 		)
@@ -90,10 +94,14 @@ func (b *backendVisitor) AddPermissionlessValidatorTx(tx *txs.AddPermissionlessV
 	return b.baseTx(&tx.BaseTx)
 }
 
+func (b *backendVisitor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionlessDelegatorTx) error {
+	return b.baseTx(&tx.BaseTx)
+}
+
 func (b *backendVisitor) baseTx(tx *txs.BaseTx) error {
 	return b.b.removeUTXOs(
 		b.ctx,
-		constants.OmegaChainID,
+		constants.PlatformChainID,
 		tx.InputIDs(),
 	)
 }

@@ -9,11 +9,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/cb58"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/codec/linearcodec"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/cb58"
+	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 var (
@@ -52,20 +52,18 @@ func init() {
 }
 
 func TestFxInitialize(t *testing.T) {
-	require := require.New(t)
 	vm := TestVM{
 		Codec: linearcodec.NewDefault(),
 		Log:   logging.NoLog{},
 	}
 	fx := Fx{}
-	require.NoError(fx.Initialize(&vm))
+	require.NoError(t, fx.Initialize(&vm))
 }
 
 func TestFxInitializeInvalid(t *testing.T) {
-	require := require.New(t)
 	fx := Fx{}
 	err := fx.Initialize(nil)
-	require.ErrorIs(err, ErrWrongVMType)
+	require.ErrorIs(t, err, ErrWrongVMType)
 }
 
 func TestFxVerifyTransfer(t *testing.T) {

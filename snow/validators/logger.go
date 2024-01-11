@@ -6,12 +6,12 @@ package validators
 import (
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/types"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/crypto/bls"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/vms/types"
 )
 
 var _ SetCallbackListener = (*logger)(nil)
@@ -31,8 +31,7 @@ func NewLogger(
 	subnetID ids.ID,
 	nodeIDs ...ids.NodeID,
 ) SetCallbackListener {
-	nodeIDSet := set.NewSet[ids.NodeID](len(nodeIDs))
-	nodeIDSet.Add(nodeIDs...)
+	nodeIDSet := set.Of(nodeIDs...)
 	return &logger{
 		log:      log,
 		enabled:  enabled,

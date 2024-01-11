@@ -4,9 +4,9 @@
 package network
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var _ router.ExternalHandler = (*testHandler)(nil)

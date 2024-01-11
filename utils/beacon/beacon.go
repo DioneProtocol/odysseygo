@@ -4,8 +4,8 @@
 package beacon
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/ips"
 )
 
 var _ Beacon = (*beacon)(nil)

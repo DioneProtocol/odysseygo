@@ -4,12 +4,12 @@
 package validators
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto/bls"
 )
 
 // Validator is a struct that contains the base values representing a validator
-// of the Odyssey Network.
+// of the Avalanche Network.
 type Validator struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey
@@ -23,7 +23,7 @@ type Validator struct {
 }
 
 // GetValidatorOutput is a struct that contains the publicly relevant values of
-// a validator of the Odyssey Network for the output of GetValidator.
+// a validator of the Avalanche Network for the output of GetValidator.
 type GetValidatorOutput struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey

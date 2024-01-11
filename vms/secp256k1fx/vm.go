@@ -4,9 +4,9 @@
 package secp256k1fx
 
 import (
-	"github.com/DioneProtocol/odysseygo/codec"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 )
 
 // VM that this Fx must be run by

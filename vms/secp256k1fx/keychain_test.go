@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 )
 
 var (
@@ -27,8 +27,7 @@ var (
 )
 
 func TestNewKeychain(t *testing.T) {
-	require := require.New(t)
-	require.NotNil(NewKeychain())
+	require.NotNil(t, NewKeychain())
 }
 
 func TestKeychainGetUnknownAddr(t *testing.T) {

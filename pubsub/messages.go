@@ -4,9 +4,9 @@
 package pubsub
 
 import (
-	"github.com/DioneProtocol/odysseygo/api"
-	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
-	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/utils/json"
 )
 
 // NewBloom command for a new bloom filter

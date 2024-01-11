@@ -12,20 +12,20 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/chains"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/network"
-	"github.com/DioneProtocol/odysseygo/network/peer"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/networking/benchlist"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/json"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/version"
-	"github.com/DioneProtocol/odysseygo/vms"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/ava-labs/avalanchego/chains"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/network"
+	"github.com/ava-labs/avalanchego/network/peer"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/networking/benchlist"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/version"
+	"github.com/ava-labs/avalanchego/vms"
+	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
 )
 
 var errNoChainProvided = errors.New("argument 'chain' not given")
@@ -53,7 +53,9 @@ type Parameters struct {
 	TransformSubnetTxFee          uint64
 	CreateBlockchainTxFee         uint64
 	AddPrimaryNetworkValidatorFee uint64
+	AddPrimaryNetworkDelegatorFee uint64
 	AddSubnetValidatorFee         uint64
+	AddSubnetDelegatorFee         uint64
 	VMManager                     vms.Manager
 }
 
@@ -324,10 +326,12 @@ type GetTxFeeResponse struct {
 	TransformSubnetTxFee          json.Uint64 `json:"transformSubnetTxFee"`
 	CreateBlockchainTxFee         json.Uint64 `json:"createBlockchainTxFee"`
 	AddPrimaryNetworkValidatorFee json.Uint64 `json:"addPrimaryNetworkValidatorFee"`
+	AddPrimaryNetworkDelegatorFee json.Uint64 `json:"addPrimaryNetworkDelegatorFee"`
 	AddSubnetValidatorFee         json.Uint64 `json:"addSubnetValidatorFee"`
+	AddSubnetDelegatorFee         json.Uint64 `json:"addSubnetDelegatorFee"`
 }
 
-// GetTxFee returns the transaction fee in nDIONE.
+// GetTxFee returns the transaction fee in nAVAX.
 func (i *Info) GetTxFee(_ *http.Request, _ *struct{}, reply *GetTxFeeResponse) error {
 	i.log.Debug("API called",
 		zap.String("service", "info"),
@@ -340,7 +344,9 @@ func (i *Info) GetTxFee(_ *http.Request, _ *struct{}, reply *GetTxFeeResponse) e
 	reply.TransformSubnetTxFee = json.Uint64(i.TransformSubnetTxFee)
 	reply.CreateBlockchainTxFee = json.Uint64(i.CreateBlockchainTxFee)
 	reply.AddPrimaryNetworkValidatorFee = json.Uint64(i.AddPrimaryNetworkValidatorFee)
+	reply.AddPrimaryNetworkDelegatorFee = json.Uint64(i.AddPrimaryNetworkDelegatorFee)
 	reply.AddSubnetValidatorFee = json.Uint64(i.AddSubnetValidatorFee)
+	reply.AddSubnetDelegatorFee = json.Uint64(i.AddSubnetDelegatorFee)
 	return nil
 }
 

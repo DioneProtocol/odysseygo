@@ -4,11 +4,13 @@
 package constants
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 // Const variables to be exported
@@ -17,8 +19,9 @@ const (
 	CascadeID uint32 = 2
 	DenaliID  uint32 = 3
 	EverestID uint32 = 4
-	TestnetID uint32 = 5
+	FujiID    uint32 = 5
 
+	TestnetID  uint32 = FujiID
 	UnitTestID uint32 = 10
 	LocalID    uint32 = 12345
 
@@ -26,15 +29,16 @@ const (
 	CascadeName  = "cascade"
 	DenaliName   = "denali"
 	EverestName  = "everest"
+	FujiName     = "fuji"
 	TestnetName  = "testnet"
 	UnitTestName = "testing"
 	LocalName    = "local"
 
-	MainnetHRP  = "dione"
+	MainnetHRP  = "avax"
 	CascadeHRP  = "cascade"
 	DenaliHRP   = "denali"
 	EverestHRP  = "everest"
-	TestnetHRP  = "testnet"
+	FujiHRP     = "fuji"
 	UnitTestHRP = "testing"
 	LocalHRP    = "local"
 	FallbackHRP = "custom"
@@ -43,14 +47,14 @@ const (
 // Variables to be exported
 var (
 	PrimaryNetworkID = ids.Empty
-	OmegaChainID     = ids.Empty
+	PlatformChainID  = ids.Empty
 
 	NetworkIDToNetworkName = map[uint32]string{
 		MainnetID:  MainnetName,
 		CascadeID:  CascadeName,
 		DenaliID:   DenaliName,
 		EverestID:  EverestName,
-		TestnetID:  TestnetName,
+		FujiID:     FujiName,
 		UnitTestID: UnitTestName,
 		LocalID:    LocalName,
 	}
@@ -59,6 +63,7 @@ var (
 		CascadeName:  CascadeID,
 		DenaliName:   DenaliID,
 		EverestName:  EverestID,
+		FujiName:     FujiID,
 		TestnetName:  TestnetID,
 		UnitTestName: UnitTestID,
 		LocalName:    LocalID,
@@ -69,7 +74,7 @@ var (
 		CascadeID:  CascadeHRP,
 		DenaliID:   DenaliHRP,
 		EverestID:  EverestHRP,
-		TestnetID:  TestnetHRP,
+		FujiID:     FujiHRP,
 		UnitTestID: UnitTestHRP,
 		LocalID:    LocalHRP,
 	}
@@ -78,12 +83,15 @@ var (
 		CascadeHRP:  CascadeID,
 		DenaliHRP:   DenaliID,
 		EverestHRP:  EverestID,
-		TestnetHRP:  TestnetID,
+		FujiHRP:     FujiID,
 		UnitTestHRP: UnitTestID,
 		LocalHRP:    LocalID,
 	}
+	ProductionNetworkIDs = set.Of(MainnetID, FujiID)
 
 	ValidNetworkPrefix = "network-"
+
+	ErrParseNetworkName = errors.New("failed to parse network name")
 )
 
 // GetHRP returns the Human-Readable-Part of bech32 addresses for a networkID
@@ -116,7 +124,7 @@ func NetworkID(networkName string) (uint32, error) {
 	}
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse %q as a network name", networkName)
+		return 0, fmt.Errorf("%w: %q", ErrParseNetworkName, networkName)
 	}
 	return uint32(id), nil
 }

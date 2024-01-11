@@ -4,9 +4,9 @@
 package rpcdb
 
 import (
-	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/ava-labs/avalanchego/database"
 
-	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
+	rpcdbpb "github.com/ava-labs/avalanchego/proto/pb/rpcdb"
 )
 
 var (

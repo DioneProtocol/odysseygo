@@ -6,10 +6,10 @@ package x
 import (
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
+	"github.com/ava-labs/avalanchego/vms/avm/txs"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
 var _ Signer = (*signer)(nil)
@@ -20,7 +20,7 @@ type Signer interface {
 }
 
 type SignerBackend interface {
-	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*dione.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*avax.UTXO, error)
 }
 
 type signer struct {

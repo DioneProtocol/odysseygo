@@ -11,17 +11,17 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/math"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/math"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var _ common.StateSyncer = (*stateSyncer)(nil)
@@ -233,27 +233,43 @@ func (ss *stateSyncer) AcceptedStateSummary(ctx context.Context, nodeID ids.Node
 	// Mark that we received a response from [nodeID]
 	ss.pendingVoters.Remove(nodeID)
 
-	weight := ss.StateSyncBeacons.GetWeight(nodeID)
+	nodeWeight := ss.StateSyncBeacons.GetWeight(nodeID)
+	ss.Ctx.Log.Debug("adding weight to summaries",
+		zap.Stringer("nodeID", nodeID),
+		zap.Stringers("summaryIDs", summaryIDs),
+		zap.Uint64("nodeWeight", nodeWeight),
+	)
 	for _, summaryID := range summaryIDs {
 		ws, ok := ss.weightedSummaries[summaryID]
 		if !ok {
 			ss.Ctx.Log.Debug("skipping summary",
-				zap.String("reason", "received a vote from validator for unknown summary"),
+				zap.String("reason", "unknown summary"),
 				zap.Stringer("nodeID", nodeID),
 				zap.Stringer("summaryID", summaryID),
 			)
 			continue
 		}
 
-		newWeight, err := math.Add64(weight, ws.weight)
+		newWeight, err := math.Add64(nodeWeight, ws.weight)
 		if err != nil {
-			ss.Ctx.Log.Error("failed to calculate the Accepted votes",
-				zap.Uint64("weight", weight),
+			ss.Ctx.Log.Error("failed to calculate new summary weight",
+				zap.Stringer("nodeID", nodeID),
+				zap.Stringer("summaryID", summaryID),
+				zap.Uint64("height", ws.summary.Height()),
+				zap.Uint64("nodeWeight", nodeWeight),
 				zap.Uint64("previousWeight", ws.weight),
 				zap.Error(err),
 			)
 			newWeight = stdmath.MaxUint64
 		}
+
+		ss.Ctx.Log.Verbo("updating summary weight",
+			zap.Stringer("nodeID", nodeID),
+			zap.Stringer("summaryID", summaryID),
+			zap.Uint64("height", ws.summary.Height()),
+			zap.Uint64("previousWeight", ws.weight),
+			zap.Uint64("newWeight", newWeight),
+		)
 		ws.weight = newWeight
 	}
 
@@ -270,6 +286,8 @@ func (ss *stateSyncer) AcceptedStateSummary(ctx context.Context, nodeID ids.Node
 		if ws.weight < ss.Alpha {
 			ss.Ctx.Log.Debug("removing summary",
 				zap.String("reason", "insufficient weight"),
+				zap.Stringer("summaryID", summaryID),
+				zap.Uint64("height", ws.summary.Height()),
 				zap.Uint64("currentWeight", ws.weight),
 				zap.Uint64("requiredWeight", ss.Alpha),
 			)
@@ -447,8 +465,8 @@ func (ss *stateSyncer) startup(ctx context.Context) error {
 	}
 
 	// list all beacons, to reach them for voting on frontier
-	for _, vdr := range ss.StateSyncBeacons.List() {
-		ss.targetVoters.Add(vdr.NodeID)
+	for nodeID := range ss.StateSyncBeacons.Map() {
+		ss.targetVoters.Add(nodeID)
 	}
 
 	// check if there is an ongoing state sync; if so add its state summary

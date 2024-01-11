@@ -17,10 +17,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/chains"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowball"
-	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/ava-labs/avalanchego/chains"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowball"
+	"github.com/ava-labs/avalanchego/subnets"
 )
 
 func TestGetChainConfigsFromFiles(t *testing.T) {
@@ -51,12 +51,12 @@ func TestGetChainConfigsFromFiles(t *testing.T) {
 			}(),
 		},
 		"valid alias": {
-			configs:  map[string]string{"D": "hello", "A": "world"},
-			upgrades: map[string]string{"D": "upgradess"},
+			configs:  map[string]string{"C": "hello", "X": "world"},
+			upgrades: map[string]string{"C": "upgradess"},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
-				m["D"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["A"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
+				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
@@ -117,10 +117,10 @@ func TestGetChainConfigsDirNotExist(t *testing.T) {
 			expected:    map[string]chains.ChainConfig{},
 		},
 		"full structure": {
-			structure:   "/cdir/D/",
+			structure:   "/cdir/C/",
 			file:        map[string]string{"config.ex": "hello"},
 			expectedErr: nil,
-			expected:    map[string]chains.ChainConfig{"D": {Config: []byte("hello"), Upgrade: []byte(nil)}},
+			expected:    map[string]chains.ChainConfig{"C": {Config: []byte("hello"), Upgrade: []byte(nil)}},
 		},
 	}
 
@@ -161,11 +161,11 @@ func TestSetChainConfigDefaultDir(t *testing.T) {
 	v := setupViper(configFilePath)
 	require.Equal(defaultChainConfigDir, v.GetString(ChainConfigDirKey))
 
-	chainsDir := filepath.Join(defaultChainConfigDir, "D")
+	chainsDir := filepath.Join(defaultChainConfigDir, "C")
 	setupFile(t, chainsDir, chainConfigFileName+".ex", "helloworld")
 	chainConfigs, err := getChainConfigs(v)
 	require.NoError(err)
-	expected := map[string]chains.ChainConfig{"D": {Config: []byte("helloworld"), Upgrade: []byte(nil)}}
+	expected := map[string]chains.ChainConfig{"C": {Config: []byte("helloworld"), Upgrade: []byte(nil)}}
 	require.Equal(expected, chainConfigs)
 }
 
@@ -206,13 +206,13 @@ func TestGetChainConfigsFromFlags(t *testing.T) {
 		},
 		"valid alias": {
 			fullConfigs: map[string]chains.ChainConfig{
-				"D": {Config: []byte("hello"), Upgrade: []byte("upgradess")},
-				"A": {Config: []byte("world"), Upgrade: []byte(nil)},
+				"C": {Config: []byte("hello"), Upgrade: []byte("upgradess")},
+				"X": {Config: []byte("world"), Upgrade: []byte(nil)},
 			},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
-				m["D"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["A"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
+				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
@@ -451,9 +451,10 @@ func TestGetSubnetConfigsFromFile(t *testing.T) {
 			v := setupViper(configFilePath)
 			subnetConfigs, err := getSubnetConfigs(v, []ids.ID{subnetID})
 			require.ErrorIs(err, test.expectedErr)
-			if test.expectedErr == nil {
-				test.testF(require, subnetConfigs)
+			if test.expectedErr != nil {
+				return
 			}
+			test.testF(require, subnetConfigs)
 		})
 	}
 }
@@ -544,19 +545,12 @@ func TestGetSubnetConfigsFromFlags(t *testing.T) {
 
 			subnetConfigs, err := getSubnetConfigs(v, []ids.ID{subnetID})
 			require.ErrorIs(err, test.expectedErr)
-			if test.expectedErr == nil {
-				test.testF(require, subnetConfigs)
+			if test.expectedErr != nil {
+				return
 			}
+			test.testF(require, subnetConfigs)
 		})
 	}
-}
-
-func TestCalcMinConnectedStake(t *testing.T) {
-	v := setupViperFlags()
-	defaultParams := getConsensusConfig(v)
-	defaultExpectedMinStake := 0.8
-	minStake := calcMinConnectedStake(defaultParams)
-	require.Equal(t, defaultExpectedMinStake, minStake)
 }
 
 // setups config json file and writes content
@@ -568,9 +562,11 @@ func setupConfigJSON(t *testing.T, rootPath string, value string) string {
 
 // setups file creates necessary path and writes value to it.
 func setupFile(t *testing.T, path string, fileName string, value string) {
-	require.NoError(t, os.MkdirAll(path, 0o700))
+	require := require.New(t)
+
+	require.NoError(os.MkdirAll(path, 0o700))
 	filePath := filepath.Join(path, fileName)
-	require.NoError(t, os.WriteFile(filePath, []byte(value), 0o600))
+	require.NoError(os.WriteFile(filePath, []byte(value), 0o600))
 }
 
 func setupViperFlags() *viper.Viper {

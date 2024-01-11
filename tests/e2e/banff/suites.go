@@ -5,74 +5,48 @@
 package banff
 
 import (
-	"context"
-
 	ginkgo "github.com/onsi/ginkgo/v2"
 
 	"github.com/onsi/gomega"
 
-	"github.com/DioneProtocol/odysseygo/genesis"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/tests"
-	"github.com/DioneProtocol/odysseygo/tests/e2e"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/tests"
+	"github.com/ava-labs/avalanchego/tests/e2e"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
 var _ = ginkgo.Describe("[Banff]", func() {
-	ginkgo.It("can send custom assets A->O and O->A",
+	ginkgo.It("can send custom assets X->P and P->X",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
 		ginkgo.Label(
-			"require-network-runner",
 			"xp",
 			"banff",
 		),
 		func() {
-			ginkgo.By("reload initial snapshot for test independence", func() {
-				err := e2e.Env.RestoreInitialState(true /*switchOffNetworkFirst*/)
-				gomega.Expect(err).Should(gomega.BeNil())
-			})
+			keychain := e2e.Env.NewKeychain(1)
+			wallet := e2e.Env.NewWallet(keychain, e2e.Env.GetRandomNodeURI())
 
-			uris := e2e.Env.GetURIs()
-			gomega.Expect(uris).ShouldNot(gomega.BeEmpty())
-
-			kc := secp256k1fx.NewKeychain(genesis.EWOQKey)
-			var wallet primary.Wallet
-			ginkgo.By("initialize wallet", func() {
-				walletURI := uris[0]
-
-				// 5-second is enough to fetch initial UTXOs for test cluster in "primary.NewWallet"
-				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
-				var err error
-				wallet, err = primary.NewWalletFromURI(ctx, walletURI, kc)
-				cancel()
-				gomega.Expect(err).Should(gomega.BeNil())
-
-				tests.Outf("{{green}}created wallet{{/}}\n")
-			})
-
-			// Get the O-chain and the A-chain wallets
-			pWallet := wallet.O()
-			xWallet := wallet.A()
+			// Get the P-chain and the X-chain wallets
+			pWallet := wallet.P()
+			xWallet := wallet.X()
 
 			// Pull out useful constants to use when issuing transactions.
-			aChainID := xWallet.BlockchainID()
+			xChainID := xWallet.BlockchainID()
 			owner := &secp256k1fx.OutputOwners{
 				Threshold: 1,
 				Addrs: []ids.ShortID{
-					genesis.EWOQKey.PublicKey().Address(),
+					keychain.Keys[0].Address(),
 				},
 			}
 
 			var assetID ids.ID
-			ginkgo.By("create new A-chain asset", func() {
-				var err error
-				assetID, err = xWallet.IssueCreateAssetTx(
+			ginkgo.By("create new X-chain asset", func() {
+				assetTx, err := xWallet.IssueCreateAssetTx(
 					"RnM",
 					"RNM",
 					9,
@@ -86,16 +60,17 @@ var _ = ginkgo.Describe("[Banff]", func() {
 					},
 				)
 				gomega.Expect(err).Should(gomega.BeNil())
+				assetID = assetTx.ID()
 
-				tests.Outf("{{green}}created new A-chain asset{{/}}: %s\n", assetID)
+				tests.Outf("{{green}}created new X-chain asset{{/}}: %s\n", assetID)
 			})
 
-			ginkgo.By("export new A-chain asset to O-chain", func() {
-				txID, err := xWallet.IssueExportTx(
-					constants.OmegaChainID,
-					[]*dione.TransferableOutput{
+			ginkgo.By("export new X-chain asset to P-chain", func() {
+				tx, err := xWallet.IssueExportTx(
+					constants.PlatformChainID,
+					[]*avax.TransferableOutput{
 						{
-							Asset: dione.Asset{
+							Asset: avax.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -107,22 +82,22 @@ var _ = ginkgo.Describe("[Banff]", func() {
 				)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued A-chain export{{/}}: %s\n", txID)
+				tests.Outf("{{green}}issued X-chain export{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("import new asset from A-chain on the O-chain", func() {
-				txID, err := pWallet.IssueImportTx(aChainID, owner)
+			ginkgo.By("import new asset from X-chain on the P-chain", func() {
+				tx, err := pWallet.IssueImportTx(xChainID, owner)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued O-chain import{{/}}: %s\n", txID)
+				tests.Outf("{{green}}issued P-chain import{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("export asset from O-chain to the A-chain", func() {
-				txID, err := pWallet.IssueExportTx(
-					aChainID,
-					[]*dione.TransferableOutput{
+			ginkgo.By("export asset from P-chain to the X-chain", func() {
+				tx, err := pWallet.IssueExportTx(
+					xChainID,
+					[]*avax.TransferableOutput{
 						{
-							Asset: dione.Asset{
+							Asset: avax.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -134,14 +109,14 @@ var _ = ginkgo.Describe("[Banff]", func() {
 				)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued O-chain export{{/}}: %s\n", txID)
+				tests.Outf("{{green}}issued P-chain export{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("import asset from O-chain on the A-chain", func() {
-				txID, err := xWallet.IssueImportTx(constants.OmegaChainID, owner)
+			ginkgo.By("import asset from P-chain on the X-chain", func() {
+				tx, err := xWallet.IssueImportTx(constants.PlatformChainID, owner)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued A-chain import{{/}}: %s\n", txID)
+				tests.Outf("{{green}}issued X-chain import{{/}}: %s\n", tx.ID())
 			})
 		})
 })

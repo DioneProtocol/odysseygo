@@ -4,7 +4,7 @@
 package sampler
 
 import (
-	safemath "github.com/DioneProtocol/odysseygo/utils/math"
+	safemath "github.com/ava-labs/avalanchego/utils/math"
 )
 
 type weightedWithoutReplacementGeneric struct {

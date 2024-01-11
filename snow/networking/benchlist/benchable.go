@@ -3,7 +3,7 @@
 
 package benchlist
 
-import "github.com/DioneProtocol/odysseygo/ids"
+import "github.com/ava-labs/avalanchego/ids"
 
 // Benchable is notified when a validator is benched or unbenched from a given chain
 type Benchable interface {

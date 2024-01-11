@@ -13,24 +13,24 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/network/dialer"
-	"github.com/DioneProtocol/odysseygo/network/peer"
-	"github.com/DioneProtocol/odysseygo/network/throttling"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/snow/uptime"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/staking"
-	"github.com/DioneProtocol/odysseygo/subnets"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/math/meter"
-	"github.com/DioneProtocol/odysseygo/utils/resource"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/network/dialer"
+	"github.com/ava-labs/avalanchego/network/peer"
+	"github.com/ava-labs/avalanchego/network/throttling"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/snow/uptime"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/subnets"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/math/meter"
+	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/units"
 )
 
 var (
@@ -166,7 +166,7 @@ func NewTestNetwork(
 		MaxClockDifference:           constants.DefaultNetworkMaxClockDifference,
 		CompressionType:              constants.DefaultNetworkCompressionType,
 		PingFrequency:                constants.DefaultPingFrequency,
-		AllowPrivateIPs:              constants.DefaultNetworkAllowPrivateIPs,
+		AllowPrivateIPs:              !constants.ProductionNetworkIDs.Contains(networkID),
 		UptimeMetricFreq:             constants.DefaultUptimeMetricFreq,
 		MaximumInboundMessageTimeout: constants.DefaultNetworkMaximumInboundTimeout,
 
@@ -191,7 +191,7 @@ func NewTestNetwork(
 	networkConfig.Validators = validatorManager
 	networkConfig.Validators.Add(constants.PrimaryNetworkID, currentValidators)
 	networkConfig.Beacons = beacons
-	// This never actually does anything because we never initialize the O-chain
+	// This never actually does anything because we never initialize the P-chain
 	networkConfig.UptimeCalculator = uptime.NoOpCalculator
 
 	// TODO actually monitor usage

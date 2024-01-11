@@ -4,8 +4,8 @@
 package atomic
 
 import (
-	"github.com/DioneProtocol/odysseygo/codec"
-	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
+	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/codec/linearcodec"
 )
 
 const codecVersion = 0

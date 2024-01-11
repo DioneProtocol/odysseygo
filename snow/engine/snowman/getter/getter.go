@@ -8,13 +8,13 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/metric"
 )
 
 // Get requests are always served, regardless node state (bootstrapping or normal operations).
@@ -131,7 +131,7 @@ func (gh *getter) GetAcceptedFrontier(ctx context.Context, nodeID ids.NodeID, re
 	if err != nil {
 		return err
 	}
-	gh.sender.SendAcceptedFrontier(ctx, nodeID, requestID, []ids.ID{lastAccepted})
+	gh.sender.SendAcceptedFrontier(ctx, nodeID, requestID, lastAccepted)
 	return nil
 }
 
@@ -150,6 +150,7 @@ func (gh *getter) GetAccepted(ctx context.Context, nodeID ids.NodeID, requestID 
 func (gh *getter) GetAncestors(ctx context.Context, nodeID ids.NodeID, requestID uint32, blkID ids.ID) error {
 	ancestorsBytes, err := block.GetAncestors(
 		ctx,
+		gh.log,
 		gh.vm,
 		blkID,
 		gh.cfg.AncestorsMaxContainersSent,

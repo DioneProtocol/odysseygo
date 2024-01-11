@@ -9,22 +9,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/api/server"
-	"github.com/DioneProtocol/odysseygo/database/memdb"
-	"github.com/DioneProtocol/odysseygo/database/versiondb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowstorm"
-	"github.com/DioneProtocol/odysseygo/snow/engine/odyssey/vertex"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block/mocks"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"go.uber.org/mock/gomock"
+
+	"github.com/ava-labs/avalanchego/api/server"
+	"github.com/ava-labs/avalanchego/database/memdb"
+	"github.com/ava-labs/avalanchego/database/versiondb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/engine/avalanche/vertex"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block/mocks"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 var (
@@ -130,7 +128,6 @@ func TestMarkHasRunAndShutdown(t *testing.T) {
 func TestIndexer(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	baseDB := memdb.New()
 	db := versiondb.New(baseDB)
@@ -324,21 +321,11 @@ func TestIndexer(t *testing.T) {
 	txID, txBytes := ids.GenerateTestID(), utils.RandomBytes(32)
 	expectedTx := Container{
 		ID:        txID,
-		Bytes:     blkBytes,
+		Bytes:     txBytes,
 		Timestamp: now.UnixNano(),
 	}
-	// Mocked VM knows about this tx now
-	dagVM.EXPECT().GetTx(gomock.Any(), txID).Return(
-		&snowstorm.TestTx{
-			TestDecidable: choices.TestDecidable{
-				IDV:     txID,
-				StatusV: choices.Accepted,
-			},
-			BytesV: txBytes,
-		}, nil,
-	).AnyTimes()
 
-	require.NoError(config.TxAcceptorGroup.Accept(chain2Ctx, txID, blkBytes))
+	require.NoError(config.TxAcceptorGroup.Accept(chain2Ctx, txID, txBytes))
 
 	txIdx := idxr.txIndices[chain2Ctx.ChainID]
 	require.NotNil(txIdx)
@@ -411,7 +398,6 @@ func TestIncompleteIndex(t *testing.T) {
 	// Create an indexer with indexing disabled
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	baseDB := memdb.New()
 	config := Config{
@@ -493,7 +479,6 @@ func TestIncompleteIndex(t *testing.T) {
 func TestIgnoreNonDefaultChains(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	baseDB := memdb.New()
 	db := versiondb.New(baseDB)

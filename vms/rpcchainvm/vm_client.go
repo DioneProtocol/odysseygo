@@ -24,49 +24,51 @@ import (
 
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
-	"github.com/DioneProtocol/odysseygo/api/keystore/gkeystore"
-	"github.com/DioneProtocol/odysseygo/api/metrics"
-	"github.com/DioneProtocol/odysseygo/chains/atomic/gsharedmemory"
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/database/manager"
-	"github.com/DioneProtocol/odysseygo/database/rpcdb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/ids/galiasreader"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common/appsender"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators/gvalidators"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
-	"github.com/DioneProtocol/odysseygo/utils/resource"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/version"
-	"github.com/DioneProtocol/odysseygo/vms/components/chain"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp/gwarp"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
+	"github.com/ava-labs/avalanchego/api/keystore/gkeystore"
+	"github.com/ava-labs/avalanchego/api/metrics"
+	"github.com/ava-labs/avalanchego/chains/atomic/gsharedmemory"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/database/manager"
+	"github.com/ava-labs/avalanchego/database/rpcdb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/ids/galiasreader"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/common/appsender"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators/gvalidators"
+	"github.com/ava-labs/avalanchego/utils/crypto/bls"
+	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/ava-labs/avalanchego/version"
+	"github.com/ava-labs/avalanchego/vms/components/chain"
+	"github.com/ava-labs/avalanchego/vms/platformvm/warp/gwarp"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/ghttp"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/grpcutils"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/messenger"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/runtime"
 
-	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
-	appsenderpb "github.com/DioneProtocol/odysseygo/proto/pb/appsender"
-	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
-	keystorepb "github.com/DioneProtocol/odysseygo/proto/pb/keystore"
-	messengerpb "github.com/DioneProtocol/odysseygo/proto/pb/messenger"
-	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
-	sharedmemorypb "github.com/DioneProtocol/odysseygo/proto/pb/sharedmemory"
-	validatorstatepb "github.com/DioneProtocol/odysseygo/proto/pb/validatorstate"
-	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
-	warppb "github.com/DioneProtocol/odysseygo/proto/pb/warp"
+	aliasreaderpb "github.com/ava-labs/avalanchego/proto/pb/aliasreader"
+	appsenderpb "github.com/ava-labs/avalanchego/proto/pb/appsender"
+	httppb "github.com/ava-labs/avalanchego/proto/pb/http"
+	keystorepb "github.com/ava-labs/avalanchego/proto/pb/keystore"
+	messengerpb "github.com/ava-labs/avalanchego/proto/pb/messenger"
+	rpcdbpb "github.com/ava-labs/avalanchego/proto/pb/rpcdb"
+	sharedmemorypb "github.com/ava-labs/avalanchego/proto/pb/sharedmemory"
+	validatorstatepb "github.com/ava-labs/avalanchego/proto/pb/validatorstate"
+	vmpb "github.com/ava-labs/avalanchego/proto/pb/vm"
+	warppb "github.com/ava-labs/avalanchego/proto/pb/warp"
 )
 
+// TODO: Enable these to be configured by the user
 const (
-	decidedCacheSize    = 2048
+	decidedCacheSize    = 64 * units.MiB
 	missingCacheSize    = 2048
-	unverifiedCacheSize = 2048
-	bytesToIDCacheSize  = 2048
+	unverifiedCacheSize = 64 * units.MiB
+	bytesToIDCacheSize  = 64 * units.MiB
 )
 
 var (
@@ -76,7 +78,6 @@ var (
 	_ block.ChainVM                      = (*VMClient)(nil)
 	_ block.BuildBlockWithContextChainVM = (*VMClient)(nil)
 	_ block.BatchedChainVM               = (*VMClient)(nil)
-	_ block.HeightIndexedChainVM         = (*VMClient)(nil)
 	_ block.StateSyncableVM              = (*VMClient)(nil)
 	_ prometheus.Gatherer                = (*VMClient)(nil)
 
@@ -201,9 +202,9 @@ func (vm *VMClient) Initialize(
 		ChainId:      chainCtx.ChainID[:],
 		NodeId:       chainCtx.NodeID.Bytes(),
 		PublicKey:    bls.PublicKeyToBytes(chainCtx.PublicKey),
-		AChainId:     chainCtx.AChainID[:],
-		DChainId:     chainCtx.DChainID[:],
-		DioneAssetId: chainCtx.DIONEAssetID[:],
+		XChainId:     chainCtx.XChainID[:],
+		CChainId:     chainCtx.CChainID[:],
+		AvaxAssetId:  chainCtx.AVAXAssetID[:],
 		ChainDataDir: chainCtx.ChainDataDir,
 		GenesisBytes: genesisBytes,
 		UpgradeBytes: upgradeBytes,
@@ -429,7 +430,7 @@ func (vm *VMClient) Disconnected(ctx context.Context, nodeID ids.NodeID) error {
 // method will be called instead.
 func (vm *VMClient) buildBlockWithContext(ctx context.Context, blockCtx *block.Context) (snowman.Block, error) {
 	resp, err := vm.client.BuildBlock(ctx, &vmpb.BuildBlockRequest{
-		OChainHeight: &blockCtx.OChainHeight,
+		PChainHeight: &blockCtx.PChainHeight,
 	})
 	if err != nil {
 		return nil, err
@@ -911,7 +912,7 @@ func (b *blockClient) ShouldVerifyWithContext(context.Context) (bool, error) {
 func (b *blockClient) VerifyWithContext(ctx context.Context, blockCtx *block.Context) error {
 	resp, err := b.vm.client.BlockVerify(ctx, &vmpb.BlockVerifyRequest{
 		Bytes:        b.bytes,
-		OChainHeight: &blockCtx.OChainHeight,
+		PChainHeight: &blockCtx.PChainHeight,
 	})
 	if err != nil {
 		return err

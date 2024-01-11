@@ -3,18 +3,24 @@
 
 package verify
 
-import "github.com/DioneProtocol/odysseygo/snow"
+import "github.com/ava-labs/avalanchego/snow"
 
-// Verifiable can be verified
 type Verifiable interface {
 	Verify() error
 }
 
-// State that can be verified
 type State interface {
 	snow.ContextInitializable
 	Verifiable
-	VerifyState() error
+	IsState
+}
+
+type IsState interface {
+	isState()
+}
+
+type IsNotState interface {
+	isState() error
 }
 
 // All returns nil if all the verifiables were verified with no errors

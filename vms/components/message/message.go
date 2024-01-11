@@ -9,9 +9,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 
-	pb "github.com/DioneProtocol/odysseygo/proto/pb/message"
+	pb "github.com/ava-labs/avalanchego/proto/pb/message"
 )
 
 var (
@@ -62,7 +62,7 @@ func Parse(bytes []byte) (Message, error) {
 		}
 	} else {
 		// This message wasn't encoded with proto.
-		// It must have been encoded with odysseygo's codec.
+		// It must have been encoded with avalanchego's codec.
 		// TODO remove else statement remove once all nodes support proto encoding.
 		// i.e. when all nodes are on v1.11.0 or later.
 		version, err := c.Unmarshal(bytes, &msg)

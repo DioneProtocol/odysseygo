@@ -6,7 +6,7 @@ package uptime
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 var NoOpCalculator Calculator = noOpCalculator{}

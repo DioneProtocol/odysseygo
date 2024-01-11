@@ -9,10 +9,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/genesis"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/genesis"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
 )
 
 func main() {
@@ -36,20 +37,25 @@ func main() {
 
 	ctx := context.Background()
 
-	// NewWalletWithTxs fetches the available UTXOs owned by [kc] on the network
-	// that [uri] is hosting and registers [subnetID].
+	// MakeWallet fetches the available UTXOs owned by [kc] on the network that
+	// [uri] is hosting and registers [subnetID].
 	walletSyncStartTime := time.Now()
-	wallet, err := primary.NewWalletWithTxs(ctx, uri, kc, subnetID)
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:              uri,
+		AVAXKeychain:     kc,
+		EthKeychain:      kc,
+		PChainTxsToFetch: set.Of(subnetID),
+	})
 	if err != nil {
 		log.Fatalf("failed to initialize wallet: %s\n", err)
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the O-chain wallet
-	pWallet := wallet.O()
+	// Get the P-chain wallet
+	pWallet := wallet.P()
 
 	createChainStartTime := time.Now()
-	createChainTxID, err := pWallet.IssueCreateChainTx(
+	createChainTx, err := pWallet.IssueCreateChainTx(
 		subnetID,
 		genesisBytes,
 		vmID,
@@ -59,5 +65,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to issue create chain transaction: %s\n", err)
 	}
-	log.Printf("created new chain %s in %s\n", createChainTxID, time.Since(createChainStartTime))
+	log.Printf("created new chain %s in %s\n", createChainTx.ID(), time.Since(createChainStartTime))
 }

@@ -8,14 +8,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
-	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/utils/hashing"
 )
 
 const (
-	chainAlias = "O"
-	hrp        = "testnet"
+	chainAlias = "P"
+	hrp        = "fuji"
 )
 
 var factory secp256k1.Factory
@@ -35,7 +35,7 @@ func TestLedger(t *testing.T) {
 	require.NoError(err)
 	t.Logf("version: %s\n", version)
 
-	// Get Testnet Address
+	// Get Fuji Address
 	addr, err := device.Address(hrp, 0)
 	require.NoError(err)
 	paddr, err := address.Format(chainAlias, hrp, addr[:])

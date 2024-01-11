@@ -8,23 +8,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/utils/math/meter"
-	"github.com/DioneProtocol/odysseygo/utils/resource"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/utils/math/meter"
+	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 )
 
 func TestNewSystemThrottler(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 	reg := prometheus.NewRegistry()
 	clock := mockable.Clock{}
@@ -50,8 +48,6 @@ func TestNewSystemThrottler(t *testing.T) {
 
 func TestSystemThrottler(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 
 	// Setup
@@ -135,7 +131,6 @@ func TestSystemThrottler(t *testing.T) {
 func TestSystemThrottlerContextCancel(t *testing.T) {
 	require := require.New(t)
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
 
 	// Setup
 	mockTracker := tracker.NewMockTracker(ctrl)

@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 type CounterHandler struct {
@@ -27,8 +27,7 @@ func TestHandleTx(t *testing.T) {
 	handler := CounterHandler{}
 	msg := Tx{}
 
-	err := msg.Handle(&handler, ids.EmptyNodeID, 0)
-	require.NoError(err)
+	require.NoError(msg.Handle(&handler, ids.EmptyNodeID, 0))
 	require.Equal(1, handler.Tx)
 }
 
@@ -37,6 +36,5 @@ func TestNoopHandler(t *testing.T) {
 		Log: logging.NoLog{},
 	}
 
-	err := handler.HandleTx(ids.EmptyNodeID, 0, nil)
-	require.NoError(t, err)
+	require.NoError(t, handler.HandleTx(ids.EmptyNodeID, 0, nil))
 }

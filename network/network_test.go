@@ -16,25 +16,26 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/network/dialer"
-	"github.com/DioneProtocol/odysseygo/network/peer"
-	"github.com/DioneProtocol/odysseygo/network/throttling"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/snow/uptime"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/subnets"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/math/meter"
-	"github.com/DioneProtocol/odysseygo/utils/resource"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/network/dialer"
+	"github.com/ava-labs/avalanchego/network/peer"
+	"github.com/ava-labs/avalanchego/network/throttling"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/snow/uptime"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/subnets"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/math/meter"
+	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var (
@@ -222,14 +223,12 @@ func newFullyConnectedTestNetwork(t *testing.T, handlers []router.InboundHandler
 		}
 
 		beacons := validators.NewSet()
-		err = beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1)
-		require.NoError(err)
+		require.NoError(beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1))
 
 		primaryVdrs := validators.NewSet()
 		primaryVdrs.RegisterCallbackListener(&gossipTrackerCallback)
 		for _, nodeID := range nodeIDs {
-			err := primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1)
-			require.NoError(err)
+			require.NoError(primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1))
 		}
 
 		vdrs := validators.NewManager()
@@ -293,8 +292,7 @@ func newFullyConnectedTestNetwork(t *testing.T, handlers []router.InboundHandler
 		go func(net Network) {
 			defer wg.Done()
 
-			err := net.Dispatch()
-			require.NoError(err)
+			require.NoError(net.Dispatch())
 		}(net)
 	}
 
@@ -321,13 +319,13 @@ func TestSend(t *testing.T) {
 		t,
 		[]router.InboundHandler{
 			router.InboundHandlerFunc(func(context.Context, message.InboundMessage) {
-				t.Fatal("unexpected message received")
+				require.FailNow("unexpected message received")
 			}),
 			router.InboundHandlerFunc(func(_ context.Context, msg message.InboundMessage) {
 				received <- msg
 			}),
 			router.InboundHandlerFunc(func(context.Context, message.InboundMessage) {
-				t.Fatal("unexpected message received")
+				require.FailNow("unexpected message received")
 			}),
 		},
 	)
@@ -360,13 +358,13 @@ func TestSendAndGossipWithFilter(t *testing.T) {
 		t,
 		[]router.InboundHandler{
 			router.InboundHandlerFunc(func(context.Context, message.InboundMessage) {
-				t.Fatal("unexpected message received")
+				require.FailNow("unexpected message received")
 			}),
 			router.InboundHandlerFunc(func(_ context.Context, msg message.InboundMessage) {
 				received <- msg
 			}),
 			router.InboundHandlerFunc(func(context.Context, message.InboundMessage) {
-				t.Fatal("unexpected message received")
+				require.FailNow("unexpected message received")
 			}),
 		},
 	)
@@ -377,9 +375,8 @@ func TestSendAndGossipWithFilter(t *testing.T) {
 	outboundGetMsg, err := mc.Get(ids.Empty, 1, time.Second, ids.Empty, p2p.EngineType_ENGINE_TYPE_SNOWMAN)
 	require.NoError(err)
 
-	toSend := set.NewSet[ids.NodeID](3)
+	toSend := set.Of(nodeIDs...)
 	validNodeID := nodeIDs[1]
-	toSend.Add(nodeIDs...)
 	sentTo := net0.Send(outboundGetMsg, toSend, constants.PrimaryNetworkID, newNodeIDConnector(validNodeID))
 	require.Len(sentTo, 1)
 	require.Contains(sentTo, validNodeID)
@@ -408,11 +405,10 @@ func TestTrackVerifiesSignatures(t *testing.T) {
 
 	network := networks[0].(*network)
 	nodeID, tlsCert, _ := getTLS(t, 1)
-	err := validators.Add(network.config.Validators, constants.PrimaryNetworkID, nodeID, nil, ids.Empty, 1)
-	require.NoError(err)
+	require.NoError(validators.Add(network.config.Validators, constants.PrimaryNetworkID, nodeID, nil, ids.Empty, 1))
 
-	_, err = network.Track(ids.EmptyNodeID, []*ips.ClaimedIPPort{{
-		Cert: tlsCert.Leaf,
+	_, err := network.Track(ids.EmptyNodeID, []*ips.ClaimedIPPort{{
+		Cert: staking.CertificateFromX509(tlsCert.Leaf),
 		IPPort: ips.IPPort{
 			IP:   net.IPv4(123, 132, 123, 123),
 			Port: 10000,
@@ -453,14 +449,12 @@ func TestTrackDoesNotDialPrivateIPs(t *testing.T) {
 		}
 
 		beacons := validators.NewSet()
-		err = beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1)
-		require.NoError(err)
+		require.NoError(beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1))
 
 		primaryVdrs := validators.NewSet()
 		primaryVdrs.RegisterCallbackListener(&gossipTrackerCallback)
 		for _, nodeID := range nodeIDs {
-			err := primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1)
-			require.NoError(err)
+			require.NoError(primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1))
 		}
 
 		vdrs := validators.NewManager()
@@ -503,8 +497,7 @@ func TestTrackDoesNotDialPrivateIPs(t *testing.T) {
 		go func(net Network) {
 			defer wg.Done()
 
-			err := net.Dispatch()
-			require.NoError(err)
+			require.NoError(net.Dispatch())
 		}(net)
 	}
 
@@ -536,8 +529,7 @@ func TestDialDeletesNonValidators(t *testing.T) {
 
 	primaryVdrs := validators.NewSet()
 	for _, nodeID := range nodeIDs {
-		err := primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1)
-		require.NoError(err)
+		require.NoError(primaryVdrs.Add(nodeID, nil, ids.GenerateTestID(), 1))
 	}
 
 	networks := make([]Network, len(configs))
@@ -555,8 +547,7 @@ func TestDialDeletesNonValidators(t *testing.T) {
 		}
 
 		beacons := validators.NewSet()
-		err = beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1)
-		require.NoError(err)
+		require.NoError(beacons.Add(nodeIDs[0], nil, ids.GenerateTestID(), 1))
 
 		primaryVdrs.RegisterCallbackListener(&gossipTrackerCallback)
 
@@ -599,7 +590,7 @@ func TestDialDeletesNonValidators(t *testing.T) {
 	for i, net := range networks {
 		if i != 0 {
 			peerAcks, err := net.Track(config.MyNodeID, []*ips.ClaimedIPPort{{
-				Cert:      config.TLSConfig.Certificates[0].Leaf,
+				Cert:      staking.CertificateFromX509(config.TLSConfig.Certificates[0].Leaf),
 				IPPort:    ip.IPPort,
 				Timestamp: ip.Timestamp,
 				Signature: ip.Signature,
@@ -613,8 +604,7 @@ func TestDialDeletesNonValidators(t *testing.T) {
 		go func(net Network) {
 			defer wg.Done()
 
-			err := net.Dispatch()
-			require.NoError(err)
+			require.NoError(net.Dispatch())
 		}(net)
 	}
 

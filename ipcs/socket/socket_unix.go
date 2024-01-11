@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/constants"
 )
 
 var staleSocketTimeout = 100 * time.Millisecond

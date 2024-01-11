@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 const (

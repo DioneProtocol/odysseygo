@@ -6,8 +6,8 @@ package poll
 import (
 	"fmt"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/bag"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/bag"
 )
 
 type noEarlyTermFactory struct{}

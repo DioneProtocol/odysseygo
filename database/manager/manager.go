@@ -12,16 +12,16 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/database/corruptabledb"
-	"github.com/DioneProtocol/odysseygo/database/leveldb"
-	"github.com/DioneProtocol/odysseygo/database/memdb"
-	"github.com/DioneProtocol/odysseygo/database/meterdb"
-	"github.com/DioneProtocol/odysseygo/database/prefixdb"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/database/corruptabledb"
+	"github.com/ava-labs/avalanchego/database/leveldb"
+	"github.com/ava-labs/avalanchego/database/memdb"
+	"github.com/ava-labs/avalanchego/database/meterdb"
+	"github.com/ava-labs/avalanchego/database/prefixdb"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var (
@@ -211,7 +211,7 @@ func NewManagerFromDBs(dbs []*VersionedDatabase) (Manager, error) {
 		return nil, errNoDBs
 	}
 	utils.Sort(dbs)
-	sortedAndUnique := utils.IsSortedAndUniqueSortable(dbs)
+	sortedAndUnique := utils.IsSortedAndUnique(dbs)
 	if !sortedAndUnique {
 		return nil, errNonSortedAndUniqueDBs
 	}

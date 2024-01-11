@@ -16,10 +16,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/database/memdb"
-	"github.com/DioneProtocol/odysseygo/database/rpcdb"
+	"github.com/ava-labs/avalanchego/database/memdb"
+	"github.com/ava-labs/avalanchego/database/rpcdb"
 
-	pb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
+	pb "github.com/ava-labs/avalanchego/proto/pb/rpcdb"
 )
 
 func TestDialOptsSmoke(t *testing.T) {
@@ -61,8 +61,7 @@ func TestWaitForReady(t *testing.T) {
 
 	db := rpcdb.NewClient(pb.NewDatabaseClient(conn))
 
-	err = db.Put([]byte("foo"), []byte("bar"))
-	require.NoError(err)
+	require.NoError(db.Put([]byte("foo"), []byte("bar")))
 
 	noWaitListener, err := NewListener()
 	require.NoError(err)

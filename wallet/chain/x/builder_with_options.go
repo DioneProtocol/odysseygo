@@ -4,12 +4,12 @@
 package x
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/avm/txs"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
@@ -52,7 +52,7 @@ func (b *builderWithOptions) GetImportableBalance(
 }
 
 func (b *builderWithOptions) NewBaseTx(
-	outputs []*dione.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*txs.BaseTx, error) {
 	return b.Builder.NewBaseTx(
@@ -147,7 +147,7 @@ func (b *builderWithOptions) NewImportTx(
 
 func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
-	outputs []*dione.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	return b.Builder.NewExportTx(

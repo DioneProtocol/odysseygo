@@ -6,52 +6,56 @@ package p
 import (
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/api/info"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/avm"
 )
 
 var _ Context = (*context)(nil)
 
 type Context interface {
 	NetworkID() uint32
-	DIONEAssetID() ids.ID
+	AVAXAssetID() ids.ID
 	BaseTxFee() uint64
 	CreateSubnetTxFee() uint64
 	TransformSubnetTxFee() uint64
 	CreateBlockchainTxFee() uint64
 	AddPrimaryNetworkValidatorFee() uint64
+	AddPrimaryNetworkDelegatorFee() uint64
 	AddSubnetValidatorFee() uint64
+	AddSubnetDelegatorFee() uint64
 }
 
 type context struct {
 	networkID                     uint32
-	dioneAssetID                  ids.ID
+	avaxAssetID                   ids.ID
 	baseTxFee                     uint64
 	createSubnetTxFee             uint64
 	transformSubnetTxFee          uint64
 	createBlockchainTxFee         uint64
 	addPrimaryNetworkValidatorFee uint64
+	addPrimaryNetworkDelegatorFee uint64
 	addSubnetValidatorFee         uint64
+	addSubnetDelegatorFee         uint64
 }
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	aChainClient := alpha.NewClient(uri, "A")
-	return NewContextFromClients(ctx, infoClient, aChainClient)
+	xChainClient := avm.NewClient(uri, "X")
+	return NewContextFromClients(ctx, infoClient, xChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	aChainClient alpha.Client,
+	xChainClient avm.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	asset, err := aChainClient.GetAssetDescription(ctx, "DIONE")
+	asset, err := xChainClient.GetAssetDescription(ctx, "AVAX")
 	if err != nil {
 		return nil, err
 	}
@@ -69,29 +73,35 @@ func NewContextFromClients(
 		uint64(txFees.TransformSubnetTxFee),
 		uint64(txFees.CreateBlockchainTxFee),
 		uint64(txFees.AddPrimaryNetworkValidatorFee),
+		uint64(txFees.AddPrimaryNetworkDelegatorFee),
 		uint64(txFees.AddSubnetValidatorFee),
+		uint64(txFees.AddSubnetDelegatorFee),
 	), nil
 }
 
 func NewContext(
 	networkID uint32,
-	dioneAssetID ids.ID,
+	avaxAssetID ids.ID,
 	baseTxFee uint64,
 	createSubnetTxFee uint64,
 	transformSubnetTxFee uint64,
 	createBlockchainTxFee uint64,
 	addPrimaryNetworkValidatorFee uint64,
+	addPrimaryNetworkDelegatorFee uint64,
 	addSubnetValidatorFee uint64,
+	addSubnetDelegatorFee uint64,
 ) Context {
 	return &context{
 		networkID:                     networkID,
-		dioneAssetID:                  dioneAssetID,
+		avaxAssetID:                   avaxAssetID,
 		baseTxFee:                     baseTxFee,
 		createSubnetTxFee:             createSubnetTxFee,
 		transformSubnetTxFee:          transformSubnetTxFee,
 		createBlockchainTxFee:         createBlockchainTxFee,
 		addPrimaryNetworkValidatorFee: addPrimaryNetworkValidatorFee,
+		addPrimaryNetworkDelegatorFee: addPrimaryNetworkDelegatorFee,
 		addSubnetValidatorFee:         addSubnetValidatorFee,
+		addSubnetDelegatorFee:         addSubnetDelegatorFee,
 	}
 }
 
@@ -99,8 +109,8 @@ func (c *context) NetworkID() uint32 {
 	return c.networkID
 }
 
-func (c *context) DIONEAssetID() ids.ID {
-	return c.dioneAssetID
+func (c *context) AVAXAssetID() ids.ID {
+	return c.avaxAssetID
 }
 
 func (c *context) BaseTxFee() uint64 {
@@ -123,6 +133,14 @@ func (c *context) AddPrimaryNetworkValidatorFee() uint64 {
 	return c.addPrimaryNetworkValidatorFee
 }
 
+func (c *context) AddPrimaryNetworkDelegatorFee() uint64 {
+	return c.addPrimaryNetworkDelegatorFee
+}
+
 func (c *context) AddSubnetValidatorFee() uint64 {
 	return c.addSubnetValidatorFee
+}
+
+func (c *context) AddSubnetDelegatorFee() uint64 {
+	return c.addSubnetDelegatorFee
 }

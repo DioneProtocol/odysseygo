@@ -3,7 +3,7 @@
 
 package buffer
 
-import "github.com/DioneProtocol/odysseygo/utils"
+import "github.com/ava-labs/avalanchego/utils"
 
 const defaultInitSize = 32
 
