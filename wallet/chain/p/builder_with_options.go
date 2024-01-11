@@ -6,12 +6,12 @@ package p
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
 )
 
 var _ Builder = (*builderWithOptions)(nil)
@@ -56,11 +56,13 @@ func (b *builderWithOptions) GetImportableBalance(
 func (b *builderWithOptions) NewAddValidatorTx(
 	vdr *txs.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
+	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
 	return b.Builder.NewAddValidatorTx(
 		vdr,
 		rewardsOwner,
+		shares,
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -83,6 +85,18 @@ func (b *builderWithOptions) RemoveSubnetValidatorTx(
 	return b.Builder.NewRemoveSubnetValidatorTx(
 		nodeID,
 		subnetID,
+		common.UnionOptions(b.options, options)...,
+	)
+}
+
+func (b *builderWithOptions) NewAddDelegatorTx(
+	vdr *txs.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	options ...common.Option,
+) (*txs.AddDelegatorTx, error) {
+	return b.Builder.NewAddDelegatorTx(
+		vdr,
+		rewardsOwner,
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -129,7 +143,7 @@ func (b *builderWithOptions) NewImportTx(
 
 func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
-	outputs []*dione.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	return b.Builder.NewExportTx(
@@ -147,8 +161,11 @@ func (b *builderWithOptions) NewTransformSubnetTx(
 	minConsumptionRate uint64,
 	maxConsumptionRate uint64,
 	minValidatorStake uint64,
+	maxValidatorStake uint64,
 	minStakeDuration time.Duration,
 	maxStakeDuration time.Duration,
+	minDelegationFee uint32,
+	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
@@ -161,8 +178,11 @@ func (b *builderWithOptions) NewTransformSubnetTx(
 		minConsumptionRate,
 		maxConsumptionRate,
 		minValidatorStake,
+		maxValidatorStake,
 		minStakeDuration,
 		maxStakeDuration,
+		minDelegationFee,
+		minDelegatorStake,
 		maxValidatorWeightFactor,
 		uptimeRequirement,
 		common.UnionOptions(b.options, options)...,
@@ -174,6 +194,8 @@ func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
+	delegationRewardsOwner *secp256k1fx.OutputOwners,
+	shares uint32,
 	options ...common.Option,
 ) (*txs.AddPermissionlessValidatorTx, error) {
 	return b.Builder.NewAddPermissionlessValidatorTx(
@@ -181,6 +203,22 @@ func (b *builderWithOptions) NewAddPermissionlessValidatorTx(
 		signer,
 		assetID,
 		validationRewardsOwner,
+		delegationRewardsOwner,
+		shares,
+		common.UnionOptions(b.options, options)...,
+	)
+}
+
+func (b *builderWithOptions) NewAddPermissionlessDelegatorTx(
+	vdr *txs.SubnetValidator,
+	assetID ids.ID,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	options ...common.Option,
+) (*txs.AddPermissionlessDelegatorTx, error) {
+	return b.Builder.NewAddPermissionlessDelegatorTx(
+		vdr,
+		assetID,
+		rewardsOwner,
 		common.UnionOptions(b.options, options)...,
 	)
 }

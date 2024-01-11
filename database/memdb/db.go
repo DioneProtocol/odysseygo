@@ -10,7 +10,7 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/ava-labs/avalanchego/database"
 )
 
 const (

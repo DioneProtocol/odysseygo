@@ -4,14 +4,14 @@
 package block
 
 import (
-	"crypto/x509"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 var (
@@ -34,7 +34,7 @@ type Block interface {
 type SignedBlock interface {
 	Block
 
-	OChainHeight() uint64
+	PChainHeight() uint64
 	Timestamp() time.Time
 	Proposer() ids.NodeID
 
@@ -44,7 +44,7 @@ type SignedBlock interface {
 type statelessUnsignedBlock struct {
 	ParentID     ids.ID `serialize:"true"`
 	Timestamp    int64  `serialize:"true"`
-	OChainHeight uint64 `serialize:"true"`
+	PChainHeight uint64 `serialize:"true"`
 	Certificate  []byte `serialize:"true"`
 	Block        []byte `serialize:"true"`
 }
@@ -55,7 +55,7 @@ type statelessBlock struct {
 
 	id        ids.ID
 	timestamp time.Time
-	cert      *x509.Certificate
+	cert      *staking.Certificate
 	proposer  ids.NodeID
 	bytes     []byte
 }
@@ -91,9 +91,9 @@ func (b *statelessBlock) initialize(bytes []byte) error {
 		return nil
 	}
 
-	cert, err := x509.ParseCertificate(b.StatelessBlock.Certificate)
+	cert, err := staking.ParseCertificate(b.StatelessBlock.Certificate)
 	if err != nil {
-		return fmt.Errorf("%w: %s", errInvalidCertificate, err)
+		return fmt.Errorf("%w: %w", errInvalidCertificate, err)
 	}
 
 	b.cert = cert
@@ -101,8 +101,8 @@ func (b *statelessBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *statelessBlock) OChainHeight() uint64 {
-	return b.StatelessBlock.OChainHeight
+func (b *statelessBlock) PChainHeight() uint64 {
+	return b.StatelessBlock.PChainHeight
 }
 
 func (b *statelessBlock) Timestamp() time.Time {
@@ -129,5 +129,9 @@ func (b *statelessBlock) Verify(shouldHaveProposer bool, chainID ids.ID) error {
 	}
 
 	headerBytes := header.Bytes()
-	return b.cert.CheckSignature(b.cert.SignatureAlgorithm, headerBytes, b.Signature)
+	return staking.CheckSignature(
+		b.cert,
+		headerBytes,
+		b.Signature,
+	)
 }

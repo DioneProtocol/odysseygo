@@ -10,11 +10,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
-	"github.com/DioneProtocol/odysseygo/utils/math/meter"
-	"github.com/DioneProtocol/odysseygo/utils/resource"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/linkedhashmap"
+	"github.com/ava-labs/avalanchego/utils/math/meter"
+	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 const epsilon = 1e-9

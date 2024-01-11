@@ -11,8 +11,8 @@ import (
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/trace"
 )
 
 var _ State = (*tracedState)(nil)

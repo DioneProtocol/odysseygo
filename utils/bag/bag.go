@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 const minBagSize = 16
@@ -22,6 +22,13 @@ type Bag[T comparable] struct {
 
 	threshold    int
 	metThreshold set.Set[T]
+}
+
+// Of returns a Bag initialized with [elts]
+func Of[T comparable](elts ...T) Bag[T] {
+	var b Bag[T]
+	b.Add(elts...)
+	return b
 }
 
 func (b *Bag[T]) init() {
@@ -94,8 +101,6 @@ func (b *Bag[T]) Equals(other Bag[T]) bool {
 
 // Mode returns the most common element in the bag and the count of that element.
 // If there's a tie, any of the tied element may be returned.
-// TODO for Stephen: Does the above violate an assumption made by Snowball?
-// If the bag is empty, the zero value and 0 are returned.
 func (b *Bag[T]) Mode() (T, int) {
 	var (
 		mode     T
@@ -118,8 +123,8 @@ func (b *Bag[T]) Threshold() set.Set[T] {
 
 // Returns a bag with the elements of this bag that return true for [filterFunc],
 // along with their counts.
-// For example, if A is in this bag with count 5, and filterFunc(A) returns true,
-// then the returned bag contains A with count 5.
+// For example, if X is in this bag with count 5, and filterFunc(X) returns true,
+// then the returned bag contains X with count 5.
 func (b *Bag[T]) Filter(filterFunc func(T) bool) Bag[T] {
 	newBag := Bag[T]{}
 	for vote, count := range b.counts {
@@ -134,8 +139,8 @@ func (b *Bag[T]) Filter(filterFunc func(T) bool) Bag[T] {
 // 1. A bag containing the elements of this bag that return false for [splitFunc].
 // 2. A bag containing the elements of this bag that return true for [splitFunc].
 // Counts are preserved in the returned bags.
-// For example, if A is in this bag with count 5, and splitFunc(A) is false,
-// then the first returned bag has A in it with count 5.
+// For example, if X is in this bag with count 5, and splitFunc(X) is false,
+// then the first returned bag has X in it with count 5.
 func (b *Bag[T]) Split(splitFunc func(T) bool) [2]Bag[T] {
 	splitVotes := [2]Bag[T]{}
 	for vote, count := range b.counts {

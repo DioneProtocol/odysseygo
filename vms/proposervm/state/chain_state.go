@@ -4,8 +4,8 @@
 package state
 
 import (
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 const (

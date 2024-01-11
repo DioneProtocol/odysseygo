@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/btree"
 
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/hashing"
 )
 
 var (

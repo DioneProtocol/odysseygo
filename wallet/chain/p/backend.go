@@ -8,27 +8,20 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
 )
 
 var _ Backend = (*backend)(nil)
 
-type ChainUTXOs interface {
-	AddUTXO(ctx stdcontext.Context, destinationChainID ids.ID, utxo *dione.UTXO) error
-	RemoveUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) error
-
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*dione.UTXO, error)
-	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*dione.UTXO, error)
-}
-
-// Backend defines the full interface required to support a O-chain wallet.
+// Backend defines the full interface required to support a P-chain wallet.
 type Backend interface {
-	ChainUTXOs
+	common.ChainUTXOs
 	BuilderBackend
 	SignerBackend
 
@@ -37,14 +30,14 @@ type Backend interface {
 
 type backend struct {
 	Context
-	ChainUTXOs
+	common.ChainUTXOs
 
 	txsLock sync.RWMutex
 	// txID -> tx
 	txs map[ids.ID]*txs.Tx
 }
 
-func NewBackend(ctx Context, utxos ChainUTXOs, txs map[ids.ID]*txs.Tx) Backend {
+func NewBackend(ctx Context, utxos common.ChainUTXOs, txs map[ids.ID]*txs.Tx) Backend {
 	return &backend{
 		Context:    ctx,
 		ChainUTXOs: utxos,
@@ -64,7 +57,7 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *txs.Tx) error {
 	}
 
 	producedUTXOSlice := tx.UTXOs()
-	err = b.addUTXOs(ctx, constants.OmegaChainID, producedUTXOSlice)
+	err = b.addUTXOs(ctx, constants.PlatformChainID, producedUTXOSlice)
 	if err != nil {
 		return err
 	}
@@ -76,7 +69,7 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *txs.Tx) error {
 	return nil
 }
 
-func (b *backend) addUTXOs(ctx stdcontext.Context, destinationChainID ids.ID, utxos []*dione.UTXO) error {
+func (b *backend) addUTXOs(ctx stdcontext.Context, destinationChainID ids.ID, utxos []*avax.UTXO) error {
 	for _, utxo := range utxos {
 		if err := b.AddUTXO(ctx, destinationChainID, utxo); err != nil {
 			return err

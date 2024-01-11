@@ -8,26 +8,24 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"go.uber.org/mock/gomock"
+
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 const engineType = p2p.EngineType_ENGINE_TYPE_SNOWMAN
 
 func TestQueue(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 	cpuTracker := tracker.NewMockTracker(ctrl)
 	vdrs := validators.NewSet()

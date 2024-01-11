@@ -4,8 +4,8 @@
 package sampler
 
 import (
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/math"
 )
 
 var (

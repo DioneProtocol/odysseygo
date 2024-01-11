@@ -8,23 +8,23 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/genesis"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
-	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/stakeable"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/genesis"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
 )
 
 func main() {
 	key := genesis.EWOQKey
 	uri := primary.LocalAPIURI
 	kc := secp256k1fx.NewKeychain(key)
-	amount := 500 * units.MilliDione
+	amount := 500 * units.MilliAvax
 	locktime := uint64(time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC).Unix())
-	destAddrStr := "O-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
+	destAddrStr := "P-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
 
 	destAddr, err := address.ParseToID(destAddrStr)
 	if err != nil {
@@ -33,24 +33,28 @@ func main() {
 
 	ctx := context.Background()
 
-	// NewWalletFromURI fetches the available UTXOs owned by [kc] on the network
-	// that [uri] is hosting.
+	// MakeWallet fetches the available UTXOs owned by [kc] on the network that
+	// [uri] is hosting.
 	walletSyncStartTime := time.Now()
-	wallet, err := primary.NewWalletFromURI(ctx, uri, kc)
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:          uri,
+		AVAXKeychain: kc,
+		EthKeychain:  kc,
+	})
 	if err != nil {
 		log.Fatalf("failed to initialize wallet: %s\n", err)
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the O-chain wallet
-	pWallet := wallet.O()
-	dioneAssetID := pWallet.DIONEAssetID()
+	// Get the P-chain wallet
+	pWallet := wallet.P()
+	avaxAssetID := pWallet.AVAXAssetID()
 
 	issueTxStartTime := time.Now()
-	txID, err := pWallet.IssueBaseTx([]*dione.TransferableOutput{
+	tx, err := pWallet.IssueBaseTx([]*avax.TransferableOutput{
 		{
-			Asset: dione.Asset{
-				ID: dioneAssetID,
+			Asset: avax.Asset{
+				ID: avaxAssetID,
 			},
 			Out: &stakeable.LockOut{
 				Locktime: locktime,
@@ -69,5 +73,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to issue transaction: %s\n", err)
 	}
-	log.Printf("issued %s in %s\n", txID, time.Since(issueTxStartTime))
+	log.Printf("issued %s in %s\n", tx.ID(), time.Since(issueTxStartTime))
 }

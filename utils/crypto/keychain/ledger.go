@@ -4,8 +4,8 @@
 package keychain
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 // Ledger interface for the ledger wrapper

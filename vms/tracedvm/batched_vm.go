@@ -11,9 +11,9 @@ import (
 
 	oteltrace "go.opentelemetry.io/otel/trace"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
 )
 
 func (vm *blockVM) GetAncestors(

@@ -7,15 +7,15 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
 )
 
 var errInvalidETHAddress = errors.New("invalid eth address")
 
 type UnparsedAllocation struct {
 	ETHAddr        string         `json:"ethAddr"`
-	DIONEAddr      string         `json:"dioneAddr"`
+	AVAXAddr       string         `json:"avaxAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -40,15 +40,15 @@ func (ua UnparsedAllocation) Parse() (Allocation, error) {
 	}
 	a.ETHAddr = ethAddr
 
-	_, _, dioneAddrBytes, err := address.Parse(ua.DIONEAddr)
+	_, _, avaxAddrBytes, err := address.Parse(ua.AVAXAddr)
 	if err != nil {
 		return a, err
 	}
-	dioneAddr, err := ids.ToShortID(dioneAddrBytes)
+	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 	if err != nil {
 		return a, err
 	}
-	a.DIONEAddr = dioneAddr
+	a.AVAXAddr = avaxAddr
 
 	return a, nil
 }
@@ -56,22 +56,24 @@ func (ua UnparsedAllocation) Parse() (Allocation, error) {
 type UnparsedStaker struct {
 	NodeID        ids.NodeID `json:"nodeID"`
 	RewardAddress string     `json:"rewardAddress"`
+	DelegationFee uint32     `json:"delegationFee"`
 }
 
 func (us UnparsedStaker) Parse() (Staker, error) {
 	s := Staker{
-		NodeID: us.NodeID,
+		NodeID:        us.NodeID,
+		DelegationFee: us.DelegationFee,
 	}
 
-	_, _, dioneAddrBytes, err := address.Parse(us.RewardAddress)
+	_, _, avaxAddrBytes, err := address.Parse(us.RewardAddress)
 	if err != nil {
 		return s, err
 	}
-	dioneAddr, err := ids.ToShortID(dioneAddrBytes)
+	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 	if err != nil {
 		return s, err
 	}
-	s.RewardAddress = dioneAddr
+	s.RewardAddress = avaxAddr
 	return s, nil
 }
 
@@ -87,7 +89,7 @@ type UnparsedConfig struct {
 	InitialStakedFunds         []string         `json:"initialStakedFunds"`
 	InitialStakers             []UnparsedStaker `json:"initialStakers"`
 
-	DChainGenesis string `json:"dChainGenesis"`
+	CChainGenesis string `json:"cChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -101,7 +103,7 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		InitialStakeDurationOffset: uc.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]ids.ShortID, len(uc.InitialStakedFunds)),
 		InitialStakers:             make([]Staker, len(uc.InitialStakers)),
-		DChainGenesis:              uc.DChainGenesis,
+		CChainGenesis:              uc.CChainGenesis,
 		Message:                    uc.Message,
 	}
 	for i, ua := range uc.Allocations {
@@ -112,15 +114,15 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		c.Allocations[i] = a
 	}
 	for i, isa := range uc.InitialStakedFunds {
-		_, _, dioneAddrBytes, err := address.Parse(isa)
+		_, _, avaxAddrBytes, err := address.Parse(isa)
 		if err != nil {
 			return c, err
 		}
-		dioneAddr, err := ids.ToShortID(dioneAddrBytes)
+		avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 		if err != nil {
 			return c, err
 		}
-		c.InitialStakedFunds[i] = dioneAddr
+		c.InitialStakedFunds[i] = avaxAddr
 	}
 	for i, uis := range uc.InitialStakers {
 		is, err := uis.Parse()

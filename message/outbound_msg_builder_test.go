@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/compression"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/compression"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 func Test_newOutboundBuilder(t *testing.T) {

@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/units"
 )
 
 func TestTx(t *testing.T) {

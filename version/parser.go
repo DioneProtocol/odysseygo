@@ -35,11 +35,11 @@ func Parse(s string) (*Semantic, error) {
 }
 
 func ParseApplication(s string) (*Application, error) {
-	if !strings.HasPrefix(s, "odyssey/") {
+	if !strings.HasPrefix(s, "avalanche/") {
 		return nil, fmt.Errorf("%w: %q", errMissingApplicationPrefix, s)
 	}
 
-	s = s[8:]
+	s = s[10:]
 	major, minor, patch, err := parseVersions(s)
 	if err != nil {
 		return nil, err

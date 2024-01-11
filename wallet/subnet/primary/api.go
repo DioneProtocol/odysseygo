@@ -5,24 +5,31 @@ package primary
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/DioneProtocol/odysseygo/api/info"
-	"github.com/DioneProtocol/odysseygo/codec"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/rpc"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/alpha"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
+	"github.com/ava-labs/coreth/ethclient"
+	"github.com/ava-labs/coreth/plugin/evm"
+
+	"github.com/ethereum/go-ethereum/common"
+
+	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/ava-labs/avalanchego/codec"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/rpc"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/vms/avm"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/wallet/chain/c"
+	"github.com/ava-labs/avalanchego/wallet/chain/p"
+	"github.com/ava-labs/avalanchego/wallet/chain/x"
 )
 
 const (
-	MainnetAPIURI = "https://api.dioneprotocol.com"
-	TestnetAPIURI = "https://test.api.dioneprotocol.com"
+	MainnetAPIURI = "https://api.avax.network"
+	FujiAPIURI    = "https://api.avax-test.network"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
@@ -31,8 +38,8 @@ const (
 // TODO: Refactor UTXOClient definition to allow the client implementations to
 // perform their own assertions.
 var (
-	_ UTXOClient = omegavm.Client(nil)
-	_ UTXOClient = alpha.Client(nil)
+	_ UTXOClient = platformvm.Client(nil)
+	_ UTXOClient = avm.Client(nil)
 )
 
 type UTXOClient interface {
@@ -47,18 +54,42 @@ type UTXOClient interface {
 	) ([][]byte, ids.ShortID, ids.ID, error)
 }
 
-func FetchState(ctx context.Context, uri string, addrs set.Set[ids.ShortID]) (p.Context, x.Context, UTXOs, error) {
+type AVAXState struct {
+	PClient platformvm.Client
+	PCTX    p.Context
+	XClient avm.Client
+	XCTX    x.Context
+	CClient evm.Client
+	CCTX    c.Context
+	UTXOs   UTXOs
+}
+
+func FetchState(
+	ctx context.Context,
+	uri string,
+	addrs set.Set[ids.ShortID],
+) (
+	*AVAXState,
+	error,
+) {
 	infoClient := info.NewClient(uri)
-	xClient := alpha.NewClient(uri, "A")
+	pClient := platformvm.NewClient(uri)
+	xClient := avm.NewClient(uri, "X")
+	cClient := evm.NewCChainClient(uri)
 
 	pCTX, err := p.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	xCTX, err := x.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
+	}
+
+	cCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
+	if err != nil {
+		return nil, err
 	}
 
 	utxos := NewUTXOs()
@@ -69,14 +100,19 @@ func FetchState(ctx context.Context, uri string, addrs set.Set[ids.ShortID]) (p.
 		codec  codec.Manager
 	}{
 		{
-			id:     constants.OmegaChainID,
-			client: omegavm.NewClient(uri),
+			id:     constants.PlatformChainID,
+			client: pClient,
 			codec:  txs.Codec,
 		},
 		{
 			id:     xCTX.BlockchainID(),
 			client: xClient,
 			codec:  x.Parser.Codec(),
+		},
+		{
+			id:     cCTX.BlockchainID(),
+			client: cClient,
+			codec:  evm.Codec,
 		},
 	}
 	for _, destinationChain := range chains {
@@ -91,11 +127,60 @@ func FetchState(ctx context.Context, uri string, addrs set.Set[ids.ShortID]) (p.
 				addrList,
 			)
 			if err != nil {
-				return nil, nil, nil, err
+				return nil, err
 			}
 		}
 	}
-	return pCTX, xCTX, utxos, nil
+	return &AVAXState{
+		PClient: pClient,
+		PCTX:    pCTX,
+		XClient: xClient,
+		XCTX:    xCTX,
+		CClient: cClient,
+		CCTX:    cCTX,
+		UTXOs:   utxos,
+	}, nil
+}
+
+type EthState struct {
+	Client   ethclient.Client
+	Accounts map[common.Address]*c.Account
+}
+
+func FetchEthState(
+	ctx context.Context,
+	uri string,
+	addrs set.Set[common.Address],
+) (*EthState, error) {
+	path := fmt.Sprintf(
+		"%s/ext/%s/C/rpc",
+		uri,
+		constants.ChainAliasPrefix,
+	)
+	client, err := ethclient.Dial(path)
+	if err != nil {
+		return nil, err
+	}
+
+	accounts := make(map[common.Address]*c.Account, addrs.Len())
+	for addr := range addrs {
+		balance, err := client.BalanceAt(ctx, addr, nil)
+		if err != nil {
+			return nil, err
+		}
+		nonce, err := client.NonceAt(ctx, addr, nil)
+		if err != nil {
+			return nil, err
+		}
+		accounts[addr] = &c.Account{
+			Balance: balance,
+			Nonce:   nonce,
+		}
+	}
+	return &EthState{
+		Client:   client,
+		Accounts: accounts,
+	}, nil
 }
 
 // AddAllUTXOs fetches all the UTXOs referenced by [addresses] that were sent
@@ -130,7 +215,7 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			var utxo dione.UTXO
+			var utxo avax.UTXO
 			_, err := codec.Unmarshal(utxoBytes, &utxo)
 			if err != nil {
 				return err

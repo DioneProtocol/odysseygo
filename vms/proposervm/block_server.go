@@ -6,9 +6,9 @@ package proposervm
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/indexer"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/vms/proposervm/indexer"
 )
 
 var _ indexer.BlockServer = (*VM)(nil)

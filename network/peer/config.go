@@ -6,17 +6,17 @@ package peer
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/network/throttling"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/snow/uptime"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/network/throttling"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/snow/uptime"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 type Config struct {

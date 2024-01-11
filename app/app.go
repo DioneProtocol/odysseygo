@@ -14,23 +14,22 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/DioneProtocol/odysseygo/nat"
-	"github.com/DioneProtocol/odysseygo/node"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/perms"
-	"github.com/DioneProtocol/odysseygo/utils/ulimit"
+	"github.com/ava-labs/avalanchego/nat"
+	"github.com/ava-labs/avalanchego/node"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/ava-labs/avalanchego/utils/ulimit"
 )
 
 const (
-	Header = `  
-	________  .__                    __________                __                     .__   
-	\______ \ |__| ____   ____   ____\______   \_______  _____/  |_  ____   ____  ____|  |  
-	|    |  \|  |/  _ \ /    \_/ __ \|     ___/\_  __ \/  _ \   __\/  _ \_/ ___\/  _ \|  |  
-	|    |   \  (  <_> )   |  \  ___/|    |     |  | \(  <_> )  | (  <_> )  \__(  <_> )  |__
-	/_______  /__|\____/|___|  /\___  >____|     |__|   \____/|__|  \____/ \___  >____/|____/
-			\/               \/     \/                                         \/    `
+	Header = `     _____               .__                       .__
+    /  _  \___  _______  |  | _____    ____   ____ |  |__   ____    ,_ o
+   /  /_\  \  \/ /\__  \ |  | \__  \  /    \_/ ___\|  |  \_/ __ \   / //\,
+  /    |    \   /  / __ \|  |__/ __ \|   |  \  \___|   Y  \  ___/    \>> |
+  \____|__  /\_/  (____  /____(____  /___|  /\___  >___|  /\___  >    \\
+          \/           \/          \/     \/     \/     \/     \/`
 )
 
 var (

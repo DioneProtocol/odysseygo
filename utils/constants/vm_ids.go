@@ -3,10 +3,10 @@
 
 package constants
 
-import "github.com/DioneProtocol/odysseygo/ids"
+import "github.com/ava-labs/avalanchego/ids"
 
 var (
-	OmegaVMID = ids.ID{'o', 'm', 'e', 'g', 'a', 'v', 'm'}
-	ALPHAID   = ids.ID{'a', 'l', 'f', 'a'}
-	DELTAID   = ids.ID{'d', 'e', 'l', 't', 'a'}
+	PlatformVMID = ids.ID{'p', 'l', 'a', 't', 'f', 'o', 'r', 'm', 'v', 'm'}
+	AVMID        = ids.ID{'a', 'v', 'm'}
+	EVMID        = ids.ID{'e', 'v', 'm'}
 )

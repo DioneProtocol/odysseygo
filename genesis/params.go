@@ -6,15 +6,23 @@ package genesis
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
 )
 
 type StakingConfig struct {
 	// Staking uptime requirements
 	UptimeRequirement float64 `json:"uptimeRequirement"`
-	// Minimum stake, in nDIONE, required to validate the primary network
+	// Minimum stake, in nAVAX, required to validate the primary network
 	MinValidatorStake uint64 `json:"minValidatorStake"`
+	// Maximum stake, in nAVAX, allowed to be placed on a single validator in
+	// the primary network
+	MaxValidatorStake uint64 `json:"maxValidatorStake"`
+	// Minimum stake, in nAVAX, that can be delegated on the primary network
+	MinDelegatorStake uint64 `json:"minDelegatorStake"`
+	// Minimum delegation fee, in the range [0, 1000000], that can be charged
+	// for delegation on the primary network.
+	MinDelegationFee uint32 `json:"minDelegationFee"`
 	// MinStakeDuration is the minimum amount of time a validator can validate
 	// for in a single period.
 	MinStakeDuration time.Duration `json:"minStakeDuration"`
@@ -38,8 +46,12 @@ type TxFeeConfig struct {
 	CreateBlockchainTxFee uint64 `json:"createBlockchainTxFee"`
 	// Transaction fee for adding a primary network validator
 	AddPrimaryNetworkValidatorFee uint64 `json:"addPrimaryNetworkValidatorFee"`
+	// Transaction fee for adding a primary network delegator
+	AddPrimaryNetworkDelegatorFee uint64 `json:"addPrimaryNetworkDelegatorFee"`
 	// Transaction fee for adding a subnet validator
 	AddSubnetValidatorFee uint64 `json:"addSubnetValidatorFee"`
+	// Transaction fee for adding a subnet delegator
+	AddSubnetDelegatorFee uint64 `json:"addSubnetDelegatorFee"`
 }
 
 type Params struct {
@@ -51,8 +63,8 @@ func GetTxFeeConfig(networkID uint32) TxFeeConfig {
 	switch networkID {
 	case constants.MainnetID:
 		return MainnetParams.TxFeeConfig
-	case constants.TestnetID:
-		return TestnetParams.TxFeeConfig
+	case constants.FujiID:
+		return FujiParams.TxFeeConfig
 	case constants.LocalID:
 		return LocalParams.TxFeeConfig
 	default:
@@ -64,8 +76,8 @@ func GetStakingConfig(networkID uint32) StakingConfig {
 	switch networkID {
 	case constants.MainnetID:
 		return MainnetParams.StakingConfig
-	case constants.TestnetID:
-		return TestnetParams.StakingConfig
+	case constants.FujiID:
+		return FujiParams.StakingConfig
 	case constants.LocalID:
 		return LocalParams.StakingConfig
 	default:

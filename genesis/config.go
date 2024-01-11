@@ -12,12 +12,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
-	"github.com/DioneProtocol/odysseygo/utils/math"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/formatting/address"
+	"github.com/ava-labs/avalanchego/utils/math"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 var (
@@ -33,7 +33,7 @@ type LockedAmount struct {
 
 type Allocation struct {
 	ETHAddr        ids.ShortID    `json:"ethAddr"`
-	DIONEAddr      ids.ShortID    `json:"dioneAddr"`
+	AVAXAddr       ids.ShortID    `json:"avaxAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -44,34 +44,36 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		UnlockSchedule: a.UnlockSchedule,
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
-	dioneAddr, err := address.Format(
-		"A",
+	avaxAddr, err := address.Format(
+		"X",
 		constants.GetHRP(networkID),
-		a.DIONEAddr.Bytes(),
+		a.AVAXAddr.Bytes(),
 	)
-	ua.DIONEAddr = dioneAddr
+	ua.AVAXAddr = avaxAddr
 	return ua, err
 }
 
 func (a Allocation) Less(other Allocation) bool {
 	return a.InitialAmount < other.InitialAmount ||
-		(a.InitialAmount == other.InitialAmount && a.DIONEAddr.Less(other.DIONEAddr))
+		(a.InitialAmount == other.InitialAmount && a.AVAXAddr.Less(other.AVAXAddr))
 }
 
 type Staker struct {
 	NodeID        ids.NodeID  `json:"nodeID"`
 	RewardAddress ids.ShortID `json:"rewardAddress"`
+	DelegationFee uint32      `json:"delegationFee"`
 }
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
-	dioneAddr, err := address.Format(
-		"A",
+	avaxAddr, err := address.Format(
+		"X",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
 	return UnparsedStaker{
 		NodeID:        s.NodeID,
-		RewardAddress: dioneAddr,
+		RewardAddress: avaxAddr,
+		DelegationFee: s.DelegationFee,
 	}, err
 }
 
@@ -87,7 +89,7 @@ type Config struct {
 	InitialStakedFunds         []ids.ShortID `json:"initialStakedFunds"`
 	InitialStakers             []Staker      `json:"initialStakers"`
 
-	DChainGenesis string `json:"dChainGenesis"`
+	CChainGenesis string `json:"cChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -101,7 +103,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		InitialStakeDurationOffset: c.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]string, len(c.InitialStakedFunds)),
 		InitialStakers:             make([]UnparsedStaker, len(c.InitialStakers)),
-		DChainGenesis:              c.DChainGenesis,
+		CChainGenesis:              c.CChainGenesis,
 		Message:                    c.Message,
 	}
 	for i, a := range c.Allocations {
@@ -112,15 +114,15 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		uc.Allocations[i] = ua
 	}
 	for i, isa := range c.InitialStakedFunds {
-		dioneAddr, err := address.Format(
-			"A",
+		avaxAddr, err := address.Format(
+			"X",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
 		)
 		if err != nil {
 			return uc, err
 		}
-		uc.InitialStakedFunds[i] = dioneAddr
+		uc.InitialStakedFunds[i] = avaxAddr
 	}
 	for i, is := range c.InitialStakers {
 		uis, err := is.Unparse(c.NetworkID)
@@ -156,9 +158,9 @@ var (
 	// genesis.
 	MainnetConfig Config
 
-	// TestnetConfig is the config that should be used to generate the testnet
+	// FujiConfig is the config that should be used to generate the fuji
 	// genesis.
-	TestnetConfig Config
+	FujiConfig Config
 
 	// LocalConfig is the config that should be used to generate a local
 	// genesis.
@@ -167,13 +169,13 @@ var (
 
 func init() {
 	unparsedMainnetConfig := UnparsedConfig{}
-	unparsedTestnetConfig := UnparsedConfig{}
+	unparsedFujiConfig := UnparsedConfig{}
 	unparsedLocalConfig := UnparsedConfig{}
 
 	errs := wrappers.Errs{}
 	errs.Add(
 		json.Unmarshal(mainnetGenesisConfigJSON, &unparsedMainnetConfig),
-		json.Unmarshal(testnetGenesisConfigJSON, &unparsedTestnetConfig),
+		json.Unmarshal(fujiGenesisConfigJSON, &unparsedFujiConfig),
 		json.Unmarshal(localGenesisConfigJSON, &unparsedLocalConfig),
 	)
 	if errs.Errored() {
@@ -184,9 +186,9 @@ func init() {
 	errs.Add(err)
 	MainnetConfig = mainnetConfig
 
-	testnetConfig, err := unparsedTestnetConfig.Parse()
+	fujiConfig, err := unparsedFujiConfig.Parse()
 	errs.Add(err)
-	TestnetConfig = testnetConfig
+	FujiConfig = fujiConfig
 
 	localConfig, err := unparsedLocalConfig.Parse()
 	errs.Add(err)
@@ -201,8 +203,8 @@ func GetConfig(networkID uint32) *Config {
 	switch networkID {
 	case constants.MainnetID:
 		return &MainnetConfig
-	case constants.TestnetID:
-		return &TestnetConfig
+	case constants.FujiID:
+		return &FujiConfig
 	case constants.LocalID:
 		return &LocalConfig
 	default:
@@ -233,7 +235,7 @@ func GetConfigContent(genesisContent string) (*Config, error) {
 func parseGenesisJSONBytesToConfig(bytes []byte) (*Config, error) {
 	var unparsedConfig UnparsedConfig
 	if err := json.Unmarshal(bytes, &unparsedConfig); err != nil {
-		return nil, fmt.Errorf("%w: %s", errInvalidGenesisJSON, err)
+		return nil, fmt.Errorf("%w: %w", errInvalidGenesisJSON, err)
 	}
 
 	config, err := unparsedConfig.Parse()

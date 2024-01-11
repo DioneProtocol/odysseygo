@@ -6,7 +6,7 @@ package block
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 // StateSummary represents all the information needed to download, verify, and

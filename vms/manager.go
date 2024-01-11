@@ -11,9 +11,9 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 var (

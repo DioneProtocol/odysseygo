@@ -7,8 +7,8 @@ import (
 	"crypto"
 	"sync"
 
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 )
 
 // IPSigner will return a signedIP for the current value of our dynamic IP.

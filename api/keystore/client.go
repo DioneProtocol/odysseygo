@@ -6,14 +6,14 @@ package keystore
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/api"
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
-	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for Odyssey Keystore API Endpoint
+// Client interface for Avalanche Keystore API Endpoint
 //
 // Deprecated: The Keystore API is deprecated. Dedicated wallets should be used
 // instead.
@@ -29,7 +29,7 @@ type Client interface {
 	DeleteUser(context.Context, api.UserPass, ...rpc.Option) error
 }
 
-// Client implementation for Odyssey Keystore API Endpoint
+// Client implementation for Avalanche Keystore API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

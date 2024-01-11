@@ -4,8 +4,8 @@
 package proposer
 
 import (
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils"
 )
 
 var _ utils.Sortable[validatorData] = validatorData{}

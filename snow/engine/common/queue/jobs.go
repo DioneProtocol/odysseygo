@@ -12,14 +12,14 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/database/versiondb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/timer"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/database/versiondb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/timer"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 const progressUpdateFrequency = 30 * time.Second
@@ -383,7 +383,7 @@ func (jm *JobsWithMissing) Commit() error {
 // Note: the jobs queue ensures that no job with missing dependencies will be placed
 // on the runnable stack in the first place.
 // However, for specific VM implementations blocks may be committed via a two stage commit
-// (ex. omegavm Proposal and Commit/Abort blocks). This can cause an issue where if the first stage
+// (ex. platformvm Proposal and Commit/Abort blocks). This can cause an issue where if the first stage
 // is executed immediately before the node dies, it will be removed from the runnable stack
 // without writing the state transition to the VM's database. When the node restarts, the
 // VM will not have marked the first block (the proposal block as accepted), but it could

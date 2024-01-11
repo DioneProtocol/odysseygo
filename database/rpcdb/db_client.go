@@ -10,11 +10,11 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/set"
 
-	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
+	rpcdbpb "github.com/ava-labs/avalanchego/proto/pb/rpcdb"
 )
 
 var (

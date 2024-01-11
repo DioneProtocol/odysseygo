@@ -8,13 +8,14 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/api/info"
-	"github.com/DioneProtocol/odysseygo/genesis"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/ava-labs/avalanchego/genesis"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
 )
 
 func main() {
@@ -41,20 +42,25 @@ func main() {
 	}
 	log.Printf("fetched node ID %s in %s\n", nodeID, time.Since(nodeInfoStartTime))
 
-	// NewWalletWithTxs fetches the available UTXOs owned by [kc] on the network
-	// that [uri] is hosting and registers [subnetID].
+	// MakeWallet fetches the available UTXOs owned by [kc] on the network that
+	// [uri] is hosting and registers [subnetID].
 	walletSyncStartTime := time.Now()
-	wallet, err := primary.NewWalletWithTxs(ctx, uri, kc, subnetID)
+	wallet, err := primary.MakeWallet(ctx, &primary.WalletConfig{
+		URI:              uri,
+		AVAXKeychain:     kc,
+		EthKeychain:      kc,
+		PChainTxsToFetch: set.Of(subnetID),
+	})
 	if err != nil {
 		log.Fatalf("failed to initialize wallet: %s\n", err)
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the O-chain wallet
-	pWallet := wallet.O()
+	// Get the P-chain wallet
+	pWallet := wallet.P()
 
 	addValidatorStartTime := time.Now()
-	addValidatorTxID, err := pWallet.IssueAddSubnetValidatorTx(&txs.SubnetValidator{
+	addValidatorTx, err := pWallet.IssueAddSubnetValidatorTx(&txs.SubnetValidator{
 		Validator: txs.Validator{
 			NodeID: nodeID,
 			Start:  uint64(startTime.Unix()),
@@ -66,5 +72,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to issue add subnet validator transaction: %s\n", err)
 	}
-	log.Printf("added new subnet validator %s to %s with %s in %s\n", nodeID, subnetID, addValidatorTxID, time.Since(addValidatorStartTime))
+	log.Printf("added new subnet validator %s to %s with %s in %s\n", nodeID, subnetID, addValidatorTx.ID(), time.Since(addValidatorStartTime))
 }

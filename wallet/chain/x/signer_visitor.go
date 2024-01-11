@@ -9,17 +9,17 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/fxs"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
+	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/ava-labs/avalanchego/vms/avm/fxs"
+	"github.com/ava-labs/avalanchego/vms/avm/txs"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/ava-labs/avalanchego/vms/nftfx"
+	"github.com/ava-labs/avalanchego/vms/propertyfx"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
 var (
@@ -95,7 +95,7 @@ func (s *signerVisitor) ExportTx(tx *txs.ExportTx) error {
 	return sign(s.tx, txCreds, txSigners)
 }
 
-func (s *signerVisitor) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*dione.TransferableInput) ([]verify.Verifiable, [][]keychain.Signer, error) {
+func (s *signerVisitor) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*avax.TransferableInput) ([]verify.Verifiable, [][]keychain.Signer, error) {
 	txCreds := make([]verify.Verifiable, len(ins))
 	txSigners := make([][]keychain.Signer, len(ins))
 	for credIndex, transferInput := range ins {

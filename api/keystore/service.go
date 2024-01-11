@@ -9,12 +9,12 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/api"
-	"github.com/DioneProtocol/odysseygo/database/manager"
-	"github.com/DioneProtocol/odysseygo/database/memdb"
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/api"
+	"github.com/ava-labs/avalanchego/database/manager"
+	"github.com/ava-labs/avalanchego/database/memdb"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 type service struct {

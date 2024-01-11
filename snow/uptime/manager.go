@@ -6,10 +6,10 @@ package uptime
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 )
 
 var _ TestManager = (*manager)(nil)

@@ -11,8 +11,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/staking"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/utils/ips"
 )
 
 func TestIPSigner(t *testing.T) {

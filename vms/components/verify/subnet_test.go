@@ -8,13 +8,13 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/golang/mock/gomock"
-
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"go.uber.org/mock/gomock"
+
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 var errMissing = errors.New("missing")
@@ -90,8 +90,6 @@ func TestSameSubnet(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			defer ctrl.Finish()
-
 			ctx := test.ctxF(ctrl)
 
 			result := SameSubnet(context.Background(), ctx, test.chainID)

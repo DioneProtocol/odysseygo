@@ -16,11 +16,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/hashing"
-	"github.com/DioneProtocol/odysseygo/utils/perms"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/ava-labs/avalanchego/utils/perms"
+	"github.com/ava-labs/avalanchego/vms/platformvm/genesis"
 )
 
 var (
@@ -46,9 +46,9 @@ func TestValidateConfig(t *testing.T) {
 			config:      &MainnetConfig,
 			expectedErr: nil,
 		},
-		"testnet": {
+		"fuji": {
 			networkID:   5,
-			config:      &TestnetConfig,
+			config:      &FujiConfig,
 			expectedErr: nil,
 		},
 		"local": {
@@ -136,20 +136,20 @@ func TestValidateConfig(t *testing.T) {
 		"initial staked funds not in allocations": {
 			networkID: 5,
 			config: func() *Config {
-				thisConfig := TestnetConfig
+				thisConfig := FujiConfig
 				thisConfig.InitialStakedFunds = append(thisConfig.InitialStakedFunds, LocalConfig.InitialStakedFunds[0])
 				return &thisConfig
 			}(),
 			expectedErr: errNoAllocationToStake,
 		},
-		"empty D-Chain genesis": {
+		"empty C-Chain genesis": {
 			networkID: 12345,
 			config: func() *Config {
 				thisConfig := LocalConfig
-				thisConfig.DChainGenesis = ""
+				thisConfig.CChainGenesis = ""
 				return &thisConfig
 			}(),
-			expectedErr: errNoDChainGenesis,
+			expectedErr: errNoCChainGenesis,
 		},
 		"empty message": {
 			networkID: 12345,
@@ -164,10 +164,8 @@ func TestValidateConfig(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			require := require.New(t)
-
 			err := validateConfig(test.networkID, test.config, genesisStakingCfg)
-			require.ErrorIs(err, test.expectedErr)
+			require.ErrorIs(t, err, test.expectedErr)
 		})
 	}
 }
@@ -185,13 +183,13 @@ func TestGenesisFromFile(t *testing.T) {
 			customConfig: customGenesisConfigJSON,
 			expectedErr:  errOverridesStandardNetworkConfig,
 		},
-		"testnet": {
-			networkID:    constants.TestnetID,
+		"fuji": {
+			networkID:    constants.FujiID,
 			customConfig: customGenesisConfigJSON,
 			expectedErr:  errOverridesStandardNetworkConfig,
 		},
-		"testnet (with custom specified)": {
-			networkID:    constants.TestnetID,
+		"fuji (with custom specified)": {
+			networkID:    constants.FujiID,
 			customConfig: localGenesisConfigJSON, // won't load
 			expectedErr:  errOverridesStandardNetworkConfig,
 		},
@@ -230,9 +228,9 @@ func TestGenesisFromFile(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			// test loading of genesis from file
-
 			require := require.New(t)
+
+			// test loading of genesis from file
 			var customFile string
 			if len(test.customConfig) > 0 {
 				customFile = filepath.Join(t.TempDir(), "config.json")
@@ -267,8 +265,8 @@ func TestGenesisFromFlag(t *testing.T) {
 			networkID:   constants.MainnetID,
 			expectedErr: errOverridesStandardNetworkConfig,
 		},
-		"testnet": {
-			networkID:   constants.TestnetID,
+		"fuji": {
+			networkID:   constants.FujiID,
 			expectedErr: errOverridesStandardNetworkConfig,
 		},
 		"local": {
@@ -304,9 +302,9 @@ func TestGenesisFromFlag(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			// test loading of genesis content from flag/env-var
-
 			require := require.New(t)
+
+			// test loading of genesis content from flag/env-var
 			var genBytes []byte
 			if len(test.customConfig) == 0 {
 				// try loading a default config
@@ -316,7 +314,7 @@ func TestGenesisFromFlag(t *testing.T) {
 					genBytes, err = json.Marshal(&MainnetConfig)
 					require.NoError(err)
 				case constants.TestnetID:
-					genBytes, err = json.Marshal(&TestnetConfig)
+					genBytes, err = json.Marshal(&FujiConfig)
 					require.NoError(err)
 				case constants.LocalID:
 					genBytes, err = json.Marshal(&LocalConfig)
@@ -352,12 +350,12 @@ func TestGenesis(t *testing.T) {
 			expectedID: "UUvXi6j7QhVvgpbKM89MP5HdrxKm9CaJeHc187TsDNf8nZdLk",
 		},
 		{
-			networkID:  constants.TestnetID,
+			networkID:  constants.FujiID,
 			expectedID: "MSj6o9TpezwsQx4Tv7SHqpVvCbJ8of1ikjsqPZ1bKRjc9zBy3",
 		},
 		{
 			networkID:  constants.LocalID,
-			expectedID: "hBbtNFKLpjuKti32L5bnfZ2vspABkN268t8FincYhQWnWLHxw",
+			expectedID: "4vzpz26oNFyGnMCeFFPSx41Ek4dBPpPPWe6Zq2bSxdCSGbkC2",
 		},
 	}
 	for _, test := range tests {
@@ -387,24 +385,24 @@ func TestVMGenesis(t *testing.T) {
 			networkID: constants.MainnetID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.ALPHAID,
+					vmID:       constants.AVMID,
 					expectedID: "2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM",
 				},
 				{
-					vmID:       constants.DELTAID,
+					vmID:       constants.EVMID,
 					expectedID: "2q9e4r6Mu3U68nU1fYjgbR6JvwrRx36CohpAX5UQxse55x1Q5",
 				},
 			},
 		},
 		{
-			networkID: constants.TestnetID,
+			networkID: constants.FujiID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.ALPHAID,
+					vmID:       constants.AVMID,
 					expectedID: "2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm",
 				},
 				{
-					vmID:       constants.DELTAID,
+					vmID:       constants.EVMID,
 					expectedID: "yH8D7ThNJkxmtkuv2jgBa4P1Rn3Qpr4pPr7QYNfcdoS6k6HWp",
 				},
 			},
@@ -413,11 +411,11 @@ func TestVMGenesis(t *testing.T) {
 			networkID: constants.LocalID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.ALPHAID,
+					vmID:       constants.AVMID,
 					expectedID: "2eNy1mUFdmaxXNj1eQHUe7Np4gju9sJsEtWQ4MX3ToiNKuADed",
 				},
 				{
-					vmID:       constants.DELTAID,
+					vmID:       constants.EVMID,
 					expectedID: "2CA6j5zYzasynPsFeNoqWkmTCt3VScMvXUZHbfDJ8k3oGzAPtU",
 				},
 			},
@@ -452,7 +450,7 @@ func TestVMGenesis(t *testing.T) {
 	}
 }
 
-func TestDIONEAssetID(t *testing.T) {
+func TestAVAXAssetID(t *testing.T) {
 	tests := []struct {
 		networkID  uint32
 		expectedID string
@@ -462,7 +460,7 @@ func TestDIONEAssetID(t *testing.T) {
 			expectedID: "FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z",
 		},
 		{
-			networkID:  constants.TestnetID,
+			networkID:  constants.FujiID,
 			expectedID: "U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK",
 		},
 		{
@@ -476,13 +474,13 @@ func TestDIONEAssetID(t *testing.T) {
 			require := require.New(t)
 
 			config := GetConfig(test.networkID)
-			_, dioneAssetID, err := FromConfig(config)
+			_, avaxAssetID, err := FromConfig(config)
 			require.NoError(err)
 
 			require.Equal(
 				test.expectedID,
-				dioneAssetID.String(),
-				"DIONE assetID with networkID %d mismatch",
+				avaxAssetID.String(),
+				"AVAX assetID with networkID %d mismatch",
 				test.networkID,
 			)
 		})

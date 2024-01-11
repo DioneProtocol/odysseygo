@@ -12,18 +12,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/proposer"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/vms/proposervm/proposer"
 )
 
 var errDuplicateVerify = errors.New("duplicate verify")
 
 // ProposerBlock Option interface tests section
 func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
+	require := require.New(t)
+
 	// setup
 	proBlk := postForkBlock{
 		postForkCommonComponents: postForkCommonComponents{
@@ -33,12 +35,14 @@ func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
 
 	// test
 	_, err := proBlk.Options(context.Background())
-	if err != snowman.ErrNotOracle {
-		t.Fatal("Proposer block should signal that it wraps a block not implementing Options interface with ErrNotOracleBlock error")
-	}
+	require.Equal(snowman.ErrNotOracle, err)
 
 	// setup
 	_, _, proVM, _, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
 	innerOracleBlk := &TestOptionsBlock{
 		TestBlock: snowman.TestBlock{
 			TestDecidable: choices.TestDecidable{
@@ -65,15 +69,13 @@ func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
 	slb, err := block.Build(
 		ids.Empty, // refer unknown parent
 		time.Time{},
-		0, // oChainHeight,
+		0, // pChainHeight,
 		proVM.stakingCertLeaf,
 		innerOracleBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	proBlk = postForkBlock{
 		SignedBlock: slb,
 		postForkCommonComponents: postForkCommonComponents{
@@ -85,17 +87,21 @@ func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
 
 	// test
 	_, err = proBlk.Options(context.Background())
-	if err != nil {
-		t.Fatal("Proposer block should forward wrapped block options if this implements Option interface")
-	}
+	require.NoError(err)
 }
 
 // ProposerBlock.Verify tests section
 func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(100)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 
 	// create parent block ...
@@ -134,16 +140,10 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 
 	proVM.Set(proVM.Time().Add(proposer.MaxDelay))
 	prntProBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatalf("Could not build proposer block: %s", err)
-	}
+	require.NoError(err)
 
-	if err := prntProBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), prntProBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(prntProBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), prntProBlk.ID()))
 
 	// .. create child block ...
 	childCoreBlk := &snowman.TestBlock{
@@ -154,15 +154,13 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 	childSlb, err := block.Build(
 		ids.Empty, // refer unknown parent
 		childCoreBlk.Timestamp(),
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk := postForkBlock{
 		SignedBlock: childSlb,
 		postForkCommonComponents: postForkCommonComponents{
@@ -174,36 +172,34 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 
 	// child block referring unknown parent does not verify
 	err = childProBlk.Verify(context.Background())
-	if err == nil {
-		t.Fatal("Block with unknown parent should not verify")
-	}
+	require.ErrorIs(err, database.ErrNotFound)
 
 	// child block referring known parent does verify
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(), // refer known parent
 		prntProBlk.Timestamp().Add(proposer.MaxDelay),
-		oChainHeight,
+		pChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err != nil {
-		t.Fatal("could not sign parent block")
-	}
+	require.NoError(err)
 
 	proVM.Set(proVM.Time().Add(proposer.MaxDelay))
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatalf("Block with known parent should verify: %s", err)
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 }
 
 func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(100)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 
 	// create parent block ...
@@ -241,16 +237,10 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	}
 
 	prntProBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("Could not build proposer block")
-	}
+	require.NoError(err)
 
-	if err := prntProBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), prntProBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(prntProBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), prntProBlk.ID()))
 
 	prntTimestamp := prntProBlk.Timestamp()
 
@@ -269,15 +259,13 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err := block.Build(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk := postForkBlock{
 		SignedBlock: childSlb,
 		postForkCommonComponents: postForkCommonComponents{
@@ -288,34 +276,27 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	}
 
 	err = childProBlk.Verify(context.Background())
-	if err == nil {
-		t.Fatal("Proposer block timestamp too old should not verify")
-	}
+	require.ErrorIs(err, errTimeNotMonotonic)
 
 	// block cannot arrive before its creator window starts
-	blkWinDelay, err := proVM.Delay(context.Background(), childCoreBlk.Height(), oChainHeight, proVM.ctx.NodeID)
-	if err != nil {
-		t.Fatal("Could not calculate submission window")
-	}
+	blkWinDelay, err := proVM.Delay(context.Background(), childCoreBlk.Height(), pChainHeight, proVM.ctx.NodeID)
+	require.NoError(err)
 	beforeWinStart := prntTimestamp.Add(blkWinDelay).Add(-1 * time.Second)
 	proVM.Clock.Set(beforeWinStart)
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		beforeWinStart,
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 
-	if err := childProBlk.Verify(context.Background()); err == nil {
-		t.Fatal("Proposer block timestamp before submission window should not verify")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errProposerWindowNotStarted)
 
 	// block can arrive at its creator window starts
 	atWindowStart := prntTimestamp.Add(blkWinDelay)
@@ -323,20 +304,16 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		atWindowStart,
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatalf("Proposer block timestamp at submission window start should verify")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
 	// block can arrive after its creator window starts
 	afterWindowStart := prntTimestamp.Add(blkWinDelay).Add(5 * time.Second)
@@ -344,19 +321,15 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		afterWindowStart,
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("Proposer block timestamp after submission window start should verify")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
 	// block can arrive within submission window
 	atSubWindowEnd := proVM.Time().Add(proposer.MaxDelay)
@@ -364,44 +337,41 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		atSubWindowEnd,
-		oChainHeight,
+		pChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("Proposer block timestamp within submission window should verify")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
 	// block timestamp cannot be too much in the future
 	afterSubWinEnd := proVM.Time().Add(maxSkew).Add(time.Second)
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		afterSubWinEnd,
-		oChainHeight,
+		pChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err == nil {
-		t.Fatal("Proposer block timestamp after submission window should not verify")
-	} else if err == nil {
-		t.Fatal("Proposer block timestamp after submission window should have different error")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errTimeTooAdvanced)
 }
 
-func TestBlockVerify_PostForkBlock_OChainHeightChecks(t *testing.T) {
+func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(100)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 
 	// create parent block ...
@@ -439,18 +409,12 @@ func TestBlockVerify_PostForkBlock_OChainHeightChecks(t *testing.T) {
 	}
 
 	prntProBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("Could not build proposer block")
-	}
+	require.NoError(err)
 
-	if err := prntProBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), prntProBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(prntProBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), prntProBlk.ID()))
 
-	prntBlkOChainHeight := oChainHeight
+	prntBlkPChainHeight := pChainHeight
 
 	childCoreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
@@ -462,19 +426,17 @@ func TestBlockVerify_PostForkBlock_OChainHeightChecks(t *testing.T) {
 		TimestampV: prntProBlk.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	// child O-Chain height must not precede parent O-Chain height
+	// child P-Chain height must not precede parent P-Chain height
 	childSlb, err := block.Build(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight-1,
+		prntBlkPChainHeight-1,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk := postForkBlock{
 		SignedBlock: childSlb,
 		postForkCommonComponents: postForkCommonComponents{
@@ -484,84 +446,70 @@ func TestBlockVerify_PostForkBlock_OChainHeightChecks(t *testing.T) {
 		},
 	}
 
-	if err := childProBlk.Verify(context.Background()); err == nil {
-		t.Fatal("ProBlock's O-Chain-Height cannot be lower than parent ProBlock's one")
-	} else if err == nil {
-		t.Fatal("Proposer block has wrong height should have different error")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errTimeTooAdvanced)
 
-	// child O-Chain height can be equal to parent O-Chain height
+	// child P-Chain height can be equal to parent P-Chain height
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight,
+		prntBlkPChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 
 	proVM.Set(childCoreBlk.Timestamp())
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatalf("ProBlock's O-Chain-Height can be larger or equal than parent ProBlock's one: %s", err)
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// child O-Chain height may follow parent O-Chain height
-	oChainHeight = prntBlkOChainHeight * 2 // move ahead oChainHeight
+	// child P-Chain height may follow parent P-Chain height
+	pChainHeight = prntBlkPChainHeight * 2 // move ahead pChainHeight
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight+1,
+		prntBlkPChainHeight+1,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("ProBlock's O-Chain-Height can be larger or equal than parent ProBlock's one")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block O-Chain height can be equal to current O-Chain height
-	currOChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
+	// block P-Chain height can be equal to current P-Chain height
+	currPChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currOChainHeight,
+		currPChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("ProBlock's O-Chain-Height can be equal to current p chain height")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block O-Chain height cannot be at higher than current O-Chain height
+	// block P-Chain height cannot be at higher than current P-Chain height
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currOChainHeight*2,
+		currPChainHeight*2,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != errOChainHeightNotReached {
-		t.Fatal("ProBlock's O-Chain-Height cannot be larger than current p chain height")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errPChainHeightNotReached)
 }
 
-func TestBlockVerify_PostForkBlockBuiltOnOption_OChainHeightChecks(t *testing.T) {
+func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(100)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 	// proVM.SetStartTime(timer.MaxTime) // switch off scheduler for current test
 
@@ -631,34 +579,22 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_OChainHeightChecks(t *testing.T)
 	}
 
 	oracleBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build post fork oracle block")
-	}
+	require.NoError(err)
 
-	if err := oracleBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), oracleBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(oracleBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), oracleBlk.ID()))
 
 	// retrieve one option and verify block built on it
 	require.IsType(&postForkBlock{}, oracleBlk)
 	postForkOracleBlk := oracleBlk.(*postForkBlock)
 	opts, err := postForkOracleBlk.Options(context.Background())
-	if err != nil {
-		t.Fatal("could not retrieve options from post fork oracle block")
-	}
+	require.NoError(err)
 	parentBlk := opts[0]
 
-	if err := parentBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), parentBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(parentBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), parentBlk.ID()))
 
-	prntBlkOChainHeight := oChainHeight
+	prntBlkPChainHeight := pChainHeight
 
 	childCoreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
@@ -670,19 +606,17 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_OChainHeightChecks(t *testing.T)
 		TimestampV: parentBlk.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	// child O-Chain height must not precede parent O-Chain height
+	// child P-Chain height must not precede parent P-Chain height
 	childSlb, err := block.Build(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight-1,
+		prntBlkPChainHeight-1,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk := postForkBlock{
 		SignedBlock: childSlb,
 		postForkCommonComponents: postForkCommonComponents{
@@ -692,82 +626,72 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_OChainHeightChecks(t *testing.T)
 		},
 	}
 
-	if err := childProBlk.Verify(context.Background()); err == nil {
-		t.Fatal("ProBlock's O-Chain-Height cannot be lower than parent ProBlock's one")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errTimeTooAdvanced)
 
-	// child O-Chain height can be equal to parent O-Chain height
+	// child P-Chain height can be equal to parent P-Chain height
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight,
+		prntBlkPChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 
 	proVM.Set(childCoreBlk.Timestamp())
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatalf("ProBlock's O-Chain-Height can be larger or equal than parent ProBlock's one: %s", err)
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// child O-Chain height may follow parent O-Chain height
-	oChainHeight = prntBlkOChainHeight * 2 // move ahead oChainHeight
+	// child P-Chain height may follow parent P-Chain height
+	pChainHeight = prntBlkPChainHeight * 2 // move ahead pChainHeight
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkOChainHeight+1,
+		prntBlkPChainHeight+1,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("ProBlock's O-Chain-Height can be larger or equal than parent ProBlock's one")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block O-Chain height can be equal to current O-Chain height
-	currOChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
+	// block P-Chain height can be equal to current P-Chain height
+	currPChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currOChainHeight,
+		currPChainHeight,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != nil {
-		t.Fatal("ProBlock's O-Chain-Height can be equal to current p chain height")
-	}
+	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block O-Chain height cannot be at higher than current O-Chain height
+	// block P-Chain height cannot be at higher than current P-Chain height
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currOChainHeight*2,
+		currPChainHeight*2,
 		childCoreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("could not build stateless block")
-	}
+	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
-	if err := childProBlk.Verify(context.Background()); err != errOChainHeightNotReached {
-		t.Fatal("ProBlock's O-Chain-Height cannot be larger than current p chain height")
-	}
+	err = childProBlk.Verify(context.Background())
+	require.ErrorIs(err, errPChainHeightNotReached)
 }
 
 func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
+	require := require.New(t)
+
 	// Verify a block once (in this test by building it).
 	// Show that other verify call would not call coreBlk.Verify()
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(2000)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 
 	coreBlk := &snowman.TestBlock{
@@ -804,34 +728,33 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 	}
 
 	builtBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build block")
-	}
+	require.NoError(err)
 
-	if err := builtBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(builtBlk.Verify(context.Background()))
 
 	// set error on coreBlock.Verify and recall Verify()
 	coreBlk.VerifyV = errDuplicateVerify
-	if err := builtBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(builtBlk.Verify(context.Background()))
 
 	// rebuild a block with the same core block
-	oChainHeight++
-	if _, err := proVM.BuildBlock(context.Background()); err != nil {
-		t.Fatal("could not build block with same core block")
-	}
+	pChainHeight++
+	_, err = proVM.BuildBlock(context.Background())
+	require.NoError(err)
 }
 
 // ProposerBlock.Accept tests section
 func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
+	require := require.New(t)
+
 	// setup
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	oChainHeight := uint64(2000)
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
+	pChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return oChainHeight, nil
+		return pChainHeight, nil
 	}
 
 	coreBlk := &snowman.TestBlock{
@@ -868,14 +791,10 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 	}
 
 	builtBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("proposerVM could not build block")
-	}
+	require.NoError(err)
 
 	// test
-	if err := builtBlk.Accept(context.Background()); err != nil {
-		t.Fatal("could not accept block")
-	}
+	require.NoError(builtBlk.Accept(context.Background()))
 
 	coreVM.LastAcceptedF = func(context.Context) (ids.ID, error) {
 		if coreBlk.Status() == choices.Accepted {
@@ -883,15 +802,19 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 		}
 		return coreGenBlk.ID(), nil
 	}
-	if acceptedID, err := proVM.LastAccepted(context.Background()); err != nil {
-		t.Fatal("could not retrieve last accepted block")
-	} else if acceptedID != builtBlk.ID() {
-		t.Fatal("unexpected last accepted ID")
-	}
+	acceptedID, err := proVM.LastAccepted(context.Background())
+	require.NoError(err)
+	require.Equal(builtBlk.ID(), acceptedID)
 }
 
 func TestBlockAccept_PostForkBlock_TwoProBlocksWithSameCoreBlock_OneIsAccepted(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
 	var minimumHeight uint64
 	valState.GetMinimumHeightF = func(context.Context) (uint64, error) {
 		return minimumHeight, nil
@@ -915,32 +838,20 @@ func TestBlockAccept_PostForkBlock_TwoProBlocksWithSameCoreBlock_OneIsAccepted(t
 	minimumHeight = coreGenBlk.Height()
 
 	proBlk1, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build proBlk1")
-	}
+	require.NoError(err)
 
 	minimumHeight++
 	proBlk2, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build proBlk2")
-	}
-	if proBlk1.ID() == proBlk2.ID() {
-		t.Fatal("proBlk1 and proBlk2 should be different for this test")
-	}
+	require.NoError(err)
+	require.NotEqual(proBlk2.ID(), proBlk1.ID())
 
 	// set proBlk1 as preferred
-	if err := proBlk1.Accept(context.Background()); err != nil {
-		t.Fatal("could not accept proBlk1")
-	}
-	if coreBlk.Status() != choices.Accepted {
-		t.Fatal("coreBlk should have been accepted")
-	}
+	require.NoError(proBlk1.Accept(context.Background()))
+	require.Equal(choices.Accepted, coreBlk.Status())
 
-	if acceptedID, err := proVM.LastAccepted(context.Background()); err != nil {
-		t.Fatal("could not retrieve last accepted block")
-	} else if acceptedID != proBlk1.ID() {
-		t.Fatal("unexpected last accepted ID")
-	}
+	acceptedID, err := proVM.LastAccepted(context.Background())
+	require.NoError(err)
+	require.Equal(proBlk1.ID(), acceptedID)
 }
 
 // ProposerBlock.Reject tests section
@@ -948,6 +859,10 @@ func TestBlockReject_PostForkBlock_InnerBlockIsNotRejected(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
+
 	coreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
@@ -963,23 +878,14 @@ func TestBlockReject_PostForkBlock_InnerBlockIsNotRejected(t *testing.T) {
 	}
 
 	sb, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build block")
-	}
+	require.NoError(err)
 	require.IsType(&postForkBlock{}, sb)
 	proBlk := sb.(*postForkBlock)
 
-	if err := proBlk.Reject(context.Background()); err != nil {
-		t.Fatal("could not reject block")
-	}
+	require.NoError(proBlk.Reject(context.Background()))
 
-	if proBlk.Status() != choices.Rejected {
-		t.Fatal("block rejection did not set state properly")
-	}
-
-	if proBlk.innerBlk.Status() == choices.Rejected {
-		t.Fatal("block rejection unduly changed inner block status")
-	}
+	require.Equal(choices.Rejected, proBlk.Status())
+	require.NotEqual(choices.Rejected, proBlk.innerBlk.Status())
 }
 
 func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
@@ -987,6 +893,9 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
 	proVM.Set(coreGenBlk.Timestamp())
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
@@ -1056,47 +965,33 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 	}
 
 	parentBlk, err := proVM.BuildBlock(context.Background())
-	if err != nil {
-		t.Fatal("could not build post fork oracle block")
-	}
+	require.NoError(err)
 
-	if err := parentBlk.Verify(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-	if err := proVM.SetPreference(context.Background(), parentBlk.ID()); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(parentBlk.Verify(context.Background()))
+	require.NoError(proVM.SetPreference(context.Background(), parentBlk.ID()))
 
 	// retrieve options ...
 	require.IsType(&postForkBlock{}, parentBlk)
 	postForkOracleBlk := parentBlk.(*postForkBlock)
 	opts, err := postForkOracleBlk.Options(context.Background())
-	if err != nil {
-		t.Fatal("could not retrieve options from post fork oracle block")
-	}
+	require.NoError(err)
 	require.IsType(&postForkOption{}, opts[0])
 
 	// ... and verify them the first time
-	if err := opts[0].Verify(context.Background()); err != nil {
-		t.Fatal("option 0 should verify")
-	}
-	if err := opts[1].Verify(context.Background()); err != nil {
-		t.Fatal("option 1 should verify")
-	}
+	require.NoError(opts[0].Verify(context.Background()))
+	require.NoError(opts[1].Verify(context.Background()))
 
 	// Build the child
 	statelessChild, err := block.Build(
 		postForkOracleBlk.ID(),
 		postForkOracleBlk.Timestamp().Add(proposer.WindowDuration),
-		postForkOracleBlk.OChainHeight(),
+		postForkOracleBlk.PChainHeight(),
 		proVM.stakingCertLeaf,
 		oracleCoreBlk.opts[0].Bytes(),
 		proVM.ctx.ChainID,
 		proVM.stakingLeafSigner,
 	)
-	if err != nil {
-		t.Fatal("failed to build new child block")
-	}
+	require.NoError(err)
 
 	invalidChild, err := proVM.ParseBlock(context.Background(), statelessChild.Bytes())
 	if err != nil {
@@ -1105,14 +1000,17 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 	}
 
 	err = invalidChild.Verify(context.Background())
-	if err == nil {
-		t.Fatal("Should have failed to verify a child that was signed when it should be an oracle block")
-	}
+	require.ErrorIs(err, errUnexpectedBlockType)
 }
 
-func TestBlockVerify_PostForkBlock_OChainTooLow(t *testing.T) {
+func TestBlockVerify_PostForkBlock_PChainTooLow(t *testing.T) {
+	require := require.New(t)
+
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 5)
 	proVM.Set(coreGenBlk.Timestamp())
+	defer func() {
+		require.NoError(proVM.Shutdown(context.Background()))
+	}()
 
 	coreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
@@ -1151,9 +1049,7 @@ func TestBlockVerify_PostForkBlock_OChainTooLow(t *testing.T) {
 		4,
 		coreBlk.Bytes(),
 	)
-	if err != nil {
-		t.Fatal("failed to build new child block")
-	}
+	require.NoError(err)
 
 	invalidChild, err := proVM.ParseBlock(context.Background(), statelessChild.Bytes())
 	if err != nil {
@@ -1162,7 +1058,5 @@ func TestBlockVerify_PostForkBlock_OChainTooLow(t *testing.T) {
 	}
 
 	err = invalidChild.Verify(context.Background())
-	if err == nil {
-		t.Fatal("Should have failed to verify a child that was signed when it should be an oracle block")
-	}
+	require.ErrorIs(err, errPChainHeightTooLow)
 }

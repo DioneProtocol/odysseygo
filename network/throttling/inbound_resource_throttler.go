@@ -11,10 +11,10 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow/networking/tracker"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 const epsilon = time.Millisecond

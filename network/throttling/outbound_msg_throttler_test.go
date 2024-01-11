@@ -6,22 +6,20 @@ package throttling
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/logging"
 )
 
 func TestSybilOutboundMsgThrottler(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 	config := MsgByteThrottlerConfig{
 		VdrAllocSize:        1024,
@@ -166,8 +164,6 @@ func TestSybilOutboundMsgThrottler(t *testing.T) {
 // Ensure that the limit on taking from the at-large allocation is enforced
 func TestSybilOutboundMsgThrottlerMaxNonVdr(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 	config := MsgByteThrottlerConfig{
 		VdrAllocSize:        100,
@@ -215,8 +211,6 @@ func TestSybilOutboundMsgThrottlerMaxNonVdr(t *testing.T) {
 // Ensure that the throttler honors requested bypasses
 func TestBypassThrottling(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	defer ctrl.Finish()
-
 	require := require.New(t)
 	config := MsgByteThrottlerConfig{
 		VdrAllocSize:        100,

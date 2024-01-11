@@ -3,7 +3,7 @@
 
 package subnets
 
-import "github.com/DioneProtocol/odysseygo/ids"
+import "github.com/ava-labs/avalanchego/ids"
 
 // NoOpAllower is an Allower that always returns true
 var NoOpAllower Allower = noOpAllower{}
