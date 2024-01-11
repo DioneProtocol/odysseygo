@@ -8,16 +8,16 @@ import (
 	"log"
 	"time"
 
-	"github.com/ava-labs/avalanchego/genesis"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func ExampleWallet() {
@@ -28,9 +28,9 @@ func ExampleWallet() {
 	// [LocalAPIURI] is hosting.
 	walletSyncStartTime := time.Now()
 	wallet, err := MakeWallet(ctx, &WalletConfig{
-		URI:          LocalAPIURI,
-		AVAXKeychain: kc,
-		EthKeychain:  kc,
+		URI:           LocalAPIURI,
+		DIONEKeychain: kc,
+		EthKeychain:   kc,
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize wallet with: %s\n", err)
@@ -60,7 +60,7 @@ func ExampleWallet() {
 		map[uint32][]verify.State{
 			0: {
 				&secp256k1fx.TransferOutput{
-					Amt:          100 * units.MegaAvax,
+					Amt:          100 * units.MegaDione,
 					OutputOwners: *owner,
 				},
 			},
@@ -73,17 +73,17 @@ func ExampleWallet() {
 	createAssetTxID := createAssetTx.ID()
 	log.Printf("created X-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
 
-	// Send 100 MegaAvax to the P-chain.
+	// Send 100 MegaDione to the P-chain.
 	exportStartTime := time.Now()
 	exportTx, err := xWallet.IssueExportTx(
 		constants.PlatformChainID,
-		[]*avax.TransferableOutput{
+		[]*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
+				Asset: dione.Asset{
 					ID: createAssetTxID,
 				},
 				Out: &secp256k1fx.TransferOutput{
-					Amt:          100 * units.MegaAvax,
+					Amt:          100 * units.MegaDione,
 					OutputOwners: *owner,
 				},
 			},
@@ -96,7 +96,7 @@ func ExampleWallet() {
 	exportTxID := exportTx.ID()
 	log.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
-	// Import the 100 MegaAvax from the X-chain into the P-chain.
+	// Import the 100 MegaDione from the X-chain into the P-chain.
 	importStartTime := time.Now()
 	importTx, err := pWallet.IssueImportTx(xChainID, owner)
 	if err != nil {
@@ -119,12 +119,12 @@ func ExampleWallet() {
 	transformSubnetTx, err := pWallet.IssueTransformSubnetTx(
 		createSubnetTxID,
 		createAssetTxID,
-		50*units.MegaAvax,
-		100*units.MegaAvax,
+		50*units.MegaDione,
+		100*units.MegaDione,
 		reward.PercentDenominator,
 		reward.PercentDenominator,
 		1,
-		100*units.MegaAvax,
+		100*units.MegaDione,
 		time.Second,
 		365*24*time.Hour,
 		0,
@@ -147,7 +147,7 @@ func ExampleWallet() {
 				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
 				Start:  uint64(startTime.Unix()),
 				End:    uint64(startTime.Add(5 * time.Second).Unix()),
-				Wght:   25 * units.MegaAvax,
+				Wght:   25 * units.MegaDione,
 			},
 			Subnet: createSubnetTxID,
 		},
@@ -171,7 +171,7 @@ func ExampleWallet() {
 				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
 				Start:  uint64(startTime.Unix()),
 				End:    uint64(startTime.Add(5 * time.Second).Unix()),
-				Wght:   25 * units.MegaAvax,
+				Wght:   25 * units.MegaDione,
 			},
 			Subnet: createSubnetTxID,
 		},

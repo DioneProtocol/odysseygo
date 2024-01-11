@@ -11,14 +11,14 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -68,7 +68,7 @@ func (e *StandardTxExecutor) CreateChainTx(tx *txs.CreateChainTx) error {
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			e.Ctx.AVAXAssetID: createBlockchainTxFee,
+			e.Ctx.DIONEAssetID: createBlockchainTxFee,
 		},
 	); err != nil {
 		return err
@@ -77,9 +77,9 @@ func (e *StandardTxExecutor) CreateChainTx(tx *txs.CreateChainTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	avax.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Add the new chain to the database
 	e.State.AddChain(e.Tx)
 
@@ -107,7 +107,7 @@ func (e *StandardTxExecutor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
 		tx.Outs,
 		e.Tx.Creds,
 		map[ids.ID]uint64{
-			e.Ctx.AVAXAssetID: createSubnetTxFee,
+			e.Ctx.DIONEAssetID: createSubnetTxFee,
 		},
 	); err != nil {
 		return err
@@ -116,9 +116,9 @@ func (e *StandardTxExecutor) CreateSubnetTx(tx *txs.CreateSubnetTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	avax.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Add the new subnet to the database
 	e.State.AddSubnet(e.Tx)
 	return nil
@@ -150,7 +150,7 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			return fmt.Errorf("failed to get shared memory: %w", err)
 		}
 
-		utxos := make([]*avax.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
+		utxos := make([]*dione.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
 		for index, input := range tx.Ins {
 			utxo, err := e.State.GetUTXO(input.InputID())
 			if err != nil {
@@ -159,14 +159,14 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			utxos[index] = utxo
 		}
 		for i, utxoBytes := range allUTXOBytes {
-			utxo := &avax.UTXO{}
+			utxo := &dione.UTXO{}
 			if _, err := txs.Codec.Unmarshal(utxoBytes, utxo); err != nil {
 				return fmt.Errorf("failed to unmarshal UTXO: %w", err)
 			}
 			utxos[i+len(tx.Ins)] = utxo
 		}
 
-		ins := make([]*avax.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
+		ins := make([]*dione.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
 		copy(ins, tx.Ins)
 		copy(ins[len(tx.Ins):], tx.ImportedInputs)
 
@@ -177,7 +177,7 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			tx.Outs,
 			e.Tx.Creds,
 			map[ids.ID]uint64{
-				e.Ctx.AVAXAssetID: e.Config.TxFee,
+				e.Ctx.DIONEAssetID: e.Config.TxFee,
 			},
 		); err != nil {
 			return err
@@ -187,9 +187,9 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	avax.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	// Note: We apply atomic requests even if we are not verifying atomic
 	// requests to ensure the shared state will be correct if we later start
@@ -207,7 +207,7 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 		return err
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
+	outs := make([]*dione.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.ExportedOutputs)
 
@@ -225,7 +225,7 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 		outs,
 		e.Tx.Creds,
 		map[ids.ID]uint64{
-			e.Ctx.AVAXAssetID: e.Config.TxFee,
+			e.Ctx.DIONEAssetID: e.Config.TxFee,
 		},
 	); err != nil {
 		return fmt.Errorf("failed verifySpend: %w", err)
@@ -234,21 +234,21 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	avax.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	// Note: We apply atomic requests even if we are not verifying atomic
 	// requests to ensure the shared state will be correct if we later start
 	// verifying the requests.
 	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
 	for i, out := range tx.ExportedOutputs {
-		utxo := &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := &dione.UTXO{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: uint32(len(tx.Outs) + i),
 			},
-			Asset: avax.Asset{ID: out.AssetID()},
+			Asset: dione.Asset{ID: out.AssetID()},
 			Out:   out.Out,
 		}
 
@@ -261,7 +261,7 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 			Key:   utxoID[:],
 			Value: utxoBytes,
 		}
-		if out, ok := utxo.Out.(avax.Addressable); ok {
+		if out, ok := utxo.Out.(dione.Addressable); ok {
 			elem.Traits = out.Addresses()
 		}
 
@@ -296,8 +296,8 @@ func (e *StandardTxExecutor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	if e.Config.PartialSyncPrimaryNetwork && tx.Validator.NodeID == e.Ctx.NodeID {
 		e.Ctx.Log.Warn("verified transaction that would cause this node to become unhealthy",
@@ -327,8 +327,8 @@ func (e *StandardTxExecutor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) 
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -350,8 +350,8 @@ func (e *StandardTxExecutor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 	}
 
 	e.State.PutPendingDelegator(newStaker)
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -381,8 +381,8 @@ func (e *StandardTxExecutor) RemoveSubnetValidatorTx(tx *txs.RemoveSubnetValidat
 	// Invariant: There are no permissioned subnet delegators to remove.
 
 	txID := e.Tx.ID()
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }
@@ -410,12 +410,12 @@ func (e *StandardTxExecutor) TransformSubnetTx(tx *txs.TransformSubnetTx) error 
 		tx.Ins,
 		tx.Outs,
 		baseTxCreds,
-		// Invariant: [tx.AssetID != e.Ctx.AVAXAssetID]. This prevents the first
+		// Invariant: [tx.AssetID != e.Ctx.DIONEAssetID]. This prevents the first
 		//            entry in this map literal from being overwritten by the
 		//            second entry.
 		map[ids.ID]uint64{
-			e.Ctx.AVAXAssetID: e.Config.TransformSubnetTxFee,
-			tx.AssetID:        totalRewardAmount,
+			e.Ctx.DIONEAssetID: e.Config.TransformSubnetTxFee,
+			tx.AssetID:         totalRewardAmount,
 		},
 	); err != nil {
 		return err
@@ -424,9 +424,9 @@ func (e *StandardTxExecutor) TransformSubnetTx(tx *txs.TransformSubnetTx) error 
 	txID := e.Tx.ID()
 
 	// Consume the UTXOS
-	avax.Consume(e.State, tx.Ins)
+	dione.Consume(e.State, tx.Ins)
 	// Produce the UTXOS
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Produce(e.State, txID, tx.Outs)
 	// Transform the new subnet in the database
 	e.State.AddSubnetTransformation(e.Tx)
 	e.State.SetCurrentSupply(tx.Subnet, tx.InitialSupply)
@@ -450,8 +450,8 @@ func (e *StandardTxExecutor) AddPermissionlessValidatorTx(tx *txs.AddPermissionl
 	}
 
 	e.State.PutPendingValidator(newStaker)
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	if e.Config.PartialSyncPrimaryNetwork &&
 		tx.Subnet == constants.PrimaryNetworkID &&
@@ -484,8 +484,8 @@ func (e *StandardTxExecutor) AddPermissionlessDelegatorTx(tx *txs.AddPermissionl
 	}
 
 	e.State.PutPendingDelegator(newStaker)
-	avax.Consume(e.State, tx.Ins)
-	avax.Produce(e.State, txID, tx.Outs)
+	dione.Consume(e.State, tx.Ins)
+	dione.Produce(e.State, txID, tx.Outs)
 
 	return nil
 }

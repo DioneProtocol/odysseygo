@@ -6,12 +6,12 @@ package ledger
 import (
 	"fmt"
 
-	ledger "github.com/ava-labs/ledger-avalanche/go"
+	ledger "github.com/DioneProtocol/ledger-odyssey/go"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 const (
@@ -23,13 +23,13 @@ const (
 var _ keychain.Ledger = (*Ledger)(nil)
 
 // Ledger is a wrapper around the low-level Ledger Device interface that
-// provides Avalanche-specific access.
+// provides Odyssey-specific access.
 type Ledger struct {
-	device *ledger.LedgerAvalanche
+	device *ledger.LedgerOdyssey
 }
 
 func New() (keychain.Ledger, error) {
-	device, err := ledger.FindLedgerAvalancheApp()
+	device, err := ledger.FindLedgerOdysseyApp()
 	return &Ledger{
 		device: device,
 	}, err
@@ -93,7 +93,7 @@ func (l *Ledger) Sign(txBytes []byte, addressIndices []uint32) ([][]byte, error)
 		// app. When the tx that is being signed is too large, we sign with hash
 		// instead.
 		//
-		// Ref: https://github.com/ava-labs/avalanche-wallet-sdk/blob/9a71f05e424e06b94eaccf21fd32d7983ed1b040/src/Wallet/Ledger/provider/ZondaxProvider.ts#L68
+		// Ref: https://github.com/DioneProtocol/odyssey-wallet-sdk/blob/9a71f05e424e06b94eaccf21fd32d7983ed1b040/src/Wallet/Ledger/provider/ZondaxProvider.ts#L68
 		unsignedHash := hashing.ComputeHash256(txBytes)
 		return l.SignHash(unsignedHash, addressIndices)
 	}

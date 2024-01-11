@@ -6,7 +6,7 @@ package block
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
 )
 
 // Context defines the block context that will be optionally provided by the

@@ -11,23 +11,23 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 const trackChecksums = false
 
 var (
 	parser             block.Parser
-	populatedUTXO      *avax.UTXO
+	populatedUTXO      *dione.UTXO
 	populatedUTXOID    ids.ID
 	populatedTx        *txs.Tx
 	populatedTxID      ids.ID
@@ -45,11 +45,11 @@ func init() {
 		panic(err)
 	}
 
-	populatedUTXO = &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	populatedUTXO = &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: avax.Asset{
+		Asset: dione.Asset{
 			ID: ids.GenerateTestID(),
 		},
 		Out: &secp256k1fx.TransferOutput{
@@ -58,7 +58,7 @@ func init() {
 	}
 	populatedUTXOID = populatedUTXO.InputID()
 
-	populatedTx = &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+	populatedTx = &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 		BlockchainID: ids.GenerateTestID(),
 	}}}
 	err = parser.InitializeTx(populatedTx)
@@ -73,7 +73,7 @@ func init() {
 		time.Now(),
 		[]*txs.Tx{
 			{
-				Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+				Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 					BlockchainID: ids.GenerateTestID(),
 				}},
 			},
@@ -152,11 +152,11 @@ func ChainUTXOTest(t *testing.T, c Chain) {
 	// Compare IDs because [fetchedUTXO] isn't initialized
 	require.Equal(populatedUTXO.InputID(), fetchedUTXO.InputID())
 
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: avax.Asset{
+		Asset: dione.Asset{
 			ID: ids.GenerateTestID(),
 		},
 		Out: &secp256k1fx.TransferOutput{
@@ -194,7 +194,7 @@ func ChainTxTest(t *testing.T, c Chain) {
 	require.NoError(err)
 	require.Equal(populatedTx.ID(), fetchedTx.ID())
 
-	tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+	tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 		BlockchainID: ids.GenerateTestID(),
 	}}}
 	require.NoError(parser.InitializeTx(tx))
@@ -240,7 +240,7 @@ func ChainBlockTest(t *testing.T, c Chain) {
 		time.Now(),
 		[]*txs.Tx{
 			{
-				Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+				Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 					BlockchainID: ids.GenerateTestID(),
 				}},
 			},

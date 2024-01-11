@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/snow"
+	"github.com/DioneProtocol/odysseygo/snow"
 )
 
 func TestRejectMiddleware(t *testing.T) {

@@ -3,7 +3,7 @@
 
 package peer
 
-import "github.com/ava-labs/avalanchego/ids"
+import "github.com/DioneProtocol/odysseygo/ids"
 
 // ValidatorID represents a validator that we gossip to other peers
 type ValidatorID struct {

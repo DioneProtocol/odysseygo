@@ -8,15 +8,15 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/ava-labs/avalanchego/api/keystore"
-	"github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
 )
 
 // ContextInitializable represents an object that can be initialized
@@ -37,9 +37,9 @@ type Context struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey
 
-	XChainID    ids.ID
-	CChainID    ids.ID
-	AVAXAssetID ids.ID
+	XChainID     ids.ID
+	CChainID     ids.ID
+	DIONEAssetID ids.ID
 
 	Log          logging.Logger
 	Lock         sync.RWMutex
@@ -65,15 +65,15 @@ type Registerer interface {
 type ConsensusContext struct {
 	*Context
 
-	// Registers all common and snowman consensus metrics. Unlike the avalanche
+	// Registers all common and snowman consensus metrics. Unlike the odyssey
 	// consensus engine metrics, we do not prefix the name with the engine name,
 	// as snowman is used for all chains by default.
 	Registerer Registerer
-	// Only used to register Avalanche consensus metrics. Previously, all
-	// metrics were prefixed with "avalanche_{chainID}_". Now we add avalanche
-	// to the prefix, "avalanche_{chainID}_avalanche_", to differentiate
+	// Only used to register Odyssey consensus metrics. Previously, all
+	// metrics were prefixed with "odyssey_{chainID}_". Now we add odyssey
+	// to the prefix, "odyssey_{chainID}_odyssey_", to differentiate
 	// consensus operations after the DAG linearization.
-	AvalancheRegisterer Registerer
+	OdysseyRegisterer Registerer
 
 	// BlockAcceptor is the callback that will be fired whenever a VM is
 	// notified that their block was accepted.
@@ -118,11 +118,11 @@ func DefaultContextTest() *Context {
 
 func DefaultConsensusContextTest() *ConsensusContext {
 	return &ConsensusContext{
-		Context:             DefaultContextTest(),
-		Registerer:          prometheus.NewRegistry(),
-		AvalancheRegisterer: prometheus.NewRegistry(),
-		BlockAcceptor:       noOpAcceptor{},
-		TxAcceptor:          noOpAcceptor{},
-		VertexAcceptor:      noOpAcceptor{},
+		Context:           DefaultContextTest(),
+		Registerer:        prometheus.NewRegistry(),
+		OdysseyRegisterer: prometheus.NewRegistry(),
+		BlockAcceptor:     noOpAcceptor{},
+		TxAcceptor:        noOpAcceptor{},
+		VertexAcceptor:    noOpAcceptor{},
 	}
 }

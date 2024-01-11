@@ -5,13 +5,13 @@
 
 AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
 
-# Where AvalancheGo binary goes
-avalanchego_path="$AVALANCHE_PATH/build/avalanchego"
+# Where OdysseyGo binary goes
+odysseygo_path="$AVALANCHE_PATH/build/odysseygo"
 
 # Avalabs docker hub
-# avaplatform/avalanchego - defaults to local as to avoid unintentional pushes
-# You should probably set it - export DOCKER_REPO='avaplatform/avalanchego'
-avalanchego_dockerhub_repo=${DOCKER_REPO:-"avalanchego"}
+# avaplatform/odysseygo - defaults to local as to avoid unintentional pushes
+# You should probably set it - export DOCKER_REPO='avaplatform/odysseygo'
+odysseygo_dockerhub_repo=${DOCKER_REPO:-"odysseygo"}
 
 # Current branch
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI

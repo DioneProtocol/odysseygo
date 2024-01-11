@@ -11,14 +11,14 @@ import (
 
 	stdcontext "context"
 
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var (
@@ -81,7 +81,7 @@ func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error {
 			}
 
 			balance := new(big.Int).SetUint64(output.Amount)
-			balance.Mul(balance, avaxConversionRate)
+			balance.Mul(balance, dioneConversionRate)
 			account.Balance.Add(account.Balance, balance)
 		}
 	case *evm.UnsignedExportTx:
@@ -90,12 +90,12 @@ func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error {
 			err := b.AddUTXO(
 				ctx,
 				tx.DestinationChain,
-				&avax.UTXO{
-					UTXOID: avax.UTXOID{
+				&dione.UTXO{
+					UTXOID: dione.UTXOID{
 						TxID:        txID,
 						OutputIndex: uint32(i),
 					},
-					Asset: avax.Asset{ID: out.AssetID()},
+					Asset: dione.Asset{ID: out.AssetID()},
 					Out:   out.Out,
 				},
 			)
@@ -114,7 +114,7 @@ func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error {
 			}
 
 			balance := new(big.Int).SetUint64(input.Amount)
-			balance.Mul(balance, avaxConversionRate)
+			balance.Mul(balance, dioneConversionRate)
 			if account.Balance.Cmp(balance) == -1 {
 				return errInsufficientFunds
 			}

@@ -6,11 +6,11 @@ package executor
 import (
 	"reflect"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
 )
 
 type Backend struct {
@@ -19,7 +19,7 @@ type Backend struct {
 	Fxs           []*fxs.ParsedFx
 	TypeToFxIndex map[reflect.Type]int
 	Codec         codec.Manager
-	// Note: FeeAssetID may be different than ctx.AVAXAssetID if this AVM is
+	// Note: FeeAssetID may be different than ctx.DIONEAssetID if this AVM is
 	// running in a subnet.
 	FeeAssetID   ids.ID
 	Bootstrapped bool

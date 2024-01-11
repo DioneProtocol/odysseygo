@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
 )
 
 func TestEngineManager_Get(t *testing.T) {
@@ -16,7 +16,7 @@ func TestEngineManager_Get(t *testing.T) {
 		engineType p2p.EngineType
 	}
 
-	avalanche := &Engine{}
+	odyssey := &Engine{}
 	snowman := &Engine{}
 
 	type expected struct {
@@ -38,12 +38,12 @@ func TestEngineManager_Get(t *testing.T) {
 			},
 		},
 		{
-			name: "request avalanche engine",
+			name: "request odyssey engine",
 			args: args{
 				engineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 			},
 			expected: expected{
-				engine: avalanche,
+				engine: odyssey,
 			},
 		},
 		{
@@ -59,8 +59,8 @@ func TestEngineManager_Get(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			e := EngineManager{
-				Avalanche: avalanche,
-				Snowman:   snowman,
+				Odyssey: odyssey,
+				Snowman: snowman,
 			}
 
 			require.Equal(t, test.expected.engine, e.Get(test.args.engineType))

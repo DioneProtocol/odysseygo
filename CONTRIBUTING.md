@@ -1,8 +1,8 @@
-# How to Contribute to Avalanche
+# How to Contribute to Odyssey
 
 ## Setup
 
-To start developing on AvalancheGo, you'll need a few things installed.
+To start developing on OdysseyGo, you'll need a few things installed.
 
 - Golang version >= 1.20.8
 - gcc
@@ -12,21 +12,21 @@ To start developing on AvalancheGo, you'll need a few things installed.
 
 ### Security
 
-- Do not open up a GitHub issue if it relates to a security vulnerability in AvalancheGo, and instead refer to our [security policy](./SECURITY.md).
+- Do not open up a GitHub issue if it relates to a security vulnerability in OdysseyGo, and instead refer to our [security policy](./SECURITY.md).
 
 ### Did you fix whitespace, format code, or make a purely cosmetic patch?
 
-- Changes from the community that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of `avalanchego` will generally not be accepted.
+- Changes from the community that are cosmetic in nature and do not add anything substantial to the stability, functionality, or testability of `odysseygo` will generally not be accepted.
 
 ### Making an Issue
 
-- Check that the issue you're filing doesn't already exist by searching under [issues](https://github.com/ava-labs/avalanchego/issues).
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/ava-labs/avalanchego/issues/new/choose). Be sure to include a *title and clear description* with as much relevant information as possible.
+- Check that the issue you're filing doesn't already exist by searching under [issues](https://github.com/DioneProtocol/odysseygo/issues).
+- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/DioneProtocol/odysseygo/issues/new/choose). Be sure to include a *title and clear description* with as much relevant information as possible.
 
 ## Features
 
-- If you want to start a discussion about the development of a new feature or the modfiication of an existing one, start a thread under GitHub [discussions](https://github.com/ava-labs/avalanchego/discussions/categories/ideas).
-- Post a thread about your idea and why it should be added to AvalancheGo.
+- If you want to start a discussion about the development of a new feature or the modfiication of an existing one, start a thread under GitHub [discussions](https://github.com/DioneProtocol/odysseygo/discussions/categories/ideas).
+- Post a thread about your idea and why it should be added to OdysseyGo.
 - Don't start working on a pull request until you've received positive feedback from the maintainers.
 
 ## Pull Request Guidelines
@@ -55,7 +55,7 @@ To start developing on AvalancheGo, you'll need a few things installed.
 
 #### Local
 
-- Build the avalanchego binary
+- Build the odysseygo binary
 
 ```sh
 ./scripts/build.sh
@@ -81,8 +81,8 @@ To start developing on AvalancheGo, you'll need a few things installed.
 
 ### Do you have questions about the source code?
 
-- Ask any question about AvalancheGo under GitHub [discussions](https://github.com/ava-labs/avalanchego/discussions/categories/q-a).
+- Ask any question about OdysseyGo under GitHub [discussions](https://github.com/DioneProtocol/odysseygo/discussions/categories/q-a).
 
-### Do you want to contribute to the Avalanche documentation?
+### Do you want to contribute to the Odyssey documentation?
 
-- Please check out the `avalanche-docs` repository [here](https://github.com/ava-labs/avalanche-docs).
+- Please check out the `odyssey-docs` repository [here](https://github.com/DioneProtocol/odyssey-docs).

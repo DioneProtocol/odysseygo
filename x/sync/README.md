@@ -16,8 +16,8 @@ There are four message types sent between the client and server:
 3. `SyncGetChangeProofRequest`
 4. `SyncGetChangeProofResponse`
 
-These message types are defined in `avalanchego/proto/sync.proto`.
-For more information on range proofs and change proofs, see their definitions in `avalanchego/merkledb/proof.go`.
+These message types are defined in `odysseygo/proto/sync.proto`.
+For more information on range proofs and change proofs, see their definitions in `odysseygo/merkledb/proof.go`.
 
 ### `SyncGetRangeProofRequest`
 

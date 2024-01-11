@@ -8,13 +8,13 @@ import (
 	"errors"
 	"sort"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (
@@ -24,10 +24,10 @@ var (
 )
 
 type Operation struct {
-	avax.Asset `serialize:"true"`
-	UTXOIDs    []*avax.UTXOID  `serialize:"true" json:"inputIDs"`
-	FxID       ids.ID          `serialize:"false" json:"fxID"`
-	Op         fxs.FxOperation `serialize:"true" json:"operation"`
+	dione.Asset `serialize:"true"`
+	UTXOIDs     []*dione.UTXOID `serialize:"true" json:"inputIDs"`
+	FxID        ids.ID          `serialize:"false" json:"fxID"`
+	Op          fxs.FxOperation `serialize:"true" json:"operation"`
 }
 
 func (op *Operation) Verify() error {

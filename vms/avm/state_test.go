@@ -10,14 +10,14 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestSetsAndGets(t *testing.T) {
@@ -29,7 +29,7 @@ func TestSetsAndGets(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&avax.TestState{})
+					return vm.CodecRegistry().RegisterType(&dione.TestState{})
 				},
 			},
 		}},
@@ -39,27 +39,27 @@ func TestSetsAndGets(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: avax.Asset{ID: ids.Empty},
-		Out:   &avax.TestState{},
+		Asset: dione.Asset{ID: ids.Empty},
+		Out:   &dione.TestState{},
 	}
 	utxoID := utxo.InputID()
 
-	tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+	tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 		NetworkID:    constants.UnitTestID,
 		BlockchainID: chainID,
-		Ins: []*avax.TransferableInput{{
-			UTXOID: avax.UTXOID{
+		Ins: []*dione.TransferableInput{{
+			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty,
 				OutputIndex: 0,
 			},
-			Asset: avax.Asset{ID: assetID},
+			Asset: dione.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
-				Amt: 20 * units.KiloAvax,
+				Amt: 20 * units.KiloDione,
 				Input: secp256k1fx.Input{
 					SigIndices: []uint32{
 						0,
@@ -91,7 +91,7 @@ func TestFundingNoAddresses(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&avax.TestState{})
+					return vm.CodecRegistry().RegisterType(&dione.TestState{})
 				},
 			},
 		}},
@@ -101,13 +101,13 @@ func TestFundingNoAddresses(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: avax.Asset{ID: ids.Empty},
-		Out:   &avax.TestState{},
+		Asset: dione.Asset{ID: ids.Empty},
+		Out:   &dione.TestState{},
 	}
 
 	env.vm.state.AddUTXO(utxo)
@@ -123,7 +123,7 @@ func TestFundingAddresses(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&avax.TestAddressable{})
+					return vm.CodecRegistry().RegisterType(&dione.TestAddressable{})
 				},
 			},
 		}},
@@ -133,13 +133,13 @@ func TestFundingAddresses(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: avax.Asset{ID: ids.Empty},
-		Out: &avax.TestAddressable{
+		Asset: dione.Asset{ID: ids.Empty},
+		Out: &dione.TestAddressable{
 			Addrs: [][]byte{{0}},
 		},
 	}

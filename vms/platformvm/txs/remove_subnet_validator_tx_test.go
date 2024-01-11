@@ -11,16 +11,16 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/vms/types"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/vms/types"
 )
 
 var errInvalidSubnetAuth = errors.New("invalid subnet auth")
@@ -34,7 +34,7 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 
-	avaxAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
+	dioneAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -64,21 +64,21 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 
 	simpleRemoveValidatorTx := &RemoveSubnetValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs:         []*avax.TransferableOutput{},
-				Ins: []*avax.TransferableInput{
+				Outs:         []*dione.TransferableOutput{},
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.MilliAvax,
+							Amt: units.MilliDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{5},
 							},
@@ -95,9 +95,9 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 		},
 	}
 	require.NoError(simpleRemoveValidatorTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedSimpleRemoveValidatorTxBytes := []byte{
@@ -124,14 +124,14 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX assetID
+		// Mainnet DIONE assetID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// input amount = 1 MilliAvax
+		// input amount = 1 MilliDione
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x42, 0x40,
 		// number of signatures needed in input
 		0x00, 0x00, 0x00, 0x01,
@@ -162,13 +162,13 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 
 	complexRemoveValidatorTx := &RemoveSubnetValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs: []*avax.TransferableOutput{
+				Outs: []*dione.TransferableOutput{
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -183,7 +183,7 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						Out: &stakeable.LockOut{
@@ -201,28 +201,28 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 						},
 					},
 				},
-				Ins: []*avax.TransferableInput{
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.Avax,
+							Amt: units.Dione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{2, 5},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &stakeable.LockIn{
@@ -236,11 +236,11 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 3,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -260,12 +260,12 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 			SigIndices: []uint32{},
 		},
 	}
-	avax.SortTransferableOutputs(complexRemoveValidatorTx.Outs, Codec)
+	dione.SortTransferableOutputs(complexRemoveValidatorTx.Outs, Codec)
 	utils.Sort(complexRemoveValidatorTx.Ins)
 	require.NoError(simpleRemoveValidatorTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedComplexRemoveValidatorTxBytes := []byte{
@@ -283,7 +283,7 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 		// Number of outputs
 		0x00, 0x00, 0x00, 0x02,
 		// Outputs[0]
-		// Mainnet AVAX assetID
+		// Mainnet DIONE assetID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -336,14 +336,14 @@ func TestRemoveSubnetValidatorTxSerialization(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX assetID
+		// Mainnet DIONE assetID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// input amount = 1 Avax
+		// input amount = 1 Dione
 		0x00, 0x00, 0x00, 0x00, 0x3b, 0x9a, 0xca, 0x00,
 		// number of signatures needed in input
 		0x00, 0x00, 0x00, 0x02,
@@ -447,7 +447,7 @@ func TestRemoveSubnetValidatorTxSyntacticVerify(t *testing.T) {
 
 	// A BaseTx that passes syntactic verification.
 	validBaseTx := BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		},
@@ -486,7 +486,7 @@ func TestRemoveSubnetValidatorTxSyntacticVerify(t *testing.T) {
 					BaseTx: invalidBaseTx,
 				}
 			},
-			expectedErr: avax.ErrWrongNetworkID,
+			expectedErr: dione.ErrWrongNetworkID,
 		},
 		{
 			name: "invalid subnetID",

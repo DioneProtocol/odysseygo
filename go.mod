@@ -1,7 +1,7 @@
-module github.com/ava-labs/avalanchego
+module github.com/DioneProtocol/odysseygo
 
 // Changes to the minimum golang version must also be replicated in
-// scripts/build_avalanche.sh
+// scripts/build_odyssey.sh
 // Dockerfile
 // README.md
 // go.mod (here, only major.minor can be specified)
@@ -12,8 +12,7 @@ require (
 	github.com/Microsoft/go-winio v0.5.2
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/ava-labs/avalanche-network-runner-sdk v0.3.0
-	github.com/ava-labs/coreth v0.12.5-rc.6
-	github.com/ava-labs/ledger-avalanche/go v0.0.0-20230105152938-00a24d05a8c7
+	github.com/DioneProtocol/coreth v0.12.5-rc.6
 	github.com/btcsuite/btcd/btcutil v1.1.3
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0
 	github.com/ethereum/go-ethereum v1.12.0
@@ -148,3 +147,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/DioneProtocol/coreth => ../coreth

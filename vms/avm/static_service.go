@@ -10,28 +10,28 @@ import (
 
 	stdjson "encoding/json"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/nftfx"
-	"github.com/ava-labs/avalanchego/vms/propertyfx"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
 	errUnknownAssetType = errors.New("unknown asset type")
 
-	_ avax.TransferableIn  = (*secp256k1fx.TransferInput)(nil)
-	_ verify.State         = (*secp256k1fx.MintOutput)(nil)
-	_ avax.TransferableOut = (*secp256k1fx.TransferOutput)(nil)
-	_ fxs.FxOperation      = (*secp256k1fx.MintOperation)(nil)
-	_ verify.Verifiable    = (*secp256k1fx.Credential)(nil)
+	_ dione.TransferableIn  = (*secp256k1fx.TransferInput)(nil)
+	_ verify.State          = (*secp256k1fx.MintOutput)(nil)
+	_ dione.TransferableOut = (*secp256k1fx.TransferOutput)(nil)
+	_ fxs.FxOperation       = (*secp256k1fx.MintOperation)(nil)
+	_ verify.Verifiable     = (*secp256k1fx.Credential)(nil)
 
 	_ verify.State      = (*nftfx.MintOutput)(nil)
 	_ verify.State      = (*nftfx.TransferOutput)(nil)
@@ -96,7 +96,7 @@ func (*StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, repl
 		asset := GenesisAsset{
 			Alias: assetAlias,
 			CreateAssetTx: txs.CreateAssetTx{
-				BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+				BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 					NetworkID:    uint32(args.NetworkID),
 					BlockchainID: ids.Empty,
 					Memo:         assetMemo,

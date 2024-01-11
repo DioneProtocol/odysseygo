@@ -9,11 +9,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 const (
@@ -55,11 +55,11 @@ func (v *SyntacticVerifier) BaseTx(tx *txs.BaseTx) error {
 		return err
 	}
 
-	err := avax.VerifyTx(
+	err := dione.VerifyTx(
 		v.Config.TxFee,
 		v.FeeAssetID,
-		[][]*avax.TransferableInput{tx.Ins},
-		[][]*avax.TransferableOutput{tx.Outs},
+		[][]*dione.TransferableInput{tx.Ins},
+		[][]*dione.TransferableOutput{tx.Outs},
 		v.Codec,
 	)
 	if err != nil {
@@ -118,11 +118,11 @@ func (v *SyntacticVerifier) CreateAssetTx(tx *txs.CreateAssetTx) error {
 		return err
 	}
 
-	err := avax.VerifyTx(
+	err := dione.VerifyTx(
 		v.Config.CreateAssetTxFee,
 		v.FeeAssetID,
-		[][]*avax.TransferableInput{tx.Ins},
-		[][]*avax.TransferableOutput{tx.Outs},
+		[][]*dione.TransferableInput{tx.Ins},
+		[][]*dione.TransferableOutput{tx.Outs},
 		v.Codec,
 	)
 	if err != nil {
@@ -166,11 +166,11 @@ func (v *SyntacticVerifier) OperationTx(tx *txs.OperationTx) error {
 		return err
 	}
 
-	err := avax.VerifyTx(
+	err := dione.VerifyTx(
 		v.Config.TxFee,
 		v.FeeAssetID,
-		[][]*avax.TransferableInput{tx.Ins},
-		[][]*avax.TransferableOutput{tx.Outs},
+		[][]*dione.TransferableInput{tx.Ins},
+		[][]*dione.TransferableOutput{tx.Outs},
 		v.Codec,
 	)
 	if err != nil {
@@ -226,14 +226,14 @@ func (v *SyntacticVerifier) ImportTx(tx *txs.ImportTx) error {
 		return err
 	}
 
-	err := avax.VerifyTx(
+	err := dione.VerifyTx(
 		v.Config.TxFee,
 		v.FeeAssetID,
-		[][]*avax.TransferableInput{
+		[][]*dione.TransferableInput{
 			tx.Ins,
 			tx.ImportedIns,
 		},
-		[][]*avax.TransferableOutput{tx.Outs},
+		[][]*dione.TransferableOutput{tx.Outs},
 		v.Codec,
 	)
 	if err != nil {
@@ -268,11 +268,11 @@ func (v *SyntacticVerifier) ExportTx(tx *txs.ExportTx) error {
 		return err
 	}
 
-	err := avax.VerifyTx(
+	err := dione.VerifyTx(
 		v.Config.TxFee,
 		v.FeeAssetID,
-		[][]*avax.TransferableInput{tx.Ins},
-		[][]*avax.TransferableOutput{
+		[][]*dione.TransferableInput{tx.Ins},
+		[][]*dione.TransferableOutput{
 			tx.Outs,
 			tx.ExportedOuts,
 		},

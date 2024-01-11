@@ -4,14 +4,14 @@
 package genesis
 
 import (
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 // UTXO adds messages to UTXOs
 type UTXO struct {
-	avax.UTXO `serialize:"true"`
-	Message   []byte `serialize:"true" json:"message"`
+	dione.UTXO `serialize:"true"`
+	Message    []byte `serialize:"true" json:"message"`
 }
 
 // Genesis represents a genesis state of the platform chain
@@ -44,7 +44,7 @@ func Parse(genesisBytes []byte) (*Genesis, error) {
 
 // State represents the genesis state of the platform chain
 type State struct {
-	UTXOs         []*avax.UTXO
+	UTXOs         []*dione.UTXO
 	Validators    []*txs.Tx
 	Chains        []*txs.Tx
 	Timestamp     uint64
@@ -57,7 +57,7 @@ func ParseState(genesisBytes []byte) (*State, error) {
 		return nil, err
 	}
 
-	utxos := make([]*avax.UTXO, 0, len(genesis.UTXOs))
+	utxos := make([]*dione.UTXO, 0, len(genesis.UTXOs))
 	for _, utxo := range genesis.UTXOs {
 		utxos = append(utxos, &utxo.UTXO)
 	}

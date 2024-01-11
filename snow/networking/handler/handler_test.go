@@ -16,18 +16,18 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/message"
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/networking/tracker"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/subnets"
-	"github.com/ava-labs/avalanchego/utils/math/meter"
-	"github.com/ava-labs/avalanchego/utils/resource"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/utils/math/meter"
+	"github.com/DioneProtocol/odysseygo/utils/resource"
 
-	commontracker "github.com/ava-labs/avalanchego/snow/engine/common/tracker"
+	commontracker "github.com/DioneProtocol/odysseygo/snow/engine/common/tracker"
 )
 
 const testThreadPoolSize = 2
@@ -476,12 +476,12 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 		)
 	}{
 		{
-			name:                "current - avalanche, requested - unspecified",
+			name:                "current - odyssey, requested - unspecified",
 			currentEngineType:   p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
-					Avalanche: &Engine{
+					Odyssey: &Engine{
 						StateSyncer:  nil,
 						Bootstrapper: b,
 						Consensus:    e,
@@ -491,12 +491,12 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 			},
 		},
 		{
-			name:                "current - avalanche, requested - avalanche",
+			name:                "current - odyssey, requested - odyssey",
 			currentEngineType:   p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
-					Avalanche: &Engine{
+					Odyssey: &Engine{
 						StateSyncer:  nil,
 						Bootstrapper: b,
 						Consensus:    e,
@@ -511,7 +511,7 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
-					Avalanche: nil,
+					Odyssey: nil,
 					Snowman: &Engine{
 						StateSyncer:  nil,
 						Bootstrapper: b,
@@ -521,12 +521,12 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 			},
 		},
 		{
-			name:                "current - snowman, requested - avalanche",
+			name:                "current - snowman, requested - odyssey",
 			currentEngineType:   p2p.EngineType_ENGINE_TYPE_SNOWMAN,
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
-					Avalanche: &Engine{
+					Odyssey: &Engine{
 						StateSyncer:  nil,
 						Bootstrapper: nil,
 						Consensus:    e,
@@ -545,7 +545,7 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_SNOWMAN,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
-					Avalanche: nil,
+					Odyssey: nil,
 					Snowman: &Engine{
 						StateSyncer:  nil,
 						Bootstrapper: b,

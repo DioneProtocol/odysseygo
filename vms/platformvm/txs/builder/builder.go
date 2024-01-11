@@ -8,19 +8,19 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/utxo"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // Max number of items allowed in a page
@@ -174,7 +174,7 @@ func New(
 	clk *mockable.Clock,
 	fx fx.Fx,
 	state state.State,
-	atomicUTXOManager avax.AtomicUTXOManager,
+	atomicUTXOManager dione.AtomicUTXOManager,
 	utxoSpender utxo.Spender,
 ) Builder {
 	return &builder{
@@ -189,7 +189,7 @@ func New(
 }
 
 type builder struct {
-	avax.AtomicUTXOManager
+	dione.AtomicUTXOManager
 	utxo.Spender
 	state state.State
 
@@ -212,7 +212,7 @@ func (b *builder) NewImportTx(
 		return nil, fmt.Errorf("problem retrieving atomic UTXOs: %w", err)
 	}
 
-	importedInputs := []*avax.TransferableInput{}
+	importedInputs := []*dione.TransferableInput{}
 	signers := [][]*secp256k1.PrivateKey{}
 
 	importedAmounts := make(map[ids.ID]uint64)
@@ -222,7 +222,7 @@ func (b *builder) NewImportTx(
 		if err != nil {
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(dione.TransferableIn)
 		if !ok {
 			continue
 		}
@@ -231,41 +231,41 @@ func (b *builder) NewImportTx(
 		if err != nil {
 			return nil, err
 		}
-		importedInputs = append(importedInputs, &avax.TransferableInput{
+		importedInputs = append(importedInputs, &dione.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In:     input,
 		})
 		signers = append(signers, utxoSigners)
 	}
-	avax.SortTransferableInputsWithSigners(importedInputs, signers)
+	dione.SortTransferableInputsWithSigners(importedInputs, signers)
 
 	if len(importedAmounts) == 0 {
 		return nil, ErrNoFunds // No imported UTXOs were spendable
 	}
 
-	importedAVAX := importedAmounts[b.ctx.AVAXAssetID]
+	importedDIONE := importedAmounts[b.ctx.DIONEAssetID]
 
-	ins := []*avax.TransferableInput{}
-	outs := []*avax.TransferableOutput{}
+	ins := []*dione.TransferableInput{}
+	outs := []*dione.TransferableOutput{}
 	switch {
-	case importedAVAX < b.cfg.TxFee: // imported amount goes toward paying tx fee
+	case importedDIONE < b.cfg.TxFee: // imported amount goes toward paying tx fee
 		var baseSigners [][]*secp256k1.PrivateKey
-		ins, outs, _, baseSigners, err = b.Spend(b.state, keys, 0, b.cfg.TxFee-importedAVAX, changeAddr)
+		ins, outs, _, baseSigners, err = b.Spend(b.state, keys, 0, b.cfg.TxFee-importedDIONE, changeAddr)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 		}
 		signers = append(baseSigners, signers...)
-		delete(importedAmounts, b.ctx.AVAXAssetID)
-	case importedAVAX == b.cfg.TxFee:
-		delete(importedAmounts, b.ctx.AVAXAssetID)
+		delete(importedAmounts, b.ctx.DIONEAssetID)
+	case importedDIONE == b.cfg.TxFee:
+		delete(importedAmounts, b.ctx.DIONEAssetID)
 	default:
-		importedAmounts[b.ctx.AVAXAssetID] -= b.cfg.TxFee
+		importedAmounts[b.ctx.DIONEAssetID] -= b.cfg.TxFee
 	}
 
 	for assetID, amount := range importedAmounts {
-		outs = append(outs, &avax.TransferableOutput{
-			Asset: avax.Asset{ID: assetID},
+		outs = append(outs, &dione.TransferableOutput{
+			Asset: dione.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -277,11 +277,11 @@ func (b *builder) NewImportTx(
 		})
 	}
 
-	avax.SortTransferableOutputs(outs, txs.Codec) // sort imported outputs
+	dione.SortTransferableOutputs(outs, txs.Codec) // sort imported outputs
 
 	// Create the transaction
 	utx := &txs.ImportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Outs:         outs,
@@ -297,7 +297,7 @@ func (b *builder) NewImportTx(
 	return tx, tx.SyntacticVerify(b.ctx)
 }
 
-// TODO: should support other assets than AVAX
+// TODO: should support other assets than DIONE
 func (b *builder) NewExportTx(
 	amount uint64,
 	chainID ids.ID,
@@ -316,15 +316,15 @@ func (b *builder) NewExportTx(
 
 	// Create the transaction
 	utx := &txs.ExportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
 			Outs:         outs, // Non-exported outputs
 		}},
 		DestinationChain: chainID,
-		ExportedOutputs: []*avax.TransferableOutput{{ // Exported to X-Chain
-			Asset: avax.Asset{ID: b.ctx.AVAXAssetID},
+		ExportedOutputs: []*dione.TransferableOutput{{ // Exported to X-Chain
+			Asset: dione.Asset{ID: b.ctx.DIONEAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -369,7 +369,7 @@ func (b *builder) NewCreateChainTx(
 
 	// Create the tx
 	utx := &txs.CreateChainTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
@@ -407,7 +407,7 @@ func (b *builder) NewCreateSubnetTx(
 
 	// Create the tx
 	utx := &txs.CreateSubnetTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
@@ -441,7 +441,7 @@ func (b *builder) NewAddValidatorTx(
 	}
 	// Create the tx
 	utx := &txs.AddValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
@@ -483,7 +483,7 @@ func (b *builder) NewAddDelegatorTx(
 	}
 	// Create the tx
 	utx := &txs.AddDelegatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
@@ -531,7 +531,7 @@ func (b *builder) NewAddSubnetValidatorTx(
 
 	// Create the tx
 	utx := &txs.AddSubnetValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,
@@ -574,7 +574,7 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 
 	// Create the tx
 	utx := &txs.RemoveSubnetValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    b.ctx.NetworkID,
 			BlockchainID: b.ctx.ChainID,
 			Ins:          ins,

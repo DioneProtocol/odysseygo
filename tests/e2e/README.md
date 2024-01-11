@@ -1,4 +1,4 @@
-# Avalanche e2e test suites
+# Odyssey e2e test suites
 
 - Works with fixture-managed networks.
 - Compiles to a single binary with customizable configurations.
@@ -11,7 +11,7 @@ ACK_GINKGO_RC=true ginkgo build ./tests/e2e
 ./tests/e2e/e2e.test --help
 
 ./tests/e2e/e2e.test \
---avalanchego-path=./build/avalanchego
+--odysseygo-path=./build/odysseygo
 ```
 
 See [`tests.e2e.sh`](../../scripts/tests.e2e.sh) for an example.
@@ -49,13 +49,13 @@ every invocation of the test under development.
 To use a persistent network:
 
 ```bash
-# From the root of the avalanchego repo
+# From the root of the odysseygo repo
 
 # Build the testnetctl binary
 $ ./scripts/build_testnetctl.sh
 
 # Start a new network
-$ ./build/testnetctl start-network --avalanchego-path=/path/to/avalanchego
+$ ./build/testnetctl start-network --odysseygo-path=/path/to/odysseygo
 ...
 Started network 1000 @ /home/me/.testnetctl/networks/1000
 
@@ -66,12 +66,12 @@ Configure testnetctl to target this network by default with one of the following
 
 # Start a new test run using the persistent network
 ginkgo -v ./tests/e2e -- \
-    --avalanchego-path=/path/to/avalanchego \
+    --odysseygo-path=/path/to/odysseygo \
     --ginkgo-focus-file=[name of file containing test] \
     --use-persistent-network \
     --network-dir=/path/to/network
 
-# It is also possible to set the AVALANCHEGO_PATH env var instead of supplying --avalanchego-path
+# It is also possible to set the AVALANCHEGO_PATH env var instead of supplying --odysseygo-path
 # and to set TESTNETCTL_NETWORK_DIR instead of supplying --network-dir.
 ```
 
