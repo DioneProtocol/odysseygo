@@ -6,7 +6,7 @@ package merkledb
 import (
 	"bytes"
 
-	"github.com/ava-labs/avalanchego/database"
+	"github.com/DioneProtocol/odysseygo/database"
 
 	"golang.org/x/exp/slices"
 )

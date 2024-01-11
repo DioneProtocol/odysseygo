@@ -10,23 +10,23 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 	require := require.New(ginkgo.GinkgoT())
 
-	const transferAmount = 10 * units.Avax
+	const transferAmount = 10 * units.Dione
 
 	ginkgo.It("should ensure that funds can be transferred from the X-Chain to the C-Chain and the P-Chain", func() {
 		nodeURI := e2e.Env.GetRandomNodeURI()
@@ -44,7 +44,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 
 		ginkgo.By("defining common configuration")
 		recipientEthAddress := evm.GetEthAddress(recipientKey)
-		avaxAssetID := xWallet.AVAXAssetID()
+		dioneAssetID := xWallet.DIONEAssetID()
 		// Use the same owner for sending to X-Chain and importing funds to P-Chain
 		recipientOwner := secp256k1fx.OutputOwners{
 			Threshold: 1,
@@ -53,10 +53,10 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 			},
 		}
 		// Use the same outputs for both C-Chain and P-Chain exports
-		exportOutputs := []*avax.TransferableOutput{
+		exportOutputs := []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
-					ID: avaxAssetID,
+				Asset: dione.Asset{
+					ID: dioneAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: transferAmount,
@@ -72,9 +72,9 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 
 		ginkgo.By("sending funds from one address to another on the X-Chain", func() {
 			_, err = xWallet.IssueBaseTx(
-				[]*avax.TransferableOutput{{
-					Asset: avax.Asset{
-						ID: avaxAssetID,
+				[]*dione.TransferableOutput{{
+					Asset: dione.Asset{
+						ID: dioneAssetID,
 					},
 					Out: &secp256k1fx.TransferOutput{
 						Amt:          transferAmount,
@@ -91,10 +91,10 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 				recipientKey.Address(),
 			)))
 			require.NoError(err)
-			require.Greater(balances[avaxAssetID], uint64(0))
+			require.Greater(balances[dioneAssetID], uint64(0))
 		})
 
-		ginkgo.By("exporting AVAX from the X-Chain to the C-Chain", func() {
+		ginkgo.By("exporting DIONE from the X-Chain to the C-Chain", func() {
 			_, err := xWallet.IssueExportTx(
 				cWallet.BlockchainID(),
 				exportOutputs,
@@ -106,7 +106,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 		ginkgo.By("initializing a new eth client")
 		ethClient := e2e.Env.NewEthClient(nodeURI)
 
-		ginkgo.By("importing AVAX from the X-Chain to the C-Chain", func() {
+		ginkgo.By("importing DIONE from the X-Chain to the C-Chain", func() {
 			_, err := cWallet.IssueImportTx(
 				xWallet.BlockchainID(),
 				recipientEthAddress,
@@ -123,7 +123,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 			return balance.Cmp(big.NewInt(0)) > 0
 		}, e2e.DefaultTimeout, e2e.DefaultPollingInterval, "failed to see recipient address funded before timeout")
 
-		ginkgo.By("exporting AVAX from the X-Chain to the P-Chain", func() {
+		ginkgo.By("exporting DIONE from the X-Chain to the P-Chain", func() {
 			_, err := xWallet.IssueExportTx(
 				constants.PlatformChainID,
 				exportOutputs,
@@ -132,7 +132,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("importing AVAX from the X-Chain to the P-Chain", func() {
+		ginkgo.By("importing DIONE from the X-Chain to the P-Chain", func() {
 			_, err := pWallet.IssueImportTx(
 				xWallet.BlockchainID(),
 				&recipientOwner,
@@ -146,7 +146,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 				recipientKey.Address(),
 			)))
 			require.NoError(err)
-			require.Greater(balances[avaxAssetID], uint64(0))
+			require.Greater(balances[dioneAssetID], uint64(0))
 		})
 	})
 })

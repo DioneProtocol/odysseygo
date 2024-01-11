@@ -249,7 +249,7 @@ type InitializeRequest struct {
 	PublicKey    []byte               `protobuf:"bytes,5,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
 	XChainId     []byte               `protobuf:"bytes,6,opt,name=x_chain_id,json=xChainId,proto3" json:"x_chain_id,omitempty"`
 	CChainId     []byte               `protobuf:"bytes,7,opt,name=c_chain_id,json=cChainId,proto3" json:"c_chain_id,omitempty"`
-	AvaxAssetId  []byte               `protobuf:"bytes,8,opt,name=avax_asset_id,json=avaxAssetId,proto3" json:"avax_asset_id,omitempty"`
+	DioneAssetId  []byte               `protobuf:"bytes,8,opt,name=dione_asset_id,json=dioneAssetId,proto3" json:"dione_asset_id,omitempty"`
 	ChainDataDir string               `protobuf:"bytes,9,opt,name=chain_data_dir,json=chainDataDir,proto3" json:"chain_data_dir,omitempty"`
 	GenesisBytes []byte               `protobuf:"bytes,10,opt,name=genesis_bytes,json=genesisBytes,proto3" json:"genesis_bytes,omitempty"`
 	UpgradeBytes []byte               `protobuf:"bytes,11,opt,name=upgrade_bytes,json=upgradeBytes,proto3" json:"upgrade_bytes,omitempty"`
@@ -342,9 +342,9 @@ func (x *InitializeRequest) GetCChainId() []byte {
 	return nil
 }
 
-func (x *InitializeRequest) GetAvaxAssetId() []byte {
+func (x *InitializeRequest) GetDioneAssetId() []byte {
 	if x != nil {
-		return x.AvaxAssetId
+		return x.DioneAssetId
 	}
 	return nil
 }

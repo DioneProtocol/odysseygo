@@ -11,16 +11,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var _ txs.UnsignedTx = (*dummyUnsignedTx)(nil)
@@ -59,48 +59,48 @@ func TestVerifySpendUTXOs(t *testing.T) {
 	// Adjust input/output locktimes accordingly.
 	tests := []struct {
 		description     string
-		utxos           []*avax.UTXO
-		ins             []*avax.TransferableInput
-		outs            []*avax.TransferableOutput
+		utxos           []*dione.UTXO
+		ins             []*dione.TransferableInput
+		outs            []*dione.TransferableOutput
 		creds           []verify.Verifiable
 		producedAmounts map[ids.ID]uint64
 		expectedErr     error
 	}{
 		{
 			description:     "no inputs, no outputs, no fee",
-			utxos:           []*avax.UTXO{},
-			ins:             []*avax.TransferableInput{},
-			outs:            []*avax.TransferableOutput{},
+			utxos:           []*dione.UTXO{},
+			ins:             []*dione.TransferableInput{},
+			outs:            []*dione.TransferableOutput{},
 			creds:           []verify.Verifiable{},
 			producedAmounts: map[ids.ID]uint64{},
 			expectedErr:     nil,
 		},
 		{
 			description: "no inputs, no outputs, positive fee",
-			utxos:       []*avax.UTXO{},
-			ins:         []*avax.TransferableInput{},
-			outs:        []*avax.TransferableOutput{},
+			utxos:       []*dione.UTXO{},
+			ins:         []*dione.TransferableInput{},
+			outs:        []*dione.TransferableOutput{},
 			creds:       []verify.Verifiable{},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "wrong utxo assetID, one input, no outputs, no fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: customAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: customAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -109,19 +109,19 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "one wrong assetID input, no outputs, no fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: customAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: customAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -130,21 +130,21 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "one input, one wrong assetID output, no fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
@@ -158,8 +158,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempt to consume locked output as unlocked",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &stakeable.LockOut{
 					Locktime: uint64(now.Add(time.Second).Unix()),
 					TransferableOut: &secp256k1fx.TransferOutput{
@@ -167,13 +167,13 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -182,8 +182,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempt to modify locktime",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &stakeable.LockOut{
 					Locktime: uint64(now.Add(time.Second).Unix()),
 					TransferableOut: &secp256k1fx.TransferOutput{
@@ -191,8 +191,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &stakeable.LockIn{
 					Locktime: uint64(now.Unix()),
 					TransferableIn: &secp256k1fx.TransferInput{
@@ -200,7 +200,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -209,93 +209,93 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "one input, no outputs, positive fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "wrong number of credentials",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs:  []*avax.TransferableOutput{},
+			outs:  []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: errWrongNumberCredentials,
 		},
 		{
 			description: "wrong number of UTXOs",
-			utxos:       []*avax.UTXO{},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos:       []*dione.UTXO{},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: errWrongNumberUTXOs,
 		},
 		{
 			description: "invalid credential",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				(*secp256k1fx.Credential)(nil),
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: secp256k1fx.ErrNilCredential,
 		},
 		{
 			description: "invalid signature",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -306,8 +306,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 					Input: secp256k1fx.Input{
@@ -315,7 +315,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{
 					Sigs: [][secp256k1.SignatureLen]byte{
@@ -324,37 +324,37 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: secp256k1.ErrInvalidSig,
 		},
 		{
 			description: "one input, no outputs, positive fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 1,
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "locked one input, no outputs, no fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &stakeable.LockOut{
 					Locktime: uint64(now.Unix()) + 1,
 					TransferableOut: &secp256k1fx.TransferOutput{
@@ -362,8 +362,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &stakeable.LockIn{
 					Locktime: uint64(now.Unix()) + 1,
 					TransferableIn: &secp256k1fx.TransferInput{
@@ -371,7 +371,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -380,8 +380,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "locked one input, no outputs, positive fee",
-			utxos: []*avax.UTXO{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			utxos: []*dione.UTXO{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				Out: &stakeable.LockOut{
 					Locktime: uint64(now.Unix()) + 1,
 					TransferableOut: &secp256k1fx.TransferOutput{
@@ -389,8 +389,8 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			ins: []*avax.TransferableInput{{
-				Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+			ins: []*dione.TransferableInput{{
+				Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 				In: &stakeable.LockIn{
 					Locktime: uint64(now.Unix()) + 1,
 					TransferableIn: &secp256k1fx.TransferInput{
@@ -398,20 +398,20 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			}},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "one locked and one unlocked input, one locked output, positive fee",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -420,15 +420,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &stakeable.LockIn{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableIn: &secp256k1fx.TransferInput{
@@ -437,15 +437,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -459,15 +459,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "one locked and one unlocked input, one locked output, positive fee, partially locked",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -476,15 +476,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 2,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &stakeable.LockIn{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableIn: &secp256k1fx.TransferInput{
@@ -493,15 +493,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 2,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) + 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -515,15 +515,15 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "one unlocked input, one locked output, zero fee",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) - 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -532,17 +532,17 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
@@ -556,31 +556,31 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted overflow",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 2,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: stdmath.MaxUint64,
 					},
@@ -594,25 +594,25 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted mint",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -629,25 +629,25 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted mint through locking",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -656,7 +656,7 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -673,31 +673,31 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted mint through mixed locking (low then high)",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 2,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -714,31 +714,31 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted mint through mixed locking (high then low)",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: stdmath.MaxUint64,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -754,26 +754,26 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			expectedErr:     ErrInsufficientLockedFunds,
 		},
 		{
-			description: "transfer non-avax asset",
-			utxos: []*avax.UTXO{
+			description: "transfer non-dione asset",
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
@@ -786,26 +786,26 @@ func TestVerifySpendUTXOs(t *testing.T) {
 			expectedErr:     nil,
 		},
 		{
-			description: "lock non-avax asset",
-			utxos: []*avax.UTXO{
+			description: "lock non-dione asset",
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Add(time.Second).Unix()),
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -822,25 +822,25 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted asset conversion",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
@@ -854,64 +854,64 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "attempted asset conversion with burn",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "two inputs, one output with custom asset, with fee",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
@@ -922,56 +922,56 @@ func TestVerifySpendUTXOs(t *testing.T) {
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "one input, fee, custom asset",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
+				h.ctx.DIONEAssetID: 1,
 			},
 			expectedErr: ErrInsufficientUnlockedFunds,
 		},
 		{
 			description: "one input, custom fee",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -982,23 +982,23 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "one input, custom fee, wrong burn",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 			},
@@ -1009,50 +1009,50 @@ func TestVerifySpendUTXOs(t *testing.T) {
 		},
 		{
 			description: "two inputs, multiple fee",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: h.ctx.AVAXAssetID},
+					Asset: dione.Asset{ID: h.ctx.DIONEAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{},
+			outs: []*dione.TransferableOutput{},
 			creds: []verify.Verifiable{
 				&secp256k1fx.Credential{},
 				&secp256k1fx.Credential{},
 			},
 			producedAmounts: map[ids.ID]uint64{
-				h.ctx.AVAXAssetID: 1,
-				customAssetID:     1,
+				h.ctx.DIONEAssetID: 1,
+				customAssetID:      1,
 			},
 			expectedErr: nil,
 		},
 		{
 			description: "one unlock input, one locked output, zero fee, unlocked, custom asset",
-			utxos: []*avax.UTXO{
+			utxos: []*dione.UTXO{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &stakeable.LockOut{
 						Locktime: uint64(now.Unix()) - 1,
 						TransferableOut: &secp256k1fx.TransferOutput{
@@ -1061,17 +1061,17 @@ func TestVerifySpendUTXOs(t *testing.T) {
 					},
 				},
 			},
-			ins: []*avax.TransferableInput{
+			ins: []*dione.TransferableInput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt: 1,
 					},
 				},
 			},
-			outs: []*avax.TransferableOutput{
+			outs: []*dione.TransferableOutput{
 				{
-					Asset: avax.Asset{ID: customAssetID},
+					Asset: dione.Asset{ID: customAssetID},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: 1,
 					},

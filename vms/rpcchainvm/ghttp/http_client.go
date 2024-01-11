@@ -7,11 +7,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/ava-labs/avalanchego/vms/rpcchainvm/ghttp/gresponsewriter"
-	"github.com/ava-labs/avalanchego/vms/rpcchainvm/grpcutils"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp/gresponsewriter"
+	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
 
-	httppb "github.com/ava-labs/avalanchego/proto/pb/http"
-	responsewriterpb "github.com/ava-labs/avalanchego/proto/pb/http/responsewriter"
+	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
+	responsewriterpb "github.com/DioneProtocol/odysseygo/proto/pb/http/responsewriter"
 )
 
 var _ http.Handler = (*Client)(nil)

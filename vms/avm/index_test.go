@@ -11,20 +11,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/index"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/index"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestIndexTransaction_Ordered(t *testing.T) {
@@ -40,12 +40,12 @@ func TestIndexTransaction_Ordered(t *testing.T) {
 
 	key := keys[0]
 	addr := key.PublicKey().Address()
-	txAssetID := avax.Asset{ID: env.genesisTx.ID()}
+	txAssetID := dione.Asset{ID: env.genesisTx.ID()}
 
 	var txs []*txs.Tx
 	for i := 0; i < 5; i++ {
 		// make utxo
-		utxoID := avax.UTXOID{
+		utxoID := dione.UTXOID{
 			TxID: ids.GenerateTestID(),
 		}
 		utxo := buildUTXO(utxoID, txAssetID, addr)
@@ -80,13 +80,13 @@ func TestIndexTransaction_MultipleTransactions(t *testing.T) {
 	}()
 
 	addressTxMap := map[ids.ShortID]*txs.Tx{}
-	txAssetID := avax.Asset{ID: env.genesisTx.ID()}
+	txAssetID := dione.Asset{ID: env.genesisTx.ID()}
 
 	for _, key := range keys {
 		addr := key.PublicKey().Address()
 
 		// make utxo
-		utxoID := avax.UTXOID{
+		utxoID := dione.UTXOID{
 			TxID: ids.GenerateTestID(),
 		}
 		utxo := buildUTXO(utxoID, txAssetID, addr)
@@ -129,13 +129,13 @@ func TestIndexTransaction_MultipleAddresses(t *testing.T) {
 	}
 	utils.Sort(addrs)
 
-	txAssetID := avax.Asset{ID: env.genesisTx.ID()}
+	txAssetID := dione.Asset{ID: env.genesisTx.ID()}
 
 	key := keys[0]
 	addr := key.PublicKey().Address()
 
 	// make utxo
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID: ids.GenerateTestID(),
 	}
 	utxo := buildUTXO(utxoID, txAssetID, addr)
@@ -244,8 +244,8 @@ func TestIndexingAllowIncomplete(t *testing.T) {
 	require.ErrorIs(err, index.ErrIndexingRequiredFromGenesis)
 }
 
-func buildUTXO(utxoID avax.UTXOID, txAssetID avax.Asset, addr ids.ShortID) *avax.UTXO {
-	return &avax.UTXO{
+func buildUTXO(utxoID dione.UTXOID, txAssetID dione.Asset, addr ids.ShortID) *dione.UTXO {
+	return &dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  txAssetID,
 		Out: &secp256k1fx.TransferOutput{
@@ -258,12 +258,12 @@ func buildUTXO(utxoID avax.UTXOID, txAssetID avax.Asset, addr ids.ShortID) *avax
 	}
 }
 
-func buildTX(utxoID avax.UTXOID, txAssetID avax.Asset, address ...ids.ShortID) *txs.Tx {
+func buildTX(utxoID dione.UTXOID, txAssetID dione.Asset, address ...ids.ShortID) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
+			Ins: []*dione.TransferableInput{{
 				UTXOID: utxoID,
 				Asset:  txAssetID,
 				In: &secp256k1fx.TransferInput{
@@ -271,7 +271,7 @@ func buildTX(utxoID avax.UTXOID, txAssetID avax.Asset, address ...ids.ShortID) *
 					Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 				},
 			}},
-			Outs: []*avax.TransferableOutput{{
+			Outs: []*dione.TransferableOutput{{
 				Asset: txAssetID,
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1000,

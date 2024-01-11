@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 const (
@@ -125,9 +125,9 @@ func (e *ProposalTxExecutor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 
 	// Set up the state if this tx is committed
 	// Consume the UTXOs
-	avax.Consume(e.OnCommitState, tx.Ins)
+	dione.Consume(e.OnCommitState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnCommitState, txID, tx.Outs)
+	dione.Produce(e.OnCommitState, txID, tx.Outs)
 
 	newStaker, err := state.NewPendingStaker(txID, tx)
 	if err != nil {
@@ -138,9 +138,9 @@ func (e *ProposalTxExecutor) AddValidatorTx(tx *txs.AddValidatorTx) error {
 
 	// Set up the state if this tx is aborted
 	// Consume the UTXOs
-	avax.Consume(e.OnAbortState, tx.Ins)
+	dione.Consume(e.OnAbortState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnAbortState, txID, onAbortOuts)
+	dione.Produce(e.OnAbortState, txID, onAbortOuts)
 
 	e.PrefersCommit = tx.StartTime().After(e.Clk.Time())
 	return nil
@@ -173,9 +173,9 @@ func (e *ProposalTxExecutor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) 
 
 	// Set up the state if this tx is committed
 	// Consume the UTXOs
-	avax.Consume(e.OnCommitState, tx.Ins)
+	dione.Consume(e.OnCommitState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnCommitState, txID, tx.Outs)
+	dione.Produce(e.OnCommitState, txID, tx.Outs)
 
 	newStaker, err := state.NewPendingStaker(txID, tx)
 	if err != nil {
@@ -186,9 +186,9 @@ func (e *ProposalTxExecutor) AddSubnetValidatorTx(tx *txs.AddSubnetValidatorTx) 
 
 	// Set up the state if this tx is aborted
 	// Consume the UTXOs
-	avax.Consume(e.OnAbortState, tx.Ins)
+	dione.Consume(e.OnAbortState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnAbortState, txID, tx.Outs)
+	dione.Produce(e.OnAbortState, txID, tx.Outs)
 
 	e.PrefersCommit = tx.StartTime().After(e.Clk.Time())
 	return nil
@@ -222,9 +222,9 @@ func (e *ProposalTxExecutor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 
 	// Set up the state if this tx is committed
 	// Consume the UTXOs
-	avax.Consume(e.OnCommitState, tx.Ins)
+	dione.Consume(e.OnCommitState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnCommitState, txID, tx.Outs)
+	dione.Produce(e.OnCommitState, txID, tx.Outs)
 
 	newStaker, err := state.NewPendingStaker(txID, tx)
 	if err != nil {
@@ -235,9 +235,9 @@ func (e *ProposalTxExecutor) AddDelegatorTx(tx *txs.AddDelegatorTx) error {
 
 	// Set up the state if this tx is aborted
 	// Consume the UTXOs
-	avax.Consume(e.OnAbortState, tx.Ins)
+	dione.Consume(e.OnAbortState, tx.Ins)
 	// Produce the UTXOs
-	avax.Produce(e.OnAbortState, txID, onAbortOuts)
+	dione.Produce(e.OnAbortState, txID, onAbortOuts)
 
 	e.PrefersCommit = tx.StartTime().After(e.Clk.Time())
 	return nil
@@ -371,8 +371,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 
 		// Refund the stake here
 		for i, out := range stake {
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        tx.TxID,
 					OutputIndex: uint32(len(outputs) + i),
 				},
@@ -397,8 +397,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 				return ErrInvalidState
 			}
 
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        tx.TxID,
 					OutputIndex: uint32(len(outputs) + len(stake)),
 				},
@@ -432,8 +432,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 				return ErrInvalidState
 			}
 
-			onCommitUtxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			onCommitUtxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        tx.TxID,
 					OutputIndex: uint32(len(outputs) + len(stake) + offset),
 				},
@@ -443,8 +443,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 			e.OnCommitState.AddUTXO(onCommitUtxo)
 			e.OnCommitState.AddRewardUTXO(tx.TxID, onCommitUtxo)
 
-			onAbortUtxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			onAbortUtxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID: tx.TxID,
 					// Note: There is no [offset] if the RewardValidatorTx is
 					// aborted, because the validator reward is not awarded.
@@ -468,8 +468,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 
 		// Refund the stake here
 		for i, out := range stake {
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        tx.TxID,
 					OutputIndex: uint32(len(outputs) + i),
 				},
@@ -536,8 +536,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 			if !ok {
 				return ErrInvalidState
 			}
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        tx.TxID,
 					OutputIndex: uint32(len(outputs) + len(stake)),
 				},
@@ -589,8 +589,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 				if !ok {
 					return ErrInvalidState
 				}
-				utxo := &avax.UTXO{
-					UTXOID: avax.UTXOID{
+				utxo := &dione.UTXO{
+					UTXOID: dione.UTXOID{
 						TxID:        tx.TxID,
 						OutputIndex: uint32(len(outputs) + len(stake) + offset),
 					},

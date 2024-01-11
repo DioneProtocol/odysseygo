@@ -13,20 +13,20 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestApricotProposalBlockTimeVerification(t *testing.T) {
@@ -64,10 +64,10 @@ func TestApricotProposalBlockTimeVerification(t *testing.T) {
 	utx := &txs.AddValidatorTx{
 		BaseTx:    txs.BaseTx{},
 		Validator: txs.Validator{End: uint64(chainTime.Unix())},
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
-					ID: env.ctx.AVAXAssetID,
+				Asset: dione.Asset{
+					ID: env.ctx.DIONEAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,
@@ -192,10 +192,10 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	unsignedNextStakerTx := &txs.AddValidatorTx{
 		BaseTx:    txs.BaseTx{},
 		Validator: txs.Validator{End: uint64(nextStakerTime.Unix())},
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
-					ID: env.ctx.AVAXAssetID,
+				Asset: dione.Asset{
+					ID: env.ctx.DIONEAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1,

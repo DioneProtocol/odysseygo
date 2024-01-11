@@ -1,22 +1,22 @@
-# Avalanche Warp Messaging
+# Odyssey Warp Messaging
 
-Avalanche Warp Messaging (AWM) provides a primitive for cross-subnet communication on the Avalanche Network.
+Odyssey Warp Messaging (AWM) provides a primitive for cross-subnet communication on the Odyssey Network.
 
-The Avalanche P-Chain provides an index of every Subnet's validator set on the Avalanche Network, including the BLS public key of each validator (as of the [Banff Upgrade](https://github.com/ava-labs/avalanchego/releases/v1.9.0)). AWM utilizes the weighted validator sets stored on the P-Chain to build a cross-subnet communication protocol between any two Subnets on the Avalanche Network.
+The Odyssey P-Chain provides an index of every Subnet's validator set on the Odyssey Network, including the BLS public key of each validator (as of the [Banff Upgrade](https://github.com/DioneProtocol/odysseygo/releases/v1.9.0)). AWM utilizes the weighted validator sets stored on the P-Chain to build a cross-subnet communication protocol between any two Subnets on the Odyssey Network.
 
-Any Virtual Machine (VM) on Avalanche can integrate Avalanche Warp Messaging to send and receive messages across Avalanche Subnets.
+Any Virtual Machine (VM) on Odyssey can integrate Odyssey Warp Messaging to send and receive messages across Odyssey Subnets.
 
 ## Background
 
 This README assumes familiarity with:
 
-- Avalanche P-Chain / [PlatformVM](../)
+- Odyssey P-Chain / [PlatformVM](../)
 - [ProposerVM](../../proposervm/README.md)
 - Basic familiarity with [BLS Multi-Signatures](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html)
 
 ## BLS Multi-Signatures with Public-Key Aggregation
 
-Avalanche Warp Messaging utilizes BLS multi-signatures with public key aggregation in order to verify messages signed by another Subnet. When a validator joins a Subnet, the P-Chain records the validator's BLS public key and NodeID, as well as a proof of possession of the validator's BLS private key to defend against [rogue public-key attacks](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html#mjx-eqn-eqaggsame).
+Odyssey Warp Messaging utilizes BLS multi-signatures with public key aggregation in order to verify messages signed by another Subnet. When a validator joins a Subnet, the P-Chain records the validator's BLS public key and NodeID, as well as a proof of possession of the validator's BLS private key to defend against [rogue public-key attacks](https://crypto.stanford.edu/~dabo/pubs/papers/BLSmultisig.html#mjx-eqn-eqaggsame).
 
 AWM utilizes the validator set's weights and public keys to verify that an aggregate signature has sufficient weight signing the message from the source Subnet.
 
@@ -37,8 +37,8 @@ Unsigned Message:
                              +--------------------------+
 ```
 
-- `networkID` is the unique ID of an Avalanche Network (Mainnet/Testnet) and provides replay protection for BLS Signers across different Avalanche Networks
-- `sourceChainID` is the hash of the transaction that created the blockchain on the Avalanche P-Chain. It serves as the unique identifier for the blockchain across the Avalanche Network so that each blockchain can only sign a message with its own id.
+- `networkID` is the unique ID of an Odyssey Network (Mainnet/Testnet) and provides replay protection for BLS Signers across different Odyssey Networks
+- `sourceChainID` is the hash of the transaction that created the blockchain on the Odyssey P-Chain. It serves as the unique identifier for the blockchain across the Odyssey Network so that each blockchain can only sign a message with its own id.
 - `payload` provides an arbitrary byte array containing the contents of the message. VMs define their own message types to include in the `payload`
 
 
@@ -74,9 +74,9 @@ Signed Message:
                                       +-------------------------------------------------+
 ```
 
-## Sending an Avalanche Warp Message
+## Sending an Odyssey Warp Message
 
-A blockchain on Avalanche sends an Avalanche Warp Message by coming to agreement on the message that every validator should be willing to sign. As an example, the VM of a blockchain may define that once a block is accepted, the VM should be willing to sign a message including the block hash in the payload to attest to any other Subnet that the block was accepted. The contents of the payload, how to aggregate the signature (VM-to-VM communication, off-chain relayer, etc.), is left to the VM.
+A blockchain on Odyssey sends an Odyssey Warp Message by coming to agreement on the message that every validator should be willing to sign. As an example, the VM of a blockchain may define that once a block is accepted, the VM should be willing to sign a message including the block hash in the payload to attest to any other Subnet that the block was accepted. The contents of the payload, how to aggregate the signature (VM-to-VM communication, off-chain relayer, etc.), is left to the VM.
 
 Once the validator set of a blockchain is willing to sign an arbitrary message `M`, an aggregator performs the following process:
 
@@ -86,7 +86,7 @@ Once the validator set of a blockchain is willing to sign an arbitrary message `
 4. Encode the selection of the `N` validators included in the signature in a bitset
 5. Construct the signed message from the aggregate signature, bitset, and original unsigned message
 
-## Verifying / Receiving an Avalanche Warp Message
+## Verifying / Receiving an Odyssey Warp Message
 
 Avalanache Warp Messages are verified within the context of a specific P-Chain height included in the [ProposerVM](../../proposervm/README.md)'s header. The P-Chain height is provided as context to the underlying VM when verifying the underlying VM's blocks (implemented by the optional interface [WithVerifyContext](../../../snow/engine/snowman/block/block_context_vm.go)).
 
@@ -102,17 +102,17 @@ Once a message is verified, it is left to the VM to define the semantics of deli
 
 ## Design Considerations
 
-### Processing Historical Avalanche Warp Messages
+### Processing Historical Odyssey Warp Messages
 
-Verifying an Avalanche Warp Message requires a lookup of validator sets at a specific P-Chain height. The P-Chain serves lookups maintaining validator set diffs that can be applied in-order to reconstruct the validator set of any Subnet at any height.
+Verifying an Odyssey Warp Message requires a lookup of validator sets at a specific P-Chain height. The P-Chain serves lookups maintaining validator set diffs that can be applied in-order to reconstruct the validator set of any Subnet at any height.
 
-As the P-Chain grows, the number of validator set diffs that needs to be applied in order to reconstruct the validator set needed to verify an Avalanche Warp Messages increases over time.
+As the P-Chain grows, the number of validator set diffs that needs to be applied in order to reconstruct the validator set needed to verify an Odyssey Warp Messages increases over time.
 
-Therefore, in order to support verifying historical Avalanche Warp Messages, VMs should provide a mechanism to determine whether an Avalanche Warp Message was treated as valid or invalid within a historical block.
+Therefore, in order to support verifying historical Odyssey Warp Messages, VMs should provide a mechanism to determine whether an Odyssey Warp Message was treated as valid or invalid within a historical block.
 
 When nodes bootstrap in the future, they bootstrap blocks that have already been marked as accepted by the network, so they can assume the block was verified by the validators of the network when it was first accepted.
 
-Therefore, the new bootstrapping node can assume the block was valid to determine whether an Avalanche Warp Message should be treated as valid/invalid within the execution of that block.
+Therefore, the new bootstrapping node can assume the block was valid to determine whether an Odyssey Warp Message should be treated as valid/invalid within the execution of that block.
 
 Two strategies to provide that mechanism are:
 

@@ -51,7 +51,7 @@ linters:
 
 linters-settings:
   goimports:
-    local-prefixes: github.com/ava-labs/avalanchego
+    local-prefixes: github.com/DioneProtocol/odysseygo
   depguard:
     list-type: blacklist
     packages-with-error-message:

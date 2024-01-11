@@ -13,16 +13,16 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet/local"
-	"github.com/ava-labs/avalanchego/version"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet/local"
+	"github.com/DioneProtocol/odysseygo/version"
 )
 
 const cliVersion = "0.0.1"
 
 var (
-	errAvalancheGoRequired = fmt.Errorf("--avalanchego-path or %s are required", local.AvalancheGoPathEnvName)
-	errNetworkDirRequired  = fmt.Errorf("--network-dir or %s are required", local.NetworkDirEnvName)
+	errOdysseyGoRequired  = fmt.Errorf("--odysseygo-path or %s are required", local.OdysseyGoPathEnvName)
+	errNetworkDirRequired = fmt.Errorf("--network-dir or %s are required", local.NetworkDirEnvName)
 )
 
 func main() {
@@ -56,7 +56,7 @@ func main() {
 		Short: "Start a new local network",
 		RunE: func(*cobra.Command, []string) error {
 			if len(execPath) == 0 {
-				return errAvalancheGoRequired
+				return errOdysseyGoRequired
 			}
 
 			// Root dir will be defaulted on start if not provided
@@ -93,7 +93,7 @@ func main() {
 		},
 	}
 	startNetworkCmd.PersistentFlags().StringVar(&rootDir, "root-dir", os.Getenv(local.RootDirEnvName), "The path to the root directory for local networks")
-	startNetworkCmd.PersistentFlags().StringVar(&execPath, "avalanchego-path", os.Getenv(local.AvalancheGoPathEnvName), "The path to an avalanchego binary")
+	startNetworkCmd.PersistentFlags().StringVar(&execPath, "odysseygo-path", os.Getenv(local.OdysseyGoPathEnvName), "The path to an odysseygo binary")
 	startNetworkCmd.PersistentFlags().Uint8Var(&nodeCount, "node-count", testnet.DefaultNodeCount, "Number of nodes the network should initially consist of")
 	startNetworkCmd.PersistentFlags().Uint8Var(&fundedKeyCount, "funded-key-count", testnet.DefaultFundedKeyCount, "Number of funded keys the network should start with")
 	rootCmd.AddCommand(startNetworkCmd)

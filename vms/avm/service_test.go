@@ -19,31 +19,31 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/block/executor"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/index"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/nftfx"
-	"github.com/ava-labs/avalanchego/vms/propertyfx"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block/executor"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/index"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestServiceIssueTx(t *testing.T) {
@@ -60,7 +60,7 @@ func TestServiceIssueTx(t *testing.T) {
 	err := env.service.IssueTx(nil, txArgs, txReply)
 	require.ErrorIs(err, codec.ErrCantUnpackVersion)
 
-	tx := newTx(t, env.genesisBytes, env.vm, "AVAX")
+	tx := newTx(t, env.genesisBytes, env.vm, "DIONE")
 	txArgs.Tx, err = formatting.Encode(formatting.Hex, tx.Bytes())
 	require.NoError(err)
 	txArgs.Encoding = formatting.Hex
@@ -83,7 +83,7 @@ func TestServiceGetTxStatus(t *testing.T) {
 	err := env.service.GetTxStatus(nil, statusArgs, statusReply)
 	require.ErrorIs(err, errNilTxID)
 
-	newTx := newAvaxBaseTxWithOutputs(t, env.genesisBytes, env.vm)
+	newTx := newDioneBaseTxWithOutputs(t, env.genesisBytes, env.vm)
 	txID := newTx.ID()
 
 	statusArgs = &api.JSONTxID{
@@ -117,12 +117,12 @@ func TestServiceGetBalanceStrict(t *testing.T) {
 
 	// A UTXO with a 2 out of 2 multisig
 	// where one of the addresses is [addr]
-	twoOfTwoUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	twoOfTwoUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -160,12 +160,12 @@ func TestServiceGetBalanceStrict(t *testing.T) {
 
 	// A UTXO with a 1 out of 2 multisig
 	// where one of the addresses is [addr]
-	oneOfTwoUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	oneOfTwoUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -204,12 +204,12 @@ func TestServiceGetBalanceStrict(t *testing.T) {
 	// A UTXO with a 1 out of 1 multisig
 	// but with a locktime in the future
 	now := env.vm.clock.Time()
-	futureUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	futureUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -300,12 +300,12 @@ func TestServiceGetAllBalances(t *testing.T) {
 	require.NoError(err)
 	// A UTXO with a 2 out of 2 multisig
 	// where one of the addresses is [addr]
-	twoOfTwoUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	twoOfTwoUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -340,12 +340,12 @@ func TestServiceGetAllBalances(t *testing.T) {
 
 	// A UTXO with a 1 out of 2 multisig
 	// where one of the addresses is [addr]
-	oneOfTwoUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	oneOfTwoUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -382,12 +382,12 @@ func TestServiceGetAllBalances(t *testing.T) {
 	// A UTXO with a 1 out of 1 multisig
 	// but with a locktime in the future
 	now := env.vm.clock.Time()
-	futureUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	futureUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -424,12 +424,12 @@ func TestServiceGetAllBalances(t *testing.T) {
 
 	// A UTXO for a different asset
 	otherAssetID := ids.GenerateTestID()
-	otherAssetUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	otherAssetUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{ID: otherAssetID},
+		Asset: dione.Asset{ID: otherAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1337,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -497,7 +497,7 @@ func TestServiceGetTxJSON_BaseTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	newTx := newAvaxBaseTxWithOutputs(t, env.genesisBytes, env.vm)
+	newTx := newDioneBaseTxWithOutputs(t, env.genesisBytes, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, newTx)
 
 	reply := api.GetTxReply{}
@@ -524,7 +524,7 @@ func TestServiceGetTxJSON_ExportTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	newTx := newAvaxExportTxWithOutputs(t, env.genesisBytes, env.vm)
+	newTx := newDioneExportTxWithOutputs(t, env.genesisBytes, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, newTx)
 
 	reply := api.GetTxReply{}
@@ -556,7 +556,7 @@ func TestServiceGetTxJSON_CreateAssetTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	reply := api.GetTxReply{}
@@ -591,7 +591,7 @@ func TestServiceGetTxJSON_OperationTxWithNftxMintOp(t *testing.T) {
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintNFTTx := buildOperationTxWithOp(buildNFTxMintOp(createAssetTx, key, 2, 1))
@@ -634,7 +634,7 @@ func TestServiceGetTxJSON_OperationTxWithMultipleNftxMintOp(t *testing.T) {
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintOp1 := buildNFTxMintOp(createAssetTx, key, 2, 1)
@@ -679,7 +679,7 @@ func TestServiceGetTxJSON_OperationTxWithSecpMintOp(t *testing.T) {
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintSecpOpTx := buildOperationTxWithOp(buildSecpMintOp(createAssetTx, key, 0))
@@ -724,7 +724,7 @@ func TestServiceGetTxJSON_OperationTxWithMultipleSecpMintOp(t *testing.T) {
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	op1 := buildSecpMintOp(createAssetTx, key, 0)
@@ -770,7 +770,7 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOp(t *testing.T) {
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintPropertyFxOpTx := buildOperationTxWithOp(buildPropertyFxMintOp(createAssetTx, key, 4))
@@ -814,7 +814,7 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOpMultiple(t *testing.T) 
 	}()
 
 	key := keys[0]
-	createAssetTx := newAvaxCreateAssetTxWithOutputs(t, env.vm)
+	createAssetTx := newDioneCreateAssetTxWithOutputs(t, env.vm)
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	op1 := buildPropertyFxMintOp(createAssetTx, key, 4)
@@ -843,41 +843,41 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOpMultiple(t *testing.T) 
 	require.Contains(jsonString, `"credentials":[{"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy","credential":{"signatures":["0x25b7ca14df108d4a32877bda4f10d84eda6d653c620f4c8d124265bdcf0ac91f45712b58b33f4b62a19698325a3c89adff214b77f772d9f311742860039abb5601"]}},{"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy","credential":{"signatures":["0x25b7ca14df108d4a32877bda4f10d84eda6d653c620f4c8d124265bdcf0ac91f45712b58b33f4b62a19698325a3c89adff214b77f772d9f311742860039abb5601"]}}]`)
 }
 
-func newAvaxBaseTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *txs.Tx {
-	avaxTx := getCreateTxFromGenesisTest(t, genesisBytes, "AVAX")
+func newDioneBaseTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *txs.Tx {
+	dioneTx := getCreateTxFromGenesisTest(t, genesisBytes, "DIONE")
 	key := keys[0]
-	tx := buildBaseTx(avaxTx, vm, key)
+	tx := buildBaseTx(dioneTx, vm, key)
 	require.NoError(t, tx.SignSECP256K1Fx(vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 	return tx
 }
 
-func newAvaxExportTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *txs.Tx {
-	avaxTx := getCreateTxFromGenesisTest(t, genesisBytes, "AVAX")
+func newDioneExportTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *txs.Tx {
+	dioneTx := getCreateTxFromGenesisTest(t, genesisBytes, "DIONE")
 	key := keys[0]
-	tx := buildExportTx(avaxTx, vm, key)
+	tx := buildExportTx(dioneTx, vm, key)
 	require.NoError(t, tx.SignSECP256K1Fx(vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 	return tx
 }
 
-func newAvaxCreateAssetTxWithOutputs(t *testing.T, vm *VM) *txs.Tx {
+func newDioneCreateAssetTxWithOutputs(t *testing.T, vm *VM) *txs.Tx {
 	key := keys[0]
 	tx := buildCreateAssetTx(key)
 	require.NoError(t, vm.parser.InitializeTx(tx))
 	return tx
 }
 
-func buildBaseTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
+func buildBaseTx(dioneTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 			Memo:         []byte{1, 2, 3, 4, 5, 6, 7, 8},
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
-					TxID:        avaxTx.ID(),
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
+					TxID:        dioneTx.ID(),
 					OutputIndex: 2,
 				},
-				Asset: avax.Asset{ID: avaxTx.ID()},
+				Asset: dione.Asset{ID: dioneTx.ID()},
 				In: &secp256k1fx.TransferInput{
 					Amt: startBalance,
 					Input: secp256k1fx.Input{
@@ -887,8 +887,8 @@ func buildBaseTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 					},
 				},
 			}},
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: avaxTx.ID()},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: dioneTx.ID()},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: startBalance - vm.TxFee,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -901,18 +901,18 @@ func buildBaseTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 	}}
 }
 
-func buildExportTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
+func buildExportTx(dioneTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.ExportTx{
 		BaseTx: txs.BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.UnitTestID,
 				BlockchainID: chainID,
-				Ins: []*avax.TransferableInput{{
-					UTXOID: avax.UTXOID{
-						TxID:        avaxTx.ID(),
+				Ins: []*dione.TransferableInput{{
+					UTXOID: dione.UTXOID{
+						TxID:        dioneTx.ID(),
 						OutputIndex: 2,
 					},
-					Asset: avax.Asset{ID: avaxTx.ID()},
+					Asset: dione.Asset{ID: dioneTx.ID()},
 					In: &secp256k1fx.TransferInput{
 						Amt:   startBalance,
 						Input: secp256k1fx.Input{SigIndices: []uint32{0}},
@@ -921,8 +921,8 @@ func buildExportTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 			},
 		},
 		DestinationChain: constants.PlatformChainID,
-		ExportedOuts: []*avax.TransferableOutput{{
-			Asset: avax.Asset{ID: avaxTx.ID()},
+		ExportedOuts: []*dione.TransferableOutput{{
+			Asset: dione.Asset{ID: dioneTx.ID()},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: startBalance - vm.TxFee,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -936,7 +936,7 @@ func buildExportTx(avaxTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 
 func buildCreateAssetTx(key *secp256k1.PrivateKey) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.CreateAssetTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
@@ -1002,8 +1002,8 @@ func buildCreateAssetTx(key *secp256k1.PrivateKey) *txs.Tx {
 
 func buildNFTxMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, outputIndex, groupID uint32) *txs.Operation {
 	return &txs.Operation{
-		Asset: avax.Asset{ID: createAssetTx.ID()},
-		UTXOIDs: []*avax.UTXOID{{
+		Asset: dione.Asset{ID: createAssetTx.ID()},
+		UTXOIDs: []*dione.UTXOID{{
 			TxID:        createAssetTx.ID(),
 			OutputIndex: outputIndex,
 		}},
@@ -1023,8 +1023,8 @@ func buildNFTxMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, outputInd
 
 func buildPropertyFxMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, outputIndex uint32) *txs.Operation {
 	return &txs.Operation{
-		Asset: avax.Asset{ID: createAssetTx.ID()},
-		UTXOIDs: []*avax.UTXOID{{
+		Asset: dione.Asset{ID: createAssetTx.ID()},
+		UTXOIDs: []*dione.UTXOID{{
 			TxID:        createAssetTx.ID(),
 			OutputIndex: outputIndex,
 		}},
@@ -1044,8 +1044,8 @@ func buildPropertyFxMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, out
 
 func buildSecpMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, outputIndex uint32) *txs.Operation {
 	return &txs.Operation{
-		Asset: avax.Asset{ID: createAssetTx.ID()},
-		UTXOIDs: []*avax.UTXOID{{
+		Asset: dione.Asset{ID: createAssetTx.ID()},
+		UTXOIDs: []*dione.UTXOID{{
 			TxID:        createAssetTx.ID(),
 			OutputIndex: outputIndex,
 		}},
@@ -1075,7 +1075,7 @@ func buildSecpMintOp(createAssetTx *txs.Tx, key *secp256k1.PrivateKey, outputInd
 
 func buildOperationTxWithOp(op ...*txs.Operation) *txs.Tx {
 	return &txs.Tx{Unsigned: &txs.OperationTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
@@ -1124,11 +1124,11 @@ func TestServiceGetUTXOs(t *testing.T) {
 	numUTXOs := 10
 	// Put a bunch of UTXOs
 	for i := 0; i < numUTXOs; i++ {
-		utxo := &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := &dione.UTXO{
+			UTXOID: dione.UTXOID{
 				TxID: ids.GenerateTestID(),
 			},
-			Asset: avax.Asset{ID: env.vm.ctx.AVAXAssetID},
+			Asset: dione.Asset{ID: env.vm.ctx.DIONEAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: 1,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -1146,11 +1146,11 @@ func TestServiceGetUTXOs(t *testing.T) {
 	elems := make([]*atomic.Element, numUTXOs)
 	codec := env.vm.parser.Codec()
 	for i := range elems {
-		utxo := &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := &dione.UTXO{
+			UTXOID: dione.UTXOID{
 				TxID: ids.GenerateTestID(),
 			},
-			Asset: avax.Asset{ID: env.vm.ctx.AVAXAssetID},
+			Asset: dione.Asset{ID: env.vm.ctx.DIONEAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: 1,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -1329,7 +1329,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 		},
 		{
 			label:       "get UTXOs from multiple chains",
-			expectedErr: avax.ErrMismatchedChainIDs,
+			expectedErr: dione.ErrMismatchedChainIDs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
 					xAddr,
@@ -1339,7 +1339,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 		},
 		{
 			label:       "get UTXOs for an address on a different chain",
-			expectedErr: avax.ErrMismatchedChainIDs,
+			expectedErr: dione.ErrMismatchedChainIDs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
 					pAddr,
@@ -1370,14 +1370,14 @@ func TestGetAssetDescription(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	avaxAssetID := env.genesisTx.ID()
+	dioneAssetID := env.genesisTx.ID()
 
 	reply := GetAssetDescriptionReply{}
 	require.NoError(env.service.GetAssetDescription(nil, &GetAssetDescriptionArgs{
-		AssetID: avaxAssetID.String(),
+		AssetID: dioneAssetID.String(),
 	}, &reply))
 
-	require.Equal("AVAX", reply.Name)
+	require.Equal("DIONE", reply.Name)
 	require.Equal("SYMB", reply.Symbol)
 }
 
@@ -1390,14 +1390,14 @@ func TestGetBalance(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	avaxAssetID := env.genesisTx.ID()
+	dioneAssetID := env.genesisTx.ID()
 
 	reply := GetBalanceReply{}
 	addrStr, err := env.vm.FormatLocalAddress(keys[0].PublicKey().Address())
 	require.NoError(err)
 	require.NoError(env.service.GetBalance(nil, &GetBalanceArgs{
 		Address: addrStr,
-		AssetID: avaxAssetID.String(),
+		AssetID: dioneAssetID.String(),
 	}, &reply))
 
 	require.Equal(startBalance, uint64(reply.Balance))
@@ -1409,7 +1409,7 @@ func TestCreateFixedCapAsset(t *testing.T) {
 			require := require.New(t)
 
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,
@@ -1457,7 +1457,7 @@ func TestCreateVariableCapAsset(t *testing.T) {
 			require := require.New(t)
 
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,
@@ -1547,7 +1547,7 @@ func TestNFTWorkflow(t *testing.T) {
 			require := require.New(t)
 
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,
@@ -1592,7 +1592,7 @@ func TestNFTWorkflow(t *testing.T) {
 			buildAndAccept(require, env.vm, env.issuer, createReply.AssetID)
 
 			// Key: Address
-			// Value: AVAX balance
+			// Value: DIONE balance
 			balances := map[ids.ShortID]uint64{}
 			for _, addr := range addrs { // get balances for all addresses
 				addrStr, err := env.vm.FormatLocalAddress(addr)
@@ -1805,7 +1805,7 @@ func TestSendMultiple(t *testing.T) {
 			require := require.New(t)
 
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,
@@ -1897,7 +1897,7 @@ func TestImport(t *testing.T) {
 			require := require.New(t)
 
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,
@@ -1911,9 +1911,9 @@ func TestImport(t *testing.T) {
 			assetID := env.genesisTx.ID()
 			addr0 := keys[0].PublicKey().Address()
 
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{TxID: ids.Empty},
-				Asset:  avax.Asset{ID: assetID},
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{TxID: ids.Empty},
+				Asset:  dione.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 7,
 					OutputOwners: secp256k1fx.OutputOwners{

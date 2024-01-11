@@ -8,23 +8,23 @@ import (
 	"net/url"
 )
 
-var _ EndpointRequester = (*avalancheEndpointRequester)(nil)
+var _ EndpointRequester = (*odysseyEndpointRequester)(nil)
 
 type EndpointRequester interface {
 	SendRequest(ctx context.Context, method string, params interface{}, reply interface{}, options ...Option) error
 }
 
-type avalancheEndpointRequester struct {
+type odysseyEndpointRequester struct {
 	uri string
 }
 
 func NewEndpointRequester(uri string) EndpointRequester {
-	return &avalancheEndpointRequester{
+	return &odysseyEndpointRequester{
 		uri: uri,
 	}
 }
 
-func (e *avalancheEndpointRequester) SendRequest(
+func (e *odysseyEndpointRequester) SendRequest(
 	ctx context.Context,
 	method string,
 	params interface{},

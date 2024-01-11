@@ -4,10 +4,10 @@
 package txs
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var _ UnsignedTx = (*RewardValidatorTx)(nil)
@@ -17,11 +17,11 @@ var _ UnsignedTx = (*RewardValidatorTx)(nil)
 //
 // If this transaction is accepted and the next block accepted is a Commit
 // block, the validator is removed and the address that the validator specified
-// receives the staked AVAX as well as a validating reward.
+// receives the staked DIONE as well as a validating reward.
 //
 // If this transaction is accepted and the next block accepted is an Abort
 // block, the validator is removed and the address that the validator specified
-// receives the staked AVAX but no reward.
+// receives the staked DIONE but no reward.
 type RewardValidatorTx struct {
 	// ID of the tx that created the delegator/validator being removed/rewarded
 	TxID ids.ID `serialize:"true" json:"txID"`
@@ -46,7 +46,7 @@ func (*RewardValidatorTx) InputIDs() set.Set[ids.ID] {
 	return nil
 }
 
-func (*RewardValidatorTx) Outputs() []*avax.TransferableOutput {
+func (*RewardValidatorTx) Outputs() []*dione.TransferableOutput {
 	return nil
 }
 

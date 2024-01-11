@@ -6,19 +6,19 @@ package genesis
 import (
 	"time"
 
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
 )
 
 type StakingConfig struct {
 	// Staking uptime requirements
 	UptimeRequirement float64 `json:"uptimeRequirement"`
-	// Minimum stake, in nAVAX, required to validate the primary network
+	// Minimum stake, in nDIONE, required to validate the primary network
 	MinValidatorStake uint64 `json:"minValidatorStake"`
-	// Maximum stake, in nAVAX, allowed to be placed on a single validator in
+	// Maximum stake, in nDIONE, allowed to be placed on a single validator in
 	// the primary network
 	MaxValidatorStake uint64 `json:"maxValidatorStake"`
-	// Minimum stake, in nAVAX, that can be delegated on the primary network
+	// Minimum stake, in nDIONE, that can be delegated on the primary network
 	MinDelegatorStake uint64 `json:"minDelegatorStake"`
 	// Minimum delegation fee, in the range [0, 1000000], that can be charged
 	// for delegation on the primary network.

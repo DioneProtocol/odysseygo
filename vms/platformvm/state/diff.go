@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -52,12 +52,12 @@ type diff struct {
 	addedChains  map[ids.ID][]*txs.Tx
 	cachedChains map[ids.ID][]*txs.Tx
 
-	addedRewardUTXOs map[ids.ID][]*avax.UTXO
+	addedRewardUTXOs map[ids.ID][]*dione.UTXO
 
 	addedTxs map[ids.ID]*txAndStatus
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
-	modifiedUTXOs map[ids.ID]*avax.UTXO
+	modifiedUTXOs map[ids.ID]*dione.UTXO
 }
 
 func NewDiff(
@@ -430,7 +430,7 @@ func (d *diff) AddTx(tx *txs.Tx, status status.Status) {
 	}
 }
 
-func (d *diff) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
+func (d *diff) GetRewardUTXOs(txID ids.ID) ([]*dione.UTXO, error) {
 	if utxos, exists := d.addedRewardUTXOs[txID]; exists {
 		return utxos, nil
 	}
@@ -442,14 +442,14 @@ func (d *diff) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
 	return parentState.GetRewardUTXOs(txID)
 }
 
-func (d *diff) AddRewardUTXO(txID ids.ID, utxo *avax.UTXO) {
+func (d *diff) AddRewardUTXO(txID ids.ID, utxo *dione.UTXO) {
 	if d.addedRewardUTXOs == nil {
-		d.addedRewardUTXOs = make(map[ids.ID][]*avax.UTXO)
+		d.addedRewardUTXOs = make(map[ids.ID][]*dione.UTXO)
 	}
 	d.addedRewardUTXOs[txID] = append(d.addedRewardUTXOs[txID], utxo)
 }
 
-func (d *diff) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
+func (d *diff) GetUTXO(utxoID ids.ID) (*dione.UTXO, error) {
 	utxo, modified := d.modifiedUTXOs[utxoID]
 	if !modified {
 		parentState, ok := d.stateVersions.GetState(d.parentID)
@@ -464,9 +464,9 @@ func (d *diff) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
 	return utxo, nil
 }
 
-func (d *diff) AddUTXO(utxo *avax.UTXO) {
+func (d *diff) AddUTXO(utxo *dione.UTXO) {
 	if d.modifiedUTXOs == nil {
-		d.modifiedUTXOs = map[ids.ID]*avax.UTXO{
+		d.modifiedUTXOs = map[ids.ID]*dione.UTXO{
 			utxo.InputID(): utxo,
 		}
 	} else {
@@ -476,7 +476,7 @@ func (d *diff) AddUTXO(utxo *avax.UTXO) {
 
 func (d *diff) DeleteUTXO(utxoID ids.ID) {
 	if d.modifiedUTXOs == nil {
-		d.modifiedUTXOs = map[ids.ID]*avax.UTXO{
+		d.modifiedUTXOs = map[ids.ID]*dione.UTXO{
 			utxoID: nil,
 		}
 	} else {

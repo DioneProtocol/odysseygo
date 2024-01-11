@@ -8,13 +8,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/wallet/chain/p"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 
 func main() {
@@ -47,7 +47,7 @@ func main() {
 		log.Fatalf("failed to get the balance: %s\n", err)
 	}
 
-	avaxID := state.PCTX.AVAXAssetID()
-	avaxBalance := currentBalances[avaxID]
-	log.Printf("current AVAX balance of %s is %d nAVAX\n", addrStr, avaxBalance)
+	dioneID := state.PCTX.DIONEAssetID()
+	dioneBalance := currentBalances[dioneID]
+	log.Printf("current DIONE balance of %s is %d nDIONE\n", addrStr, dioneBalance)
 }

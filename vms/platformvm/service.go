@@ -17,35 +17,35 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/keystore"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/builder"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/keystore"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/builder"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	platformapi "github.com/ava-labs/avalanchego/vms/platformvm/api"
+	platformapi "github.com/DioneProtocol/odysseygo/vms/platformvm/api"
 )
 
 const (
@@ -86,7 +86,7 @@ var (
 // Service defines the API calls that can be made to the platform chain
 type Service struct {
 	vm                    *VM
-	addrManager           avax.AddressManager
+	addrManager           dione.AddressManager
 	stakerAttributesCache *cache.LRU[ids.ID, *stakerAttributes]
 }
 
@@ -132,7 +132,7 @@ func (s *Service) ExportKey(_ *http.Request, args *ExportKeyArgs, reply *ExportK
 		logging.UserString("username", args.Username),
 	)
 
-	address, err := avax.ParseServiceAddress(s.addrManager, args.Address)
+	address, err := dione.ParseServiceAddress(s.addrManager, args.Address)
 	if err != nil {
 		return fmt.Errorf("couldn't parse %s to address: %w", args.Address, err)
 	}
@@ -198,10 +198,10 @@ type GetBalanceRequest struct {
 	Addresses []string `json:"addresses"`
 }
 
-// Note: We explicitly duplicate AVAX out of the maps to ensure backwards
+// Note: We explicitly duplicate DIONE out of the maps to ensure backwards
 // compatibility.
 type GetBalanceResponse struct {
-	// Balance, in nAVAX, of the address
+	// Balance, in nDIONE, of the address
 	Balance             json.Uint64            `json:"balance"`
 	Unlocked            json.Uint64            `json:"unlocked"`
 	LockedStakeable     json.Uint64            `json:"lockedStakeable"`
@@ -210,7 +210,7 @@ type GetBalanceResponse struct {
 	Unlockeds           map[ids.ID]json.Uint64 `json:"unlockeds"`
 	LockedStakeables    map[ids.ID]json.Uint64 `json:"lockedStakeables"`
 	LockedNotStakeables map[ids.ID]json.Uint64 `json:"lockedNotStakeables"`
-	UTXOIDs             []*avax.UTXOID         `json:"utxoIDs"`
+	UTXOIDs             []*dione.UTXOID        `json:"utxoIDs"`
 }
 
 // GetBalance gets the balance of an address
@@ -222,12 +222,12 @@ func (s *Service) GetBalance(_ *http.Request, args *GetBalanceRequest, response 
 	)
 
 	// Parse to address
-	addrs, err := avax.ParseServiceAddresses(s.addrManager, args.Addresses)
+	addrs, err := dione.ParseServiceAddresses(s.addrManager, args.Addresses)
 	if err != nil {
 		return err
 	}
 
-	utxos, err := avax.GetAllUTXOs(s.vm.state, addrs)
+	utxos, err := dione.GetAllUTXOs(s.vm.state, addrs)
 	if err != nil {
 		return fmt.Errorf("couldn't get UTXO set of %v: %w", args.Addresses, err)
 	}
@@ -317,10 +317,10 @@ utxoFor:
 	response.Unlockeds = newJSONBalanceMap(unlockeds)
 	response.LockedStakeables = newJSONBalanceMap(lockedStakeables)
 	response.LockedNotStakeables = newJSONBalanceMap(lockedNotStakeables)
-	response.Balance = response.Balances[s.vm.ctx.AVAXAssetID]
-	response.Unlocked = response.Unlockeds[s.vm.ctx.AVAXAssetID]
-	response.LockedStakeable = response.LockedStakeables[s.vm.ctx.AVAXAssetID]
-	response.LockedNotStakeable = response.LockedNotStakeables[s.vm.ctx.AVAXAssetID]
+	response.Balance = response.Balances[s.vm.ctx.DIONEAssetID]
+	response.Unlocked = response.Unlockeds[s.vm.ctx.DIONEAssetID]
+	response.LockedStakeable = response.LockedStakeables[s.vm.ctx.DIONEAssetID]
+	response.LockedNotStakeable = response.LockedNotStakeables[s.vm.ctx.DIONEAssetID]
 	return nil
 }
 
@@ -419,7 +419,7 @@ func (s *Service) GetUTXOs(_ *http.Request, args *api.GetUTXOsArgs, response *ap
 		sourceChain = chainID
 	}
 
-	addrSet, err := avax.ParseServiceAddresses(s.addrManager, args.Addresses)
+	addrSet, err := dione.ParseServiceAddresses(s.addrManager, args.Addresses)
 	if err != nil {
 		return err
 	}
@@ -427,7 +427,7 @@ func (s *Service) GetUTXOs(_ *http.Request, args *api.GetUTXOsArgs, response *ap
 	startAddr := ids.ShortEmpty
 	startUTXO := ids.Empty
 	if args.StartIndex.Address != "" || args.StartIndex.UTXO != "" {
-		startAddr, err = avax.ParseServiceAddress(s.addrManager, args.StartIndex.Address)
+		startAddr, err = dione.ParseServiceAddress(s.addrManager, args.StartIndex.Address)
 		if err != nil {
 			return fmt.Errorf("couldn't parse start index address %q: %w", args.StartIndex.Address, err)
 		}
@@ -438,7 +438,7 @@ func (s *Service) GetUTXOs(_ *http.Request, args *api.GetUTXOsArgs, response *ap
 	}
 
 	var (
-		utxos     []*avax.UTXO
+		utxos     []*dione.UTXO
 		endAddr   ids.ShortID
 		endUTXOID ids.ID
 	)
@@ -447,7 +447,7 @@ func (s *Service) GetUTXOs(_ *http.Request, args *api.GetUTXOsArgs, response *ap
 		limit = builder.MaxPageSize
 	}
 	if sourceChain == s.vm.ctx.ChainID {
-		utxos, endAddr, endUTXOID, err = avax.GetPaginatedUTXOs(
+		utxos, endAddr, endUTXOID, err = dione.GetPaginatedUTXOs(
 			s.vm.state,
 			addrSet,
 			startAddr,
@@ -652,7 +652,7 @@ func (s *Service) GetStakingAssetID(_ *http.Request, args *GetStakingAssetIDArgs
 	)
 
 	if args.SubnetID == constants.PrimaryNetworkID {
-		response.AssetID = s.vm.ctx.AVAXAssetID
+		response.AssetID = s.vm.ctx.DIONEAssetID
 		return nil
 	}
 
@@ -1074,7 +1074,7 @@ type GetCurrentSupplyReply struct {
 	Height json.Uint64 `json:"height"`
 }
 
-// GetCurrentSupply returns an upper bound on the supply of AVAX in the system
+// GetCurrentSupply returns an upper bound on the supply of DIONE in the system
 func (s *Service) GetCurrentSupply(r *http.Request, args *GetCurrentSupplyArgs, reply *GetCurrentSupplyReply) error {
 	s.vm.ctx.Log.Debug("API called",
 		zap.String("service", "platform"),
@@ -1196,13 +1196,13 @@ func (s *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, reply *a
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
 
 	// Parse the reward address
-	rewardAddress, err := avax.ParseServiceAddress(s.addrManager, args.RewardAddress)
+	rewardAddress, err := dione.ParseServiceAddress(s.addrManager, args.RewardAddress)
 	if err != nil {
 		return fmt.Errorf("problem while parsing reward address: %w", err)
 	}
@@ -1225,7 +1225,7 @@ func (s *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, reply *a
 	}
 	changeAddr := privKeys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1306,13 +1306,13 @@ func (s *Service) AddDelegator(_ *http.Request, args *AddDelegatorArgs, reply *a
 	}
 
 	// Parse the reward address
-	rewardAddress, err := avax.ParseServiceAddress(s.addrManager, args.RewardAddress)
+	rewardAddress, err := dione.ParseServiceAddress(s.addrManager, args.RewardAddress)
 	if err != nil {
 		return fmt.Errorf("problem parsing 'rewardAddress': %w", err)
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1335,7 +1335,7 @@ func (s *Service) AddDelegator(_ *http.Request, args *AddDelegatorArgs, reply *a
 	}
 	changeAddr := privKeys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1418,7 +1418,7 @@ func (s *Service) AddSubnetValidator(_ *http.Request, args *AddSubnetValidatorAr
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1440,7 +1440,7 @@ func (s *Service) AddSubnetValidator(_ *http.Request, args *AddSubnetValidatorAr
 	}
 	changeAddr := keys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1494,13 +1494,13 @@ func (s *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, response
 	)
 
 	// Parse the control keys
-	controlKeys, err := avax.ParseServiceAddresses(s.addrManager, args.ControlKeys)
+	controlKeys, err := dione.ParseServiceAddresses(s.addrManager, args.ControlKeys)
 	if err != nil {
 		return err
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1523,7 +1523,7 @@ func (s *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, response
 	}
 	changeAddr := privKeys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1552,28 +1552,28 @@ func (s *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, response
 	return errs.Err
 }
 
-// ExportAVAXArgs are the arguments to ExportAVAX
-type ExportAVAXArgs struct {
+// ExportDIONEArgs are the arguments to ExportDIONE
+type ExportDIONEArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
-	// Amount of AVAX to send
+	// Amount of DIONE to send
 	Amount json.Uint64 `json:"amount"`
 
 	// Chain the funds are going to. Optional. Used if To address does not include the chainID.
 	TargetChain string `json:"targetChain"`
 
-	// ID of the address that will receive the AVAX. This address may include the
+	// ID of the address that will receive the DIONE. This address may include the
 	// chainID, which is used to determine what the destination chain is.
 	To string `json:"to"`
 }
 
-// ExportAVAX exports AVAX from the P-Chain to the X-Chain
+// ExportDIONE exports DIONE from the P-Chain to the X-Chain
 // It must be imported on the X-Chain to complete the transfer
-func (s *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
+func (s *Service) ExportDIONE(_ *http.Request, args *ExportDIONEArgs, response *api.JSONTxIDChangeAddr) error {
 	s.vm.ctx.Log.Warn("deprecated API called",
 		zap.String("service", "platform"),
-		zap.String("method", "exportAVAX"),
+		zap.String("method", "exportDIONE"),
 	)
 
 	if args.Amount == 0 {
@@ -1594,7 +1594,7 @@ func (s *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *ap
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1617,7 +1617,7 @@ func (s *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *ap
 	}
 	changeAddr := privKeys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1647,8 +1647,8 @@ func (s *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *ap
 	return errs.Err
 }
 
-// ImportAVAXArgs are the arguments to ImportAVAX
-type ImportAVAXArgs struct {
+// ImportDIONEArgs are the arguments to ImportDIONE
+type ImportDIONEArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
@@ -1659,12 +1659,12 @@ type ImportAVAXArgs struct {
 	To string `json:"to"`
 }
 
-// ImportAVAX issues a transaction to import AVAX from the X-chain. The AVAX
+// ImportDIONE issues a transaction to import DIONE from the X-chain. The DIONE
 // must have already been exported from the X-Chain.
-func (s *Service) ImportAVAX(_ *http.Request, args *ImportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
+func (s *Service) ImportDIONE(_ *http.Request, args *ImportDIONEArgs, response *api.JSONTxIDChangeAddr) error {
 	s.vm.ctx.Log.Warn("deprecated API called",
 		zap.String("service", "platform"),
-		zap.String("method", "importAVAX"),
+		zap.String("method", "importDIONE"),
 	)
 
 	// Parse the sourceCHain
@@ -1674,13 +1674,13 @@ func (s *Service) ImportAVAX(_ *http.Request, args *ImportAVAXArgs, response *ap
 	}
 
 	// Parse the to address
-	to, err := avax.ParseServiceAddress(s.addrManager, args.To)
+	to, err := dione.ParseServiceAddress(s.addrManager, args.To)
 	if err != nil { // Parse address
 		return fmt.Errorf("couldn't parse argument 'to' to an address: %w", err)
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1703,7 +1703,7 @@ func (s *Service) ImportAVAX(_ *http.Request, args *ImportAVAXArgs, response *ap
 	}
 	changeAddr := privKeys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -1800,7 +1800,7 @@ func (s *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchainArgs, 
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseServiceAddresses(s.addrManager, args.From)
+	fromAddrs, err := dione.ParseServiceAddresses(s.addrManager, args.From)
 	if err != nil {
 		return err
 	}
@@ -1823,7 +1823,7 @@ func (s *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchainArgs, 
 	}
 	changeAddr := keys.Keys[0].PublicKey().Address() // By default, use a key controlled by the user
 	if args.ChangeAddr != "" {
-		changeAddr, err = avax.ParseServiceAddress(s.addrManager, args.ChangeAddr)
+		changeAddr, err = dione.ParseServiceAddress(s.addrManager, args.ChangeAddr)
 		if err != nil {
 			return fmt.Errorf("couldn't parse changeAddr: %w", err)
 		}
@@ -2251,17 +2251,17 @@ type GetStakeReply struct {
 	Staked  json.Uint64            `json:"staked"`
 	Stakeds map[ids.ID]json.Uint64 `json:"stakeds"`
 	// String representation of staked outputs
-	// Each is of type avax.TransferableOutput
+	// Each is of type dione.TransferableOutput
 	Outputs []string `json:"stakedOutputs"`
 	// Encoding of [Outputs]
 	Encoding formatting.Encoding `json:"encoding"`
 }
 
-// GetStake returns the amount of nAVAX that [args.Addresses] have cumulatively
+// GetStake returns the amount of nDIONE that [args.Addresses] have cumulatively
 // staked on the Primary Network.
 //
 // This method assumes that each stake output has only owner
-// This method assumes only AVAX can be staked
+// This method assumes only DIONE can be staked
 // This method only concerns itself with the Primary Network, not subnets
 // TODO: Improve the performance of this method by maintaining this data
 // in a data structure rather than re-calculating it by iterating over stakers
@@ -2275,7 +2275,7 @@ func (s *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *GetSta
 		return fmt.Errorf("%d addresses provided but this method can take at most %d", len(args.Addresses), maxGetStakeAddrs)
 	}
 
-	addrs, err := avax.ParseServiceAddresses(s.addrManager, args.Addresses)
+	addrs, err := dione.ParseServiceAddresses(s.addrManager, args.Addresses)
 	if err != nil {
 		return err
 	}
@@ -2288,7 +2288,7 @@ func (s *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *GetSta
 
 	var (
 		totalAmountStaked = make(map[ids.ID]uint64)
-		stakedOuts        []avax.TransferableOutput
+		stakedOuts        []dione.TransferableOutput
 	)
 	for currentStakerIterator.Next() { // Iterates over current stakers
 		staker := currentStakerIterator.Value()
@@ -2327,7 +2327,7 @@ func (s *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *GetSta
 	}
 
 	response.Stakeds = newJSONBalanceMap(totalAmountStaked)
-	response.Staked = response.Stakeds[s.vm.ctx.AVAXAssetID]
+	response.Staked = response.Stakeds[s.vm.ctx.DIONEAssetID]
 	response.Outputs = make([]string, len(stakedOuts))
 	for i, output := range stakedOuts {
 		bytes, err := txs.Codec.Marshal(txs.Version, output)
@@ -2353,11 +2353,11 @@ type GetMinStakeArgs struct {
 type GetMinStakeReply struct {
 	//  The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake json.Uint64 `json:"minValidatorStake"`
-	// Minimum stake, in nAVAX, that can be delegated on the primary network
+	// Minimum stake, in nDIONE, that can be delegated on the primary network
 	MinDelegatorStake json.Uint64 `json:"minDelegatorStake"`
 }
 
-// GetMinStake returns the minimum staking amount in nAVAX.
+// GetMinStake returns the minimum staking amount in nDIONE.
 func (s *Service) GetMinStake(_ *http.Request, args *GetMinStakeArgs, reply *GetMinStakeReply) error {
 	s.vm.ctx.Log.Debug("API called",
 		zap.String("service", "platform"),
@@ -2437,7 +2437,7 @@ type GetMaxStakeAmountReply struct {
 	Amount json.Uint64 `json:"amount"`
 }
 
-// GetMaxStakeAmount returns the maximum amount of nAVAX staking to the named
+// GetMaxStakeAmount returns the maximum amount of nDIONE staking to the named
 // node during the time period.
 func (s *Service) GetMaxStakeAmount(_ *http.Request, args *GetMaxStakeAmountArgs, reply *GetMaxStakeAmountReply) error {
 	s.vm.ctx.Log.Debug("deprecated API called",
@@ -2726,14 +2726,14 @@ func (s *Service) getAPIOwner(owner *secp256k1fx.OutputOwners) (*platformapi.Own
 // Returns:
 // 1) The total amount staked by addresses in [addrs]
 // 2) The staked outputs
-func getStakeHelper(tx *txs.Tx, addrs set.Set[ids.ShortID], totalAmountStaked map[ids.ID]uint64) []avax.TransferableOutput {
+func getStakeHelper(tx *txs.Tx, addrs set.Set[ids.ShortID], totalAmountStaked map[ids.ID]uint64) []dione.TransferableOutput {
 	staker, ok := tx.Unsigned.(txs.PermissionlessStaker)
 	if !ok {
 		return nil
 	}
 
 	stake := staker.Stake()
-	stakedOuts := make([]avax.TransferableOutput, 0, len(stake))
+	stakedOuts := make([]dione.TransferableOutput, 0, len(stake))
 	// Go through all of the staked outputs
 	for _, output := range stake {
 		out := output.Out

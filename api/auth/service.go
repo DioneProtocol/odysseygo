@@ -8,7 +8,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/api"
+	"github.com/DioneProtocol/odysseygo/api"
 )
 
 // Service that serves the Auth API functionality.

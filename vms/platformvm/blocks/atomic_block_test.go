@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 func TestNewApricotAtomicBlock(t *testing.T) {
@@ -22,12 +22,12 @@ func TestNewApricotAtomicBlock(t *testing.T) {
 	tx := &txs.Tx{
 		Unsigned: &txs.ImportTx{
 			BaseTx: txs.BaseTx{
-				BaseTx: avax.BaseTx{
-					Ins:  []*avax.TransferableInput{},
-					Outs: []*avax.TransferableOutput{},
+				BaseTx: dione.BaseTx{
+					Ins:  []*dione.TransferableInput{},
+					Outs: []*dione.TransferableOutput{},
 				},
 			},
-			ImportedInputs: []*avax.TransferableInput{},
+			ImportedInputs: []*dione.TransferableInput{},
 		},
 		Creds: []verify.Verifiable{},
 	}

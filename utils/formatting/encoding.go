@@ -11,7 +11,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/ava-labs/avalanchego/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
 )
 
 const (

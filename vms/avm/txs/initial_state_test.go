@@ -9,12 +9,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/codec/linearcodec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var errTest = errors.New("non-nil error")
@@ -124,14 +124,14 @@ func TestInitialStateVerifyInvalidOutput(t *testing.T) {
 	require := require.New(t)
 
 	c := linearcodec.NewDefault()
-	require.NoError(c.RegisterType(&avax.TestState{}))
+	require.NoError(c.RegisterType(&dione.TestState{}))
 	m := codec.NewDefaultManager()
 	require.NoError(m.RegisterCodec(CodecVersion, c))
 	numFxs := 1
 
 	is := InitialState{
 		FxIndex: 0,
-		Outs:    []verify.State{&avax.TestState{Err: errTest}},
+		Outs:    []verify.State{&dione.TestState{Err: errTest}},
 	}
 	err := is.Verify(m, numFxs)
 	require.ErrorIs(err, errTest)
@@ -141,7 +141,7 @@ func TestInitialStateVerifyUnsortedOutputs(t *testing.T) {
 	require := require.New(t)
 
 	c := linearcodec.NewDefault()
-	require.NoError(c.RegisterType(&avax.TestTransferable{}))
+	require.NoError(c.RegisterType(&dione.TestTransferable{}))
 	m := codec.NewDefaultManager()
 	require.NoError(m.RegisterCodec(CodecVersion, c))
 	numFxs := 1
@@ -149,8 +149,8 @@ func TestInitialStateVerifyUnsortedOutputs(t *testing.T) {
 	is := InitialState{
 		FxIndex: 0,
 		Outs: []verify.State{
-			&avax.TestTransferable{Val: 1},
-			&avax.TestTransferable{Val: 0},
+			&dione.TestTransferable{Val: 1},
+			&dione.TestTransferable{Val: 0},
 		},
 	}
 	err := is.Verify(m, numFxs)

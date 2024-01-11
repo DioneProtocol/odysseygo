@@ -9,18 +9,18 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestRewardValidatorTxExecuteOnCommit(t *testing.T) {
@@ -113,7 +113,7 @@ func TestRewardValidatorTxExecuteOnCommit(t *testing.T) {
 	stakeOwners := stakerToRemoveTx.StakeOuts[0].Out.(*secp256k1fx.TransferOutput).AddressesSet()
 
 	// Get old balances
-	oldBalance, err := avax.GetBalance(env.state, stakeOwners)
+	oldBalance, err := dione.GetBalance(env.state, stakeOwners)
 	require.NoError(err)
 
 	require.NoError(txExecutor.OnCommitState.Apply(env.state))
@@ -121,7 +121,7 @@ func TestRewardValidatorTxExecuteOnCommit(t *testing.T) {
 	env.state.SetHeight(dummyHeight)
 	require.NoError(env.state.Commit())
 
-	onCommitBalance, err := avax.GetBalance(env.state, stakeOwners)
+	onCommitBalance, err := dione.GetBalance(env.state, stakeOwners)
 	require.NoError(err)
 	require.Equal(oldBalance+stakerToRemove.Weight+27697, onCommitBalance)
 }
@@ -210,7 +210,7 @@ func TestRewardValidatorTxExecuteOnAbort(t *testing.T) {
 	stakeOwners := stakerToRemoveTx.StakeOuts[0].Out.(*secp256k1fx.TransferOutput).AddressesSet()
 
 	// Get old balances
-	oldBalance, err := avax.GetBalance(env.state, stakeOwners)
+	oldBalance, err := dione.GetBalance(env.state, stakeOwners)
 	require.NoError(err)
 
 	require.NoError(txExecutor.OnAbortState.Apply(env.state))
@@ -218,7 +218,7 @@ func TestRewardValidatorTxExecuteOnAbort(t *testing.T) {
 	env.state.SetHeight(dummyHeight)
 	require.NoError(env.state.Commit())
 
-	onAbortBalance, err := avax.GetBalance(env.state, stakeOwners)
+	onAbortBalance, err := dione.GetBalance(env.state, stakeOwners)
 	require.NoError(err)
 	require.Equal(oldBalance+stakerToRemove.Weight, onAbortBalance)
 }
@@ -317,9 +317,9 @@ func TestRewardDelegatorTxExecuteOnCommitPreDelegateeDeferral(t *testing.T) {
 
 	expectedReward := uint64(1000000)
 
-	oldVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	oldVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
-	oldDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	oldDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 
 	require.NoError(txExecutor.OnCommitState.Apply(env.state))
@@ -329,13 +329,13 @@ func TestRewardDelegatorTxExecuteOnCommitPreDelegateeDeferral(t *testing.T) {
 
 	// Since the tx was committed, the delegator and the delegatee should be rewarded.
 	// The delegator reward should be higher since the delegatee's share is 25%.
-	commitVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	commitVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
 	vdrReward, err := math.Sub(commitVdrBalance, oldVdrBalance)
 	require.NoError(err)
 	require.NotZero(vdrReward, "expected delegatee balance to increase because of reward")
 
-	commitDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	commitDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 	delReward, err := math.Sub(commitDelBalance, oldDelBalance)
 	require.NoError(err)
@@ -417,9 +417,9 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	delDestSet := set.Set[ids.ShortID]{}
 	delDestSet.Add(delRewardAddress)
 
-	oldVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	oldVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
-	oldDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	oldDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 
 	// test validator stake
@@ -452,7 +452,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	// Since this is post [CortinaTime], the delegatee should not be rewarded until a
 	// RewardValidatorTx is issued for the delegatee.
 	numDelStakeUTXOs := uint32(len(delTx.Unsigned.InputIDs()))
-	delRewardUTXOID := &avax.UTXOID{
+	delRewardUTXOID := &dione.UTXOID{
 		TxID:        delTx.ID(),
 		OutputIndex: numDelStakeUTXOs + 1,
 	}
@@ -464,7 +464,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	require.Equal(delRewardAmt*3/4, castUTXO.Amt, "expected delegator balance to increase by 3/4 of reward amount")
 	require.True(delDestSet.Equals(castUTXO.AddressesSet()), "expected reward UTXO to be issued to delDestSet")
 
-	preCortinaVdrRewardUTXOID := &avax.UTXOID{
+	preCortinaVdrRewardUTXOID := &dione.UTXOID{
 		TxID:        delTx.ID(),
 		OutputIndex: numDelStakeUTXOs + 2,
 	}
@@ -500,7 +500,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	numVdrStakeUTXOs := uint32(len(delTx.Unsigned.InputIDs()))
 
 	// check for validator reward here
-	vdrRewardUTXOID := &avax.UTXOID{
+	vdrRewardUTXOID := &dione.UTXOID{
 		TxID:        vdrTx.ID(),
 		OutputIndex: numVdrStakeUTXOs + 1,
 	}
@@ -513,7 +513,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	require.True(vdrDestSet.Equals(castUTXO.AddressesSet()), "expected reward UTXO to be issued to vdrDestSet")
 
 	// check for validator's batched delegator rewards here
-	onCommitVdrDelRewardUTXOID := &avax.UTXOID{
+	onCommitVdrDelRewardUTXOID := &dione.UTXOID{
 		TxID:        vdrTx.ID(),
 		OutputIndex: numVdrStakeUTXOs + 2,
 	}
@@ -526,7 +526,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	require.True(vdrDestSet.Equals(castUTXO.AddressesSet()), "expected reward UTXO to be issued to vdrDestSet")
 
 	// aborted validator tx should still distribute accrued delegator rewards
-	onAbortVdrDelRewardUTXOID := &avax.UTXOID{
+	onAbortVdrDelRewardUTXOID := &dione.UTXOID{
 		TxID:        vdrTx.ID(),
 		OutputIndex: numVdrStakeUTXOs + 1,
 	}
@@ -549,7 +549,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 
 	// Since the tx was committed, the delegator and the delegatee should be rewarded.
 	// The delegator reward should be higher since the delegatee's share is 25%.
-	commitVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	commitVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
 	vdrReward, err := math.Sub(commitVdrBalance, oldVdrBalance)
 	require.NoError(err)
@@ -557,7 +557,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	require.NoError(err)
 	require.NotZero(delegateeReward, "expected delegatee balance to increase because of reward")
 
-	commitDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	commitDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 	delReward, err := math.Sub(commitDelBalance, oldDelBalance)
 	require.NoError(err)
@@ -637,9 +637,9 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 	delDestSet := set.Set[ids.ShortID]{}
 	delDestSet.Add(delRewardAddress)
 
-	oldVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	oldVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
-	oldDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	oldDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 
 	tx, err := env.txBuilder.NewRewardValidatorTx(delTx.ID())
@@ -683,7 +683,7 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 
 	// aborted validator tx should still distribute accrued delegator rewards
 	numVdrStakeUTXOs := uint32(len(delTx.Unsigned.InputIDs()))
-	onAbortVdrDelRewardUTXOID := &avax.UTXOID{
+	onAbortVdrDelRewardUTXOID := &dione.UTXOID{
 		TxID:        vdrTx.ID(),
 		OutputIndex: numVdrStakeUTXOs + 1,
 	}
@@ -709,7 +709,7 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 
 	// Since the tx was committed, the delegator and the delegatee should be rewarded.
 	// The delegator reward should be higher since the delegatee's share is 25%.
-	commitVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	commitVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
 	vdrReward, err := math.Sub(commitVdrBalance, oldVdrBalance)
 	require.NoError(err)
@@ -717,7 +717,7 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 	require.NoError(err)
 	require.NotZero(delegateeReward, "expected delegatee balance to increase because of reward")
 
-	commitDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	commitDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 	delReward, err := math.Sub(commitDelBalance, oldDelBalance)
 	require.NoError(err)
@@ -816,9 +816,9 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 
 	expectedReward := uint64(1000000)
 
-	oldVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	oldVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
-	oldDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	oldDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 
 	require.NoError(txExecutor.OnAbortState.Apply(env.state))
@@ -827,13 +827,13 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	require.NoError(env.state.Commit())
 
 	// If tx is aborted, delegator and delegatee shouldn't get reward
-	newVdrBalance, err := avax.GetBalance(env.state, vdrDestSet)
+	newVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
 	vdrReward, err := math.Sub(newVdrBalance, oldVdrBalance)
 	require.NoError(err)
 	require.Zero(vdrReward, "expected delegatee balance not to increase")
 
-	newDelBalance, err := avax.GetBalance(env.state, delDestSet)
+	newDelBalance, err := dione.GetBalance(env.state, delDestSet)
 	require.NoError(err)
 	delReward, err := math.Sub(newDelBalance, oldDelBalance)
 	require.NoError(err)

@@ -1,6 +1,6 @@
 # Local network orchestration
 
-This package implements a simple orchestrator for the avalanchego
+This package implements a simple orchestrator for the odysseygo
 nodes of a local network. Configuration is stored on disk, and nodes
 run as independent processes whose process details are also written to
 disk. Using the filesystem to store configuration and process details
@@ -32,13 +32,13 @@ abstractions.
 A local network can be managed by the `testnetctl` cli tool:
 
 ```bash
-# From the root of the avalanchego repo
+# From the root of the odysseygo repo
 
 # Build the testnetctl binary
 $ ./scripts/build_testnetctl.sh
 
 # Start a new network
-$ ./build/testnetctl start-network --avalanchego-path=/path/to/avalanchego
+$ ./build/testnetctl start-network --odysseygo-path=/path/to/odysseygo
 ...
 Started network 1000 @ /home/me/.testnetctl/networks/1000
 
@@ -69,7 +69,7 @@ network, _ := local.StartNetwork(
     "",                                        // Use default root dir (~/.testnetctl)
     &local.LocalNetwork{
         LocalConfig: local.LocalConfig{
-            ExecPath: "/path/to/avalanchego",  // Defining the avalanchego exec path is required
+            ExecPath: "/path/to/odysseygo",  // Defining the odysseygo exec path is required
         },
     },
     5,                                         // Number of initial validating nodes
@@ -95,7 +95,7 @@ network, _ := local.StartNetwork(
     "",
     &local.LocalNetwork{
         LocalConfig: local.LocalConfig{
-            ExecPath: "/path/to/avalanchego",
+            ExecPath: "/path/to/odysseygo",
         },
         Nodes: []*LocalNode{
             {                                                       // node1 configuration is customized
@@ -123,7 +123,7 @@ By default, nodes in a local network will be started with staking and
 API ports set to `0` to ensure that ports will be dynamically
 chosen. The testnet fixture discovers the ports used by a given node
 by reading the `[base-data-dir]/process.json` file written by
-avalanchego on node start. The use of dynamic ports supports testing
+odysseygo on node start. The use of dynamic ports supports testing
 with many local networks without having to manually select compatible
 port ranges.
 
@@ -161,8 +161,8 @@ HOME
 
 ### Default flags and configuration
 
-The default avalanchego node flags (e.g. `--staking-port=`) and
-default configuration like the avalanchego path are stored at
+The default odysseygo node flags (e.g. `--staking-port=`) and
+default configuration like the odysseygo path are stored at
 `[network-dir]/defaults.json`. The value for a given defaulted flag
 will be set on initial and subsequently added nodes that do not supply
 values for a given defaulted flag.
@@ -213,7 +213,7 @@ editing the config file.
 
 #### Process details
 
-The process details of a node are written by avalanchego to
+The process details of a node are written by odysseygo to
 `[base-data-dir]/process.json`. The file contains the PID of the node
 process, the URI of the node's API, and the address other nodes can
 use to bootstrap themselves (aka staking address).

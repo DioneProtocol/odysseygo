@@ -6,10 +6,10 @@ package txs
 import (
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var _ UnsignedTx = (*AdvanceTimeTx)(nil)
@@ -46,7 +46,7 @@ func (*AdvanceTimeTx) InputIDs() set.Set[ids.ID] {
 	return nil
 }
 
-func (*AdvanceTimeTx) Outputs() []*avax.TransferableOutput {
+func (*AdvanceTimeTx) Outputs() []*dione.TransferableOutput {
 	return nil
 }
 

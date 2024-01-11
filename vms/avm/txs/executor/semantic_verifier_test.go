@@ -11,23 +11,23 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestSemanticVerifierBaseTx(t *testing.T) {
@@ -47,11 +47,11 @@ func TestSemanticVerifierBaseTx(t *testing.T) {
 
 	codec := parser.Codec()
 	txID := ids.GenerateTestID()
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        txID,
 		OutputIndex: 2,
 	}
-	asset := avax.Asset{
+	asset := dione.Asset{
 		ID: ids.GenerateTestID(),
 	}
 	inputSigner := secp256k1fx.Input{
@@ -63,14 +63,14 @@ func TestSemanticVerifierBaseTx(t *testing.T) {
 		Amt:   12345,
 		Input: inputSigner,
 	}
-	input := avax.TransferableInput{
+	input := dione.TransferableInput{
 		UTXOID: utxoID,
 		Asset:  asset,
 		In:     &fxInput,
 	}
 	baseTx := txs.BaseTx{
-		BaseTx: avax.BaseTx{
-			Ins: []*avax.TransferableInput{
+		BaseTx: dione.BaseTx{
+			Ins: []*dione.TransferableInput{
 				&input,
 			},
 		},
@@ -102,7 +102,7 @@ func TestSemanticVerifierBaseTx(t *testing.T) {
 		Amt:          12345,
 		OutputOwners: outputOwners,
 	}
-	utxo := avax.UTXO{
+	utxo := dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  asset,
 		Out:    &output,
@@ -299,7 +299,7 @@ func TestSemanticVerifierBaseTx(t *testing.T) {
 			txFunc: func(require *require.Assertions) *txs.Tx {
 				baseTx := baseTx
 				baseTx.Ins = nil
-				baseTx.Outs = []*avax.TransferableOutput{
+				baseTx.Outs = []*dione.TransferableOutput{
 					{
 						Asset: asset,
 						Out:   &output,
@@ -409,11 +409,11 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 
 	codec := parser.Codec()
 	txID := ids.GenerateTestID()
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        txID,
 		OutputIndex: 2,
 	}
-	asset := avax.Asset{
+	asset := dione.Asset{
 		ID: ids.GenerateTestID(),
 	}
 	inputSigner := secp256k1fx.Input{
@@ -425,14 +425,14 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 		Amt:   12345,
 		Input: inputSigner,
 	}
-	input := avax.TransferableInput{
+	input := dione.TransferableInput{
 		UTXOID: utxoID,
 		Asset:  asset,
 		In:     &fxInput,
 	}
 	baseTx := txs.BaseTx{
-		BaseTx: avax.BaseTx{
-			Ins: []*avax.TransferableInput{
+		BaseTx: dione.BaseTx{
+			Ins: []*dione.TransferableInput{
 				&input,
 			},
 		},
@@ -468,7 +468,7 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 		Amt:          12345,
 		OutputOwners: outputOwners,
 	}
-	utxo := avax.UTXO{
+	utxo := dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  asset,
 		Out:    &output,
@@ -665,7 +665,7 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 			txFunc: func(require *require.Assertions) *txs.Tx {
 				exportTx := exportTx
 				exportTx.Ins = nil
-				exportTx.ExportedOuts = []*avax.TransferableOutput{
+				exportTx.ExportedOuts = []*dione.TransferableOutput{
 					{
 						Asset: asset,
 						Out:   &output,
@@ -777,11 +777,11 @@ func TestSemanticVerifierExportTxDifferentSubnet(t *testing.T) {
 
 	codec := parser.Codec()
 	txID := ids.GenerateTestID()
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        txID,
 		OutputIndex: 2,
 	}
-	asset := avax.Asset{
+	asset := dione.Asset{
 		ID: ids.GenerateTestID(),
 	}
 	inputSigner := secp256k1fx.Input{
@@ -793,14 +793,14 @@ func TestSemanticVerifierExportTxDifferentSubnet(t *testing.T) {
 		Amt:   12345,
 		Input: inputSigner,
 	}
-	input := avax.TransferableInput{
+	input := dione.TransferableInput{
 		UTXOID: utxoID,
 		Asset:  asset,
 		In:     &fxInput,
 	}
 	baseTx := txs.BaseTx{
-		BaseTx: avax.BaseTx{
-			Ins: []*avax.TransferableInput{
+		BaseTx: dione.BaseTx{
+			Ins: []*dione.TransferableInput{
 				&input,
 			},
 		},
@@ -836,7 +836,7 @@ func TestSemanticVerifierExportTxDifferentSubnet(t *testing.T) {
 		Amt:          12345,
 		OutputOwners: outputOwners,
 	}
-	utxo := avax.UTXO{
+	utxo := dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  asset,
 		Out:    &output,
@@ -899,12 +899,12 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	require.NoError(t, err)
 
 	codec := parser.Codec()
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        ids.GenerateTestID(),
 		OutputIndex: 2,
 	}
 
-	asset := avax.Asset{
+	asset := dione.Asset{
 		ID: ids.GenerateTestID(),
 	}
 	outputOwners := secp256k1fx.OutputOwners{
@@ -914,10 +914,10 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 		},
 	}
 	baseTx := txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: ctx.ChainID,
-			Outs: []*avax.TransferableOutput{{
+			Outs: []*dione.TransferableOutput{{
 				Asset: asset,
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          1000,
@@ -926,7 +926,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 			}},
 		},
 	}
-	input := avax.TransferableInput{
+	input := dione.TransferableInput{
 		UTXOID: utxoID,
 		Asset:  asset,
 		In: &secp256k1fx.TransferInput{
@@ -939,7 +939,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	unsignedImportTx := txs.ImportTx{
 		BaseTx:      baseTx,
 		SourceChain: ctx.CChainID,
-		ImportedIns: []*avax.TransferableInput{
+		ImportedIns: []*dione.TransferableInput{
 			&input,
 		},
 	}
@@ -973,7 +973,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 		Amt:          12345,
 		OutputOwners: outputOwners,
 	}
-	utxo := avax.UTXO{
+	utxo := dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  asset,
 		Out:    &output,
@@ -1073,7 +1073,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 			txFunc: func(require *require.Assertions) *txs.Tx {
 				importTx := unsignedImportTx
 				importTx.Ins = nil
-				importTx.ImportedIns = []*avax.TransferableInput{
+				importTx.ImportedIns = []*dione.TransferableInput{
 					&input,
 				}
 				tx := &txs.Tx{

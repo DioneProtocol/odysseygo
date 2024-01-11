@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -25,7 +25,7 @@ var (
 // BaseTx contains fields common to many transaction types. It should be
 // embedded in transaction implementations.
 type BaseTx struct {
-	avax.BaseTx `serialize:"true"`
+	dione.BaseTx `serialize:"true"`
 
 	// true iff this transaction has already passed syntactic verification
 	SyntacticallyVerified bool `json:"-"`
@@ -49,7 +49,7 @@ func (tx *BaseTx) InputIDs() set.Set[ids.ID] {
 	return inputIDs
 }
 
-func (tx *BaseTx) Outputs() []*avax.TransferableOutput {
+func (tx *BaseTx) Outputs() []*dione.TransferableOutput {
 	return tx.Outs
 }
 
@@ -88,7 +88,7 @@ func (tx *BaseTx) SyntacticVerify(ctx *snow.Context) error {
 		}
 	}
 	switch {
-	case !avax.IsSortedTransferableOutputs(tx.Outs, Codec):
+	case !dione.IsSortedTransferableOutputs(tx.Outs, Codec):
 		return errOutputsNotSorted
 	case !utils.IsSortedAndUnique(tx.Ins):
 		return errInputsNotSortedUnique

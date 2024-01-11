@@ -11,7 +11,7 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var errTest = errors.New("hi mom")
@@ -20,14 +20,14 @@ func TestLockOutVerify(t *testing.T) {
 	tests := []struct {
 		name             string
 		locktime         uint64
-		transferableOutF func(*gomock.Controller) avax.TransferableOut
+		transferableOutF func(*gomock.Controller) dione.TransferableOut
 		expectedErr      error
 	}{
 		{
 			name:     "happy path",
 			locktime: 1,
-			transferableOutF: func(ctrl *gomock.Controller) avax.TransferableOut {
-				o := avax.NewMockTransferableOut(ctrl)
+			transferableOutF: func(ctrl *gomock.Controller) dione.TransferableOut {
+				o := dione.NewMockTransferableOut(ctrl)
 				o.EXPECT().Verify().Return(nil)
 				return o
 			},
@@ -36,7 +36,7 @@ func TestLockOutVerify(t *testing.T) {
 		{
 			name:     "invalid locktime",
 			locktime: 0,
-			transferableOutF: func(ctrl *gomock.Controller) avax.TransferableOut {
+			transferableOutF: func(ctrl *gomock.Controller) dione.TransferableOut {
 				return nil
 			},
 			expectedErr: errInvalidLocktime,
@@ -44,7 +44,7 @@ func TestLockOutVerify(t *testing.T) {
 		{
 			name:     "nested",
 			locktime: 1,
-			transferableOutF: func(ctrl *gomock.Controller) avax.TransferableOut {
+			transferableOutF: func(ctrl *gomock.Controller) dione.TransferableOut {
 				return &LockOut{}
 			},
 			expectedErr: errNestedStakeableLocks,
@@ -52,8 +52,8 @@ func TestLockOutVerify(t *testing.T) {
 		{
 			name:     "inner output fails verification",
 			locktime: 1,
-			transferableOutF: func(ctrl *gomock.Controller) avax.TransferableOut {
-				o := avax.NewMockTransferableOut(ctrl)
+			transferableOutF: func(ctrl *gomock.Controller) dione.TransferableOut {
+				o := dione.NewMockTransferableOut(ctrl)
 				o.EXPECT().Verify().Return(errTest)
 				return o
 			},
@@ -78,14 +78,14 @@ func TestLockInVerify(t *testing.T) {
 	tests := []struct {
 		name            string
 		locktime        uint64
-		transferableInF func(*gomock.Controller) avax.TransferableIn
+		transferableInF func(*gomock.Controller) dione.TransferableIn
 		expectedErr     error
 	}{
 		{
 			name:     "happy path",
 			locktime: 1,
-			transferableInF: func(ctrl *gomock.Controller) avax.TransferableIn {
-				o := avax.NewMockTransferableIn(ctrl)
+			transferableInF: func(ctrl *gomock.Controller) dione.TransferableIn {
+				o := dione.NewMockTransferableIn(ctrl)
 				o.EXPECT().Verify().Return(nil)
 				return o
 			},
@@ -94,7 +94,7 @@ func TestLockInVerify(t *testing.T) {
 		{
 			name:     "invalid locktime",
 			locktime: 0,
-			transferableInF: func(ctrl *gomock.Controller) avax.TransferableIn {
+			transferableInF: func(ctrl *gomock.Controller) dione.TransferableIn {
 				return nil
 			},
 			expectedErr: errInvalidLocktime,
@@ -102,7 +102,7 @@ func TestLockInVerify(t *testing.T) {
 		{
 			name:     "nested",
 			locktime: 1,
-			transferableInF: func(ctrl *gomock.Controller) avax.TransferableIn {
+			transferableInF: func(ctrl *gomock.Controller) dione.TransferableIn {
 				return &LockIn{}
 			},
 			expectedErr: errNestedStakeableLocks,
@@ -110,8 +110,8 @@ func TestLockInVerify(t *testing.T) {
 		{
 			name:     "inner input fails verification",
 			locktime: 1,
-			transferableInF: func(ctrl *gomock.Controller) avax.TransferableIn {
-				o := avax.NewMockTransferableIn(ctrl)
+			transferableInF: func(ctrl *gomock.Controller) dione.TransferableIn {
+				o := dione.NewMockTransferableIn(ctrl)
 				o.EXPECT().Verify().Return(errTest)
 				return o
 			},

@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var (
@@ -32,7 +32,7 @@ type diff struct {
 	stateVersions Versions
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
-	modifiedUTXOs map[ids.ID]*avax.UTXO
+	modifiedUTXOs map[ids.ID]*dione.UTXO
 	addedTxs      map[ids.ID]*txs.Tx     // map of txID -> tx
 	addedBlockIDs map[uint64]ids.ID      // map of height -> blockID
 	addedBlocks   map[ids.ID]block.Block // map of blockID -> block
@@ -52,7 +52,7 @@ func NewDiff(
 	return &diff{
 		parentID:      parentID,
 		stateVersions: stateVersions,
-		modifiedUTXOs: make(map[ids.ID]*avax.UTXO),
+		modifiedUTXOs: make(map[ids.ID]*dione.UTXO),
 		addedTxs:      make(map[ids.ID]*txs.Tx),
 		addedBlockIDs: make(map[uint64]ids.ID),
 		addedBlocks:   make(map[ids.ID]block.Block),
@@ -61,7 +61,7 @@ func NewDiff(
 	}, nil
 }
 
-func (d *diff) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
+func (d *diff) GetUTXO(utxoID ids.ID) (*dione.UTXO, error) {
 	if utxo, modified := d.modifiedUTXOs[utxoID]; modified {
 		if utxo == nil {
 			return nil, database.ErrNotFound
@@ -76,7 +76,7 @@ func (d *diff) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
 	return parentState.GetUTXO(utxoID)
 }
 
-func (d *diff) AddUTXO(utxo *avax.UTXO) {
+func (d *diff) AddUTXO(utxo *dione.UTXO) {
 	d.modifiedUTXOs[utxo.InputID()] = utxo
 }
 

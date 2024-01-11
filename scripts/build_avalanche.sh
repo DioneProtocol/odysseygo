@@ -3,9 +3,9 @@
 set -euo pipefail
 
 print_usage() {
-  printf "Usage: build_avalanche [OPTIONS]
+  printf "Usage: build_odyssey [OPTIONS]
 
-  Build avalanchego
+  Build odysseygo
 
   Options:
 
@@ -23,7 +23,7 @@ while getopts 'r' flag; do
 done
 
 # Changes to the minimum golang version must also be replicated in
-# scripts/build_avalanche.sh (here)
+# scripts/build_odyssey.sh (here)
 # Dockerfile
 # README.md
 # go.mod
@@ -46,15 +46,15 @@ version_lt() {
 }
 
 if version_lt "$(go_version)" "$go_version_minimum"; then
-    echo "AvalancheGo requires Go >= $go_version_minimum, Go $(go_version) found." >&2
+    echo "OdysseyGo requires Go >= $go_version_minimum, Go $(go_version) found." >&2
     exit 1
 fi
 
-# Avalanchego root folder
+# Odysseygo root folder
 AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
 source "$AVALANCHE_PATH"/scripts/constants.sh
 
 build_args="$race"
-echo "Building AvalancheGo..."
-go build $build_args -ldflags "-X github.com/ava-labs/avalanchego/version.GitCommit=$git_commit $static_ld_flags" -o "$avalanchego_path" "$AVALANCHE_PATH/main/"*.go
+echo "Building OdysseyGo..."
+go build $build_args -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit $static_ld_flags" -o "$odysseygo_path" "$AVALANCHE_PATH/main/"*.go

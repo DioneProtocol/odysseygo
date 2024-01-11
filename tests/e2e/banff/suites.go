@@ -9,14 +9,14 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var _ = ginkgo.Describe("[Banff]", func() {
@@ -68,9 +68,9 @@ var _ = ginkgo.Describe("[Banff]", func() {
 			ginkgo.By("export new X-chain asset to P-chain", func() {
 				tx, err := xWallet.IssueExportTx(
 					constants.PlatformChainID,
-					[]*avax.TransferableOutput{
+					[]*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -95,9 +95,9 @@ var _ = ginkgo.Describe("[Banff]", func() {
 			ginkgo.By("export asset from P-chain to the X-chain", func() {
 				tx, err := pWallet.IssueExportTx(
 					xChainID,
-					[]*avax.TransferableOutput{
+					[]*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{

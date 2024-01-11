@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/api"
+	"github.com/DioneProtocol/odysseygo/api"
 )
 
 func TestWalletService_SendMultiple(t *testing.T) {
@@ -18,7 +18,7 @@ func TestWalletService_SendMultiple(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			env := setup(t, &envConfig{
-				isCustomFeeAsset: !tc.avaxAsset,
+				isCustomFeeAsset: !tc.dioneAsset,
 				keystoreUsers: []*user{{
 					username:    username,
 					password:    password,

@@ -6,15 +6,15 @@ package primary
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/wallet/chain/c"
-	"github.com/ava-labs/avalanchego/wallet/chain/p"
-	"github.com/ava-labs/avalanchego/wallet/chain/x"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/c"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var _ Wallet = (*wallet)(nil)
@@ -66,8 +66,8 @@ type WalletConfig struct {
 	// Base URI to use for all node requests.
 	URI string // required
 	// Keys to use for signing all transactions.
-	AVAXKeychain keychain.Keychain // required
-	EthKeychain  c.EthKeychain     // required
+	DIONEKeychain keychain.Keychain // required
+	EthKeychain   c.EthKeychain     // required
 	// Set of P-chain transactions that the wallet should know about to be able
 	// to generate transactions.
 	PChainTxs map[ids.ID]*txs.Tx // optional
@@ -87,8 +87,8 @@ type WalletConfig struct {
 //
 // The wallet manages all state locally, and performs all tx signing locally.
 func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
-	avaxAddrs := config.AVAXKeychain.Addresses()
-	avaxState, err := FetchState(ctx, config.URI, avaxAddrs)
+	dioneAddrs := config.DIONEKeychain.Addresses()
+	dioneState, err := FetchState(ctx, config.URI, dioneAddrs)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	}
 
 	for txID := range config.PChainTxsToFetch {
-		txBytes, err := avaxState.PClient.GetTx(ctx, txID)
+		txBytes, err := dioneState.PClient.GetTx(ctx, txID)
 		if err != nil {
 			return nil, err
 		}
@@ -116,26 +116,26 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		pChainTxs[txID] = tx
 	}
 
-	pUTXOs := NewChainUTXOs(constants.PlatformChainID, avaxState.UTXOs)
-	pBackend := p.NewBackend(avaxState.PCTX, pUTXOs, pChainTxs)
-	pBuilder := p.NewBuilder(avaxAddrs, pBackend)
-	pSigner := p.NewSigner(config.AVAXKeychain, pBackend)
+	pUTXOs := NewChainUTXOs(constants.PlatformChainID, dioneState.UTXOs)
+	pBackend := p.NewBackend(dioneState.PCTX, pUTXOs, pChainTxs)
+	pBuilder := p.NewBuilder(dioneAddrs, pBackend)
+	pSigner := p.NewSigner(config.DIONEKeychain, pBackend)
 
-	xChainID := avaxState.XCTX.BlockchainID()
-	xUTXOs := NewChainUTXOs(xChainID, avaxState.UTXOs)
-	xBackend := x.NewBackend(avaxState.XCTX, xUTXOs)
-	xBuilder := x.NewBuilder(avaxAddrs, xBackend)
-	xSigner := x.NewSigner(config.AVAXKeychain, xBackend)
+	xChainID := dioneState.XCTX.BlockchainID()
+	xUTXOs := NewChainUTXOs(xChainID, dioneState.UTXOs)
+	xBackend := x.NewBackend(dioneState.XCTX, xUTXOs)
+	xBuilder := x.NewBuilder(dioneAddrs, xBackend)
+	xSigner := x.NewSigner(config.DIONEKeychain, xBackend)
 
-	cChainID := avaxState.CCTX.BlockchainID()
-	cUTXOs := NewChainUTXOs(cChainID, avaxState.UTXOs)
-	cBackend := c.NewBackend(avaxState.CCTX, cUTXOs, ethState.Accounts)
-	cBuilder := c.NewBuilder(avaxAddrs, ethAddrs, cBackend)
-	cSigner := c.NewSigner(config.AVAXKeychain, config.EthKeychain, cBackend)
+	cChainID := dioneState.CCTX.BlockchainID()
+	cUTXOs := NewChainUTXOs(cChainID, dioneState.UTXOs)
+	cBackend := c.NewBackend(dioneState.CCTX, cUTXOs, ethState.Accounts)
+	cBuilder := c.NewBuilder(dioneAddrs, ethAddrs, cBackend)
+	cSigner := c.NewSigner(config.DIONEKeychain, config.EthKeychain, cBackend)
 
 	return NewWallet(
-		p.NewWallet(pBuilder, pSigner, avaxState.PClient, pBackend),
-		x.NewWallet(xBuilder, xSigner, avaxState.XClient, xBackend),
-		c.NewWallet(cBuilder, cSigner, avaxState.CClient, ethState.Client, cBackend),
+		p.NewWallet(pBuilder, pSigner, dioneState.PClient, pBackend),
+		x.NewWallet(xBuilder, xSigner, dioneState.XClient, xBackend),
+		c.NewWallet(cBuilder, cSigner, dioneState.CClient, ethState.Client, cBackend),
 	), nil
 }

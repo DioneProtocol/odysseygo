@@ -13,22 +13,22 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs/mempool"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	blockexecutor "github.com/ava-labs/avalanchego/vms/platformvm/blocks/executor"
-	txbuilder "github.com/ava-labs/avalanchego/vms/platformvm/txs/builder"
-	txexecutor "github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
+	blockexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/blocks/executor"
+	txbuilder "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/builder"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
 )
 
 var errTestingDropped = errors.New("testing dropped")
@@ -298,8 +298,8 @@ func TestBuildBlock(t *testing.T) {
 	var (
 		parentID = ids.GenerateTestID()
 		height   = uint64(1337)
-		output   = &avax.TransferableOutput{
-			Asset: avax.Asset{ID: ids.GenerateTestID()},
+		output   = &dione.TransferableOutput{
+			Asset: dione.Asset{ID: ids.GenerateTestID()},
 			Out: &secp256k1fx.TransferOutput{
 				OutputOwners: secp256k1fx.OutputOwners{
 					Addrs: []ids.ShortID{ids.GenerateTestShortID()},
@@ -310,22 +310,22 @@ func TestBuildBlock(t *testing.T) {
 		parentTimestamp = now.Add(-2 * time.Second)
 		transactions    = []*txs.Tx{{
 			Unsigned: &txs.AddValidatorTx{
-				BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
-					Ins: []*avax.TransferableInput{{
-						Asset: avax.Asset{ID: ids.GenerateTestID()},
+				BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+					Ins: []*dione.TransferableInput{{
+						Asset: dione.Asset{ID: ids.GenerateTestID()},
 						In: &secp256k1fx.TransferInput{
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{0},
 							},
 						},
 					}},
-					Outs: []*avax.TransferableOutput{output},
+					Outs: []*dione.TransferableOutput{output},
 				}},
 				Validator: txs.Validator{
 					// Shouldn't be dropped
 					Start: uint64(now.Add(2 * txexecutor.SyncBound).Unix()),
 				},
-				StakeOuts: []*avax.TransferableOutput{output},
+				StakeOuts: []*dione.TransferableOutput{output},
 				RewardsOwner: &secp256k1fx.OutputOwners{
 					Addrs: []ids.ShortID{ids.GenerateTestShortID()},
 				},

@@ -13,26 +13,26 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database/leveldb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/platformvm/api"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
-	"github.com/ava-labs/avalanchego/vms/platformvm/metrics"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database/leveldb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/api"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 // BenchmarkGetValidatorSet generates 10k diffs and calculates the time to
@@ -59,7 +59,7 @@ func BenchmarkGetValidatorSet(b *testing.B) {
 		require.NoError(db.Close())
 	}()
 
-	avaxAssetID := ids.GenerateTestID()
+	dioneAssetID := ids.GenerateTestID()
 	genesisTime := time.Now().Truncate(time.Second)
 	genesisEndTime := genesisTime.Add(28 * 24 * time.Hour)
 
@@ -77,7 +77,7 @@ func BenchmarkGetValidatorSet(b *testing.B) {
 			Addresses: []string{addr},
 		},
 		Staked: []api.UTXO{{
-			Amount:  json.Uint64(2 * units.KiloAvax),
+			Amount:  json.Uint64(2 * units.KiloDione),
 			Address: addr,
 		}},
 		DelegationFee: reward.PercentDenominator,
@@ -85,12 +85,12 @@ func BenchmarkGetValidatorSet(b *testing.B) {
 
 	buildGenesisArgs := api.BuildGenesisArgs{
 		NetworkID:     json.Uint32(constants.UnitTestID),
-		AvaxAssetID:   avaxAssetID,
+		DioneAssetID:  dioneAssetID,
 		UTXOs:         nil,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(genesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAvax),
+		InitialSupply: json.Uint64(360 * units.MegaDione),
 		Encoding:      formatting.Hex,
 	}
 
@@ -128,7 +128,7 @@ func BenchmarkGetValidatorSet(b *testing.B) {
 			MaxConsumptionRate: .12 * reward.PercentDenominator,
 			MinConsumptionRate: .10 * reward.PercentDenominator,
 			MintingPeriod:      365 * 24 * time.Hour,
-			SupplyCap:          720 * units.MegaAvax,
+			SupplyCap:          720 * units.MegaDione,
 		}),
 		new(utils.Atomic[bool]),
 	)
@@ -196,7 +196,7 @@ func addPrimaryValidator(
 		NodeID:          nodeID,
 		PublicKey:       bls.PublicFromSecretKey(sk),
 		SubnetID:        constants.PrimaryNetworkID,
-		Weight:          2 * units.MegaAvax,
+		Weight:          2 * units.MegaDione,
 		StartTime:       startTime,
 		EndTime:         endTime,
 		PotentialReward: 0,
@@ -226,7 +226,7 @@ func addSubnetValidator(
 		TxID:            ids.GenerateTestID(),
 		NodeID:          nodeID,
 		SubnetID:        subnetID,
-		Weight:          1 * units.Avax,
+		Weight:          1 * units.Dione,
 		StartTime:       startTime,
 		EndTime:         endTime,
 		PotentialReward: 0,
@@ -258,7 +258,7 @@ func addSubnetDelegator(
 		TxID:            ids.GenerateTestID(),
 		NodeID:          nodeID,
 		SubnetID:        subnetID,
-		Weight:          1 * units.Avax,
+		Weight:          1 * units.Dione,
 		StartTime:       startTime,
 		EndTime:         endTime,
 		PotentialReward: 0,

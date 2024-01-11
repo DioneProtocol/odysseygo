@@ -14,34 +14,34 @@ import (
 
 	ginkgo "github.com/onsi/ginkgo/v2"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/avm"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 const (
 	totalRounds = 50
 
-	metricBlksProcessing = "avalanche_X_blks_processing"
-	metricBlksAccepted   = "avalanche_X_blks_accepted_count"
+	metricBlksProcessing = "odyssey_X_blks_processing"
+	metricBlksAccepted   = "odyssey_X_blks_accepted_count"
 )
 
 // This test requires that the network not have ongoing blocks and
 // cannot reliably be run in parallel.
-var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx AVAX]", func() {
-	ginkgo.It("can issue a virtuous transfer tx for AVAX asset",
+var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx DIONE]", func() {
+	ginkgo.It("can issue a virtuous transfer tx for DIONE asset",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
 		ginkgo.Label(
 			"x",
-			"virtuous-transfer-tx-avax",
+			"virtuous-transfer-tx-dione",
 		),
 		func() {
 			rpcEps := make([]string, len(e2e.Env.URIs))
@@ -88,7 +88,7 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx AVAX]", func() {
 
 				keychain := secp256k1fx.NewKeychain(testKeys...)
 				baseWallet := e2e.Env.NewWallet(keychain, e2e.Env.GetRandomNodeURI())
-				avaxAssetID := baseWallet.X().AVAXAssetID()
+				dioneAssetID := baseWallet.X().DIONEAssetID()
 
 				wallets := make([]primary.Wallet, len(testKeys))
 				shortAddrs := make([]ids.ShortID, len(testKeys))
@@ -114,10 +114,10 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx AVAX]", func() {
 					balances, err := w.X().Builder().GetFTBalance()
 					gomega.Expect(err).Should(gomega.BeNil())
 
-					bal := balances[avaxAssetID]
+					bal := balances[dioneAssetID]
 					testBalances = append(testBalances, bal)
 
-					fmt.Printf(`CURRENT BALANCE %21d AVAX (SHORT ADDRESS %q)
+					fmt.Printf(`CURRENT BALANCE %21d DIONE (SHORT ADDRESS %q)
 `,
 						bal,
 						testKeys[i].PublicKey().Address(),
@@ -158,9 +158,9 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx AVAX]", func() {
 				ginkgo.By("X-Chain transfer with wrong amount must fail", func() {
 					ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 					_, err := wallets[fromIdx].X().IssueBaseTx(
-						[]*avax.TransferableOutput{{
-							Asset: avax.Asset{
-								ID: avaxAssetID,
+						[]*dione.TransferableOutput{{
+							Asset: dione.Asset{
+								ID: dioneAssetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
 								Amt: senderOrigBal + 1,
@@ -180,14 +180,14 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx AVAX]", func() {
 TRANSFERRING
 
 FROM [%q]
-SENDER    CURRENT BALANCE     : %21d AVAX
-SENDER    NEW BALANCE (AFTER) : %21d AVAX
+SENDER    CURRENT BALANCE     : %21d DIONE
+SENDER    NEW BALANCE (AFTER) : %21d DIONE
 
-TRANSFER AMOUNT FROM SENDER   : %21d AVAX
+TRANSFER AMOUNT FROM SENDER   : %21d DIONE
 
 TO [%q]
-RECEIVER  CURRENT BALANCE     : %21d AVAX
-RECEIVER  NEW BALANCE (AFTER) : %21d AVAX
+RECEIVER  CURRENT BALANCE     : %21d DIONE
+RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 ===
 `,
 					shortAddrs[fromIdx],
@@ -201,9 +201,9 @@ RECEIVER  NEW BALANCE (AFTER) : %21d AVAX
 
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				tx, err := wallets[fromIdx].X().IssueBaseTx(
-					[]*avax.TransferableOutput{{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+					[]*dione.TransferableOutput{{
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &secp256k1fx.TransferOutput{
 							Amt: amountToTransfer,
@@ -220,12 +220,12 @@ RECEIVER  NEW BALANCE (AFTER) : %21d AVAX
 
 				balances, err := wallets[fromIdx].X().Builder().GetFTBalance()
 				gomega.Expect(err).Should(gomega.BeNil())
-				senderCurBalX := balances[avaxAssetID]
+				senderCurBalX := balances[dioneAssetID]
 				tests.Outf("{{green}}first wallet balance:{{/}}  %d\n", senderCurBalX)
 
 				balances, err = wallets[toIdx].X().Builder().GetFTBalance()
 				gomega.Expect(err).Should(gomega.BeNil())
-				receiverCurBalX := balances[avaxAssetID]
+				receiverCurBalX := balances[dioneAssetID]
 				tests.Outf("{{green}}second wallet balance:{{/}} %d\n", receiverCurBalX)
 
 				gomega.Expect(senderCurBalX).Should(gomega.Equal(senderNewBal))

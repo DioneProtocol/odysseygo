@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 // List of possible blockchain status values:

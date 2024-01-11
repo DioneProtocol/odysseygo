@@ -7,14 +7,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -94,16 +94,16 @@ func (tx *Tx) ID() ids.ID {
 }
 
 // UTXOs returns the UTXOs transaction is producing.
-func (tx *Tx) UTXOs() []*avax.UTXO {
+func (tx *Tx) UTXOs() []*dione.UTXO {
 	outs := tx.Unsigned.Outputs()
-	utxos := make([]*avax.UTXO, len(outs))
+	utxos := make([]*dione.UTXO, len(outs))
 	for i, out := range outs {
-		utxos[i] = &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxos[i] = &dione.UTXO{
+			UTXOID: dione.UTXOID{
 				TxID:        tx.TxID,
 				OutputIndex: uint32(i),
 			},
-			Asset: avax.Asset{ID: out.AssetID()},
+			Asset: dione.Asset{ID: out.AssetID()},
 			Out:   out.Out,
 		}
 	}

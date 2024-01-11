@@ -8,14 +8,14 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ava-labs/coreth/ethclient"
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/ethclient"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 var (
@@ -71,25 +71,25 @@ type Wallet interface {
 func NewWallet(
 	builder Builder,
 	signer Signer,
-	avaxClient evm.Client,
+	dioneClient evm.Client,
 	ethClient ethclient.Client,
 	backend Backend,
 ) Wallet {
 	return &wallet{
-		Backend:    backend,
-		builder:    builder,
-		signer:     signer,
-		avaxClient: avaxClient,
-		ethClient:  ethClient,
+		Backend:     backend,
+		builder:     builder,
+		signer:      signer,
+		dioneClient: dioneClient,
+		ethClient:   ethClient,
 	}
 }
 
 type wallet struct {
 	Backend
-	builder    Builder
-	signer     Signer
-	avaxClient evm.Client
-	ethClient  ethclient.Client
+	builder     Builder
+	signer      Signer
+	dioneClient evm.Client
+	ethClient   ethclient.Client
 }
 
 func (w *wallet) Builder() Builder {
@@ -154,7 +154,7 @@ func (w *wallet) IssueAtomicTx(
 ) error {
 	ops := common.NewOptions(options)
 	ctx := ops.Context()
-	txID, err := w.avaxClient.IssueTx(ctx, tx.SignedBytes())
+	txID, err := w.dioneClient.IssueTx(ctx, tx.SignedBytes())
 	if err != nil {
 		return err
 	}
@@ -172,7 +172,7 @@ func (w *wallet) IssueAtomicTx(
 	defer ticker.Stop()
 
 	for {
-		status, err := w.avaxClient.GetAtomicTxStatus(ctx, txID)
+		status, err := w.dioneClient.GetAtomicTxStatus(ctx, txID)
 		if err != nil {
 			return err
 		}

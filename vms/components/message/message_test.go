@@ -10,9 +10,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/ava-labs/avalanchego/codec"
+	"github.com/DioneProtocol/odysseygo/codec"
 
-	pb "github.com/ava-labs/avalanchego/proto/pb/message"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/message"
 )
 
 func TestParseGibberish(t *testing.T) {
@@ -45,6 +45,6 @@ func TestParseProto(t *testing.T) {
 
 	// Parse invalid message
 	_, err = Parse([]byte{1, 3, 3, 7})
-	// Can't parse as proto so it falls back to using avalanchego's codec
+	// Can't parse as proto so it falls back to using odysseygo's codec
 	require.ErrorIs(err, codec.ErrUnknownVersion)
 }

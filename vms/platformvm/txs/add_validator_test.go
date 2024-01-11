@@ -9,21 +9,21 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	require := require.New(t)
 	clk := mockable.Clock{}
 	ctx := snow.DefaultContextTest()
-	ctx.AVAXAssetID = ids.GenerateTestID()
+	ctx.DIONEAssetID = ids.GenerateTestID()
 	signers := [][]*secp256k1.PrivateKey{preFundedKeys}
 
 	var (
@@ -42,19 +42,19 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 
 	validatorWeight := uint64(2022)
 	rewardAddress := preFundedKeys[0].PublicKey().Address()
-	inputs := []*avax.TransferableInput{{
-		UTXOID: avax.UTXOID{
+	inputs := []*dione.TransferableInput{{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.ID{'t', 'x', 'I', 'D'},
 			OutputIndex: 2,
 		},
-		Asset: avax.Asset{ID: ctx.AVAXAssetID},
+		Asset: dione.Asset{ID: ctx.DIONEAssetID},
 		In: &secp256k1fx.TransferInput{
 			Amt:   uint64(5678),
 			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 		},
 	}}
-	outputs := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: ctx.AVAXAssetID},
+	outputs := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: ctx.DIONEAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: uint64(1234),
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -63,8 +63,8 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 			},
 		},
 	}}
-	stakes := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: ctx.AVAXAssetID},
+	stakes := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: ctx.DIONEAssetID},
 		Out: &stakeable.LockOut{
 			Locktime: uint64(clk.Time().Add(time.Second).Unix()),
 			TransferableOut: &secp256k1fx.TransferOutput{
@@ -77,7 +77,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 		},
 	}}
 	addValidatorTx = &AddValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    ctx.NetworkID,
 			BlockchainID: ctx.ChainID,
 			Ins:          inputs,
@@ -109,7 +109,7 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.ErrorIs(err, avax.ErrWrongNetworkID)
+	require.ErrorIs(err, dione.ErrWrongNetworkID)
 	addValidatorTx.NetworkID--
 
 	// Case: Stake owner has no addresses
@@ -143,11 +143,11 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	addValidatorTx.DelegationShares--
 }
 
-func TestAddValidatorTxSyntacticVerifyNotAVAX(t *testing.T) {
+func TestAddValidatorTxSyntacticVerifyNotDIONE(t *testing.T) {
 	require := require.New(t)
 	clk := mockable.Clock{}
 	ctx := snow.DefaultContextTest()
-	ctx.AVAXAssetID = ids.GenerateTestID()
+	ctx.DIONEAssetID = ids.GenerateTestID()
 	signers := [][]*secp256k1.PrivateKey{preFundedKeys}
 
 	var (
@@ -159,19 +159,19 @@ func TestAddValidatorTxSyntacticVerifyNotAVAX(t *testing.T) {
 	assetID := ids.GenerateTestID()
 	validatorWeight := uint64(2022)
 	rewardAddress := preFundedKeys[0].PublicKey().Address()
-	inputs := []*avax.TransferableInput{{
-		UTXOID: avax.UTXOID{
+	inputs := []*dione.TransferableInput{{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.ID{'t', 'x', 'I', 'D'},
 			OutputIndex: 2,
 		},
-		Asset: avax.Asset{ID: assetID},
+		Asset: dione.Asset{ID: assetID},
 		In: &secp256k1fx.TransferInput{
 			Amt:   uint64(5678),
 			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 		},
 	}}
-	outputs := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: assetID},
+	outputs := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: uint64(1234),
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -180,8 +180,8 @@ func TestAddValidatorTxSyntacticVerifyNotAVAX(t *testing.T) {
 			},
 		},
 	}}
-	stakes := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: assetID},
+	stakes := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: assetID},
 		Out: &stakeable.LockOut{
 			Locktime: uint64(clk.Time().Add(time.Second).Unix()),
 			TransferableOut: &secp256k1fx.TransferOutput{
@@ -194,7 +194,7 @@ func TestAddValidatorTxSyntacticVerifyNotAVAX(t *testing.T) {
 		},
 	}}
 	addValidatorTx = &AddValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    ctx.NetworkID,
 			BlockchainID: ctx.ChainID,
 			Ins:          inputs,
@@ -219,7 +219,7 @@ func TestAddValidatorTxSyntacticVerifyNotAVAX(t *testing.T) {
 	require.NoError(err)
 
 	err = stx.SyntacticVerify(ctx)
-	require.ErrorIs(err, errStakeMustBeAVAX)
+	require.ErrorIs(err, errStakeMustBeDIONE)
 }
 
 func TestAddValidatorTxNotDelegatorTx(t *testing.T) {

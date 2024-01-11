@@ -7,18 +7,18 @@ import (
 	"context"
 	"time"
 
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/rpc"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
 
-	platformapi "github.com/ava-labs/avalanchego/vms/platformvm/api"
+	platformapi "github.com/DioneProtocol/odysseygo/vms/platformvm/api"
 )
 
 var _ Client = (*client)(nil)
@@ -78,7 +78,7 @@ type Client interface {
 	GetCurrentValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.NodeID, options ...rpc.Option) ([]ClientPermissionlessValidator, error)
 	// GetPendingValidators returns the list of pending validators for subnet with ID [subnetID]
 	GetPendingValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.NodeID, options ...rpc.Option) ([]interface{}, []interface{}, error)
-	// GetCurrentSupply returns an upper bound on the supply of AVAX in the system along with the P-chain height
+	// GetCurrentSupply returns an upper bound on the supply of DIONE in the system along with the P-chain height
 	GetCurrentSupply(ctx context.Context, subnetID ids.ID, options ...rpc.Option) (uint64, uint64, error)
 	// SampleValidators returns the nodeIDs of a sample of [sampleSize] validators from the current validator set for subnet with ID [subnetID]
 	SampleValidators(ctx context.Context, subnetID ids.ID, sampleSize uint16, options ...rpc.Option) ([]ids.NodeID, error)
@@ -86,7 +86,7 @@ type Client interface {
 	// and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
+	// `odysseygo/wallet/chain/p.Wallet` utility.
 	AddValidator(
 		ctx context.Context,
 		user api.UserPass,
@@ -104,7 +104,7 @@ type Client interface {
 	// and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
+	// `odysseygo/wallet/chain/p.Wallet` utility.
 	AddDelegator(
 		ctx context.Context,
 		user api.UserPass,
@@ -121,7 +121,7 @@ type Client interface {
 	// with ID [subnetID] and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
+	// `odysseygo/wallet/chain/p.Wallet` utility.
 	AddSubnetValidator(
 		ctx context.Context,
 		user api.UserPass,
@@ -137,7 +137,7 @@ type Client interface {
 	// CreateSubnet issues a transaction to create [subnet] and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
+	// `odysseygo/wallet/chain/p.Wallet` utility.
 	CreateSubnet(
 		ctx context.Context,
 		user api.UserPass,
@@ -147,11 +147,11 @@ type Client interface {
 		threshold uint32,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// ExportAVAX issues an ExportTx transaction and returns the txID
+	// ExportDIONE issues an ExportTx transaction and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
-	ExportAVAX(
+	// `odysseygo/wallet/chain/p.Wallet` utility.
+	ExportDIONE(
 		ctx context.Context,
 		user api.UserPass,
 		from []ids.ShortID,
@@ -161,11 +161,11 @@ type Client interface {
 		amount uint64,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// ImportAVAX issues an ImportTx transaction and returns the txID
+	// ImportDIONE issues an ImportTx transaction and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
-	ImportAVAX(
+	// `odysseygo/wallet/chain/p.Wallet` utility.
+	ImportDIONE(
 		ctx context.Context,
 		user api.UserPass,
 		from []ids.ShortID,
@@ -177,7 +177,7 @@ type Client interface {
 	// CreateBlockchain issues a CreateBlockchain transaction and returns the txID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/p.Wallet` utility.
+	// `odysseygo/wallet/chain/p.Wallet` utility.
 	CreateBlockchain(
 		ctx context.Context,
 		user api.UserPass,
@@ -216,7 +216,7 @@ type Client interface {
 		freq time.Duration,
 		options ...rpc.Option,
 	) (*GetTxStatusResponse, error)
-	// GetStake returns the amount of nAVAX that [addrs] have cumulatively
+	// GetStake returns the amount of nDIONE that [addrs] have cumulatively
 	// staked on the Primary Network.
 	//
 	// Deprecated: Stake should be calculated using GetTx, GetCurrentValidators,
@@ -227,12 +227,12 @@ type Client interface {
 		validatorsOnly bool,
 		options ...rpc.Option,
 	) (map[ids.ID]uint64, [][]byte, error)
-	// GetMinStake returns the minimum staking amount in nAVAX for validators
+	// GetMinStake returns the minimum staking amount in nDIONE for validators
 	// and delegators respectively
 	GetMinStake(ctx context.Context, subnetID ids.ID, options ...rpc.Option) (uint64, uint64, error)
-	// GetTotalStake returns the total amount (in nAVAX) staked on the network
+	// GetTotalStake returns the total amount (in nDIONE) staked on the network
 	GetTotalStake(ctx context.Context, subnetID ids.ID, options ...rpc.Option) (uint64, error)
-	// GetMaxStakeAmount returns the maximum amount of nAVAX staking to the named
+	// GetMaxStakeAmount returns the maximum amount of nDIONE staking to the named
 	// node during the time period.
 	//
 	// Deprecated: The MaxStakeAmount should be calculated using
@@ -594,7 +594,7 @@ func (c *client) CreateSubnet(
 	return res.TxID, err
 }
 
-func (c *client) ExportAVAX(
+func (c *client) ExportDIONE(
 	ctx context.Context,
 	user api.UserPass,
 	from []ids.ShortID,
@@ -605,7 +605,7 @@ func (c *client) ExportAVAX(
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	err := c.requester.SendRequest(ctx, "platform.exportAVAX", &ExportAVAXArgs{
+	err := c.requester.SendRequest(ctx, "platform.exportDIONE", &ExportDIONEArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: ids.ShortIDsToStrings(from)},
@@ -618,7 +618,7 @@ func (c *client) ExportAVAX(
 	return res.TxID, err
 }
 
-func (c *client) ImportAVAX(
+func (c *client) ImportDIONE(
 	ctx context.Context,
 	user api.UserPass,
 	from []ids.ShortID,
@@ -628,7 +628,7 @@ func (c *client) ImportAVAX(
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	err := c.requester.SendRequest(ctx, "platform.importAVAX", &ImportAVAXArgs{
+	err := c.requester.SendRequest(ctx, "platform.importDIONE", &ImportDIONEArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: ids.ShortIDsToStrings(from)},

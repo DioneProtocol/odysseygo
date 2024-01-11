@@ -3,7 +3,7 @@
 
 package merkledb
 
-import "github.com/ava-labs/avalanchego/database"
+import "github.com/DioneProtocol/odysseygo/database"
 
 var _ database.Batch = (*batch)(nil)
 

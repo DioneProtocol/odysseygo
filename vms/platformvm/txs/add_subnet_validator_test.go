@@ -9,13 +9,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // TODO use table tests here
@@ -41,19 +41,19 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 
 	validatorWeight := uint64(2022)
 	subnetID := ids.ID{'s', 'u', 'b', 'n', 'e', 't', 'I', 'D'}
-	inputs := []*avax.TransferableInput{{
-		UTXOID: avax.UTXOID{
+	inputs := []*dione.TransferableInput{{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.ID{'t', 'x', 'I', 'D'},
 			OutputIndex: 2,
 		},
-		Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+		Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 		In: &secp256k1fx.TransferInput{
 			Amt:   uint64(5678),
 			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 		},
 	}}
-	outputs := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+	outputs := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: uint64(1234),
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -66,7 +66,7 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 		SigIndices: []uint32{0, 1},
 	}
 	addSubnetValidatorTx = &AddSubnetValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    ctx.NetworkID,
 			BlockchainID: ctx.ChainID,
 			Ins:          inputs,
@@ -96,7 +96,7 @@ func TestAddSubnetValidatorTxSyntacticVerify(t *testing.T) {
 	stx, err = NewSigned(addSubnetValidatorTx, Codec, signers)
 	require.NoError(err)
 	err = stx.SyntacticVerify(ctx)
-	require.ErrorIs(err, avax.ErrWrongNetworkID)
+	require.ErrorIs(err, dione.ErrWrongNetworkID)
 	addSubnetValidatorTx.NetworkID--
 
 	// Case: Specifies primary network SubnetID
@@ -152,19 +152,19 @@ func TestAddSubnetValidatorMarshal(t *testing.T) {
 	// create a valid tx
 	validatorWeight := uint64(2022)
 	subnetID := ids.ID{'s', 'u', 'b', 'n', 'e', 't', 'I', 'D'}
-	inputs := []*avax.TransferableInput{{
-		UTXOID: avax.UTXOID{
+	inputs := []*dione.TransferableInput{{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.ID{'t', 'x', 'I', 'D'},
 			OutputIndex: 2,
 		},
-		Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+		Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 		In: &secp256k1fx.TransferInput{
 			Amt:   uint64(5678),
 			Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 		},
 	}}
-	outputs := []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+	outputs := []*dione.TransferableOutput{{
+		Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: uint64(1234),
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -177,7 +177,7 @@ func TestAddSubnetValidatorMarshal(t *testing.T) {
 		SigIndices: []uint32{0, 1},
 	}
 	addSubnetValidatorTx = &AddSubnetValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    ctx.NetworkID,
 			BlockchainID: ctx.ChainID,
 			Ins:          inputs,

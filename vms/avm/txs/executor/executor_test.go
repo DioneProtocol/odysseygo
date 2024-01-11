@@ -10,20 +10,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 const trackChecksums = false
@@ -47,17 +47,17 @@ func TestBaseTxExecutor(t *testing.T) {
 	state, err := states.New(vdb, parser, registerer, trackChecksums)
 	require.NoError(err)
 
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        ids.GenerateTestID(),
 		OutputIndex: 1,
 	}
 
 	addr := keys[0].Address()
-	utxo := &avax.UTXO{
+	utxo := &dione.UTXO{
 		UTXOID: utxoID,
-		Asset:  avax.Asset{ID: assetID},
+		Asset:  dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
-			Amt: 20 * units.KiloAvax,
+			Amt: 20 * units.KiloDione,
 			OutputOwners: secp256k1fx.OutputOwners{
 				Threshold: 1,
 				Addrs: []ids.ShortID{
@@ -71,14 +71,14 @@ func TestBaseTxExecutor(t *testing.T) {
 	state.AddUTXO(utxo)
 	require.NoError(state.Commit())
 
-	baseTx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+	baseTx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 		NetworkID:    constants.UnitTestID,
 		BlockchainID: chainID,
-		Ins: []*avax.TransferableInput{{
+		Ins: []*dione.TransferableInput{{
 			UTXOID: utxoID,
-			Asset:  avax.Asset{ID: assetID},
+			Asset:  dione.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
-				Amt: 20 * units.KiloAvax,
+				Amt: 20 * units.KiloDione,
 				Input: secp256k1fx.Input{
 					SigIndices: []uint32{
 						0,
@@ -86,10 +86,10 @@ func TestBaseTxExecutor(t *testing.T) {
 				},
 			},
 		}},
-		Outs: []*avax.TransferableOutput{{
-			Asset: avax.Asset{ID: assetID},
+		Outs: []*dione.TransferableOutput{{
+			Asset: dione.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
-				Amt: 10 * units.KiloAvax,
+				Amt: 10 * units.KiloDione,
 				OutputOwners: secp256k1fx.OutputOwners{
 					Threshold: 1,
 					Addrs:     []ids.ShortID{addr},
@@ -113,16 +113,16 @@ func TestBaseTxExecutor(t *testing.T) {
 	require.ErrorIs(err, database.ErrNotFound)
 
 	// Verify the produced UTXO was added to the state
-	expectedOutputUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	expectedOutputUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        baseTx.TxID,
 			OutputIndex: 0,
 		},
-		Asset: avax.Asset{
+		Asset: dione.Asset{
 			ID: assetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
-			Amt: 10 * units.KiloAvax,
+			Amt: 10 * units.KiloDione,
 			OutputOwners: secp256k1fx.OutputOwners{
 				Threshold: 1,
 				Addrs:     []ids.ShortID{addr},
@@ -152,17 +152,17 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 	state, err := states.New(vdb, parser, registerer, trackChecksums)
 	require.NoError(err)
 
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        ids.GenerateTestID(),
 		OutputIndex: 1,
 	}
 
 	addr := keys[0].Address()
-	utxo := &avax.UTXO{
+	utxo := &dione.UTXO{
 		UTXOID: utxoID,
-		Asset:  avax.Asset{ID: assetID},
+		Asset:  dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
-			Amt: 20 * units.KiloAvax,
+			Amt: 20 * units.KiloDione,
 			OutputOwners: secp256k1fx.OutputOwners{
 				Threshold: 1,
 				Addrs: []ids.ShortID{
@@ -177,14 +177,14 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 	require.NoError(state.Commit())
 
 	createAssetTx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
+			Ins: []*dione.TransferableInput{{
 				UTXOID: utxoID,
-				Asset:  avax.Asset{ID: assetID},
+				Asset:  dione.Asset{ID: assetID},
 				In: &secp256k1fx.TransferInput{
-					Amt: 20 * units.KiloAvax,
+					Amt: 20 * units.KiloDione,
 					Input: secp256k1fx.Input{
 						SigIndices: []uint32{
 							0,
@@ -192,10 +192,10 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 					},
 				},
 			}},
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: assetID},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
-					Amt: 10 * units.KiloAvax,
+					Amt: 10 * units.KiloDione,
 					OutputOwners: secp256k1fx.OutputOwners{
 						Threshold: 1,
 						Addrs:     []ids.ShortID{addr},
@@ -237,17 +237,17 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 
 	// Verify the produced UTXOs were added to the state
 	txID := createAssetTx.ID()
-	expectedOutputUTXOs := []*avax.UTXO{
+	expectedOutputUTXOs := []*dione.UTXO{
 		{
-			UTXOID: avax.UTXOID{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: 0,
 			},
-			Asset: avax.Asset{
+			Asset: dione.Asset{
 				ID: assetID,
 			},
 			Out: &secp256k1fx.TransferOutput{
-				Amt: 10 * units.KiloAvax,
+				Amt: 10 * units.KiloDione,
 				OutputOwners: secp256k1fx.OutputOwners{
 					Threshold: 1,
 					Addrs:     []ids.ShortID{addr},
@@ -255,11 +255,11 @@ func TestCreateAssetTxExecutor(t *testing.T) {
 			},
 		},
 		{
-			UTXOID: avax.UTXOID{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: 1,
 			},
-			Asset: avax.Asset{
+			Asset: dione.Asset{
 				ID: txID,
 			},
 			Out: &secp256k1fx.MintOutput{
@@ -302,26 +302,26 @@ func TestOperationTxExecutor(t *testing.T) {
 		},
 	}
 
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID:        ids.GenerateTestID(),
 		OutputIndex: 1,
 	}
-	utxo := &avax.UTXO{
+	utxo := &dione.UTXO{
 		UTXOID: utxoID,
-		Asset:  avax.Asset{ID: assetID},
+		Asset:  dione.Asset{ID: assetID},
 		Out: &secp256k1fx.TransferOutput{
-			Amt:          20 * units.KiloAvax,
+			Amt:          20 * units.KiloDione,
 			OutputOwners: outputOwners,
 		},
 	}
 
-	opUTXOID := avax.UTXOID{
+	opUTXOID := dione.UTXOID{
 		TxID:        ids.GenerateTestID(),
 		OutputIndex: 1,
 	}
-	opUTXO := &avax.UTXO{
+	opUTXO := &dione.UTXO{
 		UTXOID: opUTXOID,
-		Asset:  avax.Asset{ID: assetID},
+		Asset:  dione.Asset{ID: assetID},
 		Out: &secp256k1fx.MintOutput{
 			OutputOwners: outputOwners,
 		},
@@ -333,14 +333,14 @@ func TestOperationTxExecutor(t *testing.T) {
 	require.NoError(state.Commit())
 
 	operationTx := &txs.Tx{Unsigned: &txs.OperationTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
+			Ins: []*dione.TransferableInput{{
 				UTXOID: utxoID,
-				Asset:  avax.Asset{ID: assetID},
+				Asset:  dione.Asset{ID: assetID},
 				In: &secp256k1fx.TransferInput{
-					Amt: 20 * units.KiloAvax,
+					Amt: 20 * units.KiloDione,
 					Input: secp256k1fx.Input{
 						SigIndices: []uint32{
 							0,
@@ -348,17 +348,17 @@ func TestOperationTxExecutor(t *testing.T) {
 					},
 				},
 			}},
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: assetID},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
-					Amt:          10 * units.KiloAvax,
+					Amt:          10 * units.KiloDione,
 					OutputOwners: outputOwners,
 				},
 			}},
 		}},
 		Ops: []*txs.Operation{{
-			Asset: avax.Asset{ID: assetID},
-			UTXOIDs: []*avax.UTXOID{
+			Asset: dione.Asset{ID: assetID},
+			UTXOIDs: []*dione.UTXOID{
 				&opUTXOID,
 			},
 			Op: &secp256k1fx.MintOperation{
@@ -400,26 +400,26 @@ func TestOperationTxExecutor(t *testing.T) {
 
 	// Verify the produced UTXOs were added to the state
 	txID := operationTx.ID()
-	expectedOutputUTXOs := []*avax.UTXO{
+	expectedOutputUTXOs := []*dione.UTXO{
 		{
-			UTXOID: avax.UTXOID{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: 0,
 			},
-			Asset: avax.Asset{
+			Asset: dione.Asset{
 				ID: assetID,
 			},
 			Out: &secp256k1fx.TransferOutput{
-				Amt:          10 * units.KiloAvax,
+				Amt:          10 * units.KiloDione,
 				OutputOwners: outputOwners,
 			},
 		},
 		{
-			UTXOID: avax.UTXOID{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: 1,
 			},
-			Asset: avax.Asset{
+			Asset: dione.Asset{
 				ID: assetID,
 			},
 			Out: &secp256k1fx.MintOutput{
@@ -427,11 +427,11 @@ func TestOperationTxExecutor(t *testing.T) {
 			},
 		},
 		{
-			UTXOID: avax.UTXOID{
+			UTXOID: dione.UTXOID{
 				TxID:        txID,
 				OutputIndex: 2,
 			},
-			Asset: avax.Asset{
+			Asset: dione.Asset{
 				ID: assetID,
 			},
 			Out: &secp256k1fx.TransferOutput{

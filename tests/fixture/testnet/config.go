@@ -15,21 +15,21 @@ import (
 
 	"github.com/spf13/cast"
 
-	"github.com/ava-labs/coreth/core"
-	"github.com/ava-labs/coreth/params"
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/core"
+	"github.com/DioneProtocol/coreth/params"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
-	"github.com/ava-labs/avalanchego/config"
-	"github.com/ava-labs/avalanchego/genesis"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/staking"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/perms"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/config"
+	"github.com/DioneProtocol/odysseygo/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/staking"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/perms"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
 )
 
 const (
@@ -38,12 +38,12 @@ const (
 
 	DefaultGasLimit = uint64(100_000_000) // Gas limit is arbitrary
 
-	// Arbitrarily large amount of AVAX to fund keys on the X-Chain for testing
-	DefaultFundedKeyXChainAmount = 30 * units.MegaAvax
+	// Arbitrarily large amount of DIONE to fund keys on the X-Chain for testing
+	DefaultFundedKeyXChainAmount = 30 * units.MegaDione
 )
 
 var (
-	// Arbitrarily large amount of AVAX (10^12) to fund keys on the C-Chain for testing
+	// Arbitrarily large amount of DIONE (10^12) to fund keys on the C-Chain for testing
 	DefaultFundedKeyCChainAmount = new(big.Int).Exp(big.NewInt(10), big.NewInt(30), nil)
 
 	errEmptyValidatorsForGenesis   = errors.New("failed to generate genesis: empty validator IDs")
@@ -57,7 +57,7 @@ var (
 )
 
 // Defines a mapping of flag keys to values intended to be supplied to
-// an invocation of an AvalancheGo node.
+// an invocation of an OdysseyGo node.
 type FlagsMap map[string]interface{}
 
 // SetDefaults ensures the effectiveness of flag overrides by only
@@ -163,7 +163,7 @@ type NodeURI struct {
 	URI    string
 }
 
-// NodeConfig defines configuration for an AvalancheGo node.
+// NodeConfig defines configuration for an OdysseyGo node.
 type NodeConfig struct {
 	NodeID ids.NodeID
 	Flags  FlagsMap
@@ -333,13 +333,13 @@ func NewTestGenesis(
 		return nil, fmt.Errorf("failed to format stake address: %w", err)
 	}
 
-	// Ensure the total stake allows a MegaAvax per validator
-	totalStake := uint64(len(validatorIDs)) * units.MegaAvax
+	// Ensure the total stake allows a MegaDione per validator
+	totalStake := uint64(len(validatorIDs)) * units.MegaDione
 
 	// The eth address is only needed to link pre-mainnet assets. Until that capability
 	// becomes necessary for testing, use a bogus address.
 	//
-	// Reference: https://github.com/ava-labs/avalanchego/issues/1365#issuecomment-1511508767
+	// Reference: https://github.com/DioneProtocol/odysseygo/issues/1365#issuecomment-1511508767
 	ethAddress := "0x0000000000000000000000000000000000000000"
 
 	now := time.Now()
@@ -349,7 +349,7 @@ func NewTestGenesis(
 		Allocations: []genesis.UnparsedAllocation{
 			{
 				ETHAddr:       ethAddress,
-				AVAXAddr:      stakeAddress,
+				DIONEAddr:     stakeAddress,
 				InitialAmount: 0,
 				UnlockSchedule: []genesis.LockedAmount{ // Provides stake to validators
 					{
@@ -363,12 +363,12 @@ func NewTestGenesis(
 		InitialStakedFunds:         []string{stakeAddress},
 		InitialStakeDuration:       365 * 24 * 60 * 60, // 1 year
 		InitialStakeDurationOffset: 90 * 60,            // 90 minutes
-		Message:                    "hello avalanche!",
+		Message:                    "hello odyssey!",
 	}
 
 	// Set X-Chain balances
 	for xChainAddress, balance := range xChainBalances {
-		avaxAddr, err := address.Format("X", constants.GetHRP(networkID), xChainAddress[:])
+		dioneAddr, err := address.Format("X", constants.GetHRP(networkID), xChainAddress[:])
 		if err != nil {
 			return nil, fmt.Errorf("failed to format X-Chain address: %w", err)
 		}
@@ -376,11 +376,11 @@ func NewTestGenesis(
 			config.Allocations,
 			genesis.UnparsedAllocation{
 				ETHAddr:       ethAddress,
-				AVAXAddr:      avaxAddr,
+				DIONEAddr:     dioneAddr,
 				InitialAmount: balance,
 				UnlockSchedule: []genesis.LockedAmount{
 					{
-						Amount: 20 * units.MegaAvax,
+						Amount: 20 * units.MegaDione,
 					},
 					{
 						Amount:   totalStake,

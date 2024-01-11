@@ -6,7 +6,7 @@ package config
 import (
 	"encoding/json"
 
-	"github.com/ava-labs/avalanchego/utils/units"
+	"github.com/DioneProtocol/odysseygo/utils/units"
 )
 
 var DefaultExecutionConfig = ExecutionConfig{

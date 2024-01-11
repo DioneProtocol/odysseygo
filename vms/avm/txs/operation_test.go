@@ -8,16 +8,16 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/codec/linearcodec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/codec/linearcodec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 type testOperable struct {
-	avax.TestTransferable `serialize:"true"`
+	dione.TestTransferable `serialize:"true"`
 
 	Outputs []verify.State `serialize:"true"`
 }
@@ -36,7 +36,7 @@ func TestOperationVerifyNil(t *testing.T) {
 
 func TestOperationVerifyEmpty(t *testing.T) {
 	op := &Operation{
-		Asset: avax.Asset{ID: ids.Empty},
+		Asset: dione.Asset{ID: ids.Empty},
 	}
 	err := op.Verify()
 	require.ErrorIs(t, err, ErrNilFxOperation)
@@ -44,8 +44,8 @@ func TestOperationVerifyEmpty(t *testing.T) {
 
 func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
 	op := &Operation{
-		Asset: avax.Asset{ID: ids.Empty},
-		UTXOIDs: []*avax.UTXOID{
+		Asset: dione.Asset{ID: ids.Empty},
+		UTXOIDs: []*dione.UTXOID{
 			{
 				TxID:        ids.Empty,
 				OutputIndex: 1,
@@ -64,8 +64,8 @@ func TestOperationVerifyUTXOIDsNotSorted(t *testing.T) {
 func TestOperationVerify(t *testing.T) {
 	assetID := ids.GenerateTestID()
 	op := &Operation{
-		Asset: avax.Asset{ID: assetID},
-		UTXOIDs: []*avax.UTXOID{
+		Asset: dione.Asset{ID: assetID},
+		UTXOIDs: []*dione.UTXOID{
 			{
 				TxID:        assetID,
 				OutputIndex: 1,
@@ -87,8 +87,8 @@ func TestOperationSorting(t *testing.T) {
 
 	ops := []*Operation{
 		{
-			Asset: avax.Asset{ID: ids.Empty},
-			UTXOIDs: []*avax.UTXOID{
+			Asset: dione.Asset{ID: ids.Empty},
+			UTXOIDs: []*dione.UTXOID{
 				{
 					TxID:        ids.Empty,
 					OutputIndex: 1,
@@ -97,8 +97,8 @@ func TestOperationSorting(t *testing.T) {
 			Op: &testOperable{},
 		},
 		{
-			Asset: avax.Asset{ID: ids.Empty},
-			UTXOIDs: []*avax.UTXOID{
+			Asset: dione.Asset{ID: ids.Empty},
+			UTXOIDs: []*dione.UTXOID{
 				{
 					TxID:        ids.Empty,
 					OutputIndex: 0,
@@ -111,8 +111,8 @@ func TestOperationSorting(t *testing.T) {
 	SortOperations(ops, m)
 	require.True(IsSortedAndUniqueOperations(ops, m))
 	ops = append(ops, &Operation{
-		Asset: avax.Asset{ID: ids.Empty},
-		UTXOIDs: []*avax.UTXOID{
+		Asset: dione.Asset{ID: ids.Empty},
+		UTXOIDs: []*dione.UTXOID{
 			{
 				TxID:        ids.Empty,
 				OutputIndex: 1,

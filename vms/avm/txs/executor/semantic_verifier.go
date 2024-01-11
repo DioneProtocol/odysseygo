@@ -8,11 +8,11 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (
@@ -106,7 +106,7 @@ func (v *SemanticVerifier) ImportTx(tx *txs.ImportTx) error {
 
 	offset := len(tx.Ins)
 	for i, in := range tx.ImportedIns {
-		utxo := avax.UTXO{}
+		utxo := dione.UTXO{}
 		if _, err := v.Codec.Unmarshal(allUTXOBytes[i], &utxo); err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (v *SemanticVerifier) ExportTx(tx *txs.ExportTx) error {
 
 func (v *SemanticVerifier) verifyTransfer(
 	tx txs.UnsignedTx,
-	in *avax.TransferableInput,
+	in *dione.TransferableInput,
 	cred verify.Verifiable,
 ) error {
 	utxo, err := v.State.GetUTXO(in.UTXOID.InputID())
@@ -160,9 +160,9 @@ func (v *SemanticVerifier) verifyTransfer(
 
 func (v *SemanticVerifier) verifyTransferOfUTXO(
 	tx txs.UnsignedTx,
-	in *avax.TransferableInput,
+	in *dione.TransferableInput,
 	cred verify.Verifiable,
-	utxo *avax.UTXO,
+	utxo *dione.UTXO,
 ) error {
 	utxoAssetID := utxo.AssetID()
 	inAssetID := in.AssetID()

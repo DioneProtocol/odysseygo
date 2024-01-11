@@ -4,10 +4,10 @@
 package avm
 
 import (
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/pubsub"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/pubsub"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var _ pubsub.Filterer = (*connector)(nil)
@@ -24,7 +24,7 @@ func NewPubSubFilterer(tx *txs.Tx) pubsub.Filterer {
 func (f *connector) Filter(filters []pubsub.Filter) ([]bool, interface{}) {
 	resp := make([]bool, len(filters))
 	for _, utxo := range f.tx.UTXOs() {
-		addressable, ok := utxo.Out.(avax.Addressable)
+		addressable, ok := utxo.Out.(dione.Addressable)
 		if !ok {
 			continue
 		}

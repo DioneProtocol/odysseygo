@@ -17,40 +17,40 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/pubsub"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowstorm"
-	"github.com/ava-labs/avalanchego/snow/engine/avalanche/vertex"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/linkedhashmap"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/metrics"
-	"github.com/ava-labs/avalanchego/vms/avm/network"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs/mempool"
-	"github.com/ava-labs/avalanchego/vms/avm/utxo"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/index"
-	"github.com/ava-labs/avalanchego/vms/components/keystore"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/pubsub"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowstorm"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/odyssey/vertex"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/avm/network"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/avm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/index"
+	"github.com/DioneProtocol/odysseygo/vms/components/keystore"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	blockbuilder "github.com/ava-labs/avalanchego/vms/avm/block/builder"
-	blockexecutor "github.com/ava-labs/avalanchego/vms/avm/block/executor"
-	extensions "github.com/ava-labs/avalanchego/vms/avm/fxs"
-	txexecutor "github.com/ava-labs/avalanchego/vms/avm/txs/executor"
+	blockbuilder "github.com/DioneProtocol/odysseygo/vms/avm/block/builder"
+	blockexecutor "github.com/DioneProtocol/odysseygo/vms/avm/block/executor"
+	extensions "github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/avm/txs/executor"
 )
 
 const assetToFxCacheSize = 1024
@@ -71,8 +71,8 @@ type VM struct {
 
 	metrics metrics.Metrics
 
-	avax.AddressManager
-	avax.AtomicUTXOManager
+	dione.AddressManager
+	dione.AtomicUTXOManager
 	ids.Aliaser
 	utxo.Spender
 
@@ -177,7 +177,7 @@ func (vm *VM) Initialize(
 		return fmt.Errorf("failed to initialize metrics: %w", err)
 	}
 
-	vm.AddressManager = avax.NewAddressManager(ctx)
+	vm.AddressManager = dione.NewAddressManager(ctx)
 	vm.Aliaser = ids.NewAliaser()
 
 	db := dbManager.Current().Database
@@ -218,7 +218,7 @@ func (vm *VM) Initialize(
 	}
 
 	codec := vm.parser.Codec()
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(ctx.SharedMemory, codec)
+	vm.AtomicUTXOManager = dione.NewAtomicUTXOManager(ctx.SharedMemory, codec)
 	vm.Spender = utxo.NewSpender(&vm.clock, codec)
 
 	state, err := states.New(
@@ -526,8 +526,8 @@ func (vm *VM) initGenesis(genesisBytes []byte) error {
 		return err
 	}
 
-	// secure this by defaulting to avaxAsset
-	vm.feeAssetID = vm.ctx.AVAXAssetID
+	// secure this by defaulting to dioneAsset
+	vm.feeAssetID = vm.ctx.DIONEAssetID
 
 	for index, genesisTx := range genesis.Txs {
 		if len(genesisTx.Outs) != 0 {
@@ -586,7 +586,7 @@ func (vm *VM) LoadUser(
 	password string,
 	addrsToUse set.Set[ids.ShortID],
 ) (
-	[]*avax.UTXO,
+	[]*dione.UTXO,
 	*secp256k1fx.Keychain,
 	error,
 ) {
@@ -603,7 +603,7 @@ func (vm *VM) LoadUser(
 		return nil, nil, err
 	}
 
-	utxos, err := avax.GetAllUTXOs(vm.state, kc.Addresses())
+	utxos, err := dione.GetAllUTXOs(vm.state, kc.Addresses())
 	if err != nil {
 		return nil, nil, fmt.Errorf("problem retrieving user's UTXOs: %w", err)
 	}
@@ -617,7 +617,7 @@ func (vm *VM) selectChangeAddr(defaultAddr ids.ShortID, changeAddr string) (ids.
 	if changeAddr == "" {
 		return defaultAddr, nil
 	}
-	addr, err := avax.ParseServiceAddress(vm, changeAddr)
+	addr, err := dione.ParseServiceAddress(vm, changeAddr)
 	if err != nil {
 		return ids.ShortID{}, fmt.Errorf("couldn't parse changeAddr: %w", err)
 	}
@@ -644,7 +644,7 @@ func (vm *VM) onAccept(tx *txs.Tx) error {
 	// Fetch the input UTXOs
 	txID := tx.ID()
 	inputUTXOIDs := tx.Unsigned.InputUTXOs()
-	inputUTXOs := make([]*avax.UTXO, 0, len(inputUTXOIDs))
+	inputUTXOs := make([]*dione.UTXO, 0, len(inputUTXOIDs))
 	for _, utxoID := range inputUTXOIDs {
 		// Don't bother fetching the input UTXO if its symbolic
 		if utxoID.Symbolic() {

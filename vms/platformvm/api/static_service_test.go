@@ -8,12 +8,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
 )
 
 func TestBuildGenesisInvalidUTXOBalance(t *testing.T) {
@@ -210,7 +210,7 @@ func TestBuildGenesisReturnsSortedValidators(t *testing.T) {
 	}
 
 	args := BuildGenesisArgs{
-		AvaxAssetID: ids.ID{'d', 'u', 'm', 'm', 'y', ' ', 'I', 'D'},
+		DioneAssetID: ids.ID{'d', 'u', 'm', 'm', 'y', ' ', 'I', 'D'},
 		UTXOs: []UTXO{
 			utxo,
 		},
@@ -242,9 +242,9 @@ func TestUTXOLess(t *testing.T) {
 		smallerAddr = ids.ShortID{}
 		largerAddr  = ids.ShortID{1}
 	)
-	smallerAddrStr, err := address.FormatBech32("avax", smallerAddr[:])
+	smallerAddrStr, err := address.FormatBech32("dione", smallerAddr[:])
 	require.NoError(t, err)
-	largerAddrStr, err := address.FormatBech32("avax", largerAddr[:])
+	largerAddrStr, err := address.FormatBech32("dione", largerAddr[:])
 	require.NoError(t, err)
 
 	type test struct {

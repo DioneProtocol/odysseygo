@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
@@ -77,7 +77,7 @@ type Client interface {
 	// CreateAsset creates a new asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -93,7 +93,7 @@ type Client interface {
 	// CreateFixedCapAsset creates a new fixed cap asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateFixedCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -108,7 +108,7 @@ type Client interface {
 	// CreateVariableCapAsset creates a new variable cap asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateVariableCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -123,7 +123,7 @@ type Client interface {
 	// CreateNFTAsset creates a new NFT asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	CreateNFTAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -153,7 +153,7 @@ type Client interface {
 	// Mint [amount] of [assetID] to be owned by [to]
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Mint(
 		ctx context.Context,
 		user api.UserPass,
@@ -167,7 +167,7 @@ type Client interface {
 	// SendNFT sends an NFT and returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	SendNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -181,7 +181,7 @@ type Client interface {
 	// MintNFT issues a MintNFT transaction and returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	MintNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -196,13 +196,13 @@ type Client interface {
 	// returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Import(ctx context.Context, user api.UserPass, to ids.ShortID, sourceChain string, options ...rpc.Option) (ids.ID, error) // Export sends an asset from this chain to the P/C-Chain.
-	// After this tx is accepted, the AVAX must be imported to the P/C-chain with an importTx.
+	// After this tx is accepted, the DIONE must be imported to the P/C-chain with an importTx.
 	// Returns the ID of the newly created atomic transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `avalanchego/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/x.Wallet` utility.
 	Export(
 		ctx context.Context,
 		user api.UserPass,

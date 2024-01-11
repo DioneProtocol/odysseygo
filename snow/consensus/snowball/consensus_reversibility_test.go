@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/utils/sampler"
+	"github.com/DioneProtocol/odysseygo/utils/sampler"
 )
 
 func TestSnowballGovernance(t *testing.T) {

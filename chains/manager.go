@@ -18,56 +18,56 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/api/health"
-	"github.com/ava-labs/avalanchego/api/keystore"
-	"github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/api/server"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/message"
-	"github.com/ava-labs/avalanchego/network"
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/avalanche/state"
-	"github.com/ava-labs/avalanchego/snow/engine/avalanche/vertex"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/engine/common/queue"
-	"github.com/ava-labs/avalanchego/snow/engine/common/tracker"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/syncer"
-	"github.com/ava-labs/avalanchego/snow/networking/handler"
-	"github.com/ava-labs/avalanchego/snow/networking/router"
-	"github.com/ava-labs/avalanchego/snow/networking/sender"
-	"github.com/ava-labs/avalanchego/snow/networking/timeout"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/staking"
-	"github.com/ava-labs/avalanchego/subnets"
-	"github.com/ava-labs/avalanchego/trace"
-	"github.com/ava-labs/avalanchego/utils/buffer"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/perms"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms"
-	"github.com/ava-labs/avalanchego/vms/metervm"
-	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
-	"github.com/ava-labs/avalanchego/vms/proposervm"
-	"github.com/ava-labs/avalanchego/vms/tracedvm"
+	"github.com/DioneProtocol/odysseygo/api/health"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/api/server"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/network"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/queue"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/engine/odyssey/state"
+	"github.com/DioneProtocol/odysseygo/snow/engine/odyssey/vertex"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/syncer"
+	"github.com/DioneProtocol/odysseygo/snow/networking/handler"
+	"github.com/DioneProtocol/odysseygo/snow/networking/router"
+	"github.com/DioneProtocol/odysseygo/snow/networking/sender"
+	"github.com/DioneProtocol/odysseygo/snow/networking/timeout"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/staking"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/DioneProtocol/odysseygo/utils/buffer"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/perms"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms"
+	"github.com/DioneProtocol/odysseygo/vms/metervm"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm"
+	"github.com/DioneProtocol/odysseygo/vms/tracedvm"
 
-	dbManager "github.com/ava-labs/avalanchego/database/manager"
-	timetracker "github.com/ava-labs/avalanchego/snow/networking/tracker"
+	dbManager "github.com/DioneProtocol/odysseygo/database/manager"
+	timetracker "github.com/DioneProtocol/odysseygo/snow/networking/tracker"
 
-	aveng "github.com/ava-labs/avalanchego/snow/engine/avalanche"
-	avbootstrap "github.com/ava-labs/avalanchego/snow/engine/avalanche/bootstrap"
-	avagetter "github.com/ava-labs/avalanchego/snow/engine/avalanche/getter"
+	odeng "github.com/DioneProtocol/odysseygo/snow/engine/odyssey"
+	odbootstrap "github.com/DioneProtocol/odysseygo/snow/engine/odyssey/bootstrap"
+	odagetter "github.com/DioneProtocol/odysseygo/snow/engine/odyssey/getter"
 
-	smcon "github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	smeng "github.com/ava-labs/avalanchego/snow/engine/snowman"
-	smbootstrap "github.com/ava-labs/avalanchego/snow/engine/snowman/bootstrap"
-	snowgetter "github.com/ava-labs/avalanchego/snow/engine/snowman/getter"
+	smcon "github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	smeng "github.com/DioneProtocol/odysseygo/snow/engine/snowman"
+	smbootstrap "github.com/DioneProtocol/odysseygo/snow/engine/snowman/bootstrap"
+	snowgetter "github.com/DioneProtocol/odysseygo/snow/engine/snowman/getter"
 )
 
 const (
@@ -88,7 +88,7 @@ var (
 	// Bootstrapping prefixes for ChainVMs
 	bootstrappingDB = []byte("bs")
 
-	errUnknownVMType           = errors.New("the vm should have type avalanche.DAGVM or snowman.ChainVM")
+	errUnknownVMType           = errors.New("the vm should have type odyssey.DAGVM or snowman.ChainVM")
 	errCreatePlatformVM        = errors.New("attempted to create a chain running the PlatformVM")
 	errNotBootstrapped         = errors.New("subnets not bootstrapped")
 	errNoPrimaryNetworkConfig  = errors.New("no subnet config for primary network found")
@@ -191,7 +191,7 @@ type ManagerConfig struct {
 	Server                      server.Server // Handles HTTP API calls
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
-	AVAXAssetID                 ids.ID
+	DIONEAssetID                ids.ID
 	XChainID                    ids.ID          // ID of the X-Chain,
 	CChainID                    ids.ID          // ID of the C-Chain,
 	CriticalChains              set.Set[ids.ID] // Chains that can't exit gracefully
@@ -450,12 +450,12 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 		return nil, fmt.Errorf("error while registering chain's metrics %w", err)
 	}
 
-	// This converts the prefix for all the Avalanche consensus metrics from
-	// `avalanche_{chainID}_` into `avalanche_{chainID}_avalanche_` so that
+	// This converts the prefix for all the Odyssey consensus metrics from
+	// `odyssey_{chainID}_` into `odyssey_{chainID}_odyssey_` so that
 	// there are no conflicts when registering the Snowman consensus metrics.
-	avalancheConsensusMetrics := prometheus.NewRegistry()
-	avalancheDAGNamespace := fmt.Sprintf("%s_avalanche", chainNamespace)
-	if err := m.Metrics.Register(avalancheDAGNamespace, avalancheConsensusMetrics); err != nil {
+	odysseyConsensusMetrics := prometheus.NewRegistry()
+	odysseyDAGNamespace := fmt.Sprintf("%s_odyssey", chainNamespace)
+	if err := m.Metrics.Register(odysseyDAGNamespace, odysseyConsensusMetrics); err != nil {
 		return nil, fmt.Errorf("error while registering DAG metrics %w", err)
 	}
 
@@ -473,9 +473,9 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			NodeID:    m.NodeID,
 			PublicKey: bls.PublicFromSecretKey(m.StakingBLSKey),
 
-			XChainID:    m.XChainID,
-			CChainID:    m.CChainID,
-			AVAXAssetID: m.AVAXAssetID,
+			XChainID:     m.XChainID,
+			CChainID:     m.CChainID,
+			DIONEAssetID: m.DIONEAssetID,
 
 			Log:          chainLog,
 			Keystore:     m.Keystore.NewBlockchainKeyStore(chainParams.ID),
@@ -488,11 +488,11 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			ValidatorState: m.validatorState,
 			ChainDataDir:   chainDataDir,
 		},
-		BlockAcceptor:       m.BlockAcceptorGroup,
-		TxAcceptor:          m.TxAcceptorGroup,
-		VertexAcceptor:      m.VertexAcceptorGroup,
-		Registerer:          consensusMetrics,
-		AvalancheRegisterer: avalancheConsensusMetrics,
+		BlockAcceptor:     m.BlockAcceptorGroup,
+		TxAcceptor:        m.TxAcceptorGroup,
+		VertexAcceptor:    m.VertexAcceptorGroup,
+		Registerer:        consensusMetrics,
+		OdysseyRegisterer: odysseyConsensusMetrics,
 	}
 
 	// Get a factory for the vm we want to use on our chain
@@ -542,7 +542,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 	var chain *chain
 	switch vm := vm.(type) {
 	case vertex.LinearizableVMWithEngine:
-		chain, err = m.createAvalancheChain(
+		chain, err = m.createOdysseyChain(
 			ctx,
 			chainParams.GenesisData,
 			vdrs,
@@ -551,7 +551,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			sb,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error while creating new avalanche vm %w", err)
+			return nil, fmt.Errorf("error while creating new odyssey vm %w", err)
 		}
 	case block.ChainVM:
 		beacons := vdrs
@@ -587,8 +587,8 @@ func (m *manager) AddRegistrant(r Registrant) {
 	m.registrants = append(m.registrants, r)
 }
 
-// Create a DAG-based blockchain that uses Avalanche
-func (m *manager) createAvalancheChain(
+// Create a DAG-based blockchain that uses Odyssey
+func (m *manager) createOdysseyChain(
 	ctx *snow.ConsensusContext,
 	genesisData []byte,
 	vdrs validators.Set,
@@ -617,11 +617,11 @@ func (m *manager) createAvalancheChain(
 	txBootstrappingDB := prefixdb.New(txBootstrappingDBPrefix, db.Database)
 	blockBootstrappingDB := prefixdb.New(blockBootstrappingDBPrefix, db.Database)
 
-	vtxBlocker, err := queue.NewWithMissing(vertexBootstrappingDB, "vtx", ctx.AvalancheRegisterer)
+	vtxBlocker, err := queue.NewWithMissing(vertexBootstrappingDB, "vtx", ctx.OdysseyRegisterer)
 	if err != nil {
 		return nil, err
 	}
-	txBlocker, err := queue.New(txBootstrappingDB, "tx", ctx.AvalancheRegisterer)
+	txBlocker, err := queue.New(txBootstrappingDB, "tx", ctx.OdysseyRegisterer)
 	if err != nil {
 		return nil, err
 	}
@@ -630,8 +630,8 @@ func (m *manager) createAvalancheChain(
 		return nil, err
 	}
 
-	// Passes messages from the avalanche engines to the network
-	avalancheMessageSender, err := sender.New(
+	// Passes messages from the odyssey engines to the network
+	odysseyMessageSender, err := sender.New(
 		ctx,
 		m.MsgCreator,
 		m.Net,
@@ -641,17 +641,17 @@ func (m *manager) createAvalancheChain(
 		sb,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't initialize avalanche sender: %w", err)
+		return nil, fmt.Errorf("couldn't initialize odyssey sender: %w", err)
 	}
 
 	if m.TracingEnabled {
-		avalancheMessageSender = sender.Trace(avalancheMessageSender, m.Tracer)
+		odysseyMessageSender = sender.Trace(odysseyMessageSender, m.Tracer)
 	}
 
 	err = m.VertexAcceptorGroup.RegisterAcceptor(
 		ctx.ChainID,
 		"gossip",
-		avalancheMessageSender,
+		odysseyMessageSender,
 		false,
 	)
 	if err != nil { // Set up the event dispatcher
@@ -669,7 +669,7 @@ func (m *manager) createAvalancheChain(
 		sb,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't initialize avalanche sender: %w", err)
+		return nil, fmt.Errorf("couldn't initialize odyssey sender: %w", err)
 	}
 
 	if m.TracingEnabled {
@@ -711,11 +711,11 @@ func (m *manager) createAvalancheChain(
 		},
 	)
 
-	avalancheRegisterer := metrics.NewOptionalGatherer()
+	odysseyRegisterer := metrics.NewOptionalGatherer()
 	snowmanRegisterer := metrics.NewOptionalGatherer()
 
 	registerer := metrics.NewMultiGatherer()
-	if err := registerer.Register("avalanche", avalancheRegisterer); err != nil {
+	if err := registerer.Register("odyssey", odysseyRegisterer); err != nil {
 		return nil, err
 	}
 	if err := registerer.Register("", snowmanRegisterer); err != nil {
@@ -725,13 +725,13 @@ func (m *manager) createAvalancheChain(
 		return nil, err
 	}
 
-	ctx.Context.Metrics = avalancheRegisterer
+	ctx.Context.Metrics = odysseyRegisterer
 
 	// The channel through which a VM may send messages to the consensus engine
 	// VM uses this channel to notify engine that a block is ready to be made
 	msgChan := make(chan common.Message, defaultChannelSize)
 
-	// The only difference between using avalancheMessageSender and
+	// The only difference between using odysseyMessageSender and
 	// snowmanMessageSender here is where the metrics will be placed. Because we
 	// end up using this sender after the linearization, we pass in
 	// snowmanMessageSender here.
@@ -795,7 +795,7 @@ func (m *manager) createAvalancheChain(
 		vmWrappingProposerVM = tracedvm.NewBlockVM(vmWrappingProposerVM, "proposervm", m.Tracer)
 	}
 
-	// Note: linearizableVM is the VM that the Avalanche engines should be
+	// Note: linearizableVM is the VM that the Odyssey engines should be
 	// using.
 	linearizableVM := &initializeOnLinearizeVM{
 		DAGVM:          dagVM,
@@ -835,7 +835,7 @@ func (m *manager) createAvalancheChain(
 		m.AcceptedFrontierGossipFrequency,
 		m.ConsensusAppConcurrency,
 		m.ResourceTracker,
-		validators.UnhandledSubnetConnector, // avalanche chains don't use subnet connector
+		validators.UnhandledSubnetConnector, // odyssey chains don't use subnet connector
 		sb,
 		connectedValidators,
 	)
@@ -912,13 +912,13 @@ func (m *manager) createAvalancheChain(
 		snowmanBootstrapper = common.TraceBootstrapableEngine(snowmanBootstrapper, m.Tracer)
 	}
 
-	avalancheCommonCfg := common.Config{
+	odysseyCommonCfg := common.Config{
 		Ctx:                            ctx,
 		Beacons:                        vdrs,
 		SampleK:                        sampleK,
 		StartupTracker:                 startupTracker,
 		Alpha:                          bootstrapWeight/2 + 1, // must be > 50%
-		Sender:                         avalancheMessageSender,
+		Sender:                         odysseyMessageSender,
 		BootstrapTracker:               sb,
 		Timer:                          h,
 		RetryBootstrap:                 m.RetryBootstrap,
@@ -929,22 +929,22 @@ func (m *manager) createAvalancheChain(
 		SharedCfg:                      &common.SharedConfig{},
 	}
 
-	avaGetHandler, err := avagetter.New(vtxManager, avalancheCommonCfg)
+	avaGetHandler, err := odagetter.New(vtxManager, odysseyCommonCfg)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't initialize avalanche base message handler: %w", err)
+		return nil, fmt.Errorf("couldn't initialize odyssey base message handler: %w", err)
 	}
 
 	// create engine gear
-	avalancheEngine := aveng.New(ctx, avaGetHandler, linearizableVM)
+	odysseyEngine := odeng.New(ctx, avaGetHandler, linearizableVM)
 	if m.TracingEnabled {
-		avalancheEngine = common.TraceEngine(avalancheEngine, m.Tracer)
+		odysseyEngine = common.TraceEngine(odysseyEngine, m.Tracer)
 	}
 
 	// create bootstrap gear
 	_, specifiedLinearizationTime := version.CortinaTimes[ctx.NetworkID]
 	specifiedLinearizationTime = specifiedLinearizationTime && ctx.ChainID == m.XChainID
-	avalancheBootstrapperConfig := avbootstrap.Config{
-		Config:             avalancheCommonCfg,
+	odysseyBootstrapperConfig := odbootstrap.Config{
+		Config:             odysseyCommonCfg,
 		AllGetsServer:      avaGetHandler,
 		VtxBlocked:         vtxBlocker,
 		TxBlocked:          txBlocker,
@@ -953,23 +953,23 @@ func (m *manager) createAvalancheChain(
 		LinearizeOnStartup: !specifiedLinearizationTime,
 	}
 
-	avalancheBootstrapper, err := avbootstrap.New(
-		avalancheBootstrapperConfig,
+	odysseyBootstrapper, err := odbootstrap.New(
+		odysseyBootstrapperConfig,
 		snowmanBootstrapper.Start,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing avalanche bootstrapper: %w", err)
+		return nil, fmt.Errorf("error initializing odyssey bootstrapper: %w", err)
 	}
 
 	if m.TracingEnabled {
-		avalancheBootstrapper = common.TraceBootstrapableEngine(avalancheBootstrapper, m.Tracer)
+		odysseyBootstrapper = common.TraceBootstrapableEngine(odysseyBootstrapper, m.Tracer)
 	}
 
 	h.SetEngineManager(&handler.EngineManager{
-		Avalanche: &handler.Engine{
+		Odyssey: &handler.Engine{
 			StateSyncer:  nil,
-			Bootstrapper: avalancheBootstrapper,
-			Consensus:    avalancheEngine,
+			Bootstrapper: odysseyBootstrapper,
+			Consensus:    odysseyEngine,
 		},
 		Snowman: &handler.Engine{
 			StateSyncer:  nil,
@@ -1283,7 +1283,7 @@ func (m *manager) createSnowmanChain(
 	}
 
 	h.SetEngineManager(&handler.EngineManager{
-		Avalanche: nil,
+		Odyssey: nil,
 		Snowman: &handler.Engine{
 			StateSyncer:  stateSyncer,
 			Bootstrapper: bootstrapper,

@@ -9,11 +9,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestNewBanffProposalBlock(t *testing.T) {
@@ -26,12 +26,12 @@ func TestNewBanffProposalBlock(t *testing.T) {
 	tx := &txs.Tx{
 		Unsigned: &txs.AddValidatorTx{
 			BaseTx: txs.BaseTx{
-				BaseTx: avax.BaseTx{
-					Ins:  []*avax.TransferableInput{},
-					Outs: []*avax.TransferableOutput{},
+				BaseTx: dione.BaseTx{
+					Ins:  []*dione.TransferableInput{},
+					Outs: []*dione.TransferableOutput{},
 				},
 			},
-			StakeOuts: []*avax.TransferableOutput{},
+			StakeOuts: []*dione.TransferableOutput{},
 			Validator: txs.Validator{},
 			RewardsOwner: &secp256k1fx.OutputOwners{
 				Addrs: []ids.ShortID{},
@@ -68,12 +68,12 @@ func TestNewApricotProposalBlock(t *testing.T) {
 	tx := &txs.Tx{
 		Unsigned: &txs.AddValidatorTx{
 			BaseTx: txs.BaseTx{
-				BaseTx: avax.BaseTx{
-					Ins:  []*avax.TransferableInput{},
-					Outs: []*avax.TransferableOutput{},
+				BaseTx: dione.BaseTx{
+					Ins:  []*dione.TransferableInput{},
+					Outs: []*dione.TransferableOutput{},
 				},
 			},
-			StakeOuts: []*avax.TransferableOutput{},
+			StakeOuts: []*dione.TransferableOutput{},
 			Validator: txs.Validator{},
 			RewardsOwner: &secp256k1fx.OutputOwners{
 				Addrs: []ids.ShortID{},

@@ -6,7 +6,7 @@ package snow
 import (
 	"errors"
 
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
 )
 
 const (

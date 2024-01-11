@@ -6,16 +6,16 @@ package local
 import (
 	"time"
 
-	"github.com/ava-labs/avalanchego/config"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet"
+	"github.com/DioneProtocol/odysseygo/config"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet"
 )
 
 const (
 	// Constants defining the names of shell variables whose value can
 	// configure local network orchestration.
-	AvalancheGoPathEnvName = "AVALANCHEGO_PATH"
-	NetworkDirEnvName      = "TESTNETCTL_NETWORK_DIR"
-	RootDirEnvName         = "TESTNETCTL_ROOT_DIR"
+	OdysseyGoPathEnvName = "AVALANCHEGO_PATH"
+	NetworkDirEnvName    = "TESTNETCTL_NETWORK_DIR"
+	RootDirEnvName       = "TESTNETCTL_ROOT_DIR"
 
 	DefaultNetworkStartTimeout = 2 * time.Minute
 	DefaultNodeInitTimeout     = 10 * time.Second
@@ -44,7 +44,7 @@ func LocalFlags() testnet.FlagsMap {
 func LocalCChainConfig() testnet.FlagsMap {
 	// Supply only non-default configuration to ensure that default
 	// values will be used. Available C-Chain configuration options are
-	// defined in the `github.com/ava-labs/coreth/evm` package.
+	// defined in the `github.com/DioneProtocol/coreth/evm` package.
 	return testnet.FlagsMap{
 		"log-level": "trace",
 	}

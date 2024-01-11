@@ -11,14 +11,14 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 func TestDiffMissingState(t *testing.T) {
@@ -390,8 +390,8 @@ func TestDiffRewardUTXO(t *testing.T) {
 
 	// Put a reward UTXO
 	txID := ids.GenerateTestID()
-	rewardUTXO := &avax.UTXO{
-		UTXOID: avax.UTXOID{TxID: txID},
+	rewardUTXO := &dione.UTXO{
+		UTXOID: dione.UTXOID{TxID: txID},
 	}
 	d.AddRewardUTXO(txID, rewardUTXO)
 
@@ -407,10 +407,10 @@ func TestDiffRewardUTXO(t *testing.T) {
 		// Assert that we can get a UTXO from the parent state
 		// [state] returns 1 UTXO.
 		txID2 := ids.GenerateTestID()
-		parentRewardUTXO := &avax.UTXO{
-			UTXOID: avax.UTXOID{TxID: txID2},
+		parentRewardUTXO := &dione.UTXO{
+			UTXOID: dione.UTXOID{TxID: txID2},
 		}
-		state.EXPECT().GetRewardUTXOs(txID2).Return([]*avax.UTXO{parentRewardUTXO}, nil).Times(1)
+		state.EXPECT().GetRewardUTXOs(txID2).Return([]*dione.UTXO{parentRewardUTXO}, nil).Times(1)
 		gotParentRewardUTXOs, err := d.GetRewardUTXOs(txID2)
 		require.NoError(err)
 		require.Len(gotParentRewardUTXOs, 1)
@@ -434,8 +434,8 @@ func TestDiffUTXO(t *testing.T) {
 	require.NoError(err)
 
 	// Put a UTXO
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{TxID: ids.GenerateTestID()},
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{TxID: ids.GenerateTestID()},
 	}
 	d.AddUTXO(utxo)
 
@@ -449,8 +449,8 @@ func TestDiffUTXO(t *testing.T) {
 	{
 		// Assert that we can get a UTXO from the parent state
 		// [state] returns 1 UTXO.
-		parentUTXO := &avax.UTXO{
-			UTXOID: avax.UTXOID{TxID: ids.GenerateTestID()},
+		parentUTXO := &dione.UTXO{
+			UTXOID: dione.UTXOID{TxID: ids.GenerateTestID()},
 		}
 		state.EXPECT().GetUTXO(parentUTXO.InputID()).Return(parentUTXO, nil).Times(1)
 		gotParentUTXO, err := d.GetUTXO(parentUTXO.InputID())

@@ -9,19 +9,19 @@ import (
 
 	stdcontext "context"
 
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 const version = 0
@@ -51,18 +51,18 @@ type EthKeychain interface {
 }
 
 type SignerBackend interface {
-	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*avax.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*dione.UTXO, error)
 }
 
 type txSigner struct {
-	avaxKC  keychain.Keychain
+	dioneKC keychain.Keychain
 	ethKC   EthKeychain
 	backend SignerBackend
 }
 
-func NewSigner(avaxKC keychain.Keychain, ethKC EthKeychain, backend SignerBackend) Signer {
+func NewSigner(dioneKC keychain.Keychain, ethKC EthKeychain, backend SignerBackend) Signer {
 	return &txSigner{
-		avaxKC:  avaxKC,
+		dioneKC: dioneKC,
 		ethKC:   ethKC,
 		backend: backend,
 	}
@@ -89,7 +89,7 @@ func (s *txSigner) SignAtomic(ctx stdcontext.Context, tx *evm.Tx) error {
 	}
 }
 
-func (s *txSigner) getImportSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*avax.TransferableInput) ([][]keychain.Signer, error) {
+func (s *txSigner) getImportSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*dione.TransferableInput) ([][]keychain.Signer, error) {
 	txSigners := make([][]keychain.Signer, len(ins))
 	for credIndex, transferInput := range ins {
 		input, ok := transferInput.In.(*secp256k1fx.TransferInput)
@@ -122,7 +122,7 @@ func (s *txSigner) getImportSigners(ctx stdcontext.Context, sourceChainID ids.ID
 			}
 
 			addr := out.Addrs[addrIndex]
-			key, ok := s.avaxKC.Get(addr)
+			key, ok := s.dioneKC.Get(addr)
 			if !ok {
 				// If we don't have access to the key, then we can't sign this
 				// transaction. However, we can attempt to partially sign it.

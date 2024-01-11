@@ -7,15 +7,15 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/nftfx"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -35,18 +35,18 @@ type Spender interface {
 	// - [inputs] the inputs that should be consumed to fund the outputs
 	// - [signers] the proof of ownership of the funds being moved
 	Spend(
-		utxos []*avax.UTXO,
+		utxos []*dione.UTXO,
 		kc *secp256k1fx.Keychain,
 		amounts map[ids.ID]uint64,
 	) (
 		map[ids.ID]uint64, // amountsSpent
-		[]*avax.TransferableInput, // inputs
+		[]*dione.TransferableInput, // inputs
 		[][]*secp256k1.PrivateKey, // signers
 		error,
 	)
 
 	SpendNFT(
-		utxos []*avax.UTXO,
+		utxos []*dione.UTXO,
 		kc *secp256k1fx.Keychain,
 		assetID ids.ID,
 		groupID uint32,
@@ -58,17 +58,17 @@ type Spender interface {
 	)
 
 	SpendAll(
-		utxos []*avax.UTXO,
+		utxos []*dione.UTXO,
 		kc *secp256k1fx.Keychain,
 	) (
 		map[ids.ID]uint64,
-		[]*avax.TransferableInput,
+		[]*dione.TransferableInput,
 		[][]*secp256k1.PrivateKey,
 		error,
 	)
 
 	Mint(
-		utxos []*avax.UTXO,
+		utxos []*dione.UTXO,
 		kc *secp256k1fx.Keychain,
 		amounts map[ids.ID]uint64,
 		to ids.ShortID,
@@ -79,7 +79,7 @@ type Spender interface {
 	)
 
 	MintNFT(
-		utxos []*avax.UTXO,
+		utxos []*dione.UTXO,
 		kc *secp256k1fx.Keychain,
 		assetID ids.ID,
 		payload []byte,
@@ -107,19 +107,19 @@ type spender struct {
 }
 
 func (s *spender) Spend(
-	utxos []*avax.UTXO,
+	utxos []*dione.UTXO,
 	kc *secp256k1fx.Keychain,
 	amounts map[ids.ID]uint64,
 ) (
 	map[ids.ID]uint64, // amountsSpent
-	[]*avax.TransferableInput, // inputs
+	[]*dione.TransferableInput, // inputs
 	[][]*secp256k1.PrivateKey, // signers
 	error,
 ) {
 	amountsSpent := make(map[ids.ID]uint64, len(amounts))
 	time := s.clock.Unix()
 
-	ins := []*avax.TransferableInput{}
+	ins := []*dione.TransferableInput{}
 	keys := [][]*secp256k1.PrivateKey{}
 	for _, utxo := range utxos {
 		assetID := utxo.AssetID()
@@ -136,7 +136,7 @@ func (s *spender) Spend(
 			// this utxo can't be spent with the current keys right now
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(dione.TransferableIn)
 		if !ok {
 			// this input doesn't have an amount, so I don't care about it here
 			continue
@@ -149,9 +149,9 @@ func (s *spender) Spend(
 		amountsSpent[assetID] = newAmountSpent
 
 		// add the new input to the array
-		ins = append(ins, &avax.TransferableInput{
+		ins = append(ins, &dione.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  avax.Asset{ID: assetID},
+			Asset:  dione.Asset{ID: assetID},
 			In:     input,
 		})
 		// add the required keys to the array
@@ -168,12 +168,12 @@ func (s *spender) Spend(
 		}
 	}
 
-	avax.SortTransferableInputsWithSigners(ins, keys)
+	dione.SortTransferableInputsWithSigners(ins, keys)
 	return amountsSpent, ins, keys, nil
 }
 
 func (s *spender) SpendNFT(
-	utxos []*avax.UTXO,
+	utxos []*dione.UTXO,
 	kc *secp256k1fx.Keychain,
 	assetID ids.ID,
 	groupID uint32,
@@ -219,7 +219,7 @@ func (s *spender) SpendNFT(
 		// add the new operation to the array
 		ops = append(ops, &txs.Operation{
 			Asset:   utxo.Asset,
-			UTXOIDs: []*avax.UTXOID{&utxo.UTXOID},
+			UTXOIDs: []*dione.UTXOID{&utxo.UTXOID},
 			Op: &nftfx.TransferOperation{
 				Input: secp256k1fx.Input{
 					SigIndices: indices,
@@ -247,18 +247,18 @@ func (s *spender) SpendNFT(
 }
 
 func (s *spender) SpendAll(
-	utxos []*avax.UTXO,
+	utxos []*dione.UTXO,
 	kc *secp256k1fx.Keychain,
 ) (
 	map[ids.ID]uint64,
-	[]*avax.TransferableInput,
+	[]*dione.TransferableInput,
 	[][]*secp256k1.PrivateKey,
 	error,
 ) {
 	amountsSpent := make(map[ids.ID]uint64)
 	time := s.clock.Unix()
 
-	ins := []*avax.TransferableInput{}
+	ins := []*dione.TransferableInput{}
 	keys := [][]*secp256k1.PrivateKey{}
 	for _, utxo := range utxos {
 		assetID := utxo.AssetID()
@@ -269,7 +269,7 @@ func (s *spender) SpendAll(
 			// this utxo can't be spent with the current keys right now
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(dione.TransferableIn)
 		if !ok {
 			// this input doesn't have an amount, so I don't care about it here
 			continue
@@ -282,21 +282,21 @@ func (s *spender) SpendAll(
 		amountsSpent[assetID] = newAmountSpent
 
 		// add the new input to the array
-		ins = append(ins, &avax.TransferableInput{
+		ins = append(ins, &dione.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  avax.Asset{ID: assetID},
+			Asset:  dione.Asset{ID: assetID},
 			In:     input,
 		})
 		// add the required keys to the array
 		keys = append(keys, signers)
 	}
 
-	avax.SortTransferableInputsWithSigners(ins, keys)
+	dione.SortTransferableInputsWithSigners(ins, keys)
 	return amountsSpent, ins, keys, nil
 }
 
 func (s *spender) Mint(
-	utxos []*avax.UTXO,
+	utxos []*dione.UTXO,
 	kc *secp256k1fx.Keychain,
 	amounts map[ids.ID]uint64,
 	to ids.ShortID,
@@ -338,7 +338,7 @@ func (s *spender) Mint(
 		// add the operation to the array
 		ops = append(ops, &txs.Operation{
 			Asset:   utxo.Asset,
-			UTXOIDs: []*avax.UTXOID{&utxo.UTXOID},
+			UTXOIDs: []*dione.UTXOID{&utxo.UTXOID},
 			Op: &secp256k1fx.MintOperation{
 				MintInput:  *in,
 				MintOutput: *out,
@@ -369,7 +369,7 @@ func (s *spender) Mint(
 }
 
 func (s *spender) MintNFT(
-	utxos []*avax.UTXO,
+	utxos []*dione.UTXO,
 	kc *secp256k1fx.Keychain,
 	assetID ids.ID,
 	payload []byte,
@@ -411,8 +411,8 @@ func (s *spender) MintNFT(
 
 		// add the operation to the array
 		ops = append(ops, &txs.Operation{
-			Asset: avax.Asset{ID: assetID},
-			UTXOIDs: []*avax.UTXOID{
+			Asset: dione.Asset{ID: assetID},
+			UTXOIDs: []*dione.UTXOID{
 				&utxo.UTXOID,
 			},
 			Op: &nftfx.MintOperation{

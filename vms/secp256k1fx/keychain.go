@@ -11,12 +11,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/keychain"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 )
 
 var (
@@ -27,9 +27,9 @@ var (
 
 // Keychain is a collection of keys that can be used to spend outputs
 type Keychain struct {
-	factory            *secp256k1.Factory
-	avaxAddrToKeyIndex map[ids.ShortID]int
-	ethAddrToKeyIndex  map[common.Address]int
+	factory             *secp256k1.Factory
+	dioneAddrToKeyIndex map[ids.ShortID]int
+	ethAddrToKeyIndex   map[common.Address]int
 
 	// These can be used to iterate over. However, they should not be modified
 	// externally.
@@ -41,9 +41,9 @@ type Keychain struct {
 // NewKeychain returns a new keychain containing [keys]
 func NewKeychain(keys ...*secp256k1.PrivateKey) *Keychain {
 	kc := &Keychain{
-		factory:            &secp256k1.Factory{},
-		avaxAddrToKeyIndex: make(map[ids.ShortID]int),
-		ethAddrToKeyIndex:  make(map[common.Address]int),
+		factory:             &secp256k1.Factory{},
+		dioneAddrToKeyIndex: make(map[ids.ShortID]int),
+		ethAddrToKeyIndex:   make(map[common.Address]int),
 	}
 	for _, key := range keys {
 		kc.Add(key)
@@ -54,13 +54,13 @@ func NewKeychain(keys ...*secp256k1.PrivateKey) *Keychain {
 // Add a new key to the key chain
 func (kc *Keychain) Add(key *secp256k1.PrivateKey) {
 	pk := key.PublicKey()
-	avaxAddr := pk.Address()
-	if _, ok := kc.avaxAddrToKeyIndex[avaxAddr]; !ok {
-		kc.avaxAddrToKeyIndex[avaxAddr] = len(kc.Keys)
+	dioneAddr := pk.Address()
+	if _, ok := kc.dioneAddrToKeyIndex[dioneAddr]; !ok {
+		kc.dioneAddrToKeyIndex[dioneAddr] = len(kc.Keys)
 		ethAddr := publicKeyToEthAddress(pk)
 		kc.ethAddrToKeyIndex[ethAddr] = len(kc.Keys)
 		kc.Keys = append(kc.Keys, key)
-		kc.Addrs.Add(avaxAddr)
+		kc.Addrs.Add(dioneAddr)
 		kc.EthAddrs.Add(ethAddr)
 	}
 }
@@ -166,7 +166,7 @@ func (kc *Keychain) String() string {
 
 // to avoid internals type assertions
 func (kc Keychain) get(id ids.ShortID) (*secp256k1.PrivateKey, bool) {
-	if i, ok := kc.avaxAddrToKeyIndex[id]; ok {
+	if i, ok := kc.dioneAddrToKeyIndex[id]; ok {
 		return kc.Keys[i], true
 	}
 	return nil, false

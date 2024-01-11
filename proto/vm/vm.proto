@@ -6,10 +6,10 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 import "io/prometheus/client/metrics.proto";
 
-option go_package = "github.com/ava-labs/avalanchego/proto/pb/vm";
+option go_package = "github.com/DioneProtocol/odysseygo/proto/pb/vm";
 
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/snow/engine/snowman/block
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/snow/consensus/snowman#Block
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/snow/engine/snowman/block
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/snow/consensus/snowman#Block
 service VM {
   // ChainVM
   //
@@ -122,7 +122,7 @@ message InitializeRequest {
   bytes public_key = 5;
   bytes x_chain_id = 6;
   bytes c_chain_id = 7;
-  bytes avax_asset_id = 8;
+  bytes dione_asset_id = 8;
   string chain_data_dir = 9;
   bytes genesis_bytes = 10;
   bytes upgrade_bytes = 11;

@@ -4,8 +4,8 @@ set -euo pipefail
 
 # e.g.,
 # ./scripts/build.sh
-# ./scripts/tests.e2e.sh ./build/avalanchego
-# E2E_SERIAL=1 ./scripts/tests.e2e.sh ./build/avalanchego
+# ./scripts/tests.e2e.sh ./build/odysseygo
+# E2E_SERIAL=1 ./scripts/tests.e2e.sh ./build/odysseygo
 if ! [[ "$0" =~ scripts/tests.e2e.sh ]]; then
   echo "must be run from repository root"
   exit 255
@@ -40,7 +40,7 @@ else
   fi
   echo "running e2e tests against an ephemeral local cluster deployed with ${AVALANCHEGO_PATH}"
   AVALANCHEGO_PATH="$(realpath ${AVALANCHEGO_PATH})"
-  E2E_ARGS="--avalanchego-path=${AVALANCHEGO_PATH}"
+  E2E_ARGS="--odysseygo-path=${AVALANCHEGO_PATH}"
 fi
 
 #################################

@@ -17,20 +17,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/tests/fixture"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet/local"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/tests/fixture"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet/local"
 
 	// ensure test packages are scanned by ginkgo
-	_ "github.com/ava-labs/avalanchego/tests/e2e/banff"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/c"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/faultinjection"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/p"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/static-handlers"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/x"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/x/transfer"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/banff"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/c"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/faultinjection"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/p"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/static-handlers"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x/transfer"
 )
 
 func TestE2E(t *testing.T) {
@@ -39,17 +39,17 @@ func TestE2E(t *testing.T) {
 }
 
 var (
-	avalancheGoExecPath  string
+	odysseyGoExecPath    string
 	persistentNetworkDir string
 	usePersistentNetwork bool
 )
 
 func init() {
 	flag.StringVar(
-		&avalancheGoExecPath,
-		"avalanchego-path",
-		os.Getenv(local.AvalancheGoPathEnvName),
-		fmt.Sprintf("avalanchego executable path (required if not using a persistent network). Also possible to configure via the %s env variable.", local.AvalancheGoPathEnvName),
+		&odysseyGoExecPath,
+		"odysseygo-path",
+		os.Getenv(local.OdysseyGoPathEnvName),
+		fmt.Sprintf("odysseygo executable path (required if not using a persistent network). Also possible to configure via the %s env variable.", local.OdysseyGoPathEnvName),
 	)
 	flag.StringVar(
 		&persistentNetworkDir,
@@ -83,7 +83,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 		network, err = local.ReadNetwork(persistentNetworkDir)
 		require.NoError(err)
 	} else {
-		tests.Outf("{{magenta}}Starting network with %q{{/}}\n", avalancheGoExecPath)
+		tests.Outf("{{magenta}}Starting network with %q{{/}}\n", odysseyGoExecPath)
 
 		ctx, cancel := context.WithTimeout(context.Background(), local.DefaultNetworkStartTimeout)
 		defer cancel()
@@ -94,7 +94,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 			"", // Use the default path to ensure a predictable target for github's upload-artifact action
 			&local.LocalNetwork{
 				LocalConfig: local.LocalConfig{
-					ExecPath: avalancheGoExecPath,
+					ExecPath: odysseyGoExecPath,
 				},
 			},
 			testnet.DefaultNodeCount,

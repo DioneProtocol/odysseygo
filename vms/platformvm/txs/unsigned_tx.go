@@ -4,11 +4,11 @@
 package txs
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 // UnsignedTx is an unsigned transaction
@@ -22,7 +22,7 @@ type UnsignedTx interface {
 	// InputIDs returns the set of inputs this transaction consumes
 	InputIDs() set.Set[ids.ID]
 
-	Outputs() []*avax.TransferableOutput
+	Outputs() []*dione.TransferableOutput
 
 	// Attempts to verify this transaction without any provided state.
 	SyntacticVerify(ctx *snow.Context) error

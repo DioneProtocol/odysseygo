@@ -4,9 +4,9 @@
 package handler
 
 import (
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
 )
 
 // Engine is a wrapper around a consensus engine's components.
@@ -37,8 +37,8 @@ func (e *Engine) Get(state snow.State) (common.Engine, bool) {
 // EngineManager resolves the engine that should be used given the current
 // execution context of the chain.
 type EngineManager struct {
-	Avalanche *Engine
-	Snowman   *Engine
+	Odyssey *Engine
+	Snowman *Engine
 }
 
 // Get returns the engine corresponding to the provided type if possible.
@@ -46,7 +46,7 @@ type EngineManager struct {
 func (e *EngineManager) Get(engineType p2p.EngineType) *Engine {
 	switch engineType {
 	case p2p.EngineType_ENGINE_TYPE_AVALANCHE:
-		return e.Avalanche
+		return e.Odyssey
 	case p2p.EngineType_ENGINE_TYPE_SNOWMAN:
 		return e.Snowman
 	default:

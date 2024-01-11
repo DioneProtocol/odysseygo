@@ -10,23 +10,23 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/nftfx"
-	"github.com/ava-labs/avalanchego/vms/propertyfx"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestInvalidGenesis(t *testing.T) {
@@ -124,7 +124,7 @@ func TestIssueTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	tx := newTx(t, env.genesisBytes, env.vm, "AVAX")
+	tx := newTx(t, env.genesisBytes, env.vm, "DIONE")
 	issueAndAccept(require, env.vm, env.issuer, tx)
 }
 
@@ -141,7 +141,7 @@ func TestIssueNFT(t *testing.T) {
 	}()
 
 	createAssetTx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
@@ -172,13 +172,13 @@ func TestIssueNFT(t *testing.T) {
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintNFTTx := &txs.Tx{Unsigned: &txs.OperationTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
-			Asset: avax.Asset{ID: createAssetTx.ID()},
-			UTXOIDs: []*avax.UTXOID{{
+			Asset: dione.Asset{ID: createAssetTx.ID()},
+			UTXOIDs: []*dione.UTXOID{{
 				TxID:        createAssetTx.ID(),
 				OutputIndex: 0,
 			}},
@@ -197,13 +197,13 @@ func TestIssueNFT(t *testing.T) {
 
 	transferNFTTx := &txs.Tx{
 		Unsigned: &txs.OperationTx{
-			BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+			BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 				NetworkID:    constants.UnitTestID,
 				BlockchainID: chainID,
 			}},
 			Ops: []*txs.Operation{{
-				Asset: avax.Asset{ID: createAssetTx.ID()},
-				UTXOIDs: []*avax.UTXOID{{
+				Asset: dione.Asset{ID: createAssetTx.ID()},
+				UTXOIDs: []*dione.UTXOID{{
 					TxID:        mintNFTTx.ID(),
 					OutputIndex: 0,
 				}},
@@ -242,7 +242,7 @@ func TestIssueProperty(t *testing.T) {
 	}()
 
 	createAssetTx := &txs.Tx{Unsigned: &txs.CreateAssetTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
@@ -265,13 +265,13 @@ func TestIssueProperty(t *testing.T) {
 	issueAndAccept(require, env.vm, env.issuer, createAssetTx)
 
 	mintPropertyTx := &txs.Tx{Unsigned: &txs.OperationTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
-			Asset: avax.Asset{ID: createAssetTx.ID()},
-			UTXOIDs: []*avax.UTXOID{{
+			Asset: dione.Asset{ID: createAssetTx.ID()},
+			UTXOIDs: []*dione.UTXOID{{
 				TxID:        createAssetTx.ID(),
 				OutputIndex: 0,
 			}},
@@ -297,13 +297,13 @@ func TestIssueProperty(t *testing.T) {
 	issueAndAccept(require, env.vm, env.issuer, mintPropertyTx)
 
 	burnPropertyTx := &txs.Tx{Unsigned: &txs.OperationTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
 		}},
 		Ops: []*txs.Operation{{
-			Asset: avax.Asset{ID: createAssetTx.ID()},
-			UTXOIDs: []*avax.UTXOID{{
+			Asset: dione.Asset{ID: createAssetTx.ID()},
+			UTXOIDs: []*dione.UTXOID{{
 				TxID:        mintPropertyTx.ID(),
 				OutputIndex: 1,
 			}},
@@ -349,17 +349,17 @@ func TestIssueTxWithAnotherAsset(t *testing.T) {
 	createTx := getCreateTxFromGenesisTest(t, env.genesisBytes, otherAssetName)
 
 	tx := &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{
+			Ins: []*dione.TransferableInput{
 				// fee asset
 				{
-					UTXOID: avax.UTXOID{
+					UTXOID: dione.UTXOID{
 						TxID:        feeAssetCreateTx.ID(),
 						OutputIndex: 2,
 					},
-					Asset: avax.Asset{ID: feeAssetCreateTx.ID()},
+					Asset: dione.Asset{ID: feeAssetCreateTx.ID()},
 					In: &secp256k1fx.TransferInput{
 						Amt: startBalance,
 						Input: secp256k1fx.Input{
@@ -371,11 +371,11 @@ func TestIssueTxWithAnotherAsset(t *testing.T) {
 				},
 				// issued asset
 				{
-					UTXOID: avax.UTXOID{
+					UTXOID: dione.UTXOID{
 						TxID:        createTx.ID(),
 						OutputIndex: 2,
 					},
-					Asset: avax.Asset{ID: createTx.ID()},
+					Asset: dione.Asset{ID: createTx.ID()},
 					In: &secp256k1fx.TransferInput{
 						Amt: startBalance,
 						Input: secp256k1fx.Input{
@@ -432,15 +432,15 @@ func TestTxAcceptAfterParseTx(t *testing.T) {
 
 	key := keys[0]
 	firstTx := &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        env.genesisTx.ID(),
 					OutputIndex: 2,
 				},
-				Asset: avax.Asset{ID: env.genesisTx.ID()},
+				Asset: dione.Asset{ID: env.genesisTx.ID()},
 				In: &secp256k1fx.TransferInput{
 					Amt: startBalance,
 					Input: secp256k1fx.Input{
@@ -450,8 +450,8 @@ func TestTxAcceptAfterParseTx(t *testing.T) {
 					},
 				},
 			}},
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: env.genesisTx.ID()},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: env.genesisTx.ID()},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: startBalance - env.vm.TxFee,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -465,15 +465,15 @@ func TestTxAcceptAfterParseTx(t *testing.T) {
 	require.NoError(firstTx.SignSECP256K1Fx(env.vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 
 	secondTx := &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        firstTx.ID(),
 					OutputIndex: 0,
 				},
-				Asset: avax.Asset{ID: env.genesisTx.ID()},
+				Asset: dione.Asset{ID: env.genesisTx.ID()},
 				In: &secp256k1fx.TransferInput{
 					Amt: startBalance - env.vm.TxFee,
 					Input: secp256k1fx.Input{
@@ -520,11 +520,11 @@ func TestIssueImportTx(t *testing.T) {
 
 	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
 
-	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "AVAX")
-	avaxID := genesisTx.ID()
+	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "DIONE")
+	dioneID := genesisTx.ID()
 
 	key := keys[0]
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID: ids.ID{
 			0x0f, 0x2f, 0x4f, 0x6f, 0x8e, 0xae, 0xce, 0xee,
 			0x0d, 0x2d, 0x4d, 0x6d, 0x8c, 0xac, 0xcc, 0xec,
@@ -533,12 +533,12 @@ func TestIssueImportTx(t *testing.T) {
 		},
 	}
 
-	txAssetID := avax.Asset{ID: avaxID}
+	txAssetID := dione.Asset{ID: dioneID}
 	tx := &txs.Tx{Unsigned: &txs.ImportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Outs: []*avax.TransferableOutput{{
+			Outs: []*dione.TransferableOutput{{
 				Asset: txAssetID,
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1000,
@@ -550,7 +550,7 @@ func TestIssueImportTx(t *testing.T) {
 			}},
 		}},
 		SourceChain: constants.PlatformChainID,
-		ImportedIns: []*avax.TransferableInput{{
+		ImportedIns: []*dione.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
 			In: &secp256k1fx.TransferInput{
@@ -564,7 +564,7 @@ func TestIssueImportTx(t *testing.T) {
 	require.NoError(tx.SignSECP256K1Fx(env.vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 
 	// Provide the platform UTXO:
-	utxo := &avax.UTXO{
+	utxo := &dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  txAssetID,
 		Out: &secp256k1fx.TransferOutput{
@@ -595,7 +595,7 @@ func TestIssueImportTx(t *testing.T) {
 	issueAndAccept(require, env.vm, env.issuer, tx)
 
 	assertIndexedTX(t, env.vm.db, 0, key.PublicKey().Address(), txAssetID.AssetID(), tx.ID())
-	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), avaxID, 1)
+	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), dioneID, 1)
 
 	id := utxoID.InputID()
 	_, err = env.vm.ctx.SharedMemory.Get(constants.PlatformChainID, [][]byte{id[:]})
@@ -615,11 +615,11 @@ func TestForceAcceptImportTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "AVAX")
-	avaxID := genesisTx.ID()
+	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "DIONE")
+	dioneID := genesisTx.ID()
 
 	key := keys[0]
-	utxoID := avax.UTXOID{
+	utxoID := dione.UTXOID{
 		TxID: ids.ID{
 			0x0f, 0x2f, 0x4f, 0x6f, 0x8e, 0xae, 0xce, 0xee,
 			0x0d, 0x2d, 0x4d, 0x6d, 0x8c, 0xac, 0xcc, 0xec,
@@ -628,12 +628,12 @@ func TestForceAcceptImportTx(t *testing.T) {
 		},
 	}
 
-	txAssetID := avax.Asset{ID: avaxID}
+	txAssetID := dione.Asset{ID: dioneID}
 	tx := &txs.Tx{Unsigned: &txs.ImportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Outs: []*avax.TransferableOutput{{
+			Outs: []*dione.TransferableOutput{{
 				Asset: txAssetID,
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1000,
@@ -645,7 +645,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 			}},
 		}},
 		SourceChain: constants.PlatformChainID,
-		ImportedIns: []*avax.TransferableInput{{
+		ImportedIns: []*dione.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
 			In: &secp256k1fx.TransferInput{
@@ -665,7 +665,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 	require.NoError(parsedTx.Accept(context.Background()))
 
 	assertIndexedTX(t, env.vm.db, 0, key.PublicKey().Address(), txAssetID.AssetID(), tx.ID())
-	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), avaxID, 1)
+	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), dioneID, 1)
 
 	id := utxoID.InputID()
 	_, err = env.vm.ctx.SharedMemory.Get(constants.PlatformChainID, [][]byte{id[:]})
@@ -690,20 +690,20 @@ func TestIssueExportTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "AVAX")
-	avaxID := genesisTx.ID()
+	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "DIONE")
+	dioneID := genesisTx.ID()
 
 	key := keys[0]
 	tx := &txs.Tx{Unsigned: &txs.ExportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
-					TxID:        avaxID,
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
+					TxID:        dioneID,
 					OutputIndex: 2,
 				},
-				Asset: avax.Asset{ID: avaxID},
+				Asset: dione.Asset{ID: dioneID},
 				In: &secp256k1fx.TransferInput{
 					Amt:   startBalance,
 					Input: secp256k1fx.Input{SigIndices: []uint32{0}},
@@ -711,8 +711,8 @@ func TestIssueExportTx(t *testing.T) {
 			}},
 		}},
 		DestinationChain: constants.PlatformChainID,
-		ExportedOuts: []*avax.TransferableOutput{{
-			Asset: avax.Asset{ID: avaxID},
+		ExportedOuts: []*dione.TransferableOutput{{
+			Asset: dione.Asset{ID: dioneID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: startBalance - env.vm.TxFee,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -761,18 +761,18 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "AVAX")
-	avaxID := genesisTx.ID()
+	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "DIONE")
+	dioneID := genesisTx.ID()
 
 	key := keys[0]
-	assetID := avax.Asset{ID: avaxID}
+	assetID := dione.Asset{ID: dioneID}
 	tx := &txs.Tx{Unsigned: &txs.ExportTx{
-		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
-					TxID:        avaxID,
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
+					TxID:        dioneID,
 					OutputIndex: 2,
 				},
 				Asset: assetID,
@@ -783,7 +783,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 			}},
 		}},
 		DestinationChain: constants.PlatformChainID,
-		ExportedOuts: []*avax.TransferableOutput{{
+		ExportedOuts: []*dione.TransferableOutput{{
 			Asset: assetID,
 			Out: &secp256k1fx.TransferOutput{
 				Amt: startBalance - env.vm.TxFee,
@@ -796,7 +796,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	}}
 	require.NoError(tx.SignSECP256K1Fx(env.vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 
-	utxo := avax.UTXOID{
+	utxo := dione.UTXOID{
 		TxID:        tx.ID(),
 		OutputIndex: 0,
 	}

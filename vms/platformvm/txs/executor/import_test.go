@@ -10,15 +10,15 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/platformvm/utxo"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/utxo"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestNewImportTx(t *testing.T) {
@@ -53,12 +53,12 @@ func TestNewImportTx(t *testing.T) {
 
 		for assetID, amt := range assets {
 			// #nosec G404
-			utxo := &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxo := &dione.UTXO{
+				UTXOID: dione.UTXOID{
 					TxID:        ids.GenerateTestID(),
 					OutputIndex: rand.Uint32(),
 				},
-				Asset: avax.Asset{ID: assetID},
+				Asset: dione.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: amt,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -99,7 +99,7 @@ func TestNewImportTx(t *testing.T) {
 			sharedMemory: fundedSharedMemory(
 				env.ctx.XChainID,
 				map[ids.ID]uint64{
-					env.ctx.AVAXAssetID: env.config.TxFee - 1,
+					env.ctx.DIONEAssetID: env.config.TxFee - 1,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
@@ -111,7 +111,7 @@ func TestNewImportTx(t *testing.T) {
 			sharedMemory: fundedSharedMemory(
 				env.ctx.XChainID,
 				map[ids.ID]uint64{
-					env.ctx.AVAXAssetID: env.config.TxFee,
+					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
@@ -123,7 +123,7 @@ func TestNewImportTx(t *testing.T) {
 			sharedMemory: fundedSharedMemory(
 				cChainID,
 				map[ids.ID]uint64{
-					env.ctx.AVAXAssetID: env.config.TxFee,
+					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
@@ -131,13 +131,13 @@ func TestNewImportTx(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			description:   "attempting to import non-avax from X-chain",
+			description:   "attempting to import non-dione from X-chain",
 			sourceChainID: env.ctx.XChainID,
 			sharedMemory: fundedSharedMemory(
 				env.ctx.XChainID,
 				map[ids.ID]uint64{
-					env.ctx.AVAXAssetID: env.config.TxFee,
-					customAssetID:       1,
+					env.ctx.DIONEAssetID: env.config.TxFee,
+					customAssetID:        1,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},

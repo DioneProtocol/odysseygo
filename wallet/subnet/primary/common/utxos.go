@@ -6,14 +6,14 @@ package common
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 type ChainUTXOs interface {
-	AddUTXO(ctx context.Context, destinationChainID ids.ID, utxo *avax.UTXO) error
+	AddUTXO(ctx context.Context, destinationChainID ids.ID, utxo *dione.UTXO) error
 	RemoveUTXO(ctx context.Context, sourceChainID, utxoID ids.ID) error
 
-	UTXOs(ctx context.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
-	GetUTXO(ctx context.Context, sourceChainID, utxoID ids.ID) (*avax.UTXO, error)
+	UTXOs(ctx context.Context, sourceChainID ids.ID) ([]*dione.UTXO, error)
+	GetUTXO(ctx context.Context, sourceChainID, utxoID ids.ID) (*dione.UTXO, error)
 }

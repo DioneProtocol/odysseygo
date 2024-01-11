@@ -10,10 +10,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
 )
 
 const (
@@ -40,7 +40,7 @@ type Bootstrapper interface {
 	Restart(ctx context.Context, reset bool) error
 }
 
-// It collects mechanisms common to both snowman and avalanche bootstrappers
+// It collects mechanisms common to both snowman and odyssey bootstrappers
 type bootstrapper struct {
 	Config
 	Halter

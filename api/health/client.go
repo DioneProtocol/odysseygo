@@ -7,12 +7,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/ava-labs/avalanchego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for Avalanche Health API Endpoint
+// Client interface for Odyssey Health API Endpoint
 // For helpers to wait for Readiness, Health, or Liveness, see AwaitReady,
 // AwaitHealthy, and AwaitAlive.
 type Client interface {
@@ -24,7 +24,7 @@ type Client interface {
 	Liveness(ctx context.Context, tags []string, options ...rpc.Option) (*APIReply, error)
 }
 
-// Client implementation for Avalanche Health API Endpoint
+// Client implementation for Odyssey Health API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }
