@@ -8,13 +8,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
 )
 
 const defaultWeight = 10000
 
-// each key controls an address that has [defaultBalance] AVAX at genesis
+// each key controls an address that has [defaultBalance] DIONE at genesis
 var keys = secp256k1.TestKeys()
 
 func TestBoundedBy(t *testing.T) {

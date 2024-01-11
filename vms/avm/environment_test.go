@@ -13,32 +13,32 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/api/keystore"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/cb58"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/linkedhashmap"
-	"github.com/ava-labs/avalanchego/utils/sampler"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/block/executor"
-	"github.com/ava-labs/avalanchego/vms/avm/config"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/nftfx"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/cb58"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/sampler"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block/executor"
+	"github.com/DioneProtocol/odysseygo/vms/avm/config"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/nftfx"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	keystoreutils "github.com/ava-labs/avalanchego/vms/components/keystore"
+	keystoreutils "github.com/DioneProtocol/odysseygo/vms/components/keystore"
 )
 
 const (
@@ -54,16 +54,16 @@ const (
 var (
 	testChangeAddr = ids.GenerateTestShortID()
 	testCases      = []struct {
-		name      string
-		avaxAsset bool
+		name       string
+		dioneAsset bool
 	}{
 		{
-			name:      "genesis asset is AVAX",
-			avaxAsset: true,
+			name:       "genesis asset is DIONE",
+			dioneAsset: true,
 		},
 		{
-			name:      "genesis asset is TEST",
-			avaxAsset: false,
+			name:       "genesis asset is TEST",
+			dioneAsset: false,
 		},
 	}
 
@@ -123,7 +123,7 @@ func setup(tb testing.TB, c *envConfig) *environment {
 
 	var (
 		genesisArgs *BuildGenesisArgs
-		assetName   = "AVAX"
+		assetName   = "DIONE"
 	)
 	if c.isCustomFeeAsset {
 		genesisArgs = makeCustomAssetGenesis(tb)
@@ -240,12 +240,12 @@ func newContext(tb testing.TB) *snow.Context {
 	require := require.New(tb)
 
 	genesisBytes := buildGenesisTest(tb)
-	tx := getCreateTxFromGenesisTest(tb, genesisBytes, "AVAX")
+	tx := getCreateTxFromGenesisTest(tb, genesisBytes, "DIONE")
 
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = constants.UnitTestID
 	ctx.ChainID = chainID
-	ctx.AVAXAssetID = tx.ID()
+	ctx.DIONEAssetID = tx.ID()
 	ctx.XChainID = ids.Empty.Prefix(0)
 	ctx.CChainID = ids.Empty.Prefix(1)
 	aliaser := ctx.BCLookup.(ids.Aliaser)
@@ -329,15 +329,15 @@ func newTx(tb testing.TB, genesisBytes []byte, vm *VM, assetName string) *txs.Tx
 
 	createTx := getCreateTxFromGenesisTest(tb, genesisBytes, assetName)
 	tx := &txs.Tx{Unsigned: &txs.BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        createTx.ID(),
 					OutputIndex: 2,
 				},
-				Asset: avax.Asset{ID: createTx.ID()},
+				Asset: dione.Asset{ID: createTx.ID()},
 				In: &secp256k1fx.TransferInput{
 					Amt: startBalance,
 					Input: secp256k1fx.Input{
@@ -395,7 +395,7 @@ func makeDefaultGenesis(tb testing.TB) *BuildGenesisArgs {
 		Encoding: formatting.Hex,
 		GenesisData: map[string]AssetDefinition{
 			"asset1": {
-				Name:   "AVAX",
+				Name:   "DIONE",
 				Symbol: "SYMB",
 				InitialState: map[string][]interface{}{
 					"fixedCap": {

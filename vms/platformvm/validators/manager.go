@@ -11,19 +11,19 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/utils/window"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
-	"github.com/ava-labs/avalanchego/vms/platformvm/metrics"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/window"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 const (

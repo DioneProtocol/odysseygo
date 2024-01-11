@@ -13,20 +13,20 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/vms/types"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/vms/types"
 )
 
 func TestAddPermissionlessPrimaryValidator(t *testing.T) {
@@ -44,7 +44,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 	sk, err := bls.SecretKeyFromBytes(skBytes)
 	require.NoError(err)
 
-	avaxAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
+	dioneAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -68,21 +68,21 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 
 	simpleAddPrimaryTx := &AddPermissionlessValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs:         []*avax.TransferableOutput{},
-				Ins: []*avax.TransferableInput{
+				Outs:         []*dione.TransferableOutput{},
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: 2 * units.KiloAvax,
+							Amt: 2 * units.KiloDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{1},
 							},
@@ -96,17 +96,17 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 			NodeID: nodeID,
 			Start:  12345,
 			End:    12345 + 200*24*60*60,
-			Wght:   2 * units.KiloAvax,
+			Wght:   2 * units.KiloDione,
 		},
 		Subnet: constants.PrimaryNetworkID,
 		Signer: signer.NewProofOfPossession(sk),
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
-					ID: avaxAssetID,
+				Asset: dione.Asset{
+					ID: dioneAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
-					Amt: 2 * units.KiloAvax,
+					Amt: 2 * units.KiloDione,
 					OutputOwners: secp256k1fx.OutputOwners{
 						Locktime:  0,
 						Threshold: 1,
@@ -133,13 +133,13 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	avax.SortTransferableOutputs(simpleAddPrimaryTx.Outs, Codec)
-	avax.SortTransferableOutputs(simpleAddPrimaryTx.StakeOuts, Codec)
+	dione.SortTransferableOutputs(simpleAddPrimaryTx.Outs, Codec)
+	dione.SortTransferableOutputs(simpleAddPrimaryTx.StakeOuts, Codec)
 	utils.Sort(simpleAddPrimaryTx.Ins)
 	require.NoError(simpleAddPrimaryTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedSimpleAddPrimaryTxBytes := []byte{
@@ -166,14 +166,14 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// Amount = 2k AVAX
+		// Amount = 2k DIONE
 		0x00, 0x00, 0x01, 0xd1, 0xa9, 0x4a, 0x20, 0x00,
 		// Number of input signature indices
 		0x00, 0x00, 0x00, 0x01,
@@ -220,7 +220,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0xf1, 0x33, 0x0e, 0x5a, 0x71, 0xf8, 0xc3, 0x68,
 		// Number of locked outputs
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -273,13 +273,13 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 
 	complexAddPrimaryTx := &AddPermissionlessValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs: []*avax.TransferableOutput{
+				Outs: []*dione.TransferableOutput{
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &secp256k1fx.TransferOutput{
 							Amt: 1,
@@ -293,8 +293,8 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -309,7 +309,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						Out: &stakeable.LockOut{
@@ -327,28 +327,28 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 						},
 					},
 				},
-				Ins: []*avax.TransferableInput{
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.MegaAvax,
+							Amt: units.MegaDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{2, 5},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &stakeable.LockIn{
@@ -362,11 +362,11 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 3,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -384,17 +384,17 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 			NodeID: nodeID,
 			Start:  12345,
 			End:    12345 + 200*24*60*60,
-			Wght:   5 * units.KiloAvax,
+			Wght:   5 * units.KiloDione,
 		},
 		Subnet: constants.PrimaryNetworkID,
 		Signer: signer.NewProofOfPossession(sk),
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
-					ID: avaxAssetID,
+				Asset: dione.Asset{
+					ID: dioneAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
-					Amt: 2 * units.KiloAvax,
+					Amt: 2 * units.KiloDione,
 					OutputOwners: secp256k1fx.OutputOwners{
 						Locktime:  0,
 						Threshold: 1,
@@ -405,13 +405,13 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 				},
 			},
 			{
-				Asset: avax.Asset{
-					ID: avaxAssetID,
+				Asset: dione.Asset{
+					ID: dioneAssetID,
 				},
 				Out: &stakeable.LockOut{
 					Locktime: 987654321,
 					TransferableOut: &secp256k1fx.TransferOutput{
-						Amt: 3 * units.KiloAvax,
+						Amt: 3 * units.KiloDione,
 						OutputOwners: secp256k1fx.OutputOwners{
 							Locktime:  87654321,
 							Threshold: 0,
@@ -436,9 +436,9 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		DelegationShares: reward.PercentDenominator,
 	}
 	require.NoError(complexAddPrimaryTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedComplexAddPrimaryTxBytes := []byte{
@@ -456,7 +456,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		// Number of immediate outputs
 		0x00, 0x00, 0x00, 0x03,
 		// outputs[0]
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -476,7 +476,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb,
 		0x44, 0x55, 0x66, 0x77,
 		// outputs[1]
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -529,7 +529,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -633,7 +633,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0xf1, 0x33, 0x0e, 0x5a, 0x71, 0xf8, 0xc3, 0x68,
 		// number of locked outputs
 		0x00, 0x00, 0x00, 0x02,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -652,7 +652,7 @@ func TestAddPermissionlessPrimaryValidator(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb,
 		0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb,
 		0x44, 0x55, 0x66, 0x77,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -709,7 +709,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 
-	avaxAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
+	dioneAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -739,32 +739,32 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 
 	simpleAddSubnetTx := &AddPermissionlessValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs:         []*avax.TransferableOutput{},
-				Ins: []*avax.TransferableInput{
+				Outs:         []*dione.TransferableOutput{},
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.MilliAvax,
+							Amt: units.MilliDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{1},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -786,9 +786,9 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		},
 		Subnet: subnetID,
 		Signer: &signer.Empty{},
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
+				Asset: dione.Asset{
 					ID: customAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
@@ -819,13 +819,13 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		},
 		DelegationShares: reward.PercentDenominator,
 	}
-	avax.SortTransferableOutputs(simpleAddSubnetTx.Outs, Codec)
-	avax.SortTransferableOutputs(simpleAddSubnetTx.StakeOuts, Codec)
+	dione.SortTransferableOutputs(simpleAddSubnetTx.Outs, Codec)
+	dione.SortTransferableOutputs(simpleAddSubnetTx.StakeOuts, Codec)
 	utils.Sort(simpleAddSubnetTx.Ins)
 	require.NoError(simpleAddSubnetTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedSimpleAddSubnetTxBytes := []byte{
@@ -852,14 +852,14 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// Amount = 1 MilliAVAX
+		// Amount = 1 MilliDIONE
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x0f, 0x42, 0x40,
 		// Number of input signature indices
 		0x00, 0x00, 0x00, 0x01,
@@ -960,13 +960,13 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 
 	complexAddSubnetTx := &AddPermissionlessValidatorTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs: []*avax.TransferableOutput{
+				Outs: []*dione.TransferableOutput{
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &secp256k1fx.TransferOutput{
 							Amt: 1,
@@ -980,8 +980,8 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -996,7 +996,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						Out: &stakeable.LockOut{
@@ -1014,28 +1014,28 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 						},
 					},
 				},
-				Ins: []*avax.TransferableInput{
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.MegaAvax,
+							Amt: units.MegaDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{2, 5},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &stakeable.LockIn{
@@ -1049,11 +1049,11 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 3,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -1075,9 +1075,9 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		},
 		Subnet: subnetID,
 		Signer: &signer.Empty{},
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{
+				Asset: dione.Asset{
 					ID: customAssetID,
 				},
 				Out: &secp256k1fx.TransferOutput{
@@ -1092,7 +1092,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 				},
 			},
 			{
-				Asset: avax.Asset{
+				Asset: dione.Asset{
 					ID: customAssetID,
 				},
 				Out: &stakeable.LockOut{
@@ -1123,9 +1123,9 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		DelegationShares: reward.PercentDenominator,
 	}
 	require.NoError(complexAddSubnetTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedComplexAddSubnetTxBytes := []byte{
@@ -1143,7 +1143,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		// Number of immediate outputs
 		0x00, 0x00, 0x00, 0x03,
 		// outputs[0]
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -1163,7 +1163,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb,
 		0x44, 0x55, 0x66, 0x77,
 		// outputs[1]
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -1216,7 +1216,7 @@ func TestAddPermissionlessSubnetValidator(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -1391,7 +1391,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 
 	// A BaseTx that passes syntactic verification.
 	validBaseTx := BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		},
@@ -1455,9 +1455,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					Validator: Validator{
 						NodeID: ids.GenerateTestNodeID(),
 					},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1478,9 +1478,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					Validator: Validator{
 						NodeID: ids.GenerateTestNodeID(),
 					},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1491,7 +1491,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					DelegationShares: reward.PercentDenominator,
 				}
 			},
-			err: avax.ErrWrongNetworkID,
+			err: dione.ErrWrongNetworkID,
 		},
 		{
 			name: "invalid rewards owner",
@@ -1506,9 +1506,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1536,9 +1536,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: constants.PrimaryNetworkID,
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1559,7 +1559,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 				rewardsOwner := fx.NewMockOwner(ctrl)
 				rewardsOwner.EXPECT().Verify().Return(nil).AnyTimes()
 
-				stakeOut := avax.NewMockTransferableOut(ctrl)
+				stakeOut := dione.NewMockTransferableOut(ctrl)
 				stakeOut.EXPECT().Verify().Return(errCustom)
 				return &AddPermissionlessValidatorTx{
 					BaseTx: validBaseTx,
@@ -1569,9 +1569,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: stakeOut,
@@ -1598,9 +1598,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1608,7 +1608,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1636,9 +1636,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1646,7 +1646,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: ids.GenerateTestID(),
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1675,9 +1675,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1685,7 +1685,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1714,9 +1714,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1724,7 +1724,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1753,9 +1753,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: ids.GenerateTestID(),
 					Signer: &signer.Empty{},
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1763,7 +1763,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1792,9 +1792,9 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 					},
 					Subnet: constants.PrimaryNetworkID,
 					Signer: blsPOP,
-					StakeOuts: []*avax.TransferableOutput{
+					StakeOuts: []*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{
@@ -1802,7 +1802,7 @@ func TestAddPermissionlessValidatorTxSyntacticVerify(t *testing.T) {
 							},
 						},
 						{
-							Asset: avax.Asset{
+							Asset: dione.Asset{
 								ID: assetID,
 							},
 							Out: &secp256k1fx.TransferOutput{

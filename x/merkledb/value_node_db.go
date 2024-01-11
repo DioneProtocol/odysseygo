@@ -6,10 +6,10 @@ package merkledb
 import (
 	"sync"
 
-	"github.com/ava-labs/avalanchego/cache"
+	"github.com/DioneProtocol/odysseygo/cache"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/utils"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/utils"
 )
 
 var _ database.Iterator = (*iterator)(nil)

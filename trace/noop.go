@@ -8,7 +8,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 )
 
 var Noop Tracer = noOpTracer{

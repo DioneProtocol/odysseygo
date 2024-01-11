@@ -8,10 +8,10 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/metric"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/metric"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
 )
 
 var _ Metrics = (*metrics)(nil)
@@ -67,12 +67,12 @@ func New(
 		localStake: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "local_staked",
-			Help:      "Amount (in nAVAX) of AVAX staked on this node",
+			Help:      "Amount (in nDIONE) of DIONE staked on this node",
 		}),
 		totalStake: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "total_staked",
-			Help:      "Amount (in nAVAX) of AVAX staked on the Primary Network",
+			Help:      "Amount (in nDIONE) of DIONE staked on the Primary Network",
 		}),
 
 		numVotesWon: prometheus.NewCounter(prometheus.CounterOpts{

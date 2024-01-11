@@ -18,35 +18,35 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/api"
-	"github.com/ava-labs/avalanchego/api/keystore"
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/chains/atomic"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/formatting"
-	"github.com/ava-labs/avalanchego/utils/json"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/status"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/api"
+	"github.com/DioneProtocol/odysseygo/api/keystore"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/chains/atomic"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/DioneProtocol/odysseygo/utils/json"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/status"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	vmkeystore "github.com/ava-labs/avalanchego/vms/components/keystore"
-	pchainapi "github.com/ava-labs/avalanchego/vms/platformvm/api"
-	blockexecutor "github.com/ava-labs/avalanchego/vms/platformvm/blocks/executor"
-	txexecutor "github.com/ava-labs/avalanchego/vms/platformvm/txs/executor"
+	vmkeystore "github.com/DioneProtocol/odysseygo/vms/components/keystore"
+	pchainapi "github.com/DioneProtocol/odysseygo/vms/platformvm/api"
+	blockexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/blocks/executor"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/platformvm/txs/executor"
 )
 
 var (
@@ -83,7 +83,7 @@ func defaultService(t *testing.T) (*Service, *mutableSharedMemory) {
 	vm.ctx.Keystore = ks.NewBlockchainKeyStore(vm.ctx.ChainID)
 	return &Service{
 		vm:          vm,
-		addrManager: avax.NewAddressManager(vm.ctx),
+		addrManager: dione.NewAddressManager(vm.ctx),
 		stakerAttributesCache: &cache.LRU[ids.ID, *stakerAttributes]{
 			Size: stakerAttributesCacheSize,
 		},
@@ -185,12 +185,12 @@ func TestGetTxStatus(t *testing.T) {
 	peerSharedMemory := m.NewSharedMemory(xChainID)
 
 	// #nosec G404
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &dione.UTXO{
+		UTXOID: dione.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: rand.Uint32(),
 		},
-		Asset: avax.Asset{ID: avaxAssetID},
+		Asset: dione.Asset{ID: dioneAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1234567,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -435,7 +435,7 @@ func TestGetStake(t *testing.T) {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[0])
 		require.NoError(err)
 
-		var output avax.TransferableOutput
+		var output dione.TransferableOutput
 		_, err = txs.Codec.Unmarshal(outputBytes, &output)
 		require.NoError(err)
 
@@ -463,7 +463,7 @@ func TestGetStake(t *testing.T) {
 		outputBytes, err := formatting.Decode(args.Encoding, outputStr)
 		require.NoError(err)
 
-		var output avax.TransferableOutput
+		var output dione.TransferableOutput
 		_, err = txs.Codec.Unmarshal(outputBytes, &output)
 		require.NoError(err)
 
@@ -510,7 +510,7 @@ func TestGetStake(t *testing.T) {
 	require.Len(response.Outputs, 2)
 
 	// Unmarshal into transferable outputs
-	outputs := make([]avax.TransferableOutput, 2)
+	outputs := make([]dione.TransferableOutput, 2)
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])
 		require.NoError(err)
@@ -556,7 +556,7 @@ func TestGetStake(t *testing.T) {
 	require.Len(response.Outputs, 3)
 
 	// Unmarshal
-	outputs = make([]avax.TransferableOutput, 3)
+	outputs = make([]dione.TransferableOutput, 3)
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])
 		require.NoError(err)

@@ -7,17 +7,17 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -46,7 +46,7 @@ type AddPermissionlessValidatorTx struct {
 	//       However, a NodeID does uniquely map to a BLS key
 	Signer signer.Signer `serialize:"true" json:"signer"`
 	// Where to send staked tokens when done validating
-	StakeOuts []*avax.TransferableOutput `serialize:"true" json:"stake"`
+	StakeOuts []*dione.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send validation rewards when done validating
 	ValidatorRewardsOwner fx.Owner `serialize:"true" json:"validationRewardsOwner"`
 	// Where to send delegation rewards when done validating
@@ -100,7 +100,7 @@ func (tx *AddPermissionlessValidatorTx) CurrentPriority() Priority {
 	return SubnetPermissionlessValidatorCurrentPriority
 }
 
-func (tx *AddPermissionlessValidatorTx) Stake() []*avax.TransferableOutput {
+func (tx *AddPermissionlessValidatorTx) Stake() []*dione.TransferableOutput {
 	return tx.StakeOuts
 }
 
@@ -172,7 +172,7 @@ func (tx *AddPermissionlessValidatorTx) SyntacticVerify(ctx *snow.Context) error
 	}
 
 	switch {
-	case !avax.IsSortedTransferableOutputs(tx.StakeOuts, Codec):
+	case !dione.IsSortedTransferableOutputs(tx.StakeOuts, Codec):
 		return errOutputsNotSorted
 	case totalStakeWeight != tx.Wght:
 		return fmt.Errorf("%w: weight %d != stake %d", errValidatorWeightMismatch, tx.Wght, totalStakeWeight)

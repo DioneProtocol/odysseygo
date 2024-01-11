@@ -7,8 +7,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/ava-labs/avalanchego/utils/linkedhashmap"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/utils/linkedhashmap"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 var errEmptyCacheTooLarge = errors.New("cache is empty yet still too large")

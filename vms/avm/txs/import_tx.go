@@ -4,10 +4,10 @@
 package txs
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -23,11 +23,11 @@ type ImportTx struct {
 	SourceChain ids.ID `serialize:"true" json:"sourceChain"`
 
 	// The inputs to this transaction
-	ImportedIns []*avax.TransferableInput `serialize:"true" json:"importedInputs"`
+	ImportedIns []*dione.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
 // InputUTXOs track which UTXOs this transaction is consuming.
-func (t *ImportTx) InputUTXOs() []*avax.UTXOID {
+func (t *ImportTx) InputUTXOs() []*dione.UTXOID {
 	utxos := t.BaseTx.InputUTXOs()
 	for _, in := range t.ImportedIns {
 		in.Symbol = true

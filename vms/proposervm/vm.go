@@ -14,32 +14,32 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/api/metrics"
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/cache/metercacher"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
-	"github.com/ava-labs/avalanchego/staking"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/proposervm/indexer"
-	"github.com/ava-labs/avalanchego/vms/proposervm/proposer"
-	"github.com/ava-labs/avalanchego/vms/proposervm/scheduler"
-	"github.com/ava-labs/avalanchego/vms/proposervm/state"
-	"github.com/ava-labs/avalanchego/vms/proposervm/tree"
+	"github.com/DioneProtocol/odysseygo/api/metrics"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
+	"github.com/DioneProtocol/odysseygo/staking"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/indexer"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/proposer"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/scheduler"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/state"
+	"github.com/DioneProtocol/odysseygo/vms/proposervm/tree"
 
-	statelessblock "github.com/ava-labs/avalanchego/vms/proposervm/block"
+	statelessblock "github.com/DioneProtocol/odysseygo/vms/proposervm/block"
 )
 
 const (
@@ -738,14 +738,14 @@ func (vm *VM) getForkHeight() (uint64, error) {
 	case constants.PlatformChainID:
 		switch vm.ctx.NetworkID {
 		case constants.MainnetID:
-			return 805732, nil // https://subnets.avax.network/p-chain/block/805732
+			return 805732, nil // https://subnets.dione.network/p-chain/block/805732
 		case constants.FujiID:
-			return 47529, nil // https://subnets-test.avax.network/p-chain/block/47529
+			return 47529, nil // https://subnets-test.dione.network/p-chain/block/47529
 		}
 	case mainnetXChainID:
-		return 1, nil // https://subnets.avax.network/x-chain/block/1
+		return 1, nil // https://subnets.dione.network/x-chain/block/1
 	case fujiXChainID:
-		return 1, nil // https://subnets-test.avax.network/x-chain/block/1
+		return 1, nil // https://subnets-test.dione.network/x-chain/block/1
 	}
 	return vm.GetForkHeight()
 }

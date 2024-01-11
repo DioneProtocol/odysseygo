@@ -15,29 +15,29 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/codec"
-	"github.com/ava-labs/avalanchego/database/manager"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
-	"github.com/ava-labs/avalanchego/version"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/fxs"
-	"github.com/ava-labs/avalanchego/vms/avm/metrics"
-	"github.com/ava-labs/avalanchego/vms/avm/states"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/avm/txs/mempool"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/codec"
+	"github.com/DioneProtocol/odysseygo/database/manager"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/avm/states"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	blkexecutor "github.com/ava-labs/avalanchego/vms/avm/block/executor"
-	txexecutor "github.com/ava-labs/avalanchego/vms/avm/txs/executor"
+	blkexecutor "github.com/DioneProtocol/odysseygo/vms/avm/block/executor"
+	txexecutor "github.com/DioneProtocol/odysseygo/vms/avm/txs/executor"
 )
 
 const trackChecksums = false
@@ -560,23 +560,23 @@ func TestBlockBuilderAddLocalTx(t *testing.T) {
 
 func createTxs() []*txs.Tx {
 	return []*txs.Tx{{
-		Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+		Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: ids.GenerateTestID(),
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: ids.GenerateTestID()},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: ids.GenerateTestID()},
 				Out: &secp256k1fx.TransferOutput{
 					OutputOwners: secp256k1fx.OutputOwners{
 						Addrs: []ids.ShortID{ids.GenerateTestShortID()},
 					},
 				},
 			}},
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        ids.ID{'t', 'x', 'I', 'D'},
 					OutputIndex: 1,
 				},
-				Asset: avax.Asset{ID: ids.GenerateTestID()},
+				Asset: dione.Asset{ID: ids.GenerateTestID()},
 				In: &secp256k1fx.TransferInput{
 					Amt: uint64(54321),
 					Input: secp256k1fx.Input{
@@ -599,11 +599,11 @@ func createParentTxs(cm codec.Manager) ([]*txs.Tx, error) {
 	testTxs := make([]*txs.Tx, 0, countTxs)
 	for i := 0; i < countTxs; i++ {
 		// Create the tx
-		tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: avax.BaseTx{
+		tx := &txs.Tx{Unsigned: &txs.BaseTx{BaseTx: dione.BaseTx{
 			NetworkID:    constants.UnitTestID,
 			BlockchainID: chainID,
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: ids.ID{1, 2, 3}},
+			Outs: []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: ids.ID{1, 2, 3}},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: uint64(12345),
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -612,12 +612,12 @@ func createParentTxs(cm codec.Manager) ([]*txs.Tx, error) {
 					},
 				},
 			}},
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        ids.ID{'t', 'x', 'p', 'a', 'r', 'e', 'n', 't'},
 					OutputIndex: 1,
 				},
-				Asset: avax.Asset{ID: ids.ID{1, 2, 3}},
+				Asset: dione.Asset{ID: ids.ID{1, 2, 3}},
 				In: &secp256k1fx.TransferInput{
 					Amt: uint64(54321),
 					Input: secp256k1fx.Input{

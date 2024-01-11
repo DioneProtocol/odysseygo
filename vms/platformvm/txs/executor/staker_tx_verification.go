@@ -10,13 +10,13 @@ import (
 
 	stdmath "math"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/state"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/state"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
 )
 
 var (
@@ -83,7 +83,7 @@ func verifyAddValidatorTx(
 	sTx *txs.Tx,
 	tx *txs.AddValidatorTx,
 ) (
-	[]*avax.TransferableOutput,
+	[]*dione.TransferableOutput,
 	error,
 ) {
 	// Verify the tx is well-formed
@@ -115,7 +115,7 @@ func verifyAddValidatorTx(
 		return nil, ErrStakeTooLong
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
+	outs := make([]*dione.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.StakeOuts)
 
@@ -159,7 +159,7 @@ func verifyAddValidatorTx(
 		outs,
 		sTx.Creds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: backend.Config.AddPrimaryNetworkValidatorFee,
+			backend.Ctx.DIONEAssetID: backend.Config.AddPrimaryNetworkValidatorFee,
 		},
 	); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -249,7 +249,7 @@ func verifyAddSubnetValidatorTx(
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: backend.Config.AddSubnetValidatorFee,
+			backend.Ctx.DIONEAssetID: backend.Config.AddSubnetValidatorFee,
 		},
 	); err != nil {
 		return fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -323,7 +323,7 @@ func removeSubnetValidatorValidation(
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: backend.Config.TxFee,
+			backend.Ctx.DIONEAssetID: backend.Config.TxFee,
 		},
 	); err != nil {
 		return nil, false, fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -341,7 +341,7 @@ func verifyAddDelegatorTx(
 	sTx *txs.Tx,
 	tx *txs.AddDelegatorTx,
 ) (
-	[]*avax.TransferableOutput,
+	[]*dione.TransferableOutput,
 	error,
 ) {
 	// Verify the tx is well-formed
@@ -364,7 +364,7 @@ func verifyAddDelegatorTx(
 		return nil, ErrWeightTooSmall
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
+	outs := make([]*dione.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.StakeOuts)
 
@@ -432,7 +432,7 @@ func verifyAddDelegatorTx(
 		outs,
 		sTx.Creds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: backend.Config.AddPrimaryNetworkDelegatorFee,
+			backend.Ctx.DIONEAssetID: backend.Config.AddPrimaryNetworkDelegatorFee,
 		},
 	); err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -544,7 +544,7 @@ func verifyAddPermissionlessValidatorTx(
 		txFee = backend.Config.AddPrimaryNetworkValidatorFee
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
+	outs := make([]*dione.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.StakeOuts)
 
@@ -556,7 +556,7 @@ func verifyAddPermissionlessValidatorTx(
 		outs,
 		sTx.Creds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: txFee,
+			backend.Ctx.DIONEAssetID: txFee,
 		},
 	); err != nil {
 		return fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -588,7 +588,7 @@ func getValidatorRules(
 ) (*addValidatorRules, error) {
 	if subnetID == constants.PrimaryNetworkID {
 		return &addValidatorRules{
-			assetID:           backend.Ctx.AVAXAssetID,
+			assetID:           backend.Ctx.DIONEAssetID,
 			minValidatorStake: backend.Config.MinValidatorStake,
 			maxValidatorStake: backend.Config.MaxValidatorStake,
 			minStakeDuration:  backend.Config.MinStakeDuration,
@@ -715,7 +715,7 @@ func verifyAddPermissionlessDelegatorTx(
 		return ErrOverDelegated
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
+	outs := make([]*dione.TransferableOutput, len(tx.Outs)+len(tx.StakeOuts))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.StakeOuts)
 
@@ -744,7 +744,7 @@ func verifyAddPermissionlessDelegatorTx(
 		outs,
 		sTx.Creds,
 		map[ids.ID]uint64{
-			backend.Ctx.AVAXAssetID: txFee,
+			backend.Ctx.DIONEAssetID: txFee,
 		},
 	); err != nil {
 		return fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -776,7 +776,7 @@ func getDelegatorRules(
 ) (*addDelegatorRules, error) {
 	if subnetID == constants.PrimaryNetworkID {
 		return &addDelegatorRules{
-			assetID:                  backend.Ctx.AVAXAssetID,
+			assetID:                  backend.Ctx.DIONEAssetID,
 			minDelegatorStake:        backend.Config.MinDelegatorStake,
 			maxValidatorStake:        backend.Config.MaxValidatorStake,
 			minStakeDuration:         backend.Config.MinStakeDuration,

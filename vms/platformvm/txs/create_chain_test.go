@@ -8,12 +8,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 func TestUnsignedCreateChainTxVerify(t *testing.T) {
@@ -126,19 +126,19 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 		t.Run(test.description, func(t *testing.T) {
 			require := require.New(t)
 
-			inputs := []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			inputs := []*dione.TransferableInput{{
+				UTXOID: dione.UTXOID{
 					TxID:        ids.ID{'t', 'x', 'I', 'D'},
 					OutputIndex: 2,
 				},
-				Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+				Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 				In: &secp256k1fx.TransferInput{
 					Amt:   uint64(5678),
 					Input: secp256k1fx.Input{SigIndices: []uint32{0}},
 				},
 			}}
-			outputs := []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
+			outputs := []*dione.TransferableOutput{{
+				Asset: dione.Asset{ID: ids.ID{'a', 's', 's', 'e', 't'}},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: uint64(1234),
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -152,7 +152,7 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 			}
 
 			createChainTx := &CreateChainTx{
-				BaseTx: BaseTx{BaseTx: avax.BaseTx{
+				BaseTx: BaseTx{BaseTx: dione.BaseTx{
 					NetworkID:    ctx.NetworkID,
 					BlockchainID: ctx.ChainID,
 					Ins:          inputs,

@@ -6,9 +6,9 @@ package message
 import (
 	"time"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 )
 
 var _ InboundMsgBuilder = (*inMsgBuilder)(nil)

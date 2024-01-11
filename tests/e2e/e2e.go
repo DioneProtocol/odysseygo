@@ -18,19 +18,19 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/coreth/core/types"
-	"github.com/ava-labs/coreth/ethclient"
-	"github.com/ava-labs/coreth/interfaces"
+	"github.com/DioneProtocol/coreth/core/types"
+	"github.com/DioneProtocol/coreth/ethclient"
+	"github.com/DioneProtocol/coreth/interfaces"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/fixture"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet/local"
-	"github.com/ava-labs/avalanchego/utils/crypto/secp256k1"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/fixture"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet/local"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/secp256k1"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 const (
@@ -118,9 +118,9 @@ func (te *TestEnvironment) NewKeychain(count int) *secp256k1fx.Keychain {
 func (te *TestEnvironment) NewWallet(keychain *secp256k1fx.Keychain, nodeURI testnet.NodeURI) primary.Wallet {
 	tests.Outf("{{blue}} initializing a new wallet for node %s with URI: %s {{/}}\n", nodeURI.NodeID, nodeURI.URI)
 	baseWallet, err := primary.MakeWallet(DefaultContext(), &primary.WalletConfig{
-		URI:          nodeURI.URI,
-		AVAXKeychain: keychain,
-		EthKeychain:  keychain,
+		URI:           nodeURI.URI,
+		DIONEKeychain: keychain,
+		EthKeychain:   keychain,
 	})
 	te.require.NoError(err)
 	return primary.NewWalletWithOptions(
@@ -237,7 +237,7 @@ func SuggestGasPrice(ethClient ethclient.Client) *big.Int {
 	require.NoError(ginkgo.GinkgoT(), err)
 	// Double the suggested gas price to maximize the chances of
 	// acceptance. Maybe this can be revisited pending resolution of
-	// https://github.com/ava-labs/coreth/issues/314.
+	// https://github.com/DioneProtocol/coreth/issues/314.
 	gasPrice.Add(gasPrice, gasPrice)
 	return gasPrice
 }

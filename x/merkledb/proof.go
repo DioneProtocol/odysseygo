@@ -10,14 +10,14 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/trace"
-	"github.com/ava-labs/avalanchego/utils/hashing"
-	"github.com/ava-labs/avalanchego/utils/maybe"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/DioneProtocol/odysseygo/utils/hashing"
+	"github.com/DioneProtocol/odysseygo/utils/maybe"
 
-	pb "github.com/ava-labs/avalanchego/proto/pb/sync"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/sync"
 )
 
 const (

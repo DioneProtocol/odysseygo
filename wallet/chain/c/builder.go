@@ -9,46 +9,46 @@ import (
 
 	stdcontext "context"
 
-	"github.com/ava-labs/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/evm"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/set"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
-const avaxConversionRateInt = 1_000_000_000
+const dioneConversionRateInt = 1_000_000_000
 
 var (
 	_ Builder = (*builder)(nil)
 
 	errInsufficientFunds = errors.New("insufficient funds")
 
-	// avaxConversionRate is the conversion rate between the smallest
-	// denomination on the X-Chain and P-chain, 1 nAVAX, and the smallest
-	// denomination on the C-Chain 1 wei. Where 1 nAVAX = 1 gWei.
+	// dioneConversionRate is the conversion rate between the smallest
+	// denomination on the X-Chain and P-chain, 1 nDIONE, and the smallest
+	// denomination on the C-Chain 1 wei. Where 1 nDIONE = 1 gWei.
 	//
-	// This is only required for AVAX because the denomination of 1 AVAX is 9
+	// This is only required for DIONE because the denomination of 1 DIONE is 9
 	// decimal places on the X and P chains, but is 18 decimal places within the
 	// EVM.
-	avaxConversionRate = big.NewInt(avaxConversionRateInt)
+	dioneConversionRate = big.NewInt(dioneConversionRateInt)
 )
 
 // Builder provides a convenient interface for building unsigned C-chain
 // transactions.
 type Builder interface {
-	// GetBalance calculates the amount of AVAX that this builder has control
+	// GetBalance calculates the amount of DIONE that this builder has control
 	// over.
 	GetBalance(
 		options ...common.Option,
 	) (*big.Int, error)
 
-	// GetImportableBalance calculates the amount of AVAX that this builder
+	// GetImportableBalance calculates the amount of DIONE that this builder
 	// could import from the provided chain.
 	//
 	// - [chainID] specifies the chain the funds are from.
@@ -89,34 +89,34 @@ type Builder interface {
 type BuilderBackend interface {
 	Context
 
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*dione.UTXO, error)
 	Balance(ctx stdcontext.Context, addr ethcommon.Address) (*big.Int, error)
 	Nonce(ctx stdcontext.Context, addr ethcommon.Address) (uint64, error)
 }
 
 type builder struct {
-	avaxAddrs set.Set[ids.ShortID]
-	ethAddrs  set.Set[ethcommon.Address]
-	backend   BuilderBackend
+	dioneAddrs set.Set[ids.ShortID]
+	ethAddrs   set.Set[ethcommon.Address]
+	backend    BuilderBackend
 }
 
 // NewBuilder returns a new transaction builder.
 //
-//   - [avaxAddrs] is the set of addresses in the AVAX format that the builder
+//   - [dioneAddrs] is the set of addresses in the DIONE format that the builder
 //     assumes can be used when signing the transactions in the future.
 //   - [ethAddrs] is the set of addresses in the Eth format that the builder
 //     assumes can be used when signing the transactions in the future.
 //   - [backend] provides the required access to the chain's context and state
 //     to build out the transactions.
 func NewBuilder(
-	avaxAddrs set.Set[ids.ShortID],
+	dioneAddrs set.Set[ids.ShortID],
 	ethAddrs set.Set[ethcommon.Address],
 	backend BuilderBackend,
 ) Builder {
 	return &builder{
-		avaxAddrs: avaxAddrs,
-		ethAddrs:  ethAddrs,
-		backend:   backend,
+		dioneAddrs: dioneAddrs,
+		ethAddrs:   ethAddrs,
+		backend:    backend,
 	}
 }
 
@@ -151,13 +151,13 @@ func (b *builder) GetImportableBalance(
 	}
 
 	var (
-		addrs           = ops.Addresses(b.avaxAddrs)
+		addrs           = ops.Addresses(b.dioneAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		avaxAssetID     = b.backend.AVAXAssetID()
+		dioneAssetID    = b.backend.DIONEAssetID()
 		balance         uint64
 	)
 	for _, utxo := range utxos {
-		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, avaxAssetID)
+		amount, _, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, dioneAssetID)
 		if !ok {
 			continue
 		}
@@ -185,20 +185,20 @@ func (b *builder) NewImportTx(
 	}
 
 	var (
-		addrs           = ops.Addresses(b.avaxAddrs)
+		addrs           = ops.Addresses(b.dioneAddrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		avaxAssetID     = b.backend.AVAXAssetID()
+		dioneAssetID    = b.backend.DIONEAssetID()
 
-		importedInputs = make([]*avax.TransferableInput, 0, len(utxos))
+		importedInputs = make([]*dione.TransferableInput, 0, len(utxos))
 		importedAmount uint64
 	)
 	for _, utxo := range utxos {
-		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, avaxAssetID)
+		amount, inputSigIndices, ok := getSpendableAmount(utxo, addrs, minIssuanceTime, dioneAssetID)
 		if !ok {
 			continue
 		}
 
-		importedInputs = append(importedInputs, &avax.TransferableInput{
+		importedInputs = append(importedInputs, &dione.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &secp256k1fx.TransferInput{
@@ -248,7 +248,7 @@ func (b *builder) NewImportTx(
 	tx.Outs = []evm.EVMOutput{{
 		Address: to,
 		Amount:  importedAmount - txFee,
-		AssetID: avaxAssetID,
+		AssetID: dioneAssetID,
 	}}
 	return tx, nil
 }
@@ -260,13 +260,13 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*evm.UnsignedExportTx, error) {
 	var (
-		avaxAssetID     = b.backend.AVAXAssetID()
-		exportedOutputs = make([]*avax.TransferableOutput, len(outputs))
+		dioneAssetID    = b.backend.DIONEAssetID()
+		exportedOutputs = make([]*dione.TransferableOutput, len(outputs))
 		exportedAmount  uint64
 	)
 	for i, output := range outputs {
-		exportedOutputs[i] = &avax.TransferableOutput{
-			Asset: avax.Asset{ID: avaxAssetID},
+		exportedOutputs[i] = &dione.TransferableOutput{
+			Asset: dione.Asset{ID: dioneAssetID},
 			Out:   output,
 		}
 
@@ -277,7 +277,7 @@ func (b *builder) NewExportTx(
 		exportedAmount = newExportedAmount
 	}
 
-	avax.SortTransferableOutputs(exportedOutputs, evm.Codec)
+	dione.SortTransferableOutputs(exportedOutputs, evm.Codec)
 	tx := &evm.UnsignedExportTx{
 		NetworkID:        b.backend.NetworkID(),
 		BlockchainID:     b.backend.BlockchainID(),
@@ -335,15 +335,15 @@ func (b *builder) NewExportTx(
 			return nil, err
 		}
 
-		// Since the asset is AVAX, we divide by the avaxConversionRate to
-		// convert back to the correct denomination of AVAX that can be
+		// Since the asset is DIONE, we divide by the dioneConversionRate to
+		// convert back to the correct denomination of DIONE that can be
 		// exported.
-		avaxBalance := new(big.Int).Div(balance, avaxConversionRate).Uint64()
+		dioneBalance := new(big.Int).Div(balance, dioneConversionRate).Uint64()
 
 		// If the balance for [addr] is insufficient to cover the additional
 		// cost of adding an input to the transaction, skip adding the input
 		// altogether.
-		if avaxBalance <= additionalFee {
+		if dioneBalance <= additionalFee {
 			continue
 		}
 
@@ -360,11 +360,11 @@ func (b *builder) NewExportTx(
 			return nil, err
 		}
 
-		inputAmount := math.Min(amountToConsume, avaxBalance)
+		inputAmount := math.Min(amountToConsume, dioneBalance)
 		inputs = append(inputs, evm.EVMInput{
 			Address: addr,
 			Amount:  inputAmount,
-			AssetID: avaxAssetID,
+			AssetID: dioneAssetID,
 			Nonce:   nonce,
 		})
 		amountToConsume -= inputAmount
@@ -380,13 +380,13 @@ func (b *builder) NewExportTx(
 }
 
 func getSpendableAmount(
-	utxo *avax.UTXO,
+	utxo *dione.UTXO,
 	addrs set.Set[ids.ShortID],
 	minIssuanceTime uint64,
-	avaxAssetID ids.ID,
+	dioneAssetID ids.ID,
 ) (uint64, []uint32, bool) {
-	if utxo.Asset.ID != avaxAssetID {
-		// Only AVAX can be imported
+	if utxo.Asset.ID != dioneAssetID {
+		// Only DIONE can be imported
 		return 0, nil, false
 	}
 

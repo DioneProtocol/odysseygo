@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 func TestBaseTxMarshalJSON(t *testing.T) {
@@ -20,22 +20,22 @@ func TestBaseTxMarshalJSON(t *testing.T) {
 	utxoTxID := ids.ID{2}
 	assetID := ids.ID{3}
 	fxID := ids.ID{4}
-	tx := &BaseTx{BaseTx: avax.BaseTx{
+	tx := &BaseTx{BaseTx: dione.BaseTx{
 		BlockchainID: blockchainID,
 		NetworkID:    4,
-		Ins: []*avax.TransferableInput{
+		Ins: []*dione.TransferableInput{
 			{
 				FxID:   fxID,
-				UTXOID: avax.UTXOID{TxID: utxoTxID, OutputIndex: 5},
-				Asset:  avax.Asset{ID: assetID},
-				In:     &avax.TestTransferable{Val: 100},
+				UTXOID: dione.UTXOID{TxID: utxoTxID, OutputIndex: 5},
+				Asset:  dione.Asset{ID: assetID},
+				In:     &dione.TestTransferable{Val: 100},
 			},
 		},
-		Outs: []*avax.TransferableOutput{
+		Outs: []*dione.TransferableOutput{
 			{
 				FxID:  fxID,
-				Asset: avax.Asset{ID: assetID},
-				Out:   &avax.TestTransferable{Val: 100},
+				Asset: dione.Asset{ID: assetID},
+				Out:   &dione.TestTransferable{Val: 100},
 			},
 		},
 		Memo: []byte{1, 2, 3},

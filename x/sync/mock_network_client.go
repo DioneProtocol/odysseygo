@@ -8,8 +8,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	ids "github.com/ava-labs/avalanchego/ids"
-	version "github.com/ava-labs/avalanchego/version"
+	ids "github.com/DioneProtocol/odysseygo/ids"
+	version "github.com/DioneProtocol/odysseygo/version"
 	gomock "go.uber.org/mock/gomock"
 )
 

@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
 )
 
 func TestOptionsUnexpectedBlockType(t *testing.T) {

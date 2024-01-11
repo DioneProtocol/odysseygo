@@ -16,20 +16,20 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/cache"
-	"github.com/ava-labs/avalanchego/cache/metercacher"
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/prefixdb"
-	"github.com/ava-labs/avalanchego/database/versiondb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/timer"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/avalanchego/vms/avm/block"
-	"github.com/ava-labs/avalanchego/vms/avm/txs"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/cache"
+	"github.com/DioneProtocol/odysseygo/cache/metercacher"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/prefixdb"
+	"github.com/DioneProtocol/odysseygo/database/versiondb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/timer"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/avm/block"
+	"github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 const (
@@ -62,7 +62,7 @@ var (
 )
 
 type ReadOnlyChain interface {
-	avax.UTXOGetter
+	dione.UTXOGetter
 
 	GetTx(txID ids.ID) (*txs.Tx, error)
 	GetBlockIDAtHeight(height uint64) (ids.ID, error)
@@ -73,8 +73,8 @@ type ReadOnlyChain interface {
 
 type Chain interface {
 	ReadOnlyChain
-	avax.UTXOAdder
-	avax.UTXODeleter
+	dione.UTXOAdder
+	dione.UTXODeleter
 
 	AddTx(tx *txs.Tx)
 	AddBlock(block block.Block)
@@ -86,7 +86,7 @@ type Chain interface {
 // singletons.
 type State interface {
 	Chain
-	avax.UTXOReader
+	dione.UTXOReader
 
 	IsInitialized() (bool, error)
 	SetInitialized() error
@@ -149,9 +149,9 @@ type state struct {
 	parser block.Parser
 	db     *versiondb.Database
 
-	modifiedUTXOs map[ids.ID]*avax.UTXO // map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
+	modifiedUTXOs map[ids.ID]*dione.UTXO // map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	utxoDB        database.Database
-	utxoState     avax.UTXOState
+	utxoState     dione.UTXOState
 
 	statusesPruned bool
 	statusCache    cache.Cacher[ids.ID, *choices.Status] // cache of id -> choices.Status. If the entry is nil, it is not in the database
@@ -227,7 +227,7 @@ func New(
 		return nil, err
 	}
 
-	utxoState, err := avax.NewMeteredUTXOState(utxoDB, parser.Codec(), metrics, trackChecksums)
+	utxoState, err := dione.NewMeteredUTXOState(utxoDB, parser.Codec(), metrics, trackChecksums)
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func New(
 		parser: parser,
 		db:     db,
 
-		modifiedUTXOs: make(map[ids.ID]*avax.UTXO),
+		modifiedUTXOs: make(map[ids.ID]*dione.UTXO),
 		utxoDB:        utxoDB,
 		utxoState:     utxoState,
 
@@ -262,7 +262,7 @@ func New(
 	return s, s.initTxChecksum()
 }
 
-func (s *state) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
+func (s *state) GetUTXO(utxoID ids.ID) (*dione.UTXO, error) {
 	if utxo, exists := s.modifiedUTXOs[utxoID]; exists {
 		if utxo == nil {
 			return nil, database.ErrNotFound
@@ -276,7 +276,7 @@ func (s *state) UTXOIDs(addr []byte, start ids.ID, limit int) ([]ids.ID, error) 
 	return s.utxoState.UTXOIDs(addr, start, limit)
 }
 
-func (s *state) AddUTXO(utxo *avax.UTXO) {
+func (s *state) AddUTXO(utxo *dione.UTXO) {
 	s.modifiedUTXOs[utxo.InputID()] = utxo
 }
 

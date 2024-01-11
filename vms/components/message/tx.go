@@ -3,7 +3,7 @@
 
 package message
 
-import "github.com/ava-labs/avalanchego/ids"
+import "github.com/DioneProtocol/odysseygo/ids"
 
 var _ Message = (*Tx)(nil)
 

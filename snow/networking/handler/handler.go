@@ -19,20 +19,20 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/ava-labs/avalanchego/api/health"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/message"
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/engine/common"
-	"github.com/ava-labs/avalanchego/snow/networking/tracker"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/subnets"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/logging"
-	"github.com/ava-labs/avalanchego/utils/timer/mockable"
+	"github.com/DioneProtocol/odysseygo/api/health"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/message"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/snow/networking/tracker"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/subnets"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 
-	commontracker "github.com/ava-labs/avalanchego/snow/engine/common/tracker"
+	commontracker "github.com/DioneProtocol/odysseygo/snow/engine/common/tracker"
 )
 
 const (
@@ -528,7 +528,7 @@ func (h *handler) handleSyncMsg(ctx context.Context, msg Message) error {
 	if !ok {
 		// This should only happen if the peer is not following the protocol.
 		// This can happen if the chain only has a Snowman engine and the peer
-		// requested an Avalanche engine handle the message.
+		// requested an Odyssey engine handle the message.
 		h.ctx.Log.Debug("dropping sync message",
 			zap.String("reason", "uninitialized engine state"),
 			zap.Stringer("messageOp", op),
@@ -592,7 +592,7 @@ func (h *handler) handleSyncMsg(ctx context.Context, msg Message) error {
 	case *message.GetAcceptedStateSummaryFailed:
 		return engine.GetAcceptedStateSummaryFailed(ctx, nodeID, msg.RequestID)
 
-	// Bootstrapping messages may be forwarded to either avalanche or snowman
+	// Bootstrapping messages may be forwarded to either odyssey or snowman
 	// engines, depending on the EngineType field
 	case *p2p.GetAcceptedFrontier:
 		return engine.GetAcceptedFrontier(ctx, nodeID, msg.RequestId)

@@ -4,9 +4,9 @@
 package peer
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/proto/pb/p2p"
-	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
+	"github.com/DioneProtocol/odysseygo/utils/ips"
 )
 
 var TestNetwork Network = testNetwork{}

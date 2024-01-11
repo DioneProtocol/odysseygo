@@ -10,17 +10,17 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/components/verify"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/vms/types"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/verify"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/vms/types"
 )
 
 func TestTransformSubnetTxSerialization(t *testing.T) {
@@ -32,7 +32,7 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		0x44, 0x55, 0x66, 0x77,
 	}
 
-	avaxAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
+	dioneAssetID, err := ids.FromString("FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z")
 	require.NoError(err)
 
 	customAssetID := ids.ID{
@@ -57,32 +57,32 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 
 	simpleTransformTx := &TransformSubnetTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs:         []*avax.TransferableOutput{},
-				Ins: []*avax.TransferableInput{
+				Outs:         []*dione.TransferableOutput{},
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: 10 * units.Avax,
+							Amt: 10 * units.Dione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{5},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -115,9 +115,9 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		},
 	}
 	require.NoError(simpleTransformTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedSimpleTransformTxBytes := []byte{
@@ -144,14 +144,14 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX assetID
+		// Mainnet DIONE assetID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// input amount = 10 AVAX
+		// input amount = 10 DIONE
 		0x00, 0x00, 0x00, 0x02, 0x54, 0x0b, 0xe4, 0x00,
 		// number of signatures needed in input
 		0x00, 0x00, 0x00, 0x01,
@@ -228,13 +228,13 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 
 	complexTransformTx := &TransformSubnetTx{
 		BaseTx: BaseTx{
-			BaseTx: avax.BaseTx{
+			BaseTx: dione.BaseTx{
 				NetworkID:    constants.MainnetID,
 				BlockchainID: constants.PlatformChainID,
-				Outs: []*avax.TransferableOutput{
+				Outs: []*dione.TransferableOutput{
 					{
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						Out: &stakeable.LockOut{
 							Locktime: 87654321,
@@ -249,7 +249,7 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 						},
 					},
 					{
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						Out: &stakeable.LockOut{
@@ -267,28 +267,28 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 						},
 					},
 				},
-				Ins: []*avax.TransferableInput{
+				Ins: []*dione.TransferableInput{
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 1,
 						},
-						Asset: avax.Asset{
-							ID: avaxAssetID,
+						Asset: dione.Asset{
+							ID: dioneAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
-							Amt: units.KiloAvax,
+							Amt: units.KiloDione,
 							Input: secp256k1fx.Input{
 								SigIndices: []uint32{2, 5},
 							},
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 2,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &stakeable.LockIn{
@@ -302,11 +302,11 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 						},
 					},
 					{
-						UTXOID: avax.UTXOID{
+						UTXOID: dione.UTXOID{
 							TxID:        txID,
 							OutputIndex: 3,
 						},
-						Asset: avax.Asset{
+						Asset: dione.Asset{
 							ID: customAssetID,
 						},
 						In: &secp256k1fx.TransferInput{
@@ -338,12 +338,12 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 			SigIndices: []uint32{},
 		},
 	}
-	avax.SortTransferableOutputs(complexTransformTx.Outs, Codec)
+	dione.SortTransferableOutputs(complexTransformTx.Outs, Codec)
 	utils.Sort(complexTransformTx.Ins)
 	require.NoError(complexTransformTx.SyntacticVerify(&snow.Context{
-		NetworkID:   1,
-		ChainID:     constants.PlatformChainID,
-		AVAXAssetID: avaxAssetID,
+		NetworkID:    1,
+		ChainID:      constants.PlatformChainID,
+		DIONEAssetID: dioneAssetID,
 	}))
 
 	expectedUnsignedComplexTransformTxBytes := []byte{
@@ -361,7 +361,7 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		// number of outputs
 		0x00, 0x00, 0x00, 0x02,
 		// outputs[0]
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
@@ -414,14 +414,14 @@ func TestTransformSubnetTxSerialization(t *testing.T) {
 		0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88,
 		// Tx output index
 		0x00, 0x00, 0x00, 0x01,
-		// Mainnet AVAX asset ID
+		// Mainnet DIONE asset ID
 		0x21, 0xe6, 0x73, 0x17, 0xcb, 0xc4, 0xbe, 0x2a,
 		0xeb, 0x00, 0x67, 0x7a, 0xd6, 0x46, 0x27, 0x78,
 		0xa8, 0xf5, 0x22, 0x74, 0xb9, 0xd6, 0x05, 0xdf,
 		0x25, 0x91, 0xb2, 0x30, 0x27, 0xa8, 0x7d, 0xff,
 		// secp256k1fx transfer input type ID
 		0x00, 0x00, 0x00, 0x05,
-		// amount = 1,000 AVAX
+		// amount = 1,000 DIONE
 		0x00, 0x00, 0x00, 0xe8, 0xd4, 0xa5, 0x10, 0x00,
 		// number of signatures indices
 		0x00, 0x00, 0x00, 0x02,
@@ -537,9 +537,9 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 	)
 
 	ctx := &snow.Context{
-		ChainID:     chainID,
-		NetworkID:   networkID,
-		AVAXAssetID: ids.GenerateTestID(),
+		ChainID:      chainID,
+		NetworkID:    networkID,
+		DIONEAssetID: ids.GenerateTestID(),
 	}
 
 	// A BaseTx that already passed syntactic verification.
@@ -549,7 +549,7 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 
 	// A BaseTx that passes syntactic verification.
 	validBaseTx := BaseTx{
-		BaseTx: avax.BaseTx{
+		BaseTx: dione.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		},
@@ -597,15 +597,15 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 			err: errEmptyAssetID,
 		},
 		{
-			name: "AVAX assetID",
+			name: "DIONE assetID",
 			txFunc: func(*gomock.Controller) *TransformSubnetTx {
 				return &TransformSubnetTx{
 					BaseTx:  validBaseTx,
 					Subnet:  ids.GenerateTestID(),
-					AssetID: ctx.AVAXAssetID,
+					AssetID: ctx.DIONEAssetID,
 				}
 			},
-			err: errAssetIDCantBeAVAX,
+			err: errAssetIDCantBeDIONE,
 		},
 		{
 			name: "initialSupply == 0",
@@ -899,7 +899,7 @@ func TestTransformSubnetTxSyntacticVerify(t *testing.T) {
 					UptimeRequirement:        reward.PercentDenominator,
 				}
 			},
-			err: avax.ErrWrongNetworkID,
+			err: dione.ErrWrongNetworkID,
 		},
 		{
 			name: "passes verification",

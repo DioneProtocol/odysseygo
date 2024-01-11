@@ -9,7 +9,7 @@ set -euo pipefail
 
 # e.g.,
 # ./scripts/build.sh
-# ./scripts/tests.e2e.persistent_network.sh ./build/avalanchego
+# ./scripts/tests.e2e.persistent_network.sh ./build/odysseygo
 if ! [[ "$0" =~ scripts/tests.e2e.persistent.sh ]]; then
   echo "must be run from repository root"
   exit 255

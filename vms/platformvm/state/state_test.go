@@ -14,26 +14,26 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/database"
-	"github.com/ava-labs/avalanchego/database/memdb"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/snow"
-	"github.com/ava-labs/avalanchego/snow/choices"
-	"github.com/ava-labs/avalanchego/snow/validators"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/crypto/bls"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
-	"github.com/ava-labs/avalanchego/vms/platformvm/config"
-	"github.com/ava-labs/avalanchego/vms/platformvm/genesis"
-	"github.com/ava-labs/avalanchego/vms/platformvm/metrics"
-	"github.com/ava-labs/avalanchego/vms/platformvm/reward"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/database"
+	"github.com/DioneProtocol/odysseygo/database/memdb"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/snow"
+	"github.com/DioneProtocol/odysseygo/snow/choices"
+	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/blocks"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/metrics"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
 var (
@@ -94,13 +94,13 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 			NodeID: initialNodeID,
 			Start:  uint64(initialTime.Unix()),
 			End:    uint64(initialValidatorEndTime.Unix()),
-			Wght:   units.Avax,
+			Wght:   units.Dione,
 		},
-		StakeOuts: []*avax.TransferableOutput{
+		StakeOuts: []*dione.TransferableOutput{
 			{
-				Asset: avax.Asset{ID: initialTxID},
+				Asset: dione.Asset{ID: initialTxID},
 				Out: &secp256k1fx.TransferOutput{
-					Amt: units.Avax,
+					Amt: units.Dione,
 				},
 			},
 		},
@@ -121,13 +121,13 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 
 	genesisBlkID := ids.GenerateTestID()
 	genesisState := &genesis.State{
-		UTXOs: []*avax.UTXO{
+		UTXOs: []*dione.UTXO{
 			{
-				UTXOID: avax.UTXOID{
+				UTXOID: dione.UTXOID{
 					TxID:        initialTxID,
 					OutputIndex: 0,
 				},
-				Asset: avax.Asset{ID: initialTxID},
+				Asset: dione.Asset{ID: initialTxID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: units.Schmeckle,
 				},
@@ -140,7 +140,7 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 			initialChainTx,
 		},
 		Timestamp:     uint64(initialTime.Unix()),
-		InitialSupply: units.Schmeckle + units.Avax,
+		InitialSupply: units.Schmeckle + units.Dione,
 	}
 
 	genesisBlk, err := blocks.NewApricotCommitBlock(genesisBlkID, 0)
@@ -174,7 +174,7 @@ func newStateFromDB(require *require.Assertions, db database.Database) State {
 			MaxConsumptionRate: .12 * reward.PercentDenominator,
 			MinConsumptionRate: .1 * reward.PercentDenominator,
 			MintingPeriod:      365 * 24 * time.Hour,
-			SupplyCap:          720 * units.MegaAvax,
+			SupplyCap:          720 * units.MegaDione,
 		}),
 		&utils.Atomic[bool]{},
 	)

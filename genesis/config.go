@@ -12,12 +12,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/formatting/address"
-	"github.com/ava-labs/avalanchego/utils/math"
-	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
+	"github.com/DioneProtocol/odysseygo/utils/math"
+	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 )
 
 var (
@@ -33,7 +33,7 @@ type LockedAmount struct {
 
 type Allocation struct {
 	ETHAddr        ids.ShortID    `json:"ethAddr"`
-	AVAXAddr       ids.ShortID    `json:"avaxAddr"`
+	DIONEAddr      ids.ShortID    `json:"dioneAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -44,18 +44,18 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		UnlockSchedule: a.UnlockSchedule,
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
-	avaxAddr, err := address.Format(
+	dioneAddr, err := address.Format(
 		"X",
 		constants.GetHRP(networkID),
-		a.AVAXAddr.Bytes(),
+		a.DIONEAddr.Bytes(),
 	)
-	ua.AVAXAddr = avaxAddr
+	ua.DIONEAddr = dioneAddr
 	return ua, err
 }
 
 func (a Allocation) Less(other Allocation) bool {
 	return a.InitialAmount < other.InitialAmount ||
-		(a.InitialAmount == other.InitialAmount && a.AVAXAddr.Less(other.AVAXAddr))
+		(a.InitialAmount == other.InitialAmount && a.DIONEAddr.Less(other.DIONEAddr))
 }
 
 type Staker struct {
@@ -65,14 +65,14 @@ type Staker struct {
 }
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
-	avaxAddr, err := address.Format(
+	dioneAddr, err := address.Format(
 		"X",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
 	return UnparsedStaker{
 		NodeID:        s.NodeID,
-		RewardAddress: avaxAddr,
+		RewardAddress: dioneAddr,
 		DelegationFee: s.DelegationFee,
 	}, err
 }
@@ -114,7 +114,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		uc.Allocations[i] = ua
 	}
 	for i, isa := range c.InitialStakedFunds {
-		avaxAddr, err := address.Format(
+		dioneAddr, err := address.Format(
 			"X",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
@@ -122,7 +122,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		if err != nil {
 			return uc, err
 		}
-		uc.InitialStakedFunds[i] = avaxAddr
+		uc.InitialStakedFunds[i] = dioneAddr
 	}
 	for i, is := range c.InitialStakers {
 		uis, err := is.Unparse(c.NetworkID)

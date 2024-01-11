@@ -12,24 +12,24 @@ import (
 
 	"github.com/onsi/gomega"
 
-	"github.com/ava-labs/avalanchego/api/info"
-	"github.com/ava-labs/avalanchego/ids"
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/utils"
-	"github.com/ava-labs/avalanchego/utils/constants"
-	"github.com/ava-labs/avalanchego/utils/units"
-	"github.com/ava-labs/avalanchego/vms/components/avax"
-	"github.com/ava-labs/avalanchego/vms/platformvm"
-	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
-	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
-	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
+	"github.com/DioneProtocol/odysseygo/api/info"
+	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
+	"github.com/DioneProtocol/odysseygo/utils/units"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm"
+	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
 // PChainWorkflow is an integration test for normal P-Chain operations
 // - Issues an Add Validator and an Add Delegator using the funding address
-// - Exports AVAX from the P-Chain funding address to the X-Chain created address
-// - Exports AVAX from the X-Chain created address to the P-Chain created address
+// - Exports DIONE from the P-Chain funding address to the X-Chain created address
+// - Exports DIONE from the X-Chain created address to the P-Chain created address
 // - Checks the expected value of the funding address
 
 var _ = e2e.DescribePChain("[Workflow]", func() {
@@ -47,7 +47,7 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 
 			pWallet := baseWallet.P()
-			avaxAssetID := baseWallet.P().AVAXAssetID()
+			dioneAssetID := baseWallet.P().DIONEAssetID()
 			xWallet := baseWallet.X()
 			pChainClient := platformvm.NewClient(nodeURI.URI)
 
@@ -69,13 +69,13 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			tests.Outf("{{green}} txFee: %d {{/}}\n", txFees)
 
 			// amount to transfer from P to X chain
-			toTransfer := 1 * units.Avax
+			toTransfer := 1 * units.Dione
 
 			pShortAddr := keychain.Keys[0].Address()
 			xTargetAddr := keychain.Keys[1].Address()
 			ginkgo.By("check selected keys have sufficient funds", func() {
 				pBalances, err := pWallet.Builder().GetBalance()
-				pBalance := pBalances[avaxAssetID]
+				pBalance := pBalances[dioneAssetID]
 				minBalance := minValStake + txFees + minDelStake + txFees + toTransfer + txFees
 				gomega.Expect(pBalance, err).To(gomega.BeNumerically(">=", minBalance))
 			})
@@ -126,12 +126,12 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			// retrieve initial balances
 			pBalances, err := pWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pStartBalance := pBalances[avaxAssetID]
+			pStartBalance := pBalances[dioneAssetID]
 			tests.Outf("{{blue}} P-chain balance before P->X export: %d {{/}}\n", pStartBalance)
 
 			xBalances, err := xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			xStartBalance := xBalances[avaxAssetID]
+			xStartBalance := xBalances[dioneAssetID]
 			tests.Outf("{{blue}} X-chain balance before P->X export: %d {{/}}\n", xStartBalance)
 
 			outputOwner := secp256k1fx.OutputOwners{
@@ -145,14 +145,14 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 				OutputOwners: outputOwner,
 			}
 
-			ginkgo.By("export avax from P to X chain", func() {
+			ginkgo.By("export dione from P to X chain", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				_, err := pWallet.IssueExportTx(
 					xWallet.BlockchainID(),
-					[]*avax.TransferableOutput{
+					[]*dione.TransferableOutput{
 						{
-							Asset: avax.Asset{
-								ID: avaxAssetID,
+							Asset: dione.Asset{
+								ID: dioneAssetID,
 							},
 							Out: output,
 						},
@@ -166,18 +166,18 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			// check balances post export
 			pBalances, err = pWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pPreImportBalance := pBalances[avaxAssetID]
+			pPreImportBalance := pBalances[dioneAssetID]
 			tests.Outf("{{blue}} P-chain balance after P->X export: %d {{/}}\n", pPreImportBalance)
 
 			xBalances, err = xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			xPreImportBalance := xBalances[avaxAssetID]
+			xPreImportBalance := xBalances[dioneAssetID]
 			tests.Outf("{{blue}} X-chain balance after P->X export: %d {{/}}\n", xPreImportBalance)
 
 			gomega.Expect(xPreImportBalance).To(gomega.Equal(xStartBalance)) // import not performed yet
 			gomega.Expect(pPreImportBalance).To(gomega.Equal(pStartBalance - toTransfer - txFees))
 
-			ginkgo.By("import avax from P into X chain", func() {
+			ginkgo.By("import dione from P into X chain", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				_, err := xWallet.IssueImportTx(
 					constants.PlatformChainID,
@@ -191,12 +191,12 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			// check balances post import
 			pBalances, err = pWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pFinalBalance := pBalances[avaxAssetID]
+			pFinalBalance := pBalances[dioneAssetID]
 			tests.Outf("{{blue}} P-chain balance after P->X import: %d {{/}}\n", pFinalBalance)
 
 			xBalances, err = xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			xFinalBalance := xBalances[avaxAssetID]
+			xFinalBalance := xBalances[dioneAssetID]
 			tests.Outf("{{blue}} X-chain balance after P->X import: %d {{/}}\n", xFinalBalance)
 
 			gomega.Expect(xFinalBalance).To(gomega.Equal(xPreImportBalance + toTransfer - txFees)) // import not performed yet

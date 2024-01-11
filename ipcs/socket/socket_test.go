@@ -16,7 +16,7 @@ func TestSocketSendAndReceive(t *testing.T) {
 	var (
 		connCh     chan net.Conn
 		socketName = "/tmp/pipe-test.sock"
-		msg        = append([]byte("avalanche"), make([]byte, 1000000)...)
+		msg        = append([]byte("odyssey"), make([]byte, 1000000)...)
 		msgLen     = int64(len(msg))
 	)
 
