@@ -6,9 +6,9 @@ package message
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 )
 
 var _ InboundMsgBuilder = (*inMsgBuilder)(nil)
@@ -135,18 +135,16 @@ func InboundGetAcceptedFrontier(
 func InboundAcceptedFrontier(
 	chainID ids.ID,
 	requestID uint32,
-	containerIDs []ids.ID,
+	containerID ids.ID,
 	nodeID ids.NodeID,
 ) InboundMessage {
-	containerIDBytes := make([][]byte, len(containerIDs))
-	encodeIDs(containerIDs, containerIDBytes)
 	return &inboundMessage{
 		nodeID: nodeID,
 		op:     AcceptedFrontierOp,
 		message: &p2p.AcceptedFrontier{
-			ChainId:      chainID[:],
-			RequestId:    requestID,
-			ContainerIds: containerIDBytes,
+			ChainId:     chainID[:],
+			RequestId:   requestID,
+			ContainerId: containerID[:],
 		},
 		expiration: mockable.MaxTime,
 	}
@@ -243,22 +241,18 @@ func InboundPullQuery(
 func InboundChits(
 	chainID ids.ID,
 	requestID uint32,
-	preferredContainerIDs []ids.ID,
-	acceptedContainerIDs []ids.ID,
+	preferredID ids.ID,
+	acceptedID ids.ID,
 	nodeID ids.NodeID,
 ) InboundMessage {
-	preferredContainerIDBytes := make([][]byte, len(preferredContainerIDs))
-	encodeIDs(preferredContainerIDs, preferredContainerIDBytes)
-	acceptedContainerIDBytes := make([][]byte, len(acceptedContainerIDs))
-	encodeIDs(acceptedContainerIDs, acceptedContainerIDBytes)
 	return &inboundMessage{
 		nodeID: nodeID,
 		op:     ChitsOp,
 		message: &p2p.Chits{
-			ChainId:               chainID[:],
-			RequestId:             requestID,
-			PreferredContainerIds: preferredContainerIDBytes,
-			AcceptedContainerIds:  acceptedContainerIDBytes,
+			ChainId:     chainID[:],
+			RequestId:   requestID,
+			PreferredId: preferredID[:],
+			AcceptedId:  acceptedID[:],
 		},
 		expiration: mockable.MaxTime,
 	}

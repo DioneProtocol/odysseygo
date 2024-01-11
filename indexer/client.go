@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
-	"github.com/DioneProtocol/odysseygo/utils/json"
-	"github.com/DioneProtocol/odysseygo/utils/rpc"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/rpc"
 )
 
 var _ Client = (*client)(nil)
 
-// Client interface for Odyssey Indexer API Endpoint
+// Client interface for Avalanche Indexer API Endpoint
 type Client interface {
 	// GetContainerRange returns the transactions at index [startIndex], [startIndex+1], ... , [startIndex+n-1]
 	// If [n] == 0, returns an empty response (i.e. null).
@@ -34,7 +34,7 @@ type Client interface {
 	GetContainerByID(ctx context.Context, containerID ids.ID, options ...rpc.Option) (Container, uint64, error)
 }
 
-// Client implementation for Odyssey Indexer API Endpoint
+// Client implementation for Avalanche Indexer API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }
@@ -43,8 +43,8 @@ type client struct {
 // calls.
 // [uri] is the path to make API calls to.
 // For example:
-//   - http://1.2.3.4:9650/ext/index/D/block
-//   - http://1.2.3.4:9650/ext/index/A/tx
+//   - http://1.2.3.4:9650/ext/index/C/block
+//   - http://1.2.3.4:9650/ext/index/X/tx
 func NewClient(uri string) Client {
 	return &client{
 		requester: rpc.NewEndpointRequester(uri),

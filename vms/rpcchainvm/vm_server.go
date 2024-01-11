@@ -18,39 +18,40 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	"github.com/DioneProtocol/odysseygo/api/keystore/gkeystore"
-	"github.com/DioneProtocol/odysseygo/api/metrics"
-	"github.com/DioneProtocol/odysseygo/chains/atomic/gsharedmemory"
-	"github.com/DioneProtocol/odysseygo/database/corruptabledb"
-	"github.com/DioneProtocol/odysseygo/database/manager"
-	"github.com/DioneProtocol/odysseygo/database/rpcdb"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/ids/galiasreader"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common/appsender"
-	"github.com/DioneProtocol/odysseygo/snow/engine/snowman/block"
-	"github.com/DioneProtocol/odysseygo/snow/validators/gvalidators"
-	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/version"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp/gwarp"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
+	"github.com/ava-labs/avalanchego/api/keystore/gkeystore"
+	"github.com/ava-labs/avalanchego/api/metrics"
+	"github.com/ava-labs/avalanchego/chains/atomic/gsharedmemory"
+	"github.com/ava-labs/avalanchego/database/corruptabledb"
+	"github.com/ava-labs/avalanchego/database/manager"
+	"github.com/ava-labs/avalanchego/database/rpcdb"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/ids/galiasreader"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/engine/common"
+	"github.com/ava-labs/avalanchego/snow/engine/common/appsender"
+	"github.com/ava-labs/avalanchego/snow/engine/snowman/block"
+	"github.com/ava-labs/avalanchego/snow/validators/gvalidators"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/crypto/bls"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/ava-labs/avalanchego/version"
+	"github.com/ava-labs/avalanchego/vms/platformvm/warp/gwarp"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/ghttp"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/grpcutils"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/messenger"
 
-	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
-	appsenderpb "github.com/DioneProtocol/odysseygo/proto/pb/appsender"
-	httppb "github.com/DioneProtocol/odysseygo/proto/pb/http"
-	keystorepb "github.com/DioneProtocol/odysseygo/proto/pb/keystore"
-	messengerpb "github.com/DioneProtocol/odysseygo/proto/pb/messenger"
-	rpcdbpb "github.com/DioneProtocol/odysseygo/proto/pb/rpcdb"
-	sharedmemorypb "github.com/DioneProtocol/odysseygo/proto/pb/sharedmemory"
-	validatorstatepb "github.com/DioneProtocol/odysseygo/proto/pb/validatorstate"
-	vmpb "github.com/DioneProtocol/odysseygo/proto/pb/vm"
-	warppb "github.com/DioneProtocol/odysseygo/proto/pb/warp"
+	aliasreaderpb "github.com/ava-labs/avalanchego/proto/pb/aliasreader"
+	appsenderpb "github.com/ava-labs/avalanchego/proto/pb/appsender"
+	httppb "github.com/ava-labs/avalanchego/proto/pb/http"
+	keystorepb "github.com/ava-labs/avalanchego/proto/pb/keystore"
+	messengerpb "github.com/ava-labs/avalanchego/proto/pb/messenger"
+	rpcdbpb "github.com/ava-labs/avalanchego/proto/pb/rpcdb"
+	sharedmemorypb "github.com/ava-labs/avalanchego/proto/pb/sharedmemory"
+	validatorstatepb "github.com/ava-labs/avalanchego/proto/pb/validatorstate"
+	vmpb "github.com/ava-labs/avalanchego/proto/pb/vm"
+	warppb "github.com/ava-labs/avalanchego/proto/pb/warp"
 )
 
 var (
@@ -69,12 +70,13 @@ type VMServer struct {
 	// If nil, the underlying VM doesn't implement the interface.
 	bVM block.BuildBlockWithContextChainVM
 	// If nil, the underlying VM doesn't implement the interface.
-	hVM block.HeightIndexedChainVM
-	// If nil, the underlying VM doesn't implement the interface.
 	ssVM block.StateSyncableVM
+
+	allowShutdown *utils.Atomic[bool]
 
 	processMetrics prometheus.Gatherer
 	dbManager      manager.Manager
+	log            logging.Logger
 
 	serverCloser grpcutils.ServerCloser
 	connCloser   wrappers.Closer
@@ -84,15 +86,14 @@ type VMServer struct {
 }
 
 // NewServer returns a vm instance connected to a remote vm instance
-func NewServer(vm block.ChainVM) *VMServer {
+func NewServer(vm block.ChainVM, allowShutdown *utils.Atomic[bool]) *VMServer {
 	bVM, _ := vm.(block.BuildBlockWithContextChainVM)
-	hVM, _ := vm.(block.HeightIndexedChainVM)
 	ssVM, _ := vm.(block.StateSyncableVM)
 	return &VMServer{
-		vm:   vm,
-		bVM:  bVM,
-		hVM:  hVM,
-		ssVM: ssVM,
+		vm:            vm,
+		bVM:           bVM,
+		ssVM:          ssVM,
+		allowShutdown: allowShutdown,
 	}
 }
 
@@ -113,15 +114,15 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 	if err != nil {
 		return nil, err
 	}
-	aChainID, err := ids.ToID(req.AChainId)
+	xChainID, err := ids.ToID(req.XChainId)
 	if err != nil {
 		return nil, err
 	}
-	dChainID, err := ids.ToID(req.DChainId)
+	cChainID, err := ids.ToID(req.CChainId)
 	if err != nil {
 		return nil, err
 	}
-	dioneAssetID, err := ids.ToID(req.DioneAssetId)
+	avaxAssetID, err := ids.ToID(req.AvaxAssetId)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +185,16 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 	}
 	vm.dbManager = dbManager
 
+	// TODO: Allow the logger to be configured by the client
+	vm.log = logging.NewLogger(
+		fmt.Sprintf("<%s Chain>", chainID),
+		logging.NewWrappedCore(
+			logging.Info,
+			originalStderr,
+			logging.Colors.ConsoleEncoder(),
+		),
+	)
+
 	clientConn, err := grpcutils.Dial(
 		req.ServerAddr,
 		grpcutils.WithChainUnaryInterceptor(grpcClientMetrics.UnaryClientInterceptor()),
@@ -229,19 +240,11 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 		NodeID:    nodeID,
 		PublicKey: publicKey,
 
-		AChainID:     aChainID,
-		DChainID:     dChainID,
-		DIONEAssetID: dioneAssetID,
+		XChainID:    xChainID,
+		CChainID:    cChainID,
+		AVAXAssetID: avaxAssetID,
 
-		// TODO: Allow the logger to be configured by the client
-		Log: logging.NewLogger(
-			fmt.Sprintf("<%s Chain>", chainID),
-			logging.NewWrappedCore(
-				logging.Info,
-				originalStderr,
-				logging.Colors.ConsoleEncoder(),
-			),
-		),
+		Log:          vm.log,
 		Keystore:     keystoreClient,
 		SharedMemory: sharedMemoryClient,
 		BCLookup:     bcLookupClient,
@@ -317,6 +320,7 @@ func (vm *VMServer) SetState(ctx context.Context, stateReq *vmpb.SetStateRequest
 }
 
 func (vm *VMServer) Shutdown(ctx context.Context, _ *emptypb.Empty) (*emptypb.Empty, error) {
+	vm.allowShutdown.Set(true)
 	if vm.closed == nil {
 		return &emptypb.Empty{}, nil
 	}
@@ -415,11 +419,11 @@ func (vm *VMServer) BuildBlock(ctx context.Context, req *vmpb.BuildBlockRequest)
 		blk snowman.Block
 		err error
 	)
-	if vm.bVM == nil || req.OChainHeight == nil {
+	if vm.bVM == nil || req.PChainHeight == nil {
 		blk, err = vm.vm.BuildBlock(ctx)
 	} else {
 		blk, err = vm.bVM.BuildBlockWithContext(ctx, &block.Context{
-			OChainHeight: *req.OChainHeight,
+			PChainHeight: *req.PChainHeight,
 		})
 	}
 	if err != nil {
@@ -652,6 +656,7 @@ func (vm *VMServer) GetAncestors(ctx context.Context, req *vmpb.GetAncestorsRequ
 
 	blocks, err := block.GetAncestors(
 		ctx,
+		vm.log,
 		vm.vm,
 		blkID,
 		maxBlksNum,
@@ -683,13 +688,7 @@ func (vm *VMServer) BatchedParseBlock(
 }
 
 func (vm *VMServer) VerifyHeightIndex(ctx context.Context, _ *emptypb.Empty) (*vmpb.VerifyHeightIndexResponse, error) {
-	var err error
-	if vm.hVM != nil {
-		err = vm.hVM.VerifyHeightIndex(ctx)
-	} else {
-		err = block.ErrHeightIndexedVMNotImplemented
-	}
-
+	err := vm.vm.VerifyHeightIndex(ctx)
 	return &vmpb.VerifyHeightIndexResponse{
 		Err: errorToErrEnum[err],
 	}, errorToRPCError(err)
@@ -699,16 +698,7 @@ func (vm *VMServer) GetBlockIDAtHeight(
 	ctx context.Context,
 	req *vmpb.GetBlockIDAtHeightRequest,
 ) (*vmpb.GetBlockIDAtHeightResponse, error) {
-	var (
-		blkID ids.ID
-		err   error
-	)
-	if vm.hVM != nil {
-		blkID, err = vm.hVM.GetBlockIDAtHeight(ctx, req.Height)
-	} else {
-		err = block.ErrHeightIndexedVMNotImplemented
-	}
-
+	blkID, err := vm.vm.GetBlockIDAtHeight(ctx, req.Height)
 	return &vmpb.GetBlockIDAtHeightResponse{
 		BlkId: blkID[:],
 		Err:   errorToErrEnum[err],
@@ -843,7 +833,7 @@ func (vm *VMServer) BlockVerify(ctx context.Context, req *vmpb.BlockVerifyReques
 		return nil, err
 	}
 
-	if req.OChainHeight == nil {
+	if req.PChainHeight == nil {
 		err = blk.Verify(ctx)
 	} else {
 		blkWithCtx, ok := blk.(block.WithVerifyContext)
@@ -851,7 +841,7 @@ func (vm *VMServer) BlockVerify(ctx context.Context, req *vmpb.BlockVerifyReques
 			return nil, fmt.Errorf("%w but got %T", errExpectedBlockWithVerifyContext, blk)
 		}
 		blockCtx := &block.Context{
-			OChainHeight: *req.OChainHeight,
+			PChainHeight: *req.PChainHeight,
 		}
 		err = blkWithCtx.VerifyWithContext(ctx, blockCtx)
 	}

@@ -9,10 +9,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/snow/choices"
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/snow/choices"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
 )
 
 var _ Block = (*preForkBlock)(nil)
@@ -35,6 +35,28 @@ func (*preForkBlock) acceptOuterBlk() error {
 
 func (b *preForkBlock) acceptInnerBlk(ctx context.Context) error {
 	return b.Block.Accept(ctx)
+}
+
+func (b *preForkBlock) Status() choices.Status {
+	forkHeight, err := b.vm.getForkHeight()
+	if err == database.ErrNotFound {
+		return b.Block.Status()
+	}
+	if err != nil {
+		// TODO: Once `Status()` can return an error, we should return the error
+		// here.
+		b.vm.ctx.Log.Error("unexpected error looking up fork height",
+			zap.Error(err),
+		)
+		return b.Block.Status()
+	}
+
+	// The fork has occurred earlier than this block, so preForkBlocks are all
+	// invalid.
+	if b.Height() >= forkHeight {
+		return choices.Rejected
+	}
+	return b.Block.Status()
 }
 
 func (b *preForkBlock) Verify(ctx context.Context) error {
@@ -79,10 +101,6 @@ func (b *preForkBlock) verifyPreForkChild(ctx context.Context, child *preForkBlo
 			return err
 		}
 
-		if err := b.verifyIsPreForkBlock(); err != nil {
-			return err
-		}
-
 		b.vm.ctx.Log.Debug("allowing pre-fork block after the fork time",
 			zap.String("reason", "parent is an oracle block"),
 			zap.Stringer("blkID", b.ID()),
@@ -98,26 +116,22 @@ func (b *preForkBlock) verifyPostForkChild(ctx context.Context, child *postForkB
 		return err
 	}
 
-	if err := b.verifyIsPreForkBlock(); err != nil {
-		return err
-	}
-
 	childID := child.ID()
-	childOChainHeight := child.OChainHeight()
-	currentOChainHeight, err := b.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
+	childPChainHeight := child.PChainHeight()
+	currentPChainHeight, err := b.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
 	if err != nil {
 		b.vm.ctx.Log.Error("block verification failed",
-			zap.String("reason", "failed to get current O-Chain height"),
+			zap.String("reason", "failed to get current P-Chain height"),
 			zap.Stringer("blkID", childID),
 			zap.Error(err),
 		)
 		return err
 	}
-	if childOChainHeight > currentOChainHeight {
-		return errOChainHeightNotReached
+	if childPChainHeight > currentPChainHeight {
+		return errPChainHeightNotReached
 	}
-	if childOChainHeight < b.vm.minimumOChainHeight {
-		return errOChainHeightTooLow
+	if childPChainHeight < b.vm.minimumPChainHeight {
+		return errPChainHeightTooLow
 	}
 
 	// Make sure [b] is the parent of [child]'s inner block
@@ -189,10 +203,15 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 		newTimestamp = parentTimestamp
 	}
 
-	// The child's O-Chain height is proposed as the optimal O-Chain height that
+	// The child's P-Chain height is proposed as the optimal P-Chain height that
 	// is at least the minimum height
-	oChainHeight, err := b.vm.optimalOChainHeight(ctx, b.vm.minimumOChainHeight)
+	pChainHeight, err := b.vm.optimalPChainHeight(ctx, b.vm.minimumPChainHeight)
 	if err != nil {
+		b.vm.ctx.Log.Error("unexpected build block failure",
+			zap.String("reason", "failed to calculate optimal P-chain height"),
+			zap.Stringer("parentID", parentID),
+			zap.Error(err),
+		)
 		return nil, err
 	}
 
@@ -204,7 +223,7 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 	statelessBlock, err := block.BuildUnsigned(
 		parentID,
 		newTimestamp,
-		oChainHeight,
+		pChainHeight,
 		innerBlock.Bytes(),
 	)
 	if err != nil {
@@ -229,29 +248,6 @@ func (b *preForkBlock) buildChild(ctx context.Context) (Block, error) {
 	return blk, nil
 }
 
-func (*preForkBlock) oChainHeight(context.Context) (uint64, error) {
+func (*preForkBlock) pChainHeight(context.Context) (uint64, error) {
 	return 0, nil
-}
-
-func (b *preForkBlock) verifyIsPreForkBlock() error {
-	if status := b.Status(); status == choices.Accepted {
-		_, err := b.vm.GetLastAccepted()
-		if err == nil {
-			// If this block is accepted and it was a preForkBlock, then there
-			// shouldn't have been an accepted postForkBlock yet. If there was
-			// an accepted postForkBlock, then this block wasn't a preForkBlock.
-			return errUnexpectedBlockType
-		}
-		if err != database.ErrNotFound {
-			// If an unexpected error was returned - propagate that that
-			// error.
-			return err
-		}
-	} else if _, contains := b.vm.Tree.Get(b.Block); contains {
-		// If this block is a preForkBlock, then it's inner block shouldn't have
-		// been registered into the inner block tree. If this block was
-		// registered into the inner block tree, then it wasn't a preForkBlock.
-		return errUnexpectedBlockType
-	}
-	return nil
 }

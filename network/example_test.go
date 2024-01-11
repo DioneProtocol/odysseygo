@@ -10,16 +10,16 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/genesis"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/snow/networking/router"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/genesis"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/snow/networking/router"
+	"github.com/ava-labs/avalanchego/snow/validators"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var _ router.ExternalHandler = (*testExternalHandler)(nil)
@@ -93,7 +93,7 @@ func ExampleNewTestNetwork() {
 
 	network, err := NewTestNetwork(
 		log,
-		constants.TestnetID,
+		constants.FujiID,
 		validators,
 		trackedSubnets,
 		handler,
@@ -108,30 +108,9 @@ func ExampleNewTestNetwork() {
 
 	// We need to initially connect to some nodes in the network before peer
 	// gossip will enable connecting to all the remaining nodes in the network.
-	beaconIPs, beaconIDs := genesis.SampleBeacons(constants.TestnetID, 5)
-	for i, beaconIDStr := range beaconIDs {
-		beaconID, err := ids.NodeIDFromString(beaconIDStr)
-		if err != nil {
-			log.Fatal(
-				"failed to parse beaconID",
-				zap.String("beaconID", beaconIDStr),
-				zap.Error(err),
-			)
-			return
-		}
-
-		beaconIPStr := beaconIPs[i]
-		ipPort, err := ips.ToIPPort(beaconIPStr)
-		if err != nil {
-			log.Fatal(
-				"failed to parse beaconIP",
-				zap.String("beaconIP", beaconIPStr),
-				zap.Error(err),
-			)
-			return
-		}
-
-		network.ManuallyTrack(beaconID, ipPort)
+	bootstrappers := genesis.SampleBootstrappers(constants.FujiID, 5)
+	for _, bootstrapper := range bootstrappers {
+		network.ManuallyTrack(bootstrapper.ID, ips.IPPort(bootstrapper.IP))
 	}
 
 	// Typically network.StartClose() should be called based on receiving a

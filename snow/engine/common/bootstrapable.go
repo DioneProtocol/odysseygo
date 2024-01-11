@@ -6,7 +6,7 @@ package common
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 type BootstrapableEngine interface {

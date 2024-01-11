@@ -4,11 +4,11 @@
 package x
 
 import (
-	"github.com/DioneProtocol/odysseygo/vms/alpha/blocks"
-	"github.com/DioneProtocol/odysseygo/vms/alpha/fxs"
-	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/vms/avm/block"
+	"github.com/ava-labs/avalanchego/vms/avm/fxs"
+	"github.com/ava-labs/avalanchego/vms/nftfx"
+	"github.com/ava-labs/avalanchego/vms/propertyfx"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 )
 
 const (
@@ -18,11 +18,11 @@ const (
 )
 
 // Parser to support serialization and deserialization
-var Parser blocks.Parser
+var Parser block.Parser
 
 func init() {
 	var err error
-	Parser, err = blocks.NewParser([]fxs.Fx{
+	Parser, err = block.NewParser([]fxs.Fx{
 		&secp256k1fx.Fx{},
 		&nftfx.Fx{},
 		&propertyfx.Fx{},

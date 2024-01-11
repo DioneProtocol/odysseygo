@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/exp/maps"
 
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/json"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
 )
 
 // The minimum capacity of a set
@@ -22,6 +22,13 @@ var _ stdjson.Marshaler = (*Set[int])(nil)
 
 // Set is a set of elements.
 type Set[T comparable] map[T]struct{}
+
+// Of returns a Set initialized with [elts]
+func Of[T comparable](elts ...T) Set[T] {
+	s := NewSet[T](len(elts))
+	s.Add(elts...)
+	return s
+}
 
 // Return a new set with initial capacity [size].
 // More or less than [size] elements can be added to this set.

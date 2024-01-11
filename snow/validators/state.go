@@ -7,25 +7,25 @@ import (
 	"context"
 	"sync"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 var _ State = (*lockedState)(nil)
 
 // State allows the lookup of validator sets on specified subnets at the
-// requested O-chain height.
+// requested P-chain height.
 type State interface {
 	// GetMinimumHeight returns the minimum height of the block still in the
 	// proposal window.
 	GetMinimumHeight(context.Context) (uint64, error)
-	// GetCurrentHeight returns the current height of the O-chain.
+	// GetCurrentHeight returns the current height of the P-chain.
 	GetCurrentHeight(context.Context) (uint64, error)
 
 	// GetSubnetID returns the subnetID of the provided chain.
 	GetSubnetID(ctx context.Context, chainID ids.ID) (ids.ID, error)
 
 	// GetValidatorSet returns the validators of the provided subnet at the
-	// requested O-chain height.
+	// requested P-chain height.
 	// The returned map should not be modified.
 	GetValidatorSet(
 		ctx context.Context,

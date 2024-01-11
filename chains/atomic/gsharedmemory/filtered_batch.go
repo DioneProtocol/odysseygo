@@ -4,9 +4,9 @@
 package gsharedmemory
 
 import (
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/utils/set"
 
-	sharedmemorypb "github.com/DioneProtocol/odysseygo/proto/pb/sharedmemory"
+	sharedmemorypb "github.com/ava-labs/avalanchego/proto/pb/sharedmemory"
 )
 
 type filteredBatch struct {

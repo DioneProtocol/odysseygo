@@ -6,7 +6,6 @@ package peer
 import (
 	"bufio"
 	"context"
-	"crypto/x509"
 	"errors"
 	"io"
 	"math"
@@ -17,16 +16,17 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/proto/pb/p2p"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
-	"github.com/DioneProtocol/odysseygo/utils/json"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/proto/pb/p2p"
+	"github.com/ava-labs/avalanchego/staking"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/json"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/utils/wrappers"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var (
@@ -43,7 +43,7 @@ type Peer interface {
 
 	// Cert returns the certificate that the remote peer is using to
 	// authenticate their messages.
-	Cert() *x509.Certificate
+	Cert() *staking.Certificate
 
 	// LastSent returns the last time a message was sent to the peer.
 	LastSent() time.Time
@@ -112,7 +112,7 @@ type peer struct {
 
 	// [cert] is this peer's certificate, specifically the leaf of the
 	// certificate chain they provided.
-	cert *x509.Certificate
+	cert *staking.Certificate
 
 	// node ID of this peer.
 	id ids.NodeID
@@ -176,7 +176,7 @@ type peer struct {
 func Start(
 	config *Config,
 	conn net.Conn,
-	cert *x509.Certificate,
+	cert *staking.Certificate,
 	id ids.NodeID,
 	messageQueue MessageQueue,
 ) Peer {
@@ -207,7 +207,7 @@ func (p *peer) ID() ids.NodeID {
 	return p.id
 }
 
-func (p *peer) Cert() *x509.Certificate {
+func (p *peer) Cert() *staking.Certificate {
 	return p.cert
 }
 
@@ -848,7 +848,11 @@ func (p *peer) handleVersion(msg *p2p.Version) {
 	}
 
 	myTime := p.Clock.Unix()
-	if math.Abs(float64(msg.MyTime)-float64(myTime)) > p.MaxClockDifference.Seconds() {
+	clockDifference := math.Abs(float64(msg.MyTime) - float64(myTime))
+
+	p.Metrics.ClockSkew.Observe(clockDifference)
+
+	if clockDifference > p.MaxClockDifference.Seconds() {
 		if p.Beacons.Contains(p.id) {
 			p.Log.Warn("beacon reports out of sync time",
 				zap.Stringer("nodeID", p.id),
@@ -1005,7 +1009,7 @@ func (p *peer) handlePeerList(msg *p2p.PeerList) {
 	// the peers this peer told us about
 	discoveredIPs := make([]*ips.ClaimedIPPort, len(msg.ClaimedIpPorts))
 	for i, claimedIPPort := range msg.ClaimedIpPorts {
-		tlsCert, err := x509.ParseCertificate(claimedIPPort.X509Certificate)
+		tlsCert, err := staking.ParseCertificate(claimedIPPort.X509Certificate)
 		if err != nil {
 			p.Log.Debug("message with invalid field",
 				zap.Stringer("nodeID", p.id),

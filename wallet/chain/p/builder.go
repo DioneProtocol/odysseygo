@@ -10,17 +10,17 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/utils"
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/utils/math"
-	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/stakeable"
-	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
-	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/utils"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/utils/math"
+	"github.com/ava-labs/avalanchego/utils/set"
+	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
+	"github.com/ava-labs/avalanchego/vms/platformvm/stakeable"
+	"github.com/ava-labs/avalanchego/vms/platformvm/txs"
+	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary/common"
 )
 
 var (
@@ -33,7 +33,7 @@ var (
 	_ Builder = (*builder)(nil)
 )
 
-// Builder provides a convenient interface for building unsigned O-chain
+// Builder provides a convenient interface for building unsigned P-chain
 // transactions.
 type Builder interface {
 	// GetBalance calculates the amount of each asset that this builder has
@@ -51,14 +51,14 @@ type Builder interface {
 		options ...common.Option,
 	) (map[ids.ID]uint64, error)
 
-	// NewBaseTx creates a new simple value transfer. Because the O-chain
+	// NewBaseTx creates a new simple value transfer. Because the P-chain
 	// doesn't intend for balance transfers to occur, this method is expensive
 	// and abuses the creation of subnets.
 	//
 	// - [outputs] specifies all the recipients and amounts that should be sent
 	//   from this transaction.
 	NewBaseTx(
-		outputs []*dione.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (*txs.CreateSubnetTx, error)
 
@@ -68,9 +68,13 @@ type Builder interface {
 	//   startTime, endTime, stake weight, and nodeID.
 	// - [rewardsOwner] specifies the owner of all the rewards this validator
 	//   may accrue during its validation period.
+	// - [shares] specifies the fraction (out of 1,000,000) that this validator
+	//   will take from delegation rewards. If 1,000,000 is provided, 100% of
+	//   the delegation reward will be sent to the validator's [rewardsOwner].
 	NewAddValidatorTx(
 		vdr *txs.Validator,
 		rewardsOwner *secp256k1fx.OutputOwners,
+		shares uint32,
 		options ...common.Option,
 	) (*txs.AddValidatorTx, error)
 
@@ -90,6 +94,19 @@ type Builder interface {
 		subnetID ids.ID,
 		options ...common.Option,
 	) (*txs.RemoveSubnetValidatorTx, error)
+
+	// NewAddDelegatorTx creates a new delegator to a validator on the primary
+	// network.
+	//
+	// - [vdr] specifies all the details of the delegation period such as the
+	//   startTime, endTime, stake weight, and validator's nodeID.
+	// - [rewardsOwner] specifies the owner of all the rewards this delegator
+	//   may accrue at the end of its delegation period.
+	NewAddDelegatorTx(
+		vdr *txs.Validator,
+		rewardsOwner *secp256k1fx.OutputOwners,
+		options ...common.Option,
+	) (*txs.AddDelegatorTx, error)
 
 	// NewCreateChainTx creates a new chain in the named subnet.
 	//
@@ -135,7 +152,7 @@ type Builder interface {
 	// - [outputs] specifies the outputs to send to the [chainID].
 	NewExportTx(
 		chainID ids.ID,
-		outputs []*dione.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (*txs.ExportTx, error)
 
@@ -156,12 +173,17 @@ type Builder interface {
 	//   consumed from the reward pool per year.
 	// - [minValidatorStake] is the minimum amount of funds required to become a
 	//   validator.
+	// - [maxValidatorStake] is the maximum amount of funds a single validator
+	//   can be allocated, including delegated funds.
 	// - [minStakeDuration] is the minimum number of seconds a staker can stake
 	//   for.
 	// - [maxStakeDuration] is the maximum number of seconds a staker can stake
 	//   for.
+	// - [minValidatorStake] is the minimum amount of funds required to become a
+	//   delegator.
 	// - [maxValidatorWeightFactor] is the factor which calculates the maximum
-	//   amount a validator can receive.
+	//   amount of delegation a validator can receive. A value of 1 effectively
+	//   disables delegation.
 	// - [uptimeRequirement] is the minimum percentage a validator must be
 	//   online and responsive to receive a reward.
 	NewTransformSubnetTx(
@@ -172,8 +194,11 @@ type Builder interface {
 		minConsumptionRate uint64,
 		maxConsumptionRate uint64,
 		minValidatorStake uint64,
+		maxValidatorStake uint64,
 		minStakeDuration time.Duration,
 		maxStakeDuration time.Duration,
+		minDelegationFee uint32,
+		minDelegatorStake uint64,
 		maxValidatorWeightFactor byte,
 		uptimeRequirement uint32,
 		options ...common.Option,
@@ -189,20 +214,42 @@ type Builder interface {
 	// - [assetID] specifies the asset to stake.
 	// - [validationRewardsOwner] specifies the owner of all the rewards this
 	//   validator earns for its validation period.
+	// - [delegationRewardsOwner] specifies the owner of all the rewards this
+	//   validator earns for delegations during its validation period.
+	// - [shares] specifies the fraction (out of 1,000,000) that this validator
+	//   will take from delegation rewards. If 1,000,000 is provided, 100% of
+	//   the delegation reward will be sent to the validator's [rewardsOwner].
 	NewAddPermissionlessValidatorTx(
 		vdr *txs.SubnetValidator,
 		signer signer.Signer,
 		assetID ids.ID,
 		validationRewardsOwner *secp256k1fx.OutputOwners,
+		delegationRewardsOwner *secp256k1fx.OutputOwners,
+		shares uint32,
 		options ...common.Option,
 	) (*txs.AddPermissionlessValidatorTx, error)
+
+	// NewAddPermissionlessDelegatorTx creates a new delegator of the specified
+	// subnet on the specified nodeID.
+	//
+	// - [vdr] specifies all the details of the delegation period such as the
+	//   subnetID, startTime, endTime, stake weight, and nodeID.
+	// - [assetID] specifies the asset to stake.
+	// - [rewardsOwner] specifies the owner of all the rewards this delegator
+	//   earns during its delegation period.
+	NewAddPermissionlessDelegatorTx(
+		vdr *txs.SubnetValidator,
+		assetID ids.ID,
+		rewardsOwner *secp256k1fx.OutputOwners,
+		options ...common.Option,
+	) (*txs.AddPermissionlessDelegatorTx, error)
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// O-chain transactions.
+// P-chain transactions.
 type BuilderBackend interface {
 	Context
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*dione.UTXO, error)
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
 	GetTx(ctx stdcontext.Context, txID ids.ID) (*txs.Tx, error)
 }
 
@@ -228,7 +275,7 @@ func (b *builder) GetBalance(
 	options ...common.Option,
 ) (map[ids.ID]uint64, error) {
 	ops := common.NewOptions(options)
-	return b.getBalance(constants.OmegaChainID, ops)
+	return b.getBalance(constants.PlatformChainID, ops)
 }
 
 func (b *builder) GetImportableBalance(
@@ -240,11 +287,11 @@ func (b *builder) GetImportableBalance(
 }
 
 func (b *builder) NewBaseTx(
-	outputs []*dione.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*txs.CreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -262,12 +309,12 @@ func (b *builder) NewBaseTx(
 		return nil, err
 	}
 	outputs = append(outputs, changeOutputs...)
-	dione.SortTransferableOutputs(outputs, txs.Codec) // sort the outputs
+	avax.SortTransferableOutputs(outputs, txs.Codec) // sort the outputs
 
 	return &txs.CreateSubnetTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -279,14 +326,15 @@ func (b *builder) NewBaseTx(
 func (b *builder) NewAddValidatorTx(
 	vdr *txs.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
+	shares uint32,
 	options ...common.Option,
 ) (*txs.AddValidatorTx, error) {
-	dioneAssetID := b.backend.DIONEAssetID()
+	avaxAssetID := b.backend.AVAXAssetID()
 	toBurn := map[ids.ID]uint64{
-		dioneAssetID: b.backend.AddPrimaryNetworkValidatorFee(),
+		avaxAssetID: b.backend.AddPrimaryNetworkValidatorFee(),
 	}
 	toStake := map[ids.ID]uint64{
-		dioneAssetID: vdr.Wght,
+		avaxAssetID: vdr.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
@@ -296,16 +344,17 @@ func (b *builder) NewAddValidatorTx(
 
 	utils.Sort(rewardsOwner.Addrs)
 	return &txs.AddValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
 		}},
-		Validator:    *vdr,
-		StakeOuts:    stakeOutputs,
-		RewardsOwner: rewardsOwner,
+		Validator:        *vdr,
+		StakeOuts:        stakeOutputs,
+		RewardsOwner:     rewardsOwner,
+		DelegationShares: shares,
 	}, nil
 }
 
@@ -314,7 +363,7 @@ func (b *builder) NewAddSubnetValidatorTx(
 	options ...common.Option,
 ) (*txs.AddSubnetValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.AddSubnetValidatorFee(),
+		b.backend.AVAXAssetID(): b.backend.AddSubnetValidatorFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -329,9 +378,9 @@ func (b *builder) NewAddSubnetValidatorTx(
 	}
 
 	return &txs.AddSubnetValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -347,7 +396,7 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 	options ...common.Option,
 ) (*txs.RemoveSubnetValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.BaseTxFee(),
+		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -362,9 +411,9 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 	}
 
 	return &txs.RemoveSubnetValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -372,6 +421,39 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 		Subnet:     subnetID,
 		NodeID:     nodeID,
 		SubnetAuth: subnetAuth,
+	}, nil
+}
+
+func (b *builder) NewAddDelegatorTx(
+	vdr *txs.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	options ...common.Option,
+) (*txs.AddDelegatorTx, error) {
+	avaxAssetID := b.backend.AVAXAssetID()
+	toBurn := map[ids.ID]uint64{
+		avaxAssetID: b.backend.AddPrimaryNetworkDelegatorFee(),
+	}
+	toStake := map[ids.ID]uint64{
+		b.backend.AVAXAssetID(): vdr.Wght,
+	}
+	ops := common.NewOptions(options)
+	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
+	if err != nil {
+		return nil, err
+	}
+
+	utils.Sort(rewardsOwner.Addrs)
+	return &txs.AddDelegatorTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+			NetworkID:    b.backend.NetworkID(),
+			BlockchainID: constants.PlatformChainID,
+			Ins:          inputs,
+			Outs:         baseOutputs,
+			Memo:         ops.Memo(),
+		}},
+		Validator:              *vdr,
+		StakeOuts:              stakeOutputs,
+		DelegationRewardsOwner: rewardsOwner,
 	}, nil
 }
 
@@ -384,7 +466,7 @@ func (b *builder) NewCreateChainTx(
 	options ...common.Option,
 ) (*txs.CreateChainTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.CreateBlockchainTxFee(),
+		b.backend.AVAXAssetID(): b.backend.CreateBlockchainTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -400,9 +482,9 @@ func (b *builder) NewCreateChainTx(
 
 	utils.Sort(fxIDs)
 	return &txs.CreateChainTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -421,7 +503,7 @@ func (b *builder) NewCreateSubnetTx(
 	options ...common.Option,
 ) (*txs.CreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -432,9 +514,9 @@ func (b *builder) NewCreateSubnetTx(
 
 	utils.Sort(owner.Addrs)
 	return &txs.CreateSubnetTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -457,10 +539,10 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		dioneAssetID    = b.backend.DIONEAssetID()
+		avaxAssetID     = b.backend.AVAXAssetID()
 		txFee           = b.backend.BaseTxFee()
 
-		importedInputs  = make([]*dione.TransferableInput, 0, len(utxos))
+		importedInputs  = make([]*avax.TransferableInput, 0, len(utxos))
 		importedAmounts = make(map[ids.ID]uint64)
 	)
 	// Iterate over the unlocked UTXOs
@@ -476,7 +558,7 @@ func (b *builder) NewImportTx(
 			continue
 		}
 
-		importedInputs = append(importedInputs, &dione.TransferableInput{
+		importedInputs = append(importedInputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &secp256k1fx.TransferInput{
@@ -504,16 +586,16 @@ func (b *builder) NewImportTx(
 	}
 
 	var (
-		inputs        []*dione.TransferableInput
-		outputs       = make([]*dione.TransferableOutput, 0, len(importedAmounts))
-		importedDIONE = importedAmounts[dioneAssetID]
+		inputs       []*avax.TransferableInput
+		outputs      = make([]*avax.TransferableOutput, 0, len(importedAmounts))
+		importedAVAX = importedAmounts[avaxAssetID]
 	)
-	if importedDIONE > txFee {
-		importedAmounts[dioneAssetID] -= txFee
+	if importedAVAX > txFee {
+		importedAmounts[avaxAssetID] -= txFee
 	} else {
-		if importedDIONE < txFee { // imported amount goes toward paying tx fee
+		if importedAVAX < txFee { // imported amount goes toward paying tx fee
 			toBurn := map[ids.ID]uint64{
-				dioneAssetID: txFee - importedDIONE,
+				avaxAssetID: txFee - importedAVAX,
 			}
 			toStake := map[ids.ID]uint64{}
 			var err error
@@ -522,12 +604,12 @@ func (b *builder) NewImportTx(
 				return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 			}
 		}
-		delete(importedAmounts, dioneAssetID)
+		delete(importedAmounts, avaxAssetID)
 	}
 
 	for assetID, amount := range importedAmounts {
-		outputs = append(outputs, &dione.TransferableOutput{
-			Asset: dione.Asset{ID: assetID},
+		outputs = append(outputs, &avax.TransferableOutput{
+			Asset: avax.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt:          amount,
 				OutputOwners: *to,
@@ -535,11 +617,11 @@ func (b *builder) NewImportTx(
 		})
 	}
 
-	dione.SortTransferableOutputs(outputs, txs.Codec) // sort imported outputs
+	avax.SortTransferableOutputs(outputs, txs.Codec) // sort imported outputs
 	return &txs.ImportTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -551,11 +633,11 @@ func (b *builder) NewImportTx(
 
 func (b *builder) NewExportTx(
 	chainID ids.ID,
-	outputs []*dione.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*txs.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.BaseTxFee(),
+		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -573,11 +655,11 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	dione.SortTransferableOutputs(outputs, txs.Codec) // sort exported outputs
+	avax.SortTransferableOutputs(outputs, txs.Codec) // sort exported outputs
 	return &txs.ExportTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         changeOutputs,
 			Memo:         ops.Memo(),
@@ -595,15 +677,18 @@ func (b *builder) NewTransformSubnetTx(
 	minConsumptionRate uint64,
 	maxConsumptionRate uint64,
 	minValidatorStake uint64,
+	maxValidatorStake uint64,
 	minStakeDuration time.Duration,
 	maxStakeDuration time.Duration,
+	minDelegationFee uint32,
+	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
 	uptimeRequirement uint32,
 	options ...common.Option,
 ) (*txs.TransformSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.DIONEAssetID(): b.backend.TransformSubnetTxFee(),
-		assetID:                  maxSupply - initialSupply,
+		b.backend.AVAXAssetID(): b.backend.TransformSubnetTxFee(),
+		assetID:                 maxSupply - initialSupply,
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -618,9 +703,9 @@ func (b *builder) NewTransformSubnetTx(
 	}
 
 	return &txs.TransformSubnetTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -632,8 +717,11 @@ func (b *builder) NewTransformSubnetTx(
 		MinConsumptionRate:       minConsumptionRate,
 		MaxConsumptionRate:       maxConsumptionRate,
 		MinValidatorStake:        minValidatorStake,
+		MaxValidatorStake:        maxValidatorStake,
 		MinStakeDuration:         uint32(minStakeDuration / time.Second),
 		MaxStakeDuration:         uint32(maxStakeDuration / time.Second),
+		MinDelegationFee:         minDelegationFee,
+		MinDelegatorStake:        minDelegatorStake,
 		MaxValidatorWeightFactor: maxValidatorWeightFactor,
 		UptimeRequirement:        uptimeRequirement,
 		SubnetAuth:               subnetAuth,
@@ -645,14 +733,16 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 	signer signer.Signer,
 	assetID ids.ID,
 	validationRewardsOwner *secp256k1fx.OutputOwners,
+	delegationRewardsOwner *secp256k1fx.OutputOwners,
+	shares uint32,
 	options ...common.Option,
 ) (*txs.AddPermissionlessValidatorTx, error) {
-	dioneAssetID := b.backend.DIONEAssetID()
+	avaxAssetID := b.backend.AVAXAssetID()
 	toBurn := map[ids.ID]uint64{}
 	if vdr.Subnet == constants.PrimaryNetworkID {
-		toBurn[dioneAssetID] = b.backend.AddPrimaryNetworkValidatorFee()
+		toBurn[avaxAssetID] = b.backend.AddPrimaryNetworkValidatorFee()
 	} else {
-		toBurn[dioneAssetID] = b.backend.AddSubnetValidatorFee()
+		toBurn[avaxAssetID] = b.backend.AddSubnetValidatorFee()
 	}
 	toStake := map[ids.ID]uint64{
 		assetID: vdr.Wght,
@@ -664,10 +754,11 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 	}
 
 	utils.Sort(validationRewardsOwner.Addrs)
+	utils.Sort(delegationRewardsOwner.Addrs)
 	return &txs.AddPermissionlessValidatorTx{
-		BaseTx: txs.BaseTx{BaseTx: dione.BaseTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.OmegaChainID,
+			BlockchainID: constants.PlatformChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
@@ -677,6 +768,46 @@ func (b *builder) NewAddPermissionlessValidatorTx(
 		Signer:                signer,
 		StakeOuts:             stakeOutputs,
 		ValidatorRewardsOwner: validationRewardsOwner,
+		DelegatorRewardsOwner: delegationRewardsOwner,
+		DelegationShares:      shares,
+	}, nil
+}
+
+func (b *builder) NewAddPermissionlessDelegatorTx(
+	vdr *txs.SubnetValidator,
+	assetID ids.ID,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	options ...common.Option,
+) (*txs.AddPermissionlessDelegatorTx, error) {
+	avaxAssetID := b.backend.AVAXAssetID()
+	toBurn := map[ids.ID]uint64{}
+	if vdr.Subnet == constants.PrimaryNetworkID {
+		toBurn[avaxAssetID] = b.backend.AddPrimaryNetworkDelegatorFee()
+	} else {
+		toBurn[avaxAssetID] = b.backend.AddSubnetDelegatorFee()
+	}
+	toStake := map[ids.ID]uint64{
+		assetID: vdr.Wght,
+	}
+	ops := common.NewOptions(options)
+	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
+	if err != nil {
+		return nil, err
+	}
+
+	utils.Sort(rewardsOwner.Addrs)
+	return &txs.AddPermissionlessDelegatorTx{
+		BaseTx: txs.BaseTx{BaseTx: avax.BaseTx{
+			NetworkID:    b.backend.NetworkID(),
+			BlockchainID: constants.PlatformChainID,
+			Ins:          inputs,
+			Outs:         baseOutputs,
+			Memo:         ops.Memo(),
+		}},
+		Validator:              vdr.Validator,
+		Subnet:                 vdr.Subnet,
+		StakeOuts:              stakeOutputs,
+		DelegationRewardsOwner: rewardsOwner,
 	}, nil
 }
 
@@ -744,12 +875,12 @@ func (b *builder) spend(
 	amountsToStake map[ids.ID]uint64,
 	options *common.Options,
 ) (
-	inputs []*dione.TransferableInput,
-	changeOutputs []*dione.TransferableOutput,
-	stakeOutputs []*dione.TransferableOutput,
+	inputs []*avax.TransferableInput,
+	changeOutputs []*avax.TransferableOutput,
+	stakeOutputs []*avax.TransferableOutput,
 	err error,
 ) {
-	utxos, err := b.backend.UTXOs(options.Context(), constants.OmegaChainID)
+	utxos, err := b.backend.UTXOs(options.Context(), constants.PlatformChainID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -801,7 +932,7 @@ func (b *builder) spend(
 			continue
 		}
 
-		inputs = append(inputs, &dione.TransferableInput{
+		inputs = append(inputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &stakeable.LockIn{
@@ -822,7 +953,7 @@ func (b *builder) spend(
 		)
 
 		// Add the output to the staked outputs
-		stakeOutputs = append(stakeOutputs, &dione.TransferableOutput{
+		stakeOutputs = append(stakeOutputs, &avax.TransferableOutput{
 			Asset: utxo.Asset,
 			Out: &stakeable.LockOut{
 				Locktime: lockedOut.Locktime,
@@ -836,7 +967,7 @@ func (b *builder) spend(
 		amountsToStake[assetID] -= amountToStake
 		if remainingAmount := out.Amt - amountToStake; remainingAmount > 0 {
 			// This input had extra value, so some of it must be returned
-			changeOutputs = append(changeOutputs, &dione.TransferableOutput{
+			changeOutputs = append(changeOutputs, &avax.TransferableOutput{
 				Asset: utxo.Asset,
 				Out: &stakeable.LockOut{
 					Locktime: lockedOut.Locktime,
@@ -882,7 +1013,7 @@ func (b *builder) spend(
 			continue
 		}
 
-		inputs = append(inputs, &dione.TransferableInput{
+		inputs = append(inputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &secp256k1fx.TransferInput{
@@ -909,7 +1040,7 @@ func (b *builder) spend(
 		amountsToStake[assetID] -= amountToStake
 		if amountToStake > 0 {
 			// Some of this input was put for staking
-			stakeOutputs = append(stakeOutputs, &dione.TransferableOutput{
+			stakeOutputs = append(stakeOutputs, &avax.TransferableOutput{
 				Asset: utxo.Asset,
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          amountToStake,
@@ -919,7 +1050,7 @@ func (b *builder) spend(
 		}
 		if remainingAmount := amountAvalibleToStake - amountToStake; remainingAmount > 0 {
 			// This input had extra value, so some of it must be returned
-			changeOutputs = append(changeOutputs, &dione.TransferableOutput{
+			changeOutputs = append(changeOutputs, &avax.TransferableOutput{
 				Asset: utxo.Asset,
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          remainingAmount,
@@ -950,9 +1081,9 @@ func (b *builder) spend(
 		}
 	}
 
-	utils.Sort(inputs)                                      // sort inputs
-	dione.SortTransferableOutputs(changeOutputs, txs.Codec) // sort the change outputs
-	dione.SortTransferableOutputs(stakeOutputs, txs.Codec)  // sort stake outputs
+	utils.Sort(inputs)                                     // sort inputs
+	avax.SortTransferableOutputs(changeOutputs, txs.Codec) // sort the change outputs
+	avax.SortTransferableOutputs(stakeOutputs, txs.Codec)  // sort stake outputs
 	return inputs, changeOutputs, stakeOutputs, nil
 }
 

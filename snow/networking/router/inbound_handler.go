@@ -6,9 +6,9 @@ package router
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/message"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/message"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 var _ InboundHandler = InboundHandlerFunc(nil)

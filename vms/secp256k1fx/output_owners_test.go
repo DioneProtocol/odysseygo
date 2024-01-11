@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 func TestOutputOwnersVerify(t *testing.T) {
@@ -68,8 +68,6 @@ func TestOutputOwnersVerify(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			require := require.New(t)
 			err := tt.out.Verify()
-			require.ErrorIs(err, tt.expectedErr)
-			err = tt.out.VerifyState()
 			require.ErrorIs(err, tt.expectedErr)
 		})
 	}

@@ -6,7 +6,7 @@ package math
 import (
 	"container/heap"
 
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 var (

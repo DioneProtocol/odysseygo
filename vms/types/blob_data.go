@@ -6,7 +6,7 @@ package types
 import (
 	"encoding/json"
 
-	"github.com/DioneProtocol/odysseygo/utils/formatting"
+	"github.com/ava-labs/avalanchego/utils/formatting"
 )
 
 // JSONByteSlice represents [[]byte] that is json marshalled to hex

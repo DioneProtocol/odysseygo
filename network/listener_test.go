@@ -6,7 +6,7 @@ package network
 import (
 	"net"
 
-	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/ava-labs/avalanchego/utils/ips"
 )
 
 var _ net.Listener = (*testListener)(nil)

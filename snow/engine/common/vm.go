@@ -6,10 +6,10 @@ package common
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/api/health"
-	"github.com/DioneProtocol/odysseygo/database/manager"
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/ava-labs/avalanchego/api/health"
+	"github.com/ava-labs/avalanchego/database/manager"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 // VM describes the interface that all consensus VMs must implement

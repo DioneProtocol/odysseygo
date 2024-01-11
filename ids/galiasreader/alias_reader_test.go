@@ -8,10 +8,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/rpcchainvm/grpcutils"
 
-	aliasreaderpb "github.com/DioneProtocol/odysseygo/proto/pb/aliasreader"
+	aliasreaderpb "github.com/ava-labs/avalanchego/proto/pb/aliasreader"
 )
 
 func TestInterface(t *testing.T) {
@@ -19,9 +19,7 @@ func TestInterface(t *testing.T) {
 
 	for _, test := range ids.AliasTests {
 		listener, err := grpcutils.NewListener()
-		if err != nil {
-			t.Fatalf("Failed to create listener: %s", err)
-		}
+		require.NoError(err)
 		serverCloser := grpcutils.ServerCloser{}
 		w := ids.NewAliaser()
 

@@ -8,8 +8,8 @@ import (
 	"errors"
 	"net"
 
-	"github.com/DioneProtocol/odysseygo/network/dialer"
-	"github.com/DioneProtocol/odysseygo/utils/ips"
+	"github.com/ava-labs/avalanchego/network/dialer"
+	"github.com/ava-labs/avalanchego/utils/ips"
 )
 
 var (

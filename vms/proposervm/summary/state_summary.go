@@ -3,7 +3,7 @@
 
 package summary
 
-import "github.com/DioneProtocol/odysseygo/ids"
+import "github.com/ava-labs/avalanchego/ids"
 
 var _ StateSummary = (*stateSummary)(nil)
 

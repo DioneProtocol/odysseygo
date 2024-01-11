@@ -6,7 +6,7 @@ package common
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/trace"
+	"github.com/ava-labs/avalanchego/trace"
 )
 
 var _ StateSyncer = (*tracedStateSyncer)(nil)

@@ -15,8 +15,8 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/version"
+	"github.com/ava-labs/avalanchego/utils/constants"
+	"github.com/ava-labs/avalanchego/version"
 )
 
 const (
@@ -57,9 +57,7 @@ func (t *tracer) Close() error {
 
 func New(config Config) (Tracer, error) {
 	if !config.Enabled {
-		return &noOpTracer{
-			t: trace.NewNoopTracerProvider().Tracer(constants.AppName),
-		}, nil
+		return Noop, nil
 	}
 
 	exporter, err := newExporter(config.ExporterConfig)

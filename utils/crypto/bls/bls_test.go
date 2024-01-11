@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/utils"
+	"github.com/ava-labs/avalanchego/utils"
 )
 
 func TestAggregation(t *testing.T) {

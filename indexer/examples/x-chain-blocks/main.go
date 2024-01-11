@@ -9,17 +9,17 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/indexer"
-	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
-	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
+	"github.com/ava-labs/avalanchego/indexer"
+	"github.com/ava-labs/avalanchego/vms/proposervm/block"
+	"github.com/ava-labs/avalanchego/wallet/chain/x"
+	"github.com/ava-labs/avalanchego/wallet/subnet/primary"
 )
 
-// This example program continuously polls for the next A-Chain block
+// This example program continuously polls for the next X-Chain block
 // and prints the ID of the block and its transactions.
 func main() {
 	var (
-		uri       = fmt.Sprintf("%s/ext/index/A/block", primary.LocalAPIURI)
+		uri       = fmt.Sprintf("%s/ext/index/X/block", primary.LocalAPIURI)
 		client    = indexer.NewClient(uri)
 		ctx       = context.Background()
 		nextIndex uint64
@@ -37,14 +37,14 @@ func main() {
 			log.Fatalf("failed to parse proposervm block: %s\n", err)
 		}
 
-		alphaBlockBytes := proposerVMBlock.Block()
-		alphaBlock, err := x.Parser.ParseBlock(alphaBlockBytes)
+		avmBlockBytes := proposerVMBlock.Block()
+		avmBlock, err := x.Parser.ParseBlock(avmBlockBytes)
 		if err != nil {
-			log.Fatalf("failed to parse alpha block: %s\n", err)
+			log.Fatalf("failed to parse avm block: %s\n", err)
 		}
 
-		acceptedTxs := alphaBlock.Txs()
-		log.Printf("accepted block %s with %d transactions\n", alphaBlock.ID(), len(acceptedTxs))
+		acceptedTxs := avmBlock.Txs()
+		log.Printf("accepted block %s with %d transactions\n", avmBlock.ID(), len(acceptedTxs))
 
 		for _, tx := range acceptedTxs {
 			log.Printf("accepted transaction %s\n", tx.ID())

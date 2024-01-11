@@ -16,8 +16,11 @@ import (
 	"github.com/onsi/gomega"
 
 	runner_sdk "github.com/ava-labs/avalanche-network-runner-sdk"
-	"github.com/DioneProtocol/odysseygo/tests"
+
+	"github.com/ava-labs/avalanchego/tests"
 )
+
+const DefaultTimeout = 2 * time.Minute
 
 func TestUpgrade(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
@@ -27,9 +30,9 @@ func TestUpgrade(t *testing.T) {
 var (
 	logLevel                                  string
 	networkRunnerGRPCEp                       string
-	networkRunnerOdysseyGoExecPath          string
-	networkRunnerOdysseyGoExecPathToUpgrade string
-	networkRunnerOdysseyGoLogLevel          string
+	networkRunnerAvalancheGoExecPath          string
+	networkRunnerAvalancheGoExecPathToUpgrade string
+	networkRunnerAvalancheGoLogLevel          string
 )
 
 func init() {
@@ -46,32 +49,32 @@ func init() {
 		"gRPC server endpoint for network-runner",
 	)
 	flag.StringVar(
-		&networkRunnerOdysseyGoExecPath,
-		"network-runner-odysseygo-path",
+		&networkRunnerAvalancheGoExecPath,
+		"network-runner-avalanchego-path",
 		"",
-		"odysseygo executable path",
+		"avalanchego executable path",
 	)
 	flag.StringVar(
-		&networkRunnerOdysseyGoExecPathToUpgrade,
-		"network-runner-odysseygo-path-to-upgrade",
+		&networkRunnerAvalancheGoExecPathToUpgrade,
+		"network-runner-avalanchego-path-to-upgrade",
 		"",
-		"odysseygo executable path (to upgrade to, only required for upgrade tests with local network-runner)",
+		"avalanchego executable path (to upgrade to, only required for upgrade tests with local network-runner)",
 	)
 	flag.StringVar(
-		&networkRunnerOdysseyGoLogLevel,
-		"network-runner-odysseygo-log-level",
+		&networkRunnerAvalancheGoLogLevel,
+		"network-runner-avalanchego-log-level",
 		"INFO",
-		"odysseygo log-level",
+		"avalanchego log-level",
 	)
 }
 
 var runnerCli runner_sdk.Client
 
 var _ = ginkgo.BeforeSuite(func() {
-	_, err := os.Stat(networkRunnerOdysseyGoExecPath)
+	_, err := os.Stat(networkRunnerAvalancheGoExecPath)
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	_, err = os.Stat(networkRunnerOdysseyGoExecPathToUpgrade)
+	_, err = os.Stat(networkRunnerAvalancheGoExecPathToUpgrade)
 	gomega.Expect(err).Should(gomega.BeNil())
 
 	runnerCli, err = runner_sdk.New(runner_sdk.Config{
@@ -81,26 +84,23 @@ var _ = ginkgo.BeforeSuite(func() {
 	})
 	gomega.Expect(err).Should(gomega.BeNil())
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	presp, err := runnerCli.Ping(ctx)
 	cancel()
 	gomega.Expect(err).Should(gomega.BeNil())
 	tests.Outf("{{green}}network-runner running in PID %d{{/}}\n", presp.Pid)
 
-	tests.Outf("{{magenta}}starting network-runner with %q{{/}}\n", networkRunnerOdysseyGoExecPath)
-	ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
-	resp, err := runnerCli.Start(ctx, networkRunnerOdysseyGoExecPath,
+	tests.Outf("{{magenta}}starting network-runner with %q{{/}}\n", networkRunnerAvalancheGoExecPath)
+	ctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
+	resp, err := runnerCli.Start(ctx, networkRunnerAvalancheGoExecPath,
 		runner_sdk.WithNumNodes(5),
-		runner_sdk.WithGlobalNodeConfig(fmt.Sprintf(`{"log-level":"%s"}`, networkRunnerOdysseyGoLogLevel)),
+		runner_sdk.WithGlobalNodeConfig(fmt.Sprintf(`{"log-level":"%s"}`, networkRunnerAvalancheGoLogLevel)),
 	)
 	cancel()
 	gomega.Expect(err).Should(gomega.BeNil())
 	tests.Outf("{{green}}successfully started network-runner: {{/}} %+v\n", resp.ClusterInfo.NodeNames)
 
-	// start is async, so wait some time for cluster health
-	time.Sleep(time.Minute)
-
-	ctx, cancel = context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
 	_, err = runnerCli.Health(ctx)
 	cancel()
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -108,7 +108,7 @@ var _ = ginkgo.BeforeSuite(func() {
 
 var _ = ginkgo.AfterSuite(func() {
 	tests.Outf("{{red}}shutting down network-runner cluster{{/}}\n")
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	_, err := runnerCli.Stop(ctx)
 	cancel()
 	gomega.Expect(err).Should(gomega.BeNil())
@@ -120,26 +120,24 @@ var _ = ginkgo.AfterSuite(func() {
 
 var _ = ginkgo.Describe("[Upgrade]", func() {
 	ginkgo.It("can upgrade versions", func() {
-		tests.Outf("{{magenta}}starting upgrade tests %q{{/}}\n", networkRunnerOdysseyGoExecPathToUpgrade)
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		tests.Outf("{{magenta}}starting upgrade tests %q{{/}}\n", networkRunnerAvalancheGoExecPathToUpgrade)
+		ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 		sresp, err := runnerCli.Status(ctx)
 		cancel()
 		gomega.Expect(err).Should(gomega.BeNil())
 
 		for _, name := range sresp.ClusterInfo.NodeNames {
-			tests.Outf("{{magenta}}restarting the node %q{{/}} with %q\n", name, networkRunnerOdysseyGoExecPathToUpgrade)
-			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-			resp, err := runnerCli.RestartNode(ctx, name, runner_sdk.WithExecPath(networkRunnerOdysseyGoExecPathToUpgrade))
+			tests.Outf("{{magenta}}restarting the node %q{{/}} with %q\n", name, networkRunnerAvalancheGoExecPathToUpgrade)
+			ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+			resp, err := runnerCli.RestartNode(ctx, name, runner_sdk.WithExecPath(networkRunnerAvalancheGoExecPathToUpgrade))
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			time.Sleep(20 * time.Second)
-
-			ctx, cancel = context.WithTimeout(context.Background(), 2*time.Minute)
+			ctx, cancel = context.WithTimeout(context.Background(), DefaultTimeout)
 			_, err = runnerCli.Health(ctx)
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
-			tests.Outf("{{green}}successfully upgraded %q to %q{{/}} (current info: %+v)\n", name, networkRunnerOdysseyGoExecPathToUpgrade, resp.ClusterInfo.NodeInfos)
+			tests.Outf("{{green}}successfully upgraded %q to %q{{/}} (current info: %+v)\n", name, networkRunnerAvalancheGoExecPathToUpgrade, resp.ClusterInfo.NodeInfos)
 		}
 	})
 })

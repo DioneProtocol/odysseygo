@@ -6,27 +6,27 @@ package block
 import (
 	"context"
 
-	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
 )
 
 // Context defines the block context that will be optionally provided by the
 // proposervm to an underlying vm.
 type Context struct {
-	// OChainHeight is the height that this block will use to verify it's state.
-	// In the proposervm, blocks verify the proposer based on the O-chain height
-	// recorded in the parent block. The O-chain height provided here is also
-	// the parent's O-chain height, not this block's O-chain height.
+	// PChainHeight is the height that this block will use to verify it's state.
+	// In the proposervm, blocks verify the proposer based on the P-chain height
+	// recorded in the parent block. The P-chain height provided here is also
+	// the parent's P-chain height, not this block's P-chain height.
 	//
 	// Because PreForkBlocks and PostForkOptions do not verify their execution
-	// against the O-chain's state, this context is undefined for those blocks.
-	OChainHeight uint64
+	// against the P-chain's state, this context is undefined for those blocks.
+	PChainHeight uint64
 }
 
 // BuildBlockWithContextChainVM defines the interface a ChainVM can optionally
-// implement to consider the O-Chain height when building blocks.
+// implement to consider the P-Chain height when building blocks.
 type BuildBlockWithContextChainVM interface {
-	// Attempt to build a new block given that the O-Chain height is
-	// [blockCtx.OChainHeight].
+	// Attempt to build a new block given that the P-Chain height is
+	// [blockCtx.PChainHeight].
 	//
 	// This method will be called if and only if the proposervm is activated.
 	// Otherwise [BuildBlock] will be called.
@@ -34,7 +34,7 @@ type BuildBlockWithContextChainVM interface {
 }
 
 // WithVerifyContext defines the interface a Block can optionally implement to
-// consider the O-Chain height when verifying itself.
+// consider the P-Chain height when verifying itself.
 //
 // As with all Blocks, it is guaranteed for verification to be called in
 // topological order.

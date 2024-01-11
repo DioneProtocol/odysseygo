@@ -6,9 +6,9 @@ package x
 import (
 	stdcontext "context"
 
-	"github.com/DioneProtocol/odysseygo/api/info"
-	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/ava-labs/avalanchego/api/info"
+	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/vms/avm"
 )
 
 var _ Context = (*context)(nil)
@@ -16,7 +16,7 @@ var _ Context = (*context)(nil)
 type Context interface {
 	NetworkID() uint32
 	BlockchainID() ids.ID
-	DIONEAssetID() ids.ID
+	AVAXAssetID() ids.ID
 	BaseTxFee() uint64
 	CreateAssetTxFee() uint64
 }
@@ -24,33 +24,33 @@ type Context interface {
 type context struct {
 	networkID        uint32
 	blockchainID     ids.ID
-	dioneAssetID     ids.ID
+	avaxAssetID      ids.ID
 	baseTxFee        uint64
 	createAssetTxFee uint64
 }
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	aChainClient := alpha.NewClient(uri, "A")
-	return NewContextFromClients(ctx, infoClient, aChainClient)
+	xChainClient := avm.NewClient(uri, "X")
+	return NewContextFromClients(ctx, infoClient, xChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	aChainClient alpha.Client,
+	xChainClient avm.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	chainID, err := infoClient.GetBlockchainID(ctx, "A")
+	chainID, err := infoClient.GetBlockchainID(ctx, "X")
 	if err != nil {
 		return nil, err
 	}
 
-	asset, err := aChainClient.GetAssetDescription(ctx, "DIONE")
+	asset, err := xChainClient.GetAssetDescription(ctx, "AVAX")
 	if err != nil {
 		return nil, err
 	}
@@ -72,14 +72,14 @@ func NewContextFromClients(
 func NewContext(
 	networkID uint32,
 	blockchainID ids.ID,
-	dioneAssetID ids.ID,
+	avaxAssetID ids.ID,
 	baseTxFee uint64,
 	createAssetTxFee uint64,
 ) Context {
 	return &context{
 		networkID:        networkID,
 		blockchainID:     blockchainID,
-		dioneAssetID:     dioneAssetID,
+		avaxAssetID:      avaxAssetID,
 		baseTxFee:        baseTxFee,
 		createAssetTxFee: createAssetTxFee,
 	}
@@ -93,8 +93,8 @@ func (c *context) BlockchainID() ids.ID {
 	return c.blockchainID
 }
 
-func (c *context) DIONEAssetID() ids.ID {
-	return c.dioneAssetID
+func (c *context) AVAXAssetID() ids.ID {
+	return c.avaxAssetID
 }
 
 func (c *context) BaseTxFee() uint64 {

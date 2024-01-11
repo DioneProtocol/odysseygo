@@ -6,9 +6,9 @@ package common
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/snow"
-	"github.com/DioneProtocol/odysseygo/snow/engine/common/tracker"
-	"github.com/DioneProtocol/odysseygo/snow/validators"
+	"github.com/ava-labs/avalanchego/snow"
+	"github.com/ava-labs/avalanchego/snow/engine/common/tracker"
+	"github.com/ava-labs/avalanchego/snow/validators"
 )
 
 // Config wraps the common configurations that are needed by a Snow consensus
@@ -54,7 +54,7 @@ func (c *Config) IsBootstrapped() bool {
 	return c.Ctx.State.Get().State == snow.NormalOp
 }
 
-// Shared among common.bootstrapper and snowman/odyssey bootstrapper
+// Shared among common.bootstrapper and snowman/avalanche bootstrapper
 type SharedConfig struct {
 	// Tracks the last requestID that was used in a request
 	RequestID uint32

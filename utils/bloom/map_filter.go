@@ -6,7 +6,7 @@ package bloom
 import (
 	"sync"
 
-	"github.com/DioneProtocol/odysseygo/utils/set"
+	"github.com/ava-labs/avalanchego/utils/set"
 )
 
 type mapFilter struct {

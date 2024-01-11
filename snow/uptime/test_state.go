@@ -6,8 +6,8 @@ package uptime
 import (
 	"time"
 
-	"github.com/DioneProtocol/odysseygo/database"
-	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/ava-labs/avalanchego/database"
+	"github.com/ava-labs/avalanchego/ids"
 )
 
 var _ State = (*TestState)(nil)
