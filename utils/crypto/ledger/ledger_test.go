@@ -15,7 +15,7 @@ import (
 
 const (
 	chainAlias = "P"
-	hrp        = "fuji"
+	hrp        = "testnet"
 )
 
 var factory secp256k1.Factory
@@ -35,7 +35,7 @@ func TestLedger(t *testing.T) {
 	require.NoError(err)
 	t.Logf("version: %s\n", version)
 
-	// Get Fuji Address
+	// Get Testnet Address
 	addr, err := device.Address(hrp, 0)
 	require.NoError(err)
 	paddr, err := address.Format(chainAlias, hrp, addr[:])
