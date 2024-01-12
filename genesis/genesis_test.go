@@ -389,7 +389,7 @@ func TestVMGenesis(t *testing.T) {
 					expectedID: "2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM",
 				},
 				{
-					vmID:       constants.EVMID,
+					vmID:       constants.DELTAID,
 					expectedID: "2q9e4r6Mu3U68nU1fYjgbR6JvwrRx36CohpAX5UQxse55x1Q5",
 				},
 			},
@@ -402,7 +402,7 @@ func TestVMGenesis(t *testing.T) {
 					expectedID: "2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm",
 				},
 				{
-					vmID:       constants.EVMID,
+					vmID:       constants.DELTAID,
 					expectedID: "yH8D7ThNJkxmtkuv2jgBa4P1Rn3Qpr4pPr7QYNfcdoS6k6HWp",
 				},
 			},
@@ -415,7 +415,7 @@ func TestVMGenesis(t *testing.T) {
 					expectedID: "2eNy1mUFdmaxXNj1eQHUe7Np4gju9sJsEtWQ4MX3ToiNKuADed",
 				},
 				{
-					vmID:       constants.EVMID,
+					vmID:       constants.DELTAID,
 					expectedID: "2CA6j5zYzasynPsFeNoqWkmTCt3VScMvXUZHbfDJ8k3oGzAPtU",
 				},
 			},

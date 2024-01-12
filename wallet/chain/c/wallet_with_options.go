@@ -4,7 +4,7 @@
 package c
 
 import (
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -41,7 +41,7 @@ func (w *walletWithOptions) IssueImportTx(
 	chainID ids.ID,
 	to ethcommon.Address,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	return w.Wallet.IssueImportTx(
 		chainID,
 		to,
@@ -53,7 +53,7 @@ func (w *walletWithOptions) IssueExportTx(
 	chainID ids.ID,
 	outputs []*secp256k1fx.TransferOutput,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	return w.Wallet.IssueExportTx(
 		chainID,
 		outputs,
@@ -62,9 +62,9 @@ func (w *walletWithOptions) IssueExportTx(
 }
 
 func (w *walletWithOptions) IssueUnsignedAtomicTx(
-	utx evm.UnsignedAtomicTx,
+	utx delta.UnsignedAtomicTx,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	return w.Wallet.IssueUnsignedAtomicTx(
 		utx,
 		common.UnionOptions(w.options, options)...,
@@ -72,7 +72,7 @@ func (w *walletWithOptions) IssueUnsignedAtomicTx(
 }
 
 func (w *walletWithOptions) IssueAtomicTx(
-	tx *evm.Tx,
+	tx *delta.Tx,
 	options ...common.Option,
 ) error {
 	return w.Wallet.IssueAtomicTx(
