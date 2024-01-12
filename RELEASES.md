@@ -239,7 +239,7 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 ### Configs
 
-- Changed the default value of `--network-allow-private-ips` to `false` when the `--network-id` is either `fuji` or `mainnet`
+- Changed the default value of `--network-allow-private-ips` to `false` when the `--network-id` is either `testnet` or `mainnet`
 - Added P-chain cache size configurations
   - `block-cache-size`
   - `tx-cache-size`
@@ -284,7 +284,7 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 - [x/sync] Update target locking by @patrick-ogrady in https://github.com/DioneProtocol/odysseygo/pull/1763
 - Export warp errors for external use by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1771
 - Remove unused networking constant by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1774
-- Change the default value of `--network-allow-private-ips` to `false` for `mainnet` and `fuji` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1773
+- Change the default value of `--network-allow-private-ips` to `false` for `mainnet` and `testnet` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1773
 - Remove context.TODO from tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1778
 - Replace linkeddb iterator with native DB range queries by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1752
 - Add support for measuring key size in caches by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1781
@@ -654,7 +654,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Remove no-op changes from history results by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1335
 - Cleanup type assertions in the linkedHashmap by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1341
 - Fix racy avm tx access by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1349
-- Update Fuji beacon ips by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1354
+- Update Testnet beacon ips by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1354
 - Remove duplicate TLS verification by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1364
 - Adjust Merkledb Trie invalidation locking by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1355
 - Use require in Odyssey bootstrapping tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1344
@@ -669,7 +669,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - [Issue-1368]: Panic in serializedPath.HasPrefix by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1371
 - Add ValidatorsOnly flag to GetStake by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1377
 - Use proto in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1336
-- Update incorrect fuji beacon IPs by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1392
+- Update incorrect testnet beacon IPs by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1392
 - Update `api/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1393
 - refactor concurrent work limiting in sync in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1347
 - Remove check for impossible condition in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1348
@@ -737,7 +737,7 @@ The supported plugin version is `25`.
 - defer delegatee rewards until end of validator staking period by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1262
 - Initialize UptimeCalculator in TestPeer by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1283
 - Add Odyssey liveness health checks by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1287
-- Skip AMI generation with Fuji tags by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1288
+- Skip AMI generation with Testnet tags by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1288
 - Use `maps.Equal` in `set.Equals` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1290
 - return accrued delegator rewards in `GetCurrentValidators` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1291
 - Add zstd compression by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1278
@@ -1539,7 +1539,7 @@ The supported plugin version is `16`.
 
 Please upgrade your node as soon as possible.
 
-The changes in `v1.8.x` go into effect at 4 PM EDT on September 6th, 2022 on both Fuji and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
+The changes in `v1.8.x` go into effect at 4 PM EDT on September 6th, 2022 on both Testnet and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
 
 The supported plugin version is `16`.
 
@@ -1553,7 +1553,7 @@ The supported plugin version is `16`.
 
 Please upgrade your node as soon as possible.
 
-The changes in `v1.8.x` go into effect at 4 PM EDT on September 6th, 2022 on both Fuji and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
+The changes in `v1.8.x` go into effect at 4 PM EDT on September 6th, 2022 on both Testnet and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
 
 The supported plugin version is `16`.
 
@@ -1570,7 +1570,7 @@ The supported plugin version is `16`.
 
 This is a mandatory security upgrade. Please upgrade your node **as soon as possible.**
 
-The changes in the upgrade go into effect at **4 PM EDT on September 6th, 2022** on both Fuji and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
+The changes in the upgrade go into effect at **4 PM EDT on September 6th, 2022** on both Testnet and Mainnet. You should upgrade your node before the changes go into effect, otherwise they may experience loss of uptime.
 
 You may see some extraneous ERROR logs ("BAD BLOCK") on your node after upgrading. These may continue until the Apricot Phase 6 activation (at 4 PM EDT on September 6th).
 
@@ -2235,7 +2235,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Added `--stake-supply-cap` which defaults to `720,000,000,000,000,000` nDIONE.
 - Renamed `--bootstrap-multiput-max-containers-sent` to `--bootstrap-ancestors-max-containers-sent`.
 - Renamed `--bootstrap-multiput-max-containers-received` to `--bootstrap-ancestors-max-containers-received`.
-- Enforced that `--staking-enabled=false` can not be specified on public networks (`Fuji` and `Mainnet`).
+- Enforced that `--staking-enabled=false` can not be specified on public networks (`Testnet` and `Mainnet`).
 
 ### Metrics
 

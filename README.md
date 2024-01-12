@@ -121,12 +121,12 @@ You should see some pretty ASCII art and log messages.
 
 You can use `Ctrl+C` to kill the node.
 
-### Connecting to Fuji
+### Connecting to Testnet
 
-To connect to the Fuji Testnet, run:
+To connect to the Testnet Testnet, run:
 
 ```sh
-./build/odysseygo --network-id=fuji
+./build/odysseygo --network-id=testnet
 ```
 
 ### Creating a Local Testnet

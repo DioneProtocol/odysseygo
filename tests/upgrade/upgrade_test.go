@@ -15,7 +15,7 @@ import (
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 
-	runner_sdk "github.com/DioneProtocol/odyssey-network-runner-sdk"
+	runner_sdk "github.com/ava-labs/avalanche-network-runner-sdk"
 
 	"github.com/DioneProtocol/odysseygo/tests"
 )

@@ -29,7 +29,7 @@ import (
 
 const (
 	MainnetAPIURI = "https://api.dione.network"
-	FujiAPIURI    = "https://api.dione-test.network"
+	TestnetAPIURI = "https://api.dione-test.network"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
