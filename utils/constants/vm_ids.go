@@ -6,7 +6,7 @@ package constants
 import "github.com/DioneProtocol/odysseygo/ids"
 
 var (
-	PlatformVMID = ids.ID{'p', 'l', 'a', 't', 'f', 'o', 'r', 'm', 'v', 'm'}
-	AVMID        = ids.ID{'a', 'v', 'm'}
-	EVMID        = ids.ID{'e', 'v', 'm'}
+	OmegaVMID = ids.ID{'o', 'm', 'e', 'g', 'a', 'v', 'm'}
+	AVMID     = ids.ID{'a', 'v', 'm'}
+	EVMID     = ids.ID{'e', 'v', 'm'}
 )

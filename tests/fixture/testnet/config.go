@@ -29,7 +29,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 	"github.com/DioneProtocol/odysseygo/utils/perms"
 	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 )
 
 const (

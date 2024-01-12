@@ -817,7 +817,7 @@ type BuildBlockRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	PChainHeight *uint64 `protobuf:"varint,1,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
+	OChainHeight *uint64 `protobuf:"varint,1,opt,name=o_chain_height,json=oChainHeight,proto3,oneof" json:"o_chain_height,omitempty"`
 }
 
 func (x *BuildBlockRequest) Reset() {
@@ -852,9 +852,9 @@ func (*BuildBlockRequest) Descriptor() ([]byte, []int) {
 	return file_vm_vm_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *BuildBlockRequest) GetPChainHeight() uint64 {
-	if x != nil && x.PChainHeight != nil {
-		return *x.PChainHeight
+func (x *BuildBlockRequest) GetOChainHeight() uint64 {
+	if x != nil && x.OChainHeight != nil {
+		return *x.OChainHeight
 	}
 	return 0
 }
@@ -1279,7 +1279,7 @@ type BlockVerifyRequest struct {
 	Bytes []byte `protobuf:"bytes,1,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	// If set, the VM server casts the block to a [block.WithVerifyContext] and
 	// calls [VerifyWithContext] instead of [Verify].
-	PChainHeight *uint64 `protobuf:"varint,2,opt,name=p_chain_height,json=pChainHeight,proto3,oneof" json:"p_chain_height,omitempty"`
+	OChainHeight *uint64 `protobuf:"varint,2,opt,name=o_chain_height,json=oChainHeight,proto3,oneof" json:"o_chain_height,omitempty"`
 }
 
 func (x *BlockVerifyRequest) Reset() {
@@ -1321,9 +1321,9 @@ func (x *BlockVerifyRequest) GetBytes() []byte {
 	return nil
 }
 
-func (x *BlockVerifyRequest) GetPChainHeight() uint64 {
-	if x != nil && x.PChainHeight != nil {
-		return *x.PChainHeight
+func (x *BlockVerifyRequest) GetOChainHeight() uint64 {
+	if x != nil && x.OChainHeight != nil {
+		return *x.OChainHeight
 	}
 	return 0
 }

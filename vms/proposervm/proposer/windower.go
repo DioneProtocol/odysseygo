@@ -26,26 +26,26 @@ var _ Windower = (*windower)(nil)
 
 type Windower interface {
 	// Proposers returns the proposer list for building a block at [chainHeight]
-	// when the validator set is defined at [pChainHeight]. The list is returned
+	// when the validator set is defined at [oChainHeight]. The list is returned
 	// in order. The minimum delay of a validator is the index they appear times
 	// [WindowDuration].
 	Proposers(
 		ctx context.Context,
 		chainHeight,
-		pChainHeight uint64,
+		oChainHeight uint64,
 	) ([]ids.NodeID, error)
 	// Delay returns the amount of time that [validatorID] must wait before
 	// building a block at [chainHeight] when the validator set is defined at
-	// [pChainHeight].
+	// [oChainHeight].
 	Delay(
 		ctx context.Context,
 		chainHeight,
-		pChainHeight uint64,
+		oChainHeight uint64,
 		validatorID ids.NodeID,
 	) (time.Duration, error)
 }
 
-// windower interfaces with P-Chain and it is responsible for calculating the
+// windower interfaces with O-Chain and it is responsible for calculating the
 // delay for the block submission window of a given validator
 type windower struct {
 	state       validators.State
@@ -64,9 +64,9 @@ func New(state validators.State, subnetID, chainID ids.ID) Windower {
 	}
 }
 
-func (w *windower) Proposers(ctx context.Context, chainHeight, pChainHeight uint64) ([]ids.NodeID, error) {
-	// get the validator set by the p-chain height
-	validatorsMap, err := w.state.GetValidatorSet(ctx, pChainHeight, w.subnetID)
+func (w *windower) Proposers(ctx context.Context, chainHeight, oChainHeight uint64) ([]ids.NodeID, error) {
+	// get the validator set by the o-chain height
+	validatorsMap, err := w.state.GetValidatorSet(ctx, oChainHeight, w.subnetID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +121,12 @@ func (w *windower) Proposers(ctx context.Context, chainHeight, pChainHeight uint
 	return nodeIDs, nil
 }
 
-func (w *windower) Delay(ctx context.Context, chainHeight, pChainHeight uint64, validatorID ids.NodeID) (time.Duration, error) {
+func (w *windower) Delay(ctx context.Context, chainHeight, oChainHeight uint64, validatorID ids.NodeID) (time.Duration, error) {
 	if validatorID == ids.EmptyNodeID {
 		return MaxDelay, nil
 	}
 
-	proposers, err := w.Proposers(ctx, chainHeight, pChainHeight)
+	proposers, err := w.Proposers(ctx, chainHeight, oChainHeight)
 	if err != nil {
 		return 0, err
 	}

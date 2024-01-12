@@ -1,13 +1,14 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package p
+package o
 
 import (
 	"context"
 	"errors"
 	"time"
 
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	ginkgo "github.com/onsi/ginkgo/v2"
 
 	"github.com/onsi/gomega"
@@ -20,20 +21,19 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
-// PChainWorkflow is an integration test for normal P-Chain operations
+// OChainWorkflow is an integration test for normal O-Chain operations
 // - Issues an Add Validator and an Add Delegator using the funding address
-// - Exports DIONE from the P-Chain funding address to the X-Chain created address
-// - Exports DIONE from the X-Chain created address to the P-Chain created address
+// - Exports DIONE from the O-Chain funding address to the X-Chain created address
+// - Exports DIONE from the X-Chain created address to the O-Chain created address
 // - Checks the expected value of the funding address
 
-var _ = e2e.DescribePChain("[Workflow]", func() {
-	ginkgo.It("P-chain main operations",
+var _ = e2e.DescribeOChain("[Workflow]", func() {
+	ginkgo.It("O-chain main operations",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
 		ginkgo.Label(
@@ -46,14 +46,14 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			keychain := e2e.Env.NewKeychain(2)
 			baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 
-			pWallet := baseWallet.P()
-			dioneAssetID := baseWallet.P().DIONEAssetID()
+			oWallet := baseWallet.O()
+			dioneAssetID := baseWallet.O().DIONEAssetID()
 			xWallet := baseWallet.X()
-			pChainClient := platformvm.NewClient(nodeURI.URI)
+			oChainClient := omegavm.NewClient(nodeURI.URI)
 
 			tests.Outf("{{blue}} fetching minimal stake amounts {{/}}\n")
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
-			minValStake, minDelStake, err := pChainClient.GetMinStake(ctx, constants.PlatformChainID)
+			minValStake, minDelStake, err := oChainClient.GetMinStake(ctx, constants.OmegaChainID)
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
 			tests.Outf("{{green}} minimal validator stake: %d {{/}}\n", minValStake)
@@ -68,16 +68,16 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			txFees := uint64(fees.TxFee)
 			tests.Outf("{{green}} txFee: %d {{/}}\n", txFees)
 
-			// amount to transfer from P to X chain
+			// amount to transfer from O to X chain
 			toTransfer := 1 * units.Dione
 
-			pShortAddr := keychain.Keys[0].Address()
+			oShortAddr := keychain.Keys[0].Address()
 			xTargetAddr := keychain.Keys[1].Address()
 			ginkgo.By("check selected keys have sufficient funds", func() {
-				pBalances, err := pWallet.Builder().GetBalance()
-				pBalance := pBalances[dioneAssetID]
+				oBalances, err := oWallet.Builder().GetBalance()
+				oBalance := oBalances[dioneAssetID]
 				minBalance := minValStake + txFees + minDelStake + txFees + toTransfer + txFees
-				gomega.Expect(pBalance, err).To(gomega.BeNumerically(">=", minBalance))
+				gomega.Expect(oBalance, err).To(gomega.BeNumerically(">=", minBalance))
 			})
 			// create validator data
 			validatorStartTimeDiff := 30 * time.Second
@@ -96,13 +96,13 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			}
 			rewardOwner := &secp256k1fx.OutputOwners{
 				Threshold: 1,
-				Addrs:     []ids.ShortID{pShortAddr},
+				Addrs:     []ids.ShortID{oShortAddr},
 			}
 			shares := uint32(20000) // TODO: retrieve programmatically
 
 			ginkgo.By("issue add validator tx", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				_, err := pWallet.IssueAddValidatorTx(
+				_, err := oWallet.IssueAddValidatorTx(
 					vdr,
 					rewardOwner,
 					shares,
@@ -114,7 +114,7 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 
 			ginkgo.By("issue add delegator tx", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				_, err := pWallet.IssueAddDelegatorTx(
+				_, err := oWallet.IssueAddDelegatorTx(
 					vdr,
 					rewardOwner,
 					common.WithContext(ctx),
@@ -124,15 +124,15 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			})
 
 			// retrieve initial balances
-			pBalances, err := pWallet.Builder().GetBalance()
+			oBalances, err := oWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pStartBalance := pBalances[dioneAssetID]
-			tests.Outf("{{blue}} P-chain balance before P->X export: %d {{/}}\n", pStartBalance)
+			oStartBalance := oBalances[dioneAssetID]
+			tests.Outf("{{blue}} O-chain balance before O->X export: %d {{/}}\n", oStartBalance)
 
 			xBalances, err := xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			xStartBalance := xBalances[dioneAssetID]
-			tests.Outf("{{blue}} X-chain balance before P->X export: %d {{/}}\n", xStartBalance)
+			tests.Outf("{{blue}} X-chain balance before O->X export: %d {{/}}\n", xStartBalance)
 
 			outputOwner := secp256k1fx.OutputOwners{
 				Threshold: 1,
@@ -145,9 +145,9 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 				OutputOwners: outputOwner,
 			}
 
-			ginkgo.By("export dione from P to X chain", func() {
+			ginkgo.By("export dione from O to X chain", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				_, err := pWallet.IssueExportTx(
+				_, err := oWallet.IssueExportTx(
 					xWallet.BlockchainID(),
 					[]*dione.TransferableOutput{
 						{
@@ -164,23 +164,23 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			})
 
 			// check balances post export
-			pBalances, err = pWallet.Builder().GetBalance()
+			oBalances, err = oWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pPreImportBalance := pBalances[dioneAssetID]
-			tests.Outf("{{blue}} P-chain balance after P->X export: %d {{/}}\n", pPreImportBalance)
+			oPreImportBalance := oBalances[dioneAssetID]
+			tests.Outf("{{blue}} O-chain balance after O->X export: %d {{/}}\n", oPreImportBalance)
 
 			xBalances, err = xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			xPreImportBalance := xBalances[dioneAssetID]
-			tests.Outf("{{blue}} X-chain balance after P->X export: %d {{/}}\n", xPreImportBalance)
+			tests.Outf("{{blue}} X-chain balance after O->X export: %d {{/}}\n", xPreImportBalance)
 
 			gomega.Expect(xPreImportBalance).To(gomega.Equal(xStartBalance)) // import not performed yet
-			gomega.Expect(pPreImportBalance).To(gomega.Equal(pStartBalance - toTransfer - txFees))
+			gomega.Expect(oPreImportBalance).To(gomega.Equal(oStartBalance - toTransfer - txFees))
 
-			ginkgo.By("import dione from P into X chain", func() {
+			ginkgo.By("import dione from O into X chain", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				_, err := xWallet.IssueImportTx(
-					constants.PlatformChainID,
+					constants.OmegaChainID,
 					&outputOwner,
 					common.WithContext(ctx),
 				)
@@ -189,17 +189,17 @@ var _ = e2e.DescribePChain("[Workflow]", func() {
 			})
 
 			// check balances post import
-			pBalances, err = pWallet.Builder().GetBalance()
+			oBalances, err = oWallet.Builder().GetBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			pFinalBalance := pBalances[dioneAssetID]
-			tests.Outf("{{blue}} P-chain balance after P->X import: %d {{/}}\n", pFinalBalance)
+			oFinalBalance := oBalances[dioneAssetID]
+			tests.Outf("{{blue}} O-chain balance after O->X import: %d {{/}}\n", oFinalBalance)
 
 			xBalances, err = xWallet.Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			xFinalBalance := xBalances[dioneAssetID]
-			tests.Outf("{{blue}} X-chain balance after P->X import: %d {{/}}\n", xFinalBalance)
+			tests.Outf("{{blue}} X-chain balance after O->X import: %d {{/}}\n", xFinalBalance)
 
 			gomega.Expect(xFinalBalance).To(gomega.Equal(xPreImportBalance + toTransfer - txFees)) // import not performed yet
-			gomega.Expect(pFinalBalance).To(gomega.Equal(pPreImportBalance))
+			gomega.Expect(oFinalBalance).To(gomega.Equal(oPreImportBalance))
 		})
 })

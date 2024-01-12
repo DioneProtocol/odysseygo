@@ -920,7 +920,7 @@ func buildExportTx(dioneTx *txs.Tx, vm *VM, key *secp256k1.PrivateKey) *txs.Tx {
 				}},
 			},
 		},
-		DestinationChain: constants.PlatformChainID,
+		DestinationChain: constants.OmegaChainID,
 		ExportedOuts: []*dione.TransferableOutput{{
 			Asset: dione.Asset{ID: dioneTx.ID()},
 			Out: &secp256k1fx.TransferOutput{
@@ -1141,7 +1141,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 	}
 	require.NoError(t, env.vm.state.Commit())
 
-	sm := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
+	sm := env.sharedMemory.NewSharedMemory(constants.OmegaChainID)
 
 	elems := make([]*atomic.Element, numUTXOs)
 	codec := env.vm.parser.Codec()
@@ -1181,7 +1181,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 	hrp := constants.GetHRP(env.vm.ctx.NetworkID)
 	xAddr, err := env.vm.FormatLocalAddress(rawAddr)
 	require.NoError(t, err)
-	pAddr, err := env.vm.FormatAddress(constants.PlatformChainID, rawAddr)
+	oAddr, err := env.vm.FormatAddress(constants.OmegaChainID, rawAddr)
 	require.NoError(t, err)
 	unknownChainAddr, err := address.Format("R", hrp, rawAddr.Bytes())
 	require.NoError(t, err)
@@ -1297,13 +1297,13 @@ func TestServiceGetUTXOs(t *testing.T) {
 			},
 		},
 		{
-			label: "get all P-chain UTXOs",
+			label: "get all O-chain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "O",
 			},
 		},
 		{
@@ -1318,13 +1318,13 @@ func TestServiceGetUTXOs(t *testing.T) {
 			},
 		},
 		{
-			label: "get all P-chain UTXOs",
+			label: "get all O-chain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "O",
 			},
 		},
 		{
@@ -1333,7 +1333,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
 					xAddr,
-					pAddr,
+					oAddr,
 				},
 			},
 		},
@@ -1342,7 +1342,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			expectedErr: dione.ErrMismatchedChainIDs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					pAddr,
+					oAddr,
 				},
 			},
 		},
@@ -1925,7 +1925,7 @@ func TestImport(t *testing.T) {
 			utxoBytes, err := env.vm.parser.Codec().Marshal(txs.CodecVersion, utxo)
 			require.NoError(err)
 
-			peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
+			peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.OmegaChainID)
 			utxoID := utxo.InputID()
 			require.NoError(peerSharedMemory.Apply(map[ids.ID]*atomic.Requests{
 				env.vm.ctx.ChainID: {
@@ -1946,7 +1946,7 @@ func TestImport(t *testing.T) {
 					Username: username,
 					Password: password,
 				},
-				SourceChain: "P",
+				SourceChain: "O",
 				To:          addrStr,
 			}
 			reply := &api.JSONTxID{}

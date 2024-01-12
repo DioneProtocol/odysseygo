@@ -44,18 +44,18 @@ func main() {
 		URI:              uri,
 		DIONEKeychain:    kc,
 		EthKeychain:      kc,
-		PChainTxsToFetch: set.Of(subnetID),
+		OChainTxsToFetch: set.Of(subnetID),
 	})
 	if err != nil {
 		log.Fatalf("failed to initialize wallet: %s\n", err)
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain wallet
-	pWallet := wallet.P()
+	// Get the O-chain wallet
+	oWallet := wallet.O()
 
 	createChainStartTime := time.Now()
-	createChainTx, err := pWallet.IssueCreateChainTx(
+	createChainTx, err := oWallet.IssueCreateChainTx(
 		subnetID,
 		genesisBytes,
 		vmID,

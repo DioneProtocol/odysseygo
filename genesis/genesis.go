@@ -18,13 +18,13 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/avm"
 	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/api"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/api"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
 	xchaintxs "github.com/DioneProtocol/odysseygo/vms/avm/txs"
-	pchaintxs "github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	ochaintxs "github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 )
 
 const (
@@ -180,11 +180,11 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 	return nil
 }
 
-// FromFile returns the genesis data of the Platform Chain.
+// FromFile returns the genesis data of the Omega Chain.
 //
-// Since an Odyssey network has exactly one Platform Chain, and the Platform
+// Since an Odyssey network has exactly one Omega Chain, and the Omega
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Omega Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFile accepts:
@@ -197,7 +197,7 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 //
 // FromFile returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
@@ -222,11 +222,11 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 	return FromConfig(config)
 }
 
-// FromFlag returns the genesis data of the Platform Chain.
+// FromFlag returns the genesis data of the Omega Chain.
 //
-// Since an Odyssey network has exactly one Platform Chain, and the Platform
+// Since an Odyssey network has exactly one Omega Chain, and the Omega
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Omega Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFlag accepts:
@@ -239,7 +239,7 @@ func FromFile(networkID uint32, filepath string, stakingCfg *StakingConfig) ([]b
 //
 // FromFlag returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig) ([]byte, ids.ID, error) {
@@ -266,7 +266,7 @@ func FromFlag(networkID uint32, genesisContent string, stakingCfg *StakingConfig
 
 // FromConfig returns:
 //
-//  1. The byte representation of the genesis state of the platform chain
+//  1. The byte representation of the genesis state of the omega chain
 //     (ie the genesis state of the network)
 //  2. The asset ID of DIONE
 func FromConfig(config *Config) ([]byte, ids.ID, error) {
@@ -345,8 +345,8 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	initiallyStaked.Add(config.InitialStakedFunds...)
 	skippedAllocations := []Allocation(nil)
 
-	// Specify the initial state of the Platform Chain
-	platformvmArgs := api.BuildGenesisArgs{
+	// Specify the initial state of the Omega Chain
+	omegavmArgs := api.BuildGenesisArgs{
 		DioneAssetID:  dioneAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
 		Time:          json.Uint64(config.StartTime),
@@ -369,7 +369,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				if err != nil {
 					return nil, ids.Empty, fmt.Errorf("couldn't encode message: %w", err)
 				}
-				platformvmArgs.UTXOs = append(platformvmArgs.UTXOs,
+				omegavmArgs.UTXOs = append(omegavmArgs.UTXOs,
 					api.UTXO{
 						Locktime: json.Uint64(unlock.Locktime),
 						Amount:   json.Uint64(unlock.Amount),
@@ -418,7 +418,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 		delegationFee := json.Uint32(staker.DelegationFee)
 
-		platformvmArgs.Validators = append(platformvmArgs.Validators,
+		omegavmArgs.Validators = append(omegavmArgs.Validators,
 			api.PermissionlessValidator{
 				Staker: api.Staker{
 					StartTime: json.Uint64(genesisTime.Unix()),
@@ -440,7 +440,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("couldn't encode message: %w", err)
 	}
-	platformvmArgs.Chains = []api.Chain{
+	omegavmArgs.Chains = []api.Chain{
 		{
 			GenesisData: avmReply.Bytes,
 			SubnetID:    constants.PrimaryNetworkID,
@@ -460,15 +460,15 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		},
 	}
 
-	platformvmReply := api.BuildGenesisReply{}
-	platformvmSS := api.StaticService{}
-	if err := platformvmSS.BuildGenesis(nil, &platformvmArgs, &platformvmReply); err != nil {
-		return nil, ids.ID{}, fmt.Errorf("problem while building platform chain's genesis state: %w", err)
+	omegavmReply := api.BuildGenesisReply{}
+	omegavmSS := api.StaticService{}
+	if err := omegavmSS.BuildGenesis(nil, &omegavmArgs, &omegavmReply); err != nil {
+		return nil, ids.ID{}, fmt.Errorf("problem while building omega chain's genesis state: %w", err)
 	}
 
-	genesisBytes, err := formatting.Decode(platformvmReply.Encoding, platformvmReply.Bytes)
+	genesisBytes, err := formatting.Decode(omegavmReply.Encoding, omegavmReply.Bytes)
 	if err != nil {
-		return nil, ids.ID{}, fmt.Errorf("problem parsing platformvm genesis bytes: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("problem parsing omegavm genesis bytes: %w", err)
 	}
 
 	return genesisBytes, dioneAssetID, nil
@@ -537,13 +537,13 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 	return append(allNodeAllocations, currentNodeAllocation)
 }
 
-func VMGenesis(genesisBytes []byte, vmID ids.ID) (*pchaintxs.Tx, error) {
+func VMGenesis(genesisBytes []byte, vmID ids.ID) (*ochaintxs.Tx, error) {
 	genesis, err := genesis.Parse(genesisBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse genesis: %w", err)
 	}
 	for _, chain := range genesis.Chains {
-		uChain := chain.Unsigned.(*pchaintxs.CreateChainTx)
+		uChain := chain.Unsigned.(*ochaintxs.CreateChainTx)
 		if uChain.VMID == vmID {
 			return chain, nil
 		}

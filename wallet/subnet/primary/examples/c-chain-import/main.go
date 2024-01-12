@@ -41,8 +41,8 @@ func main() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain wallet
-	pWallet := wallet.P()
+	// Get the O-chain wallet
+	oWallet := wallet.O()
 	cWallet := wallet.C()
 
 	// Pull out useful constants to use when issuing transactions.
@@ -56,7 +56,7 @@ func main() {
 	}
 
 	exportStartTime := time.Now()
-	exportTx, err := pWallet.IssueExportTx(cChainID, []*dione.TransferableOutput{{
+	exportTx, err := oWallet.IssueExportTx(cChainID, []*dione.TransferableOutput{{
 		Asset: dione.Asset{ID: dioneAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          units.Dione,
@@ -69,7 +69,7 @@ func main() {
 	log.Printf("issued export %s in %s\n", exportTx.ID(), time.Since(exportStartTime))
 
 	importStartTime := time.Now()
-	importTx, err := cWallet.IssueImportTx(constants.PlatformChainID, ethAddr)
+	importTx, err := cWallet.IssueImportTx(constants.OmegaChainID, ethAddr)
 	if err != nil {
 		log.Fatalf("failed to issue import transaction: %s\n", err)
 	}

@@ -9,8 +9,8 @@ AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Direct
 odysseygo_path="$AVALANCHE_PATH/build/odysseygo"
 
 # Avalabs docker hub
-# avaplatform/odysseygo - defaults to local as to avoid unintentional pushes
-# You should probably set it - export DOCKER_REPO='avaplatform/odysseygo'
+# odyplatform/odysseygo - defaults to local as to avoid unintentional pushes
+# You should probably set it - export DOCKER_REPO='odyplatform/odysseygo'
 odysseygo_dockerhub_repo=${DOCKER_REPO:-"odysseygo"}
 
 # Current branch

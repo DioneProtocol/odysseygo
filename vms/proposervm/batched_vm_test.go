@@ -1034,7 +1034,7 @@ func initTestRemoteProposerVM(
 		return coreGenBlk.Height(), nil
 	}
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return defaultPChainHeight, nil
+		return defaultOChainHeight, nil
 	}
 	valState.GetValidatorSetF = func(context.Context, uint64, ids.ID) (map[ids.NodeID]*validators.GetValidatorOutput, error) {
 		return map[ids.NodeID]*validators.GetValidatorOutput{
