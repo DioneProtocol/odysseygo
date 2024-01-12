@@ -10,12 +10,12 @@ service ValidatorState {
   // GetMinimumHeight returns the minimum height of the blocks in the optimal
   // proposal window.
   rpc GetMinimumHeight(google.protobuf.Empty) returns (GetMinimumHeightResponse);
-  // GetCurrentHeight returns the current height of the P-chain.
+  // GetCurrentHeight returns the current height of the O-chain.
   rpc GetCurrentHeight(google.protobuf.Empty) returns (GetCurrentHeightResponse);
   // GetSubnetID returns the subnetID of the provided chain.
   rpc GetSubnetID(GetSubnetIDRequest) returns (GetSubnetIDResponse);
   // GetValidatorSet returns the weights of the nodeIDs for the provided
-  // subnet at the requested P-chain height.
+  // subnet at the requested O-chain height.
   rpc GetValidatorSet(GetValidatorSetRequest) returns (GetValidatorSetResponse);
 }
 

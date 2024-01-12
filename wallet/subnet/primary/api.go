@@ -20,10 +20,10 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/vms/avm"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/c"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/o"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 )
 
@@ -38,7 +38,7 @@ const (
 // TODO: Refactor UTXOClient definition to allow the client implementations to
 // perform their own assertions.
 var (
-	_ UTXOClient = platformvm.Client(nil)
+	_ UTXOClient = omegavm.Client(nil)
 	_ UTXOClient = avm.Client(nil)
 )
 
@@ -55,8 +55,8 @@ type UTXOClient interface {
 }
 
 type DIONEState struct {
-	PClient platformvm.Client
-	PCTX    p.Context
+	OClient omegavm.Client
+	OCTX    o.Context
 	XClient avm.Client
 	XCTX    x.Context
 	CClient evm.Client
@@ -73,11 +73,11 @@ func FetchState(
 	error,
 ) {
 	infoClient := info.NewClient(uri)
-	pClient := platformvm.NewClient(uri)
+	oClient := omegavm.NewClient(uri)
 	xClient := avm.NewClient(uri, "X")
 	cClient := evm.NewCChainClient(uri)
 
-	pCTX, err := p.NewContextFromClients(ctx, infoClient, xClient)
+	oCTX, err := o.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +100,8 @@ func FetchState(
 		codec  codec.Manager
 	}{
 		{
-			id:     constants.PlatformChainID,
-			client: pClient,
+			id:     constants.OmegaChainID,
+			client: oClient,
 			codec:  txs.Codec,
 		},
 		{
@@ -132,8 +132,8 @@ func FetchState(
 		}
 	}
 	return &DIONEState{
-		PClient: pClient,
-		PCTX:    pCTX,
+		OClient: oClient,
+		OCTX:    oCTX,
 		XClient: xClient,
 		XCTX:    xCTX,
 		CClient: cClient,

@@ -13,7 +13,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/stakeable"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/stakeable"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
@@ -24,7 +24,7 @@ func main() {
 	kc := secp256k1fx.NewKeychain(key)
 	amount := 500 * units.MilliDione
 	locktime := uint64(time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC).Unix())
-	destAddrStr := "P-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
+	destAddrStr := "O-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
 
 	destAddr, err := address.ParseToID(destAddrStr)
 	if err != nil {
@@ -46,12 +46,12 @@ func main() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain wallet
-	pWallet := wallet.P()
-	dioneAssetID := pWallet.DIONEAssetID()
+	// Get the O-chain wallet
+	oWallet := wallet.O()
+	dioneAssetID := oWallet.DIONEAssetID()
 
 	issueTxStartTime := time.Now()
-	tx, err := pWallet.IssueBaseTx([]*dione.TransferableOutput{
+	tx, err := oWallet.IssueBaseTx([]*dione.TransferableOutput{
 		{
 			Asset: dione.Asset{
 				ID: dioneAssetID,

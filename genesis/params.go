@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/utils/constants"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 )
 
 type StakingConfig struct {

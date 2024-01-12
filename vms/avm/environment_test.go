@@ -252,14 +252,14 @@ func newContext(tb testing.TB) *snow.Context {
 
 	require.NoError(aliaser.Alias(chainID, "X"))
 	require.NoError(aliaser.Alias(chainID, chainID.String()))
-	require.NoError(aliaser.Alias(constants.PlatformChainID, "P"))
-	require.NoError(aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()))
+	require.NoError(aliaser.Alias(constants.OmegaChainID, "O"))
+	require.NoError(aliaser.Alias(constants.OmegaChainID, constants.OmegaChainID.String()))
 
 	ctx.ValidatorState = &validators.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
-				constants.PlatformChainID: ctx.SubnetID,
-				chainID:                   ctx.SubnetID,
+				constants.OmegaChainID: ctx.SubnetID,
+				chainID:                ctx.SubnetID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errMissing

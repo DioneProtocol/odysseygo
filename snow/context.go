@@ -16,7 +16,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 	"github.com/DioneProtocol/odysseygo/utils/logging"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp"
 )
 
 // ContextInitializable represents an object that can be initialized
@@ -51,7 +51,7 @@ type Context struct {
 	WarpSigner warp.Signer
 
 	// snowman++ attributes
-	ValidatorState validators.State // interface for P-Chain validators
+	ValidatorState validators.State // interface for O-Chain validators
 	// Chain-specific directory where arbitrary data can be written
 	ChainDataDir string
 }

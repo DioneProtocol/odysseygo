@@ -518,7 +518,7 @@ func TestIssueImportTx(t *testing.T) {
 		env.vm.ctx.Lock.Unlock()
 	}()
 
-	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
+	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.OmegaChainID)
 
 	genesisTx := getCreateTxFromGenesisTest(t, env.genesisBytes, "DIONE")
 	dioneID := genesisTx.ID()
@@ -549,7 +549,7 @@ func TestIssueImportTx(t *testing.T) {
 				},
 			}},
 		}},
-		SourceChain: constants.PlatformChainID,
+		SourceChain: constants.OmegaChainID,
 		ImportedIns: []*dione.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
@@ -563,7 +563,7 @@ func TestIssueImportTx(t *testing.T) {
 	}}
 	require.NoError(tx.SignSECP256K1Fx(env.vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 
-	// Provide the platform UTXO:
+	// Provide the omega UTXO:
 	utxo := &dione.UTXO{
 		UTXOID: utxoID,
 		Asset:  txAssetID,
@@ -598,7 +598,7 @@ func TestIssueImportTx(t *testing.T) {
 	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), dioneID, 1)
 
 	id := utxoID.InputID()
-	_, err = env.vm.ctx.SharedMemory.Get(constants.PlatformChainID, [][]byte{id[:]})
+	_, err = env.vm.ctx.SharedMemory.Get(constants.OmegaChainID, [][]byte{id[:]})
 	require.ErrorIs(err, database.ErrNotFound)
 }
 
@@ -644,7 +644,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 				},
 			}},
 		}},
-		SourceChain: constants.PlatformChainID,
+		SourceChain: constants.OmegaChainID,
 		ImportedIns: []*dione.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
@@ -668,7 +668,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 	assertLatestIdx(t, env.vm.db, key.PublicKey().Address(), dioneID, 1)
 
 	id := utxoID.InputID()
-	_, err = env.vm.ctx.SharedMemory.Get(constants.PlatformChainID, [][]byte{id[:]})
+	_, err = env.vm.ctx.SharedMemory.Get(constants.OmegaChainID, [][]byte{id[:]})
 	require.ErrorIs(err, database.ErrNotFound)
 }
 
@@ -710,7 +710,7 @@ func TestIssueExportTx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: constants.PlatformChainID,
+		DestinationChain: constants.OmegaChainID,
 		ExportedOuts: []*dione.TransferableOutput{{
 			Asset: dione.Asset{ID: dioneID},
 			Out: &secp256k1fx.TransferOutput{
@@ -724,7 +724,7 @@ func TestIssueExportTx(t *testing.T) {
 	}}
 	require.NoError(tx.SignSECP256K1Fx(env.vm.parser.Codec(), [][]*secp256k1.PrivateKey{{key}}))
 
-	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
+	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.OmegaChainID)
 	utxoBytes, _, _, err := peerSharedMemory.Indexed(
 		env.vm.ctx.ChainID,
 		[][]byte{
@@ -782,7 +782,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: constants.PlatformChainID,
+		DestinationChain: constants.OmegaChainID,
 		ExportedOuts: []*dione.TransferableOutput{{
 			Asset: assetID,
 			Out: &secp256k1fx.TransferOutput{
@@ -802,7 +802,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	}
 	utxoID := utxo.InputID()
 
-	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.PlatformChainID)
+	peerSharedMemory := env.sharedMemory.NewSharedMemory(constants.OmegaChainID)
 	require.NoError(peerSharedMemory.Apply(map[ids.ID]*atomic.Requests{
 		env.vm.ctx.ChainID: {
 			RemoveRequests: [][]byte{utxoID[:]},

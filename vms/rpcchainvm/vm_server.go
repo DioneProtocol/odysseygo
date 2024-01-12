@@ -37,7 +37,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/logging"
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 	"github.com/DioneProtocol/odysseygo/version"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp/gwarp"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp/gwarp"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/ghttp"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/grpcutils"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/messenger"
@@ -419,11 +419,11 @@ func (vm *VMServer) BuildBlock(ctx context.Context, req *vmpb.BuildBlockRequest)
 		blk snowman.Block
 		err error
 	)
-	if vm.bVM == nil || req.PChainHeight == nil {
+	if vm.bVM == nil || req.OChainHeight == nil {
 		blk, err = vm.vm.BuildBlock(ctx)
 	} else {
 		blk, err = vm.bVM.BuildBlockWithContext(ctx, &block.Context{
-			PChainHeight: *req.PChainHeight,
+			OChainHeight: *req.OChainHeight,
 		})
 	}
 	if err != nil {
@@ -833,7 +833,7 @@ func (vm *VMServer) BlockVerify(ctx context.Context, req *vmpb.BlockVerifyReques
 		return nil, err
 	}
 
-	if req.PChainHeight == nil {
+	if req.OChainHeight == nil {
 		err = blk.Verify(ctx)
 	} else {
 		blkWithCtx, ok := blk.(block.WithVerifyContext)
@@ -841,7 +841,7 @@ func (vm *VMServer) BlockVerify(ctx context.Context, req *vmpb.BlockVerifyReques
 			return nil, fmt.Errorf("%w but got %T", errExpectedBlockWithVerifyContext, blk)
 		}
 		blockCtx := &block.Context{
-			PChainHeight: *req.PChainHeight,
+			OChainHeight: *req.OChainHeight,
 		}
 		err = blkWithCtx.VerifyWithContext(ctx, blockCtx)
 	}

@@ -59,7 +59,7 @@ type peer struct {
 // to the consensus engines that the messages are intended for.
 // Note that consensus engines are uniquely identified by the ID of the chain
 // that they are working on.
-// Invariant: P-chain must be registered before processing any messages
+// Invariant: O-chain must be registered before processing any messages
 type ChainRouter struct {
 	clock         mockable.Clock
 	log           logging.Logger
@@ -427,9 +427,9 @@ func (cr *ChainRouter) AddChain(ctx context.Context, chain handler.Handler) {
 		)
 	}
 
-	// When we register the P-chain, we mark ourselves as connected on all of
+	// When we register the O-chain, we mark ourselves as connected on all of
 	// the subnets that we have tracked.
-	if chainID != constants.PlatformChainID {
+	if chainID != constants.OmegaChainID {
 		return
 	}
 
@@ -537,7 +537,7 @@ func (cr *ChainRouter) Benched(chainID ids.ID, nodeID ids.NodeID) {
 		return
 	}
 
-	// This will disconnect the node from all subnets when issued to P-chain.
+	// This will disconnect the node from all subnets when issued to O-chain.
 	// Even if there is no chain in the subnet.
 	msg := message.InternalDisconnected(nodeID)
 
@@ -699,12 +699,12 @@ func (cr *ChainRouter) clearRequest(
 }
 
 // connectedSubnet pushes an InternalSubnetConnected message with [nodeID] and
-// [subnetID] to the P-chain. This should be called when a node is either first
+// [subnetID] to the O-chain. This should be called when a node is either first
 // connecting to [subnetID] or when a node that was already connected is
 // unbenched on [subnetID]. This is a noop if [subnetID] is the Primary Network
 // or if the peer is already marked as connected to the subnet.
-// Invariant: should be called after *message.Connected is pushed to the P-chain
-// Invariant: should be called after the P-chain was provided in [AddChain]
+// Invariant: should be called after *message.Connected is pushed to the O-chain
+// Invariant: should be called after the O-chain was provided in [AddChain]
 func (cr *ChainRouter) connectedSubnet(peer *peer, nodeID ids.NodeID, subnetID ids.ID) {
 	// if connected to primary network, we can skip this
 	// because Connected has its own internal message
@@ -718,19 +718,19 @@ func (cr *ChainRouter) connectedSubnet(peer *peer, nodeID ids.NodeID, subnetID i
 	}
 
 	msg := message.InternalConnectedSubnet(nodeID, subnetID)
-	// We only push this message to the P-chain because it is the only chain
+	// We only push this message to the O-chain because it is the only chain
 	// that cares about the connectivity of all subnets. Others chains learn
 	// about the connectivity of their own subnet when they receive a
 	// *message.Connected.
-	platformChain, ok := cr.chainHandlers[constants.PlatformChainID]
+	omegaChain, ok := cr.chainHandlers[constants.OmegaChainID]
 	if !ok {
-		cr.log.Error("trying to issue InternalConnectedSubnet message, but platform chain is not registered",
+		cr.log.Error("trying to issue InternalConnectedSubnet message, but omega chain is not registered",
 			zap.Stringer("nodeID", nodeID),
 			zap.Stringer("subnetID", subnetID),
 		)
 		return
 	}
-	platformChain.Push(
+	omegaChain.Push(
 		context.TODO(),
 		handler.Message{
 			InboundMessage: msg,

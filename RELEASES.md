@@ -8,7 +8,7 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 
 ### APIs
 
-- Added `height` to the output of `platform.getCurrentSupply`
+- Added `height` to the output of `omega.getCurrentSupply`
 
 ### Configs
 
@@ -65,20 +65,20 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 - Add Validator Gossiper by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2015
 - database: comment that Get returns ErrNotFound if key is not present by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/2018
 - Return `height` from `GetCurrentSupply` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2022
-- simplify platformvm `GetHeight` function by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2023
+- simplify omegavm `GetHeight` function by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2023
 - Merkle db fix range proof commit bug by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2019
 - Add `bag.Of` helper by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2027
 - Cleanup early poll termination logic by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2029
 - fix typo by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2030
 - Merkle db intermediate node key compression by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1987
 - Improve RPC Chain version mismatch error message by @martineckardt in https://github.com/DioneProtocol/odysseygo/pull/2021
-- Move subnet owner lookup to platformvm state by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2024
+- Move subnet owner lookup to omegavm state by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2024
 - Fix fuzz tests; add iterator fuzz test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1991
 - Refactor subnet validator primary network requirements by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2014
 - Rename events to event by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1973
 - Add function to initialize SampleableSet by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2017
 - add `IsCortinaActivated` helper by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2013
-- Fix P-chain Import by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2035
+- Fix O-chain Import by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2035
 - Rename avm/blocks package to avm/block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1970
 - Merkledb Update rangeproof proto to be consistent with changeproof proto by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2040
 - `merkledb` -- encode lengths as uvarints by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/2039
@@ -173,20 +173,20 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 **This update changes the local network genesis. This version will not be able to join local networks with prior versions.**
 
-**The first startup of the P-Chain will perform indexing operations. This indexing runs in the background and does not impact restart time. During this indexing the node will report increased CPU, memory, and disk usage.**
+**The first startup of the O-Chain will perform indexing operations. This indexing runs in the background and does not impact restart time. During this indexing the node will report increased CPU, memory, and disk usage.**
 
 ### APIs
 
-- Added `platform.getBlockByHeight`
+- Added `omega.getBlockByHeight`
 
 ### Configs
 
-- Added `--partial-sync-primary-network` flag to enable non-validators to optionally sync only the P-chain on the primary network
-- Added P-chain cache size configuration `block-id-cache-size`
+- Added `--partial-sync-primary-network` flag to enable non-validators to optionally sync only the O-chain on the primary network
+- Added O-chain cache size configuration `block-id-cache-size`
 
 ### Fixes
 
-- Fixed P-chain GetValidatorSet regression for subnets
+- Fixed O-chain GetValidatorSet regression for subnets
 - Changed `x/sync` range/change proof bounds from `[]byte` to `Maybe[[]byte]`
 - Fixed `x/sync` error handling from failure to send app messages
 
@@ -207,10 +207,10 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 - Add Maybe to the end bound of proofs (Part 2) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1813
 - Move Maybe to its own package by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1817
 - `merkledb` -- clarify/improve change proof invariants by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1810
-- P-chain state prune + height index by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1719
+- O-chain state prune + height index by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1719
 - Update maintainer of the debian packages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1825
-- Make platformvm implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1746
-- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1747
+- Make omegavm implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1746
+- Add O-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1747
 - Update local genesis startTime by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1811
 - `sync` -- add handling for fatal error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1690
 - Add error logs for unexpected proposervm BuildBlock failures by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1832
@@ -218,7 +218,7 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 - Document PendingTxs + BuildBlock consensus engine requirement by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1835
 - Bump github.com/supranational/blst from 0.3.11-0.20230406105308-e9dfc5ee724b to 0.3.11 by @dependabot in https://github.com/DioneProtocol/odysseygo/pull/1831
 - Add Primary Network Lite Sync Option by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1769
-- Check P-chain ShouldPrune during Initialize by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1836
+- Check O-chain ShouldPrune during Initialize by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1836
 
 ### New Contributors
 
@@ -235,12 +235,12 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 ### APIs
 
-- Modifed `platform.getValidatorsAt` to also return BLS public keys
+- Modifed `omega.getValidatorsAt` to also return BLS public keys
 
 ### Configs
 
 - Changed the default value of `--network-allow-private-ips` to `false` when the `--network-id` is either `testnet` or `mainnet`
-- Added P-chain cache size configurations
+- Added O-chain cache size configurations
   - `block-cache-size`
   - `tx-cache-size`
   - `transformed-subnet-tx-cache-size`
@@ -271,12 +271,12 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 - upgrade: Increase all ANR timeouts to 2m to ensure CI reliability by @marun in https://github.com/DioneProtocol/odysseygo/pull/1737
 - fix sync panic by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1736
 - remove `vm.state` re-assignment in tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1739
-- Expose BLS public keys from platform.getValidatorsAt by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1740
+- Expose BLS public keys from omega.getValidatorsAt by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1740
 - Fix validator set diff tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1744
 - Replace List() with Map() on validators.Set by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1745
-- vms/platformvm: configure state cache sizes #1522 by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1677
+- vms/omegavm: configure state cache sizes #1522 by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1677
 - Support both `stateBlk`s and `Block`s in `blockDB` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1748
-- Add `DefaultExecutionConfig` var to `platformvm` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1749
+- Add `DefaultExecutionConfig` var to `omegavm` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1749
 - Remove hanging TODO from prior change by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1758
 - Write process context on node start to simplify test orchestration by @marun in https://github.com/DioneProtocol/odysseygo/pull/1729
 - x/sync: add locks for peerTracker by @darioush in https://github.com/DioneProtocol/odysseygo/pull/1756
@@ -322,7 +322,7 @@ The plugin version is updated to `27` all plugins must update to be compatible.
 
 ### What's Changed
 
-- stop persisting rejected blocks on P-chain by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1696
+- stop persisting rejected blocks on O-chain by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1696
 - Ensure scripts/lint.sh failure when used with incompatible grep by @marun in https://github.com/DioneProtocol/odysseygo/pull/1711
 - sum peers clock skew into metric by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1695
 - Make AVM implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1699
@@ -369,7 +369,7 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 ### Configs
 
 - Added `--staking-host` to allow binding only on a specific address for staking
-- Added `checksums-enabled` to the X-chain and P-chain configs
+- Added `checksums-enabled` to the X-chain and O-chain configs
 
 ### Fixes
 
@@ -407,7 +407,7 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 - Prune X-chain State by @coffeedione in https://github.com/DioneProtocol/odysseygo/pull/1427
 - Support building docker image on ARM64 by @dshiell in https://github.com/DioneProtocol/odysseygo/pull/1103
 - remove goreleaser by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1660
-- Fix Dockerfile on non amd64 platforms by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1661
+- Fix Dockerfile on non amd64 omegas by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1661
 - Improve metrics error message by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1663
 - Remove X-chain UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1662
 - Add state checksums by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1658
@@ -449,7 +449,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
   - `odyssey_health_checks_failing{tag="TAG"}`
   - `odyssey_liveness_checks_failing{tag="TAG"}`
   - `odyssey_readiness_checks_failing{tag="TAG"}`
-- Removed P-chain VM percent connected metrics
+- Removed O-chain VM percent connected metrics
   - `odyssey_P_vm_percent_connected`
   - `odyssey_P_vm_percent_connected_subnet{subnetID="SUBNETID"}`
 - Added percent connected metrics by chain
@@ -465,7 +465,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ### Fixes
 
-- Fixed `platformvm.GetValidatorSet` returning incorrect BLS public keys
+- Fixed `omegavm.GetValidatorSet` returning incorrect BLS public keys
 - Fixed IPv6 literal binding with `--http-host`
 - Fixed P2P message log format
 
@@ -479,8 +479,8 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Enforce inlining functions with a single error return in `require.NoError` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1500
 - `x/sync` / `x/merkledb` -- add `SyncableDB` interface by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1555
 - Rename beacon to boostrapper, define bootstrappers in JSON file for cross-language compatiblity by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1439
-- add P-chain height indexing by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1447
-- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1448
+- add O-chain height indexing by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1447
+- Add O-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1448
 - `x/sync` -- use for sending Range Proofs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1537
 - Add test to ensure that database packing produces sorted values by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1560
 - Randomize unit test execution order to identify unwanted dependency by @marun in https://github.com/DioneProtocol/odysseygo/pull/1565
@@ -489,7 +489,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - `x/sync` -- Use proto for sending Change Proofs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1541
 - Only send `PushQuery` messages after building the block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1428
 - Rename APIAllowedOrigins to HTTPAllowedOrigins by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1567
-- Add GetBalance examples for the P-chain and X-chain wallets by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1569
+- Add GetBalance examples for the O-chain and X-chain wallets by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1569
 - Reduce number of test iterations by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1568
 - Re-add upgrade tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1410
 - Remove lists from Chits messages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1412
@@ -501,7 +501,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Remove version db from merkle db by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1534
 - `MerkleDB` -- add eviction batch size config by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1586
 - `MerkleDB` -- fix `onEvictCache.Flush` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1589
-- Revert P-Chain height index by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1591
+- Revert O-Chain height index by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1591
 - `x/sync` -- Add `SyncableDB` proto by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1559
 - Clarify break on error during ancestors lookup by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1580
 - Add buf-push github workflow by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1556
@@ -509,7 +509,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Cleanup fx interface compliance by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1599
 - Improve metrics error msging by @anusha-ctrl in https://github.com/DioneProtocol/odysseygo/pull/1598
 - Separate health checks by tags by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1579
-- Separate subnet stake connected health and metrics from P-chain by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1358
+- Separate subnet stake connected health and metrics from O-chain by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1358
 - Merkle db iterator by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1533
 - Fix unreadable message errors by @morrisettjohn in https://github.com/DioneProtocol/odysseygo/pull/1585
 - Log unexpected errors during GetValidatorSet by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1592
@@ -538,7 +538,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ### APIs
 
-- Significantly improved the performance of `platform.getStake`
+- Significantly improved the performance of `omega.getStake`
 - Added `portion_filled` metric for all metered caches
 - Added resource metrics by process
   - `odyssey_system_resources_num_cpu_cycles`
@@ -573,7 +573,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - chains: do not hold write subnetsLock in health checks by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1460
 - remove zstd check by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1459
 - use `require.IsType` for type assertions in tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1458
-- vms/platformvm/service: nits (preallocate address slice, error msg) by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1477
+- vms/omegavm/service: nits (preallocate address slice, error msg) by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1477
 - ban `require.NotEqualValues` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1470
 - use `require` in `api` and `utils/password` packages by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1471
 - use "golang.org/x/term" as "golang.org/x/crypto/ssh/terminal" is deprecated by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1464
@@ -623,14 +623,14 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 - Enabled `avm.getBlockByHeight` to take in `height` as a string
 - Added IDs to json formats
-  - `platform.getTx` now includes `id` in the `tx` response
-  - `platform.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
+  - `omega.getTx` now includes `id` in the `tx` response
+  - `omega.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
   - `avm.getTx` now includes `id` in the `tx` response
   - `avm.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
   - `avm.getBlockByHeight` now includes `id` in the `block` response and in the internal `tx` fields
 - Removed `avm.issueStopVertex`
 - Fixed `wallet` methods to correctly allow issuance of dependent transactions after the X-chain linearization
-- Added `validatorOnly` flag in `platform.getStake`
+- Added `validatorOnly` flag in `omega.getStake`
 - Removed all odyssey consensus metrics
 - Fixed `msgHandlingTime` metrics
 
@@ -712,7 +712,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ## [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0)
 
-[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the P-chain, and increases the maximum block size on the C-chain.
+[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the O-chain, and increases the maximum block size on the C-chain.
 
 The changes in the upgrade go into effect at 11 AM ET, April 25th 2023 on Mainnet.
 
@@ -730,7 +730,7 @@ The supported plugin version is `25`.
 - Replace `flags` usage with `pflags` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1270
 - Fixed grammatical errors in `README.md` by @krakxn in https://github.com/DioneProtocol/odysseygo/pull/1102
 - Add tests for race conditions in merkledb by @kyl27 in https://github.com/DioneProtocol/odysseygo/pull/1256
-- Add P-chain indexer API example by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1271
+- Add O-chain indexer API example by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1271
 - use `require` in `snow/choices` tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1279
 - use `require` in `utils/wrappers` tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1280
 - add support for tracking delegatee rewards to validator metadata by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1273
@@ -835,11 +835,11 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Added `avm` transaction based metrics
 - Replaced error strings with error interfaces in the `avm` mempool
 
-### PlatformVM
+### OmegaVM
 
 - Added logs when the local nodes stake amount changes
-- Moved `platformvm` `message` package into `components`
-- Replaced error strings with error interfaces in the `platformvm` mempool
+- Moved `omegavm` `message` package into `components`
+- Replaced error strings with error interfaces in the `omegavm` mempool
 
 ### Warp
 
@@ -865,7 +865,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### Examples
 
-- Added P-chain `RemoveSubnetValidatorTx` example using the wallet
+- Added O-chain `RemoveSubnetValidatorTx` example using the wallet
 - Added X-chain `CreateAssetTx` example using the wallet
 
 ### Configs
@@ -917,25 +917,25 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
   - `wallet.issueTx`
   - `wallet.send`
   - `wallet.sendMultiple`
-- Deprecated various `platformvm` APIs
-  - `platform.exportKey`
-  - `platform.importKey`
-  - `platform.getBalance`
-  - `platform.createAddress`
-  - `platform.listAddresses`
-  - `platform.getSubnets`
-  - `platform.addValidator`
-  - `platform.addDelegator`
-  - `platform.addSubnetValidator`
-  - `platform.createSubnet`
-  - `platform.exportDIONE`
-  - `platform.importDIONE`
-  - `platform.createBlockchain`
-  - `platform.getBlockchains`
-  - `platform.getStake`
-  - `platform.getMaxStakeAmount`
-  - `platform.getRewardUTXOs`
-- Deprecated the `stake` field in the `platform.getTotalStake` response in favor of `weight`
+- Deprecated various `omegavm` APIs
+  - `omega.exportKey`
+  - `omega.importKey`
+  - `omega.getBalance`
+  - `omega.createAddress`
+  - `omega.listAddresses`
+  - `omega.getSubnets`
+  - `omega.addValidator`
+  - `omega.addDelegator`
+  - `omega.addSubnetValidator`
+  - `omega.createSubnet`
+  - `omega.exportDIONE`
+  - `omega.importDIONE`
+  - `omega.createBlockchain`
+  - `omega.getBlockchains`
+  - `omega.getStake`
+  - `omega.getMaxStakeAmount`
+  - `omega.getRewardUTXOs`
+- Deprecated the `stake` field in the `omega.getTotalStake` response in favor of `weight`
 
 ## [v1.9.11](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.11)
 
@@ -971,7 +971,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 ### AVM
 
 - Refactored `avm` API tx creation into a standalone `Spender` implementation
-- Migrated UTXO interfaces from the `platformvm` into the `components` for use in the `avm`
+- Migrated UTXO interfaces from the `omegavm` into the `components` for use in the `avm`
 - Refactored `avm` `tx.SyntacticVerify` to expect the config rather than the fee fields
 
 ### Miscellaneous
@@ -988,8 +988,8 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 - Removed support for the `--whitelisted-subnets` flag
 - Removed unnecessary abstractions from the `app` package
-- Removed `Factory` embedding from `platformvm.VM` and `avm.VM`
-- Removed `validator` package from the `platformvm`
+- Removed `Factory` embedding from `omegavm.VM` and `avm.VM`
+- Removed `validator` package from the `omegavm`
 - Removed `timer.TimeoutManager`
 - Replaced `snow.Context` in `Factory.New` with `logging.Logger`
 - Renamed `set.Bits#Len` to `BitLen` and `set.Bits#HammingWeight` to `Len` to align with `set.Bits64`
@@ -1024,8 +1024,8 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### API
 
-- Removed delegators from `platform.getCurrentValidators` unless a single `nodeID` is requested
-- Added `delegatorCount` and `delegatorWeight` to the validators returned by `platform.getCurrentValidators`
+- Removed delegators from `omega.getCurrentValidators` unless a single `nodeID` is requested
+- Added `delegatorCount` and `delegatorWeight` to the validators returned by `omega.getCurrentValidators`
 
 ### Documentation
 
@@ -1054,7 +1054,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 ### Cleanup
 
 - Renamed `teleporter` package to `warp`
-- Replaced `bool` flags in P-chain state diffs with an `enum`
+- Replaced `bool` flags in O-chain state diffs with an `enum`
 - Refactored subnet configs to more closely align between the primary network and subnets
 - Simplified the `utxo.Spender` interface
 - Removed unused field `common.Config#Validators`
@@ -1080,13 +1080,13 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### APIs
 
-- Updated `platform.getCurrentValidators` to return `uptime` as a percentage
-- Updated `platform.get*Validators` to avoid iterating over the staker set when requesting specific nodeIDs
-- Cached staker data in `platform.get*Validators` to significantly reduce DB IO
-- Added `stakeAmount` and `weight` to all staker responses in P-chain APIs
-- Deprecated `stakeAmount` in staker responses from P-chain APIs
+- Updated `omega.getCurrentValidators` to return `uptime` as a percentage
+- Updated `omega.get*Validators` to avoid iterating over the staker set when requesting specific nodeIDs
+- Cached staker data in `omega.get*Validators` to significantly reduce DB IO
+- Added `stakeAmount` and `weight` to all staker responses in O-chain APIs
+- Deprecated `stakeAmount` in staker responses from O-chain APIs
 - Removed `creationTxFee` from `info.GetTxFeeResponse`
-- Removed `address` from `platformvm.GetBalanceRequest`
+- Removed `address` from `omegavm.GetBalanceRequest`
 
 ### Fixes
 
@@ -1239,15 +1239,15 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Added a `TxID` field to `validators.Validator`
 - Improved and documented error handling within the `validators.Set` interface
 - Added `BLS` public keys to the result of `GetValidatorSet`
-- Added `BuildBlockWithContext` as an optional VM method to build blocks at a specific P-chain height
-- Added `VerifyWithContext` as an optional block method to verify blocks at a specific P-chain height
+- Added `BuildBlockWithContext` as an optional VM method to build blocks at a specific O-chain height
+- Added `VerifyWithContext` as an optional block method to verify blocks at a specific O-chain height
 
 ### Uptime Tracking
 
 - Added ConnectedSubnet message handling to the chain handler
-- Added SubnetConnector interface and implemented it in the platformvm
+- Added SubnetConnector interface and implemented it in the omegavm
 - Added subnet uptimes to p2p `pong` messages
-- Added subnet uptimes to `platform.getCurrentValidators`
+- Added subnet uptimes to `omega.getCurrentValidators`
 - Added `subnetID` as an argument to `info.Uptime`
 
 ### Fixes
@@ -1357,7 +1357,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Removed `Parameters` from all `Consensus` interfaces
 - Updated `odyssey-network-runner` to `v1.3.0`
 - Added `ids.BigBitSet` to extend `ids.BitSet64` for arbitrarily large sets
-- Added support for parsing future subnet uptime tracking data to the P-chain's state implementation
+- Added support for parsing future subnet uptime tracking data to the O-chain's state implementation
 - Increased validator set cache size
 - Added `dione.UTXOIDFromString` helper for managing `UTXOID`s more easily
 
@@ -1386,14 +1386,14 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### BLS
 
-- Added bls proof of possession to `platform.getCurrentValidators` and `platform.getPendingValidators`
+- Added bls proof of possession to `omega.getCurrentValidators` and `omega.getPendingValidators`
 - Added bls public key to in-memory staker objects
 - Improved memory clearing of bls secret keys
 
 ### Cleanup
 
 - Fixed issue where the chain manager would attempt to start chain creation multiple times
-- Fixed race that caused the P-chain to finish bootstrapping before the primary network finished bootstrapping
+- Fixed race that caused the O-chain to finish bootstrapping before the primary network finished bootstrapping
 - Converted inbound message handling to expect usage of types rather than maps of fields
 - Simplified the `validators.Set` implementation
 - Added a warning if synchronous consensus messages take too long
@@ -1419,15 +1419,15 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Removed duplicated fields from the json format of the node config
 - Configured min connected stake health check based on the consensus parameters
 - Added new consensus metrics
-- Documented how chain time is advanced in the PlatformVM with `chain_time_update.md`
+- Documented how chain time is advanced in the OmegaVM with `chain_time_update.md`
 
 ### Cleanup
 
-- Converted chain creation to be handled asynchronously from the P-chain's execution environment
+- Converted chain creation to be handled asynchronously from the O-chain's execution environment
 - Removed `SetLinger` usage of P2P TCP connections
 - Removed `Banff` upgrade flow
 - Fixed ProposerVM inner block caching after verification
-- Fixed PlatformVM mempool verification to use an updated chain time
+- Fixed OmegaVM mempool verification to use an updated chain time
 - Removed deprecated CLI flags: `--dynamic-update-duration`, `--dynamic-public-ip`
 - Added unexpected Put bytes tests to the Odyssey and Snowman consensus engines
 - Removed mockery generated mock implementations
@@ -1449,13 +1449,13 @@ The supported plugin version is `17`.
 ### Upgrades
 
 - Activated P2P serialization format change to Protobuf
-- Activated non-DIONE `ImportTx`/`ExportTx`s to/from the P-chain
-- Activated `Banff*` blocks on the P-chain
-- Deactivated `Apricot*` blocks on the P-chain
-- Activated `RemoveSubnetValidatorTx`s on the P-chain
-- Activated `TransformSubnetTx`s on the P-chain
-- Activated `AddPermissionlessValidatorTx`s on the P-chain
-- Activated `AddPermissionlessDelegatorTx`s on the P-chain
+- Activated non-DIONE `ImportTx`/`ExportTx`s to/from the O-chain
+- Activated `Banff*` blocks on the O-chain
+- Deactivated `Apricot*` blocks on the O-chain
+- Activated `RemoveSubnetValidatorTx`s on the O-chain
+- Activated `TransformSubnetTx`s on the O-chain
+- Activated `AddPermissionlessValidatorTx`s on the O-chain
+- Activated `AddPermissionlessDelegatorTx`s on the O-chain
 - Deactivated ANT `ImportTx`/`ExportTx`s on the C-chain
 - Deactivated ANT precompiles on the C-chain
 
@@ -1465,11 +1465,11 @@ The supported plugin version is `17`.
 
 ### Miscellaneous
 
-- Fixed locked input signing in the P-chain wallet
+- Fixed locked input signing in the O-chain wallet
 - Removed assertions from the logger interface
 - Removed `--assertions-enabled` flag
 - Fixed typo in `--bootstrap-max-time-get-ancestors` flag
-- Standardized exported P-Chain codec usage
+- Standardized exported O-Chain codec usage
 - Improved isolation and execution of the E2E tests
 - Updated the linked hashmap implementation to use generics
 
@@ -1576,7 +1576,7 @@ You may see some extraneous ERROR logs ("BAD BLOCK") on your node after upgradin
 
 The supported plugin version is `16`.
 
-### PlatformVM APIs
+### OmegaVM APIs
 
 - Fixed `GetBlock` API when requesting the encoding as `json`
 - Changed the json key in `AddSubnetValidatorTx`s from `subnet` to `subnetID`
@@ -1587,7 +1587,7 @@ The supported plugin version is `16`.
 - Added multiple asset support to `getStake`
 - Added `subnetID` argument to `getMinStake`
 
-### PlatformVM Structures
+### OmegaVM Structures
 
 - Renamed existing blocks
   - `ProposalBlock` -> `ApricotProposalBlock`
@@ -1618,7 +1618,7 @@ The supported plugin version is `16`.
     - Can be included into `BlueberryStandardBlock`s
     - Adds a new delegator to the requested permissionless validator on the requested subnet
 
-### PlatformVM Block Building
+### OmegaVM Block Building
 
 - Fixed race in `AdvanceTimeTx` creation to avoid unnecessary block construction
 - Added `block_formation_logic.md` to describe how blocks are created
@@ -1627,7 +1627,7 @@ The supported plugin version is `16`.
 - Added `OptionBlock` builder visitor
 - Refactored `Mempool` issuance and removal logic to use transaction visitors
 
-### PlatformVM Block Execution
+### OmegaVM Block Execution
 
 - Added support for executing `AddValidatorTx`, `AddDelegatorTx`, and `AddSubnetValidatorTx` inside of a `BlueberryStandardBlock`
 - Refactored time advancement into a standard state modification structure
@@ -1637,7 +1637,7 @@ The supported plugin version is `16`.
 
 ### Wallet
 
-- Added support for new transaction types in the P-chain wallet
+- Added support for new transaction types in the O-chain wallet
 - Fixed fee amounts used in the Primary Network wallet to reduce unnecessary fee burning
 
 ### Networking
@@ -1672,15 +1672,15 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 - Fixed bug in `codeToFetch` database accessors that caused an error when starting/stopping state sync
 - Fixed rare BAD BLOCK errors during C-chain bootstrapping
-- Fixed platformvm `couldn't get preferred block state` log due to attempted block building during bootstrapping
-- Fixed platformvm `failed to fetch next staker to reward` error log due to an incorrect `lastAcceptedID` reference
+- Fixed omegavm `couldn't get preferred block state` log due to attempted block building during bootstrapping
+- Fixed omegavm `failed to fetch next staker to reward` error log due to an incorrect `lastAcceptedID` reference
 - Fixed AWS AMI creation
 
-### PlatformVM
+### OmegaVM
 
-- Refactored platformvm metrics handling
-- Refactored platformvm block creation
-- Introduced support to prevent empty nodeID use on the P-chain to be activated in a future upgrade
+- Refactored omegavm metrics handling
+- Refactored omegavm block creation
+- Introduced support to prevent empty nodeID use on the O-chain to be activated in a future upgrade
 
 ### Coreth
 
@@ -1708,12 +1708,12 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### VMs
 
-- Refactored P-chain block state management
+- Refactored O-chain block state management
   - Supporting easier parsing and usage of blocks
   - Improving separation of block execution with block definition
   - Unifying state definitions
-- Introduced support to send custom X-chain assets to the P-chain to be activated in a future upgrade
-- Introduced support to use custom assets on the P-chain to be activated in a future upgrade
+- Introduced support to send custom X-chain assets to the O-chain to be activated in a future upgrade
+- Introduced support to use custom assets on the O-chain to be activated in a future upgrade
 - Added VMs README to begin fully documenting plugin invariants
 - Added various comments around expected usages of VM tools
 
@@ -1750,13 +1750,13 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
 
-### PlatformVM
+### OmegaVM
 
 - Replaced copy-on-write validator set data-structure to use tree diffs to optimize validator set additions
 - Replaced validation transactions with a standardized representation to remove transaction type handling
 - Migrated transaction execution to its own package
 - Removed child pointers from processing blocks
-- Added P-chain wallet helper for providing initial transactions
+- Added O-chain wallet helper for providing initial transactions
 
 ### Coreth
 
@@ -1779,7 +1779,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Added gRPC client metrics for dynamically created connections
 - Added uninitialized continuous time averager for when initial predictions are unreliable
 - Updated linter version
-- Documented various platform invariants
+- Documented various omega invariants
 - Cleaned up various dead parameters
 - Improved various tests
 
@@ -1796,14 +1796,14 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Removed the `Success` response from all APIs
 - Replaced `containerID` with `id` in the indexer API
 
-### PlatformVM
+### OmegaVM
 
-- Fixed incorrect `P-chain` height in `Snowman++` when staking is disabled
-- Moved `platformvm` transactions to be defined in a sub-package
-- Moved `platformvm` genesis management to be defined in a sub-package
-- Moved `platformvm` state to be defined in a sub-package
-- Standardized `platformvm` transactions to always be referenced via pointer
-- Moved the `platformvm` transaction builder to be defined in a sub-package
+- Fixed incorrect `O-chain` height in `Snowman++` when staking is disabled
+- Moved `omegavm` transactions to be defined in a sub-package
+- Moved `omegavm` genesis management to be defined in a sub-package
+- Moved `omegavm` state to be defined in a sub-package
+- Standardized `omegavm` transactions to always be referenced via pointer
+- Moved the `omegavm` transaction builder to be defined in a sub-package
 - Fixed uptime rounding during node shutdown
 
 ### Coreth
@@ -1843,8 +1843,8 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Miscellaneous
 
-- Fixed `platform.getCurrentValidators` API to correctly mark a node as connected to itself on subnets.
-- Fixed `platform.getBlockchainStatus` to correctly report `Unknown` for blockchains that are not managed by the `P-Chain`
+- Fixed `omega.getCurrentValidators` API to correctly mark a node as connected to itself on subnets.
+- Fixed `omega.getBlockchainStatus` to correctly report `Unknown` for blockchains that are not managed by the `O-Chain`
 - Added process metrics by default in the `rpcchainvm#Server`
 - Added `Database` health checks
 - Removed the deprecated `Database.Stat` call from the `rpcdb#Server`
@@ -1886,11 +1886,11 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### Cleanup
 
 - Refactored the avm to utilize the external txs package
-- Unified platformvm dropped tx handling
+- Unified omegavm dropped tx handling
 - Clarified snowman child block acceptance calls
 - Fixed small consensus typos
 - Reduced minor duplicated code in consensus
-- Moved the platformvm key factory out of the VM into the test file
+- Moved the omegavm key factory out of the VM into the test file
 - Removed unused return values from the timeout manager
 - Removed weird json rpc private interface
 - Standardized json imports
@@ -1928,9 +1928,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Fixed `coreth` metrics initialization
 - Fixed bootstrapping startup logic to correctly startup if initially connected to enough stake
 - Fixed `coreth` panic during metrics collection
-- Fixed panic on concurrent map read/write in P-chain wallet SDK
+- Fixed panic on concurrent map read/write in O-chain wallet SDK
 - Fixed `rpcchainvm` panic by sanitizing http response codes
-- Fixed incorrect JSON tag on `platformvm.BaseTx`
+- Fixed incorrect JSON tag on `omegavm.BaseTx`
 - Fixed `AppRequest`, `AppResponse`, and `AppGossip` stringers used in logging
 
 ### API/Client
@@ -1938,8 +1938,8 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Supported client implementations pointing to non-standard URIs
 - Introduced `ids.NodeID` type to standardize logging and simplify API service and client implementations
 - Changed client implementations to use standard types rather than `string`s wherever possible
-- Added `subnetID` as an argument to `platform.getTotalStake`
-- Added `connected` to the subnet validators in responses to `platform.getCurrentValidators` and `platform.getPendingValidators`
+- Added `subnetID` as an argument to `omega.getTotalStake`
+- Added `connected` to the subnet validators in responses to `omega.getCurrentValidators` and `omega.getPendingValidators`
 - Add missing `admin` API client methods
 - Improved `indexer` API client implementation to avoid encoding edge cases
 
@@ -1971,7 +1971,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Cleanup
 
-- Refactored easily separable `platformvm` files into separate smaller packages
+- Refactored easily separable `omegavm` files into separate smaller packages
 - Simplified default version parsing
 - Fixed various typos
 - Converted some structs to interfaces to better support mocked testing
@@ -1996,11 +1996,11 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### APIs
 
 - Added support for specifying additional headers and query params in the RPC client implementations.
-- Added static API clients for the `platformvm` and the `avm`.
+- Added static API clients for the `omegavm` and the `avm`.
 
-### PlatformVM
+### OmegaVM
 
-- Introduced time based windowing of accepted P-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
+- Introduced time based windowing of accepted O-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
 - Improved selection of decision transactions from the mempool.
 
 ### RPCChainVM
@@ -2072,7 +2072,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### Miscellaneous
 
 - Fixed incorrect `BlockchainID` usage in the X-chain `ImportTx` builder.
-- Fixed incorrect `OutputOwners` in the P-chain `ImportTx` builder.
+- Fixed incorrect `OutputOwners` in the O-chain `ImportTx` builder.
 - Improved FD limit error logging and warnings.
 - Rounded bootstrapping ETAs to the nearest second.
 - Added gossip config support to the subnet configs.
@@ -2138,10 +2138,10 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Added pending message metrics to the chain message queues.
 - Refactored event dispatchers to simplify dependencies and remove dead code.
 
-### PlatformVM
+### OmegaVM
 
-- Added `json` encoding option to the `platform.getTx` call.
-- Added `platform.getBlock` API.
+- Added `json` encoding option to the `omega.getTx` call.
+- Added `omega.getBlock` API.
 - Cleaned up block building logic to be more modular and testable.
 
 ### Coreth
@@ -2153,7 +2153,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented X-chain + P-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented X-chain + O-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.
@@ -2217,11 +2217,11 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### VMs
 
-- Refactored `platformvm` rewards calculations to enable usage from an external library.
-- Fixed `platformvm` and `avm` UTXO fetching to not re-iterate the UTXO set if no UTXOs are fetched.
-- Refactored `platformvm` status definitions.
-- Added support for multiple address balance lookups in the `platformvm`.
-- Refactored `platformvm` and `avm` keystore users to reuse similar code.
+- Refactored `omegavm` rewards calculations to enable usage from an external library.
+- Fixed `omegavm` and `avm` UTXO fetching to not re-iterate the UTXO set if no UTXOs are fetched.
+- Refactored `omegavm` status definitions.
+- Added support for multiple address balance lookups in the `omegavm`.
+- Refactored `omegavm` and `avm` keystore users to reuse similar code.
 
 ### RPCChainVM
 
@@ -2289,7 +2289,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Improved RPC logging.
 - Removed pre-AP5 legacy code.
 
-### PlatformVM
+### OmegaVM
 
 - Optimized validator set change calculations.
 - Removed storage of non-decided blocks.
@@ -2324,7 +2324,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/DioneProtoc
 
 ## [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0)
 
-This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the P-chain and the C-chain.
+This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the O-chain and the C-chain.
 
 The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Mainnet. One should upgrade their node before the changes go into effect, otherwise they may experience loss of uptime.
 
@@ -2335,7 +2335,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 - Added peer uptime reports as metrics.
 - Removed IP rate limiting over local networks.
 
-### PlatformVM
+### OmegaVM
 
 - Enabled `AtomicTx`s to be issued into `StandardBlock`s and deprecated `AtomicBlock`s.
 - Added the ability to export/import DIONE to/from the C-chain.
@@ -2343,7 +2343,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 ### Coreth
 
 - Enabled multiple `AtomicTx`s to be issued per block.
-- Added the ability to export/import DIONE to/from the P-chain.
+- Added the ability to export/import DIONE to/from the O-chain.
 - Updated dynamic fee calculations.
 
 ### ProposerVM

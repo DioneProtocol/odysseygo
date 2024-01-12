@@ -17,7 +17,7 @@ import (
 func equal(require *require.Assertions, chainID ids.ID, want, have SignedBlock) {
 	require.Equal(want.ID(), have.ID())
 	require.Equal(want.ParentID(), have.ParentID())
-	require.Equal(want.PChainHeight(), have.PChainHeight())
+	require.Equal(want.OChainHeight(), have.OChainHeight())
 	require.Equal(want.Timestamp(), have.Timestamp())
 	require.Equal(want.Block(), have.Block())
 	require.Equal(want.Proposer(), have.Proposer())
@@ -29,12 +29,12 @@ func equal(require *require.Assertions, chainID ids.ID, want, have SignedBlock) 
 func TestVerifyNoCertWithSignature(t *testing.T) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
 	require := require.New(t)
 
-	builtBlockIntf, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
+	builtBlockIntf, err := BuildUnsigned(parentID, timestamp, oChainHeight, innerBlockBytes)
 	require.NoError(err)
 
 	builtBlock := builtBlockIntf.(*statelessBlock)
@@ -52,10 +52,10 @@ func TestBlockSizeLimit(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	pChainHeight := uint64(2)
+	oChainHeight := uint64(2)
 	innerBlockBytes := bytes.Repeat([]byte{0}, 270*units.KiB)
 
 	// with the large limit, it should be able to build large blocks
-	_, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
+	_, err := BuildUnsigned(parentID, timestamp, oChainHeight, innerBlockBytes)
 	require.NoError(err)
 }

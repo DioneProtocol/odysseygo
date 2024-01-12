@@ -124,14 +124,14 @@ func (s *state) SetValue(e *Element) error {
 //
 // This ensures that we can consume a UTXO before it has been added into shared
 // memory in bootstrapping.
-// Ex. P-Chain attempts to consume atomic UTXO from the C-Chain in block 100.
-// P-Chain executes before the C-Chain, so when bootstrapping it must be able to
+// Ex. O-Chain attempts to consume atomic UTXO from the C-Chain in block 100.
+// O-Chain executes before the C-Chain, so when bootstrapping it must be able to
 // verify and accept this block before the node has processed the block on the
 // C-Chain where the atomic UTXO is added to shared memory.
 // Additionally, when the C-Chain actually does add the atomic UTXO to shared
 // memory, RemoveValue must handle the case that the atomic UTXO was marked as
 // deleted before it was actually added.
-// To do this, the node essentially adds a tombstone marker when the P-Chain
+// To do this, the node essentially adds a tombstone marker when the O-Chain
 // consumes the non-existent UTXO, which is deleted when the C-Chain actually
 // adds the atomic UTXO to shared memory.
 //
