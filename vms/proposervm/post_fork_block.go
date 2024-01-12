@@ -119,11 +119,11 @@ func (*postForkBlock) verifyPreForkChild(context.Context, *preForkBlock) error {
 
 func (b *postForkBlock) verifyPostForkChild(ctx context.Context, child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentPChainHeight := b.PChainHeight()
+	parentOChainHeight := b.OChainHeight()
 	return b.postForkCommonComponents.Verify(
 		ctx,
 		parentTimestamp,
-		parentPChainHeight,
+		parentOChainHeight,
 		child,
 	)
 }
@@ -149,12 +149,12 @@ func (b *postForkBlock) buildChild(ctx context.Context) (Block, error) {
 		ctx,
 		b.ID(),
 		b.Timestamp(),
-		b.PChainHeight(),
+		b.OChainHeight(),
 	)
 }
 
-func (b *postForkBlock) pChainHeight(context.Context) (uint64, error) {
-	return b.PChainHeight(), nil
+func (b *postForkBlock) oChainHeight(context.Context) (uint64, error) {
+	return b.OChainHeight(), nil
 }
 
 func (b *postForkBlock) setStatus(status choices.Status) {

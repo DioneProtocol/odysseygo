@@ -53,7 +53,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
 	"github.com/DioneProtocol/odysseygo/vms/metervm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/warp"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp"
 	"github.com/DioneProtocol/odysseygo/vms/proposervm"
 	"github.com/DioneProtocol/odysseygo/vms/tracedvm"
 
@@ -89,7 +89,7 @@ var (
 	bootstrappingDB = []byte("bs")
 
 	errUnknownVMType           = errors.New("the vm should have type odyssey.DAGVM or snowman.ChainVM")
-	errCreatePlatformVM        = errors.New("attempted to create a chain running the PlatformVM")
+	errCreateOmegaVM           = errors.New("attempted to create a chain running the OmegaVM")
 	errNotBootstrapped         = errors.New("subnets not bootstrapped")
 	errNoPrimaryNetworkConfig  = errors.New("no subnet config for primary network found")
 	errPartialSyncAsAValidator = errors.New("partial sync should not be configured for a validator")
@@ -110,8 +110,8 @@ type Manager interface {
 	Router() router.Router
 
 	// Queues a chain to be created in the future after chain creator is unblocked.
-	// This is only called from the P-chain thread to create other chains
-	// Queued chains are created only after P-chain is bootstrapped.
+	// This is only called from the O-chain thread to create other chains
+	// Queued chains are created only after O-chain is bootstrapped.
 	// This assumes only chains in tracked subnets are queued.
 	QueueChainCreation(ChainParameters)
 
@@ -128,9 +128,9 @@ type Manager interface {
 	// Returns true iff the chain with the given ID exists and is finished bootstrapping
 	IsBootstrapped(ids.ID) bool
 
-	// Starts the chain creator with the initial platform chain parameters, must
+	// Starts the chain creator with the initial omega chain parameters, must
 	// be called once.
-	StartChainCreator(platformChain ChainParameters) error
+	StartChainCreator(omegaChain ChainParameters) error
 
 	Shutdown()
 }
@@ -147,7 +147,7 @@ type ChainParameters struct {
 	VMID ids.ID
 	// The IDs of the feature extensions this chain is running.
 	FxIDs []ids.ID
-	// Invariant: Only used when [ID] is the P-chain ID.
+	// Invariant: Only used when [ID] is the O-chain ID.
 	CustomBeacons validators.Set
 }
 
@@ -219,7 +219,7 @@ type ManagerConfig struct {
 	BootstrapAncestorsMaxContainersReceived int
 
 	ApricotPhase4Time            time.Time
-	ApricotPhase4MinPChainHeight uint64
+	ApricotPhase4MinOChainHeight uint64
 
 	// Tracks CPU/disk usage caused by each peer.
 	ResourceTracker timetracker.ResourceTracker
@@ -342,7 +342,7 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	chain, err := m.buildChain(chainParams, sb)
 	if err != nil {
 		if m.CriticalChains.Contains(chainParams.ID) {
-			// Shut down if we fail to create a required chain (i.e. X, P or C)
+			// Shut down if we fail to create a required chain (i.e. X, O or C)
 			m.Log.Fatal("error creating required chain",
 				zap.Stringer("subnetID", chainParams.SubnetID),
 				zap.Stringer("chainID", chainParams.ID),
@@ -408,27 +408,27 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	// handler is started.
 	m.ManagerConfig.Router.AddChain(context.TODO(), chain.Handler)
 
-	// Register bootstrapped health checks after P chain has been added to
+	// Register bootstrapped health checks after O chain has been added to
 	// chains.
 	//
 	// Note: Registering this after the chain has been tracked prevents a race
 	//       condition between the health check and adding the first chain to
 	//       the manager.
-	if chainParams.ID == constants.PlatformChainID {
+	if chainParams.ID == constants.OmegaChainID {
 		if err := m.registerBootstrappedHealthChecks(); err != nil {
 			chain.Handler.StopWithError(context.TODO(), err)
 		}
 	}
 
 	// Tell the chain to start processing messages.
-	// If the X, P, or C Chain panics, do not attempt to recover
+	// If the X, O, or C Chain panics, do not attempt to recover
 	chain.Handler.Start(context.TODO(), !m.CriticalChains.Contains(chainParams.ID))
 }
 
 // Create a chain
 func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*chain, error) {
-	if chainParams.ID != constants.PlatformChainID && chainParams.VMID == constants.PlatformVMID {
-		return nil, errCreatePlatformVM
+	if chainParams.ID != constants.OmegaChainID && chainParams.VMID == constants.OmegaVMID {
+		return nil, errCreateOmegaVM
 	}
 	primaryAlias := m.PrimaryAliasOrDefault(chainParams.ID)
 
@@ -555,7 +555,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 		}
 	case block.ChainVM:
 		beacons := vdrs
-		if chainParams.ID == constants.PlatformChainID {
+		if chainParams.ID == constants.OmegaChainID {
 			beacons = chainParams.CustomBeacons
 		}
 
@@ -761,7 +761,7 @@ func (m *manager) createOdysseyChain(
 	}
 	m.Log.Info("creating proposervm wrapper",
 		zap.Time("activationTime", m.ApricotPhase4Time),
-		zap.Uint64("minPChainHeight", m.ApricotPhase4MinPChainHeight),
+		zap.Uint64("minOChainHeight", m.ApricotPhase4MinOChainHeight),
 		zap.Duration("minBlockDelay", minBlockDelay),
 		zap.Uint64("numHistoricalBlocks", numHistoricalBlocks),
 	)
@@ -781,7 +781,7 @@ func (m *manager) createOdysseyChain(
 	var vmWrappingProposerVM block.ChainVM = proposervm.New(
 		vmWrappedInsideProposerVM,
 		m.ApricotPhase4Time,
-		m.ApricotPhase4MinPChainHeight,
+		m.ApricotPhase4MinOChainHeight,
 		minBlockDelay,
 		numHistoricalBlocks,
 		m.stakingSigner,
@@ -1056,8 +1056,8 @@ func (m *manager) createSnowmanChain(
 		bootstrapFunc   func()
 		subnetConnector = validators.UnhandledSubnetConnector
 	)
-	// If [m.validatorState] is nil then we are creating the P-Chain. Since the
-	// P-Chain is the first chain to be created, we can use it to initialize
+	// If [m.validatorState] is nil then we are creating the O-Chain. Since the
+	// O-Chain is the first chain to be created, we can use it to initialize
 	// required interfaces for the other chains
 	if m.validatorState == nil {
 		valState, ok := vm.(validators.State)
@@ -1066,12 +1066,12 @@ func (m *manager) createSnowmanChain(
 		}
 
 		if m.TracingEnabled {
-			valState = validators.Trace(valState, "platformvm", m.Tracer)
+			valState = validators.Trace(valState, "omegavm", m.Tracer)
 		}
 
 		// Notice that this context is left unlocked. This is because the
 		// lock will already be held when accessing these values on the
-		// P-chain.
+		// O-chain.
 		ctx.ValidatorState = valState
 
 		// Initialize the validator state for future chains.
@@ -1085,7 +1085,7 @@ func (m *manager) createSnowmanChain(
 			ctx.ValidatorState = validators.NewNoValidatorsState(ctx.ValidatorState)
 		}
 
-		// Set this func only for platform
+		// Set this func only for omega
 		//
 		// The snowman bootstrapper ensures this function is only executed once, so
 		// we don't need to be concerned about closing this channel multiple times.
@@ -1093,7 +1093,7 @@ func (m *manager) createSnowmanChain(
 			close(m.unblockChainCreatorCh)
 		}
 
-		// Set up the subnet connector for the P-Chain
+		// Set up the subnet connector for the O-Chain
 		subnetConnector, ok = vm.(validators.SubnetConnector)
 		if !ok {
 			return nil, fmt.Errorf("expected validators.SubnetConnector but got %T", vm)
@@ -1116,7 +1116,7 @@ func (m *manager) createSnowmanChain(
 	}
 	m.Log.Info("creating proposervm wrapper",
 		zap.Time("activationTime", m.ApricotPhase4Time),
-		zap.Uint64("minPChainHeight", m.ApricotPhase4MinPChainHeight),
+		zap.Uint64("minOChainHeight", m.ApricotPhase4MinOChainHeight),
 		zap.Duration("minBlockDelay", minBlockDelay),
 		zap.Uint64("numHistoricalBlocks", numHistoricalBlocks),
 	)
@@ -1129,7 +1129,7 @@ func (m *manager) createSnowmanChain(
 	vm = proposervm.New(
 		vm,
 		m.ApricotPhase4Time,
-		m.ApricotPhase4MinPChainHeight,
+		m.ApricotPhase4MinOChainHeight,
 		minBlockDelay,
 		numHistoricalBlocks,
 		m.stakingSigner,
@@ -1232,7 +1232,7 @@ func (m *manager) createSnowmanChain(
 		Validators:    vdrs,
 		Params:        consensusParams,
 		Consensus:     consensus,
-		PartialSync:   m.PartialSyncPrimaryNetwork && commonCfg.Ctx.ChainID == constants.PlatformChainID,
+		PartialSync:   m.PartialSyncPrimaryNetwork && commonCfg.Ctx.ChainID == constants.OmegaChainID,
 	}
 	engine, err := smeng.New(engineConfig)
 	if err != nil {
@@ -1352,7 +1352,7 @@ func (m *manager) registerBootstrappedHealthChecks() error {
 	partialSyncCheck := health.CheckerFunc(func(ctx context.Context) (interface{}, error) {
 		// Note: The health check is skipped during bootstrapping to allow a
 		// node to sync the network even if it was previously a validator.
-		if !m.IsBootstrapped(constants.PlatformChainID) {
+		if !m.IsBootstrapped(constants.OmegaChainID) {
 			return "node is currently bootstrapping", nil
 		}
 		if !validators.Contains(m.Validators, constants.PrimaryNetworkID, m.NodeID) {
@@ -1372,7 +1372,7 @@ func (m *manager) registerBootstrappedHealthChecks() error {
 }
 
 // Starts chain creation loop to process queued chains
-func (m *manager) StartChainCreator(platformParams ChainParameters) error {
+func (m *manager) StartChainCreator(omegaParams ChainParameters) error {
 	// Get the Primary Network's subnet config. If it wasn't registered, then we
 	// throw a fatal error.
 	sbConfig, ok := m.SubnetConfigs[constants.PrimaryNetworkID]
@@ -1382,15 +1382,15 @@ func (m *manager) StartChainCreator(platformParams ChainParameters) error {
 
 	sb := subnets.New(m.NodeID, sbConfig)
 	m.subnetsLock.Lock()
-	m.subnets[platformParams.SubnetID] = sb
-	sb.AddChain(platformParams.ID)
+	m.subnets[omegaParams.SubnetID] = sb
+	sb.AddChain(omegaParams.ID)
 	m.subnetsLock.Unlock()
 
-	// The P-chain is created synchronously to ensure that `VM.Initialize` has
+	// The O-chain is created synchronously to ensure that `VM.Initialize` has
 	// finished before returning from this function. This is required because
-	// the P-chain initializes state that the rest of the node initialization
+	// the O-chain initializes state that the rest of the node initialization
 	// depends on.
-	m.createChain(platformParams)
+	m.createChain(omegaParams)
 
 	m.Log.Info("starting chain creator")
 	go m.dispatchChainCreator()

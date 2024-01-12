@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package p
+package o
 
 import (
 	"context"
@@ -18,15 +18,15 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
-var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
+var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 	ginkgo.It("subnets operations",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
@@ -40,15 +40,15 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 			keychain := e2e.Env.NewKeychain(1)
 			baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 
-			pWallet := baseWallet.P()
+			oWallet := baseWallet.O()
 			xWallet := baseWallet.X()
 			xChainID := xWallet.BlockchainID()
 
 			var validatorID ids.NodeID
 			ginkgo.By("retrieving the node ID of a primary network validator", func() {
-				pChainClient := platformvm.NewClient(nodeURI.URI)
+				oChainClient := omegavm.NewClient(nodeURI.URI)
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				validatorIDs, err := pChainClient.SampleValidators(ctx, constants.PrimaryNetworkID, 1)
+				validatorIDs, err := oChainClient.SampleValidators(ctx, constants.PrimaryNetworkID, 1)
 				cancel()
 				gomega.Expect(err).Should(gomega.BeNil())
 				gomega.Expect(validatorIDs).Should(gomega.HaveLen(1))
@@ -65,7 +65,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 			var subnetID ids.ID
 			ginkgo.By("create a permissioned subnet", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				subnetTx, err := pWallet.IssueCreateSubnetTx(
+				subnetTx, err := oWallet.IssueCreateSubnetTx(
 					owner,
 					common.WithContext(ctx),
 				)
@@ -97,10 +97,10 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				subnetAssetID = subnetAssetTx.ID()
 			})
 
-			ginkgo.By(fmt.Sprintf("Send 100 MegaDione of asset %s to the P-chain", subnetAssetID), func() {
+			ginkgo.By(fmt.Sprintf("Send 100 MegaDione of asset %s to the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
 				_, err := xWallet.IssueExportTx(
-					constants.PlatformChainID,
+					constants.OmegaChainID,
 					[]*dione.TransferableOutput{
 						{
 							Asset: dione.Asset{
@@ -118,9 +118,9 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 			})
 
-			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the X-chain into the P-chain", subnetAssetID), func() {
+			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the X-chain into the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				_, err := pWallet.IssueImportTx(
+				_, err := oWallet.IssueImportTx(
 					xChainID,
 					owner,
 					common.WithContext(ctx),
@@ -131,7 +131,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 
 			ginkgo.By("make subnet permissionless", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				_, err := pWallet.IssueTransformSubnetTx(
+				_, err := oWallet.IssueTransformSubnetTx(
 					subnetID,
 					subnetAssetID,
 					50*units.MegaDione,
@@ -155,7 +155,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 			validatorStartTime := time.Now().Add(time.Minute)
 			ginkgo.By("add permissionless validator", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				_, err := pWallet.IssueAddPermissionlessValidatorTx(
+				_, err := oWallet.IssueAddPermissionlessValidatorTx(
 					&txs.SubnetValidator{
 						Validator: txs.Validator{
 							NodeID: validatorID,
@@ -179,7 +179,7 @@ var _ = e2e.DescribePChain("[Permissionless Subnets]", func() {
 			delegatorStartTime := validatorStartTime
 			ginkgo.By("add permissionless delegator", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				_, err := pWallet.IssueAddPermissionlessDelegatorTx(
+				_, err := oWallet.IssueAddPermissionlessDelegatorTx(
 					&txs.SubnetValidator{
 						Validator: txs.Validator{
 							NodeID: validatorID,

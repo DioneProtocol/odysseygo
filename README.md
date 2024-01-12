@@ -101,10 +101,10 @@ To check the built image, run:
 docker image ls
 ```
 
-The image should be tagged as `avaplatform/odysseygo:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Odyssey source it was built from. To run the Odyssey node, run:
+The image should be tagged as `odyplatform/odysseygo:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Odyssey source it was built from. To run the Odyssey node, run:
 
 ```sh
-docker run -ti -p 9650:9650 -p 9651:9651 avaplatform/odysseygo:xxxxxxxx /odysseygo/build/odysseygo
+docker run -ti -p 9650:9650 -p 9651:9651 odyplatform/odysseygo:xxxxxxxx /odysseygo/build/odysseygo
 ```
 
 ## Running Odyssey

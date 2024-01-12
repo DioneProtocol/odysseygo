@@ -14,9 +14,9 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 )
 
@@ -38,8 +38,8 @@ func ExampleWallet() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain and the X-chain wallets
-	pWallet := wallet.P()
+	// Get the O-chain and the X-chain wallets
+	oWallet := wallet.O()
 	xWallet := wallet.X()
 
 	// Pull out useful constants to use when issuing transactions.
@@ -51,7 +51,7 @@ func ExampleWallet() {
 		},
 	}
 
-	// Create a custom asset to send to the P-chain.
+	// Create a custom asset to send to the O-chain.
 	createAssetStartTime := time.Now()
 	createAssetTx, err := xWallet.IssueCreateAssetTx(
 		"RnM",
@@ -73,10 +73,10 @@ func ExampleWallet() {
 	createAssetTxID := createAssetTx.ID()
 	log.Printf("created X-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
 
-	// Send 100 MegaDione to the P-chain.
+	// Send 100 MegaDione to the O-chain.
 	exportStartTime := time.Now()
 	exportTx, err := xWallet.IssueExportTx(
-		constants.PlatformChainID,
+		constants.OmegaChainID,
 		[]*dione.TransferableOutput{
 			{
 				Asset: dione.Asset{
@@ -90,24 +90,24 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to issue X->P export transaction with: %s\n", err)
+		log.Fatalf("failed to issue X->O export transaction with: %s\n", err)
 		return
 	}
 	exportTxID := exportTx.ID()
-	log.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
+	log.Printf("issued X->O export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
 	// Import the 100 MegaDione from the X-chain into the P-chain.
 	importStartTime := time.Now()
-	importTx, err := pWallet.IssueImportTx(xChainID, owner)
+	importTx, err := oWallet.IssueImportTx(xChainID, owner)
 	if err != nil {
-		log.Fatalf("failed to issue X->P import transaction with: %s\n", err)
+		log.Fatalf("failed to issue X->O import transaction with: %s\n", err)
 		return
 	}
 	importTxID := importTx.ID()
-	log.Printf("issued X->P import %s in %s\n", importTxID, time.Since(importStartTime))
+	log.Printf("issued X->O import %s in %s\n", importTxID, time.Since(importStartTime))
 
 	createSubnetStartTime := time.Now()
-	createSubnetTx, err := pWallet.IssueCreateSubnetTx(owner)
+	createSubnetTx, err := oWallet.IssueCreateSubnetTx(owner)
 	if err != nil {
 		log.Fatalf("failed to issue create subnet transaction with: %s\n", err)
 		return
@@ -116,7 +116,7 @@ func ExampleWallet() {
 	log.Printf("issued create subnet transaction %s in %s\n", createSubnetTxID, time.Since(createSubnetStartTime))
 
 	transformSubnetStartTime := time.Now()
-	transformSubnetTx, err := pWallet.IssueTransformSubnetTx(
+	transformSubnetTx, err := oWallet.IssueTransformSubnetTx(
 		createSubnetTxID,
 		createAssetTxID,
 		50*units.MegaDione,
@@ -141,7 +141,7 @@ func ExampleWallet() {
 
 	addPermissionlessValidatorStartTime := time.Now()
 	startTime := time.Now().Add(time.Minute)
-	addSubnetValidatorTx, err := pWallet.IssueAddPermissionlessValidatorTx(
+	addSubnetValidatorTx, err := oWallet.IssueAddPermissionlessValidatorTx(
 		&txs.SubnetValidator{
 			Validator: txs.Validator{
 				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,
@@ -165,7 +165,7 @@ func ExampleWallet() {
 	log.Printf("issued add subnet validator transaction %s in %s\n", addSubnetValidatorTxID, time.Since(addPermissionlessValidatorStartTime))
 
 	addPermissionlessDelegatorStartTime := time.Now()
-	addSubnetDelegatorTx, err := pWallet.IssueAddPermissionlessDelegatorTx(
+	addSubnetDelegatorTx, err := oWallet.IssueAddPermissionlessDelegatorTx(
 		&txs.SubnetValidator{
 			Validator: txs.Validator{
 				NodeID: genesis.LocalConfig.InitialStakers[0].NodeID,

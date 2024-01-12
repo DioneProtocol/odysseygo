@@ -31,12 +31,12 @@ var (
 	errUnexpectedBlockType      = errors.New("unexpected proposer block type")
 	errInnerParentMismatch      = errors.New("inner parentID didn't match expected parent")
 	errTimeNotMonotonic         = errors.New("time must monotonically increase")
-	errPChainHeightNotMonotonic = errors.New("non monotonically increasing P-chain height")
-	errPChainHeightNotReached   = errors.New("block P-chain height larger than current P-chain height")
+	errOChainHeightNotMonotonic = errors.New("non monotonically increasing O-chain height")
+	errOChainHeightNotReached   = errors.New("block O-chain height larger than current O-chain height")
 	errTimeTooAdvanced          = errors.New("time is too far advanced")
 	errProposerWindowNotStarted = errors.New("proposer window hasn't started")
 	errProposersNotActivated    = errors.New("proposers haven't been activated yet")
-	errPChainHeightTooLow       = errors.New("block P-chain height is too low")
+	errOChainHeightTooLow       = errors.New("block O-chain height is too low")
 )
 
 type Block interface {
@@ -57,7 +57,7 @@ type Block interface {
 
 	buildChild(context.Context) (Block, error)
 
-	pChainHeight(context.Context) (uint64, error)
+	oChainHeight(context.Context) (uint64, error)
 }
 
 type PostForkBlock interface {
@@ -82,27 +82,27 @@ func (p *postForkCommonComponents) Height() uint64 {
 
 // Verify returns nil if:
 // 1) [p]'s inner block is not an oracle block
-// 2) [child]'s P-Chain height >= [parentPChainHeight]
+// 2) [child]'s O-Chain height >= [parentOChainHeight]
 // 3) [p]'s inner block is the parent of [c]'s inner block
 // 4) [child]'s timestamp isn't before [p]'s timestamp
 // 5) [child]'s timestamp is within the skew bound
-// 6) [childPChainHeight] <= the current P-Chain height
+// 6) [childOChainHeight] <= the current O-Chain height
 // 7) [child]'s timestamp is within its proposer's window
 // 8) [child] has a valid signature from its proposer
 // 9) [child]'s inner block is valid
 func (p *postForkCommonComponents) Verify(
 	ctx context.Context,
 	parentTimestamp time.Time,
-	parentPChainHeight uint64,
+	parentOChainHeight uint64,
 	child *postForkBlock,
 ) error {
 	if err := verifyIsNotOracleBlock(ctx, p.innerBlk); err != nil {
 		return err
 	}
 
-	childPChainHeight := child.PChainHeight()
-	if childPChainHeight < parentPChainHeight {
-		return errPChainHeightNotMonotonic
+	childOChainHeight := child.OChainHeight()
+	if childOChainHeight < parentOChainHeight {
+		return errOChainHeightNotMonotonic
 	}
 
 	expectedInnerParentID := p.innerBlk.ID()
@@ -121,26 +121,26 @@ func (p *postForkCommonComponents) Verify(
 		return errTimeTooAdvanced
 	}
 
-	// If the node is currently syncing - we don't assume that the P-chain has
+	// If the node is currently syncing - we don't assume that the O-chain has
 	// been synced up to this point yet.
 	if p.vm.consensusState == snow.NormalOp {
 		childID := child.ID()
-		currentPChainHeight, err := p.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
+		currentOChainHeight, err := p.vm.ctx.ValidatorState.GetCurrentHeight(ctx)
 		if err != nil {
 			p.vm.ctx.Log.Error("block verification failed",
-				zap.String("reason", "failed to get current P-Chain height"),
+				zap.String("reason", "failed to get current O-Chain height"),
 				zap.Stringer("blkID", childID),
 				zap.Error(err),
 			)
 			return err
 		}
-		if childPChainHeight > currentPChainHeight {
-			return errPChainHeightNotReached
+		if childOChainHeight > currentOChainHeight {
+			return errOChainHeightNotReached
 		}
 
 		childHeight := child.Height()
 		proposerID := child.Proposer()
-		minDelay, err := p.vm.Windower.Delay(ctx, childHeight, parentPChainHeight, proposerID)
+		minDelay, err := p.vm.Windower.Delay(ctx, childHeight, parentOChainHeight, proposerID)
 		if err != nil {
 			return err
 		}
@@ -167,7 +167,7 @@ func (p *postForkCommonComponents) Verify(
 	return p.vm.verifyAndRecordInnerBlk(
 		ctx,
 		&smblock.Context{
-			PChainHeight: parentPChainHeight,
+			OChainHeight: parentOChainHeight,
 		},
 		child,
 	)
@@ -178,7 +178,7 @@ func (p *postForkCommonComponents) buildChild(
 	ctx context.Context,
 	parentID ids.ID,
 	parentTimestamp time.Time,
-	parentPChainHeight uint64,
+	parentOChainHeight uint64,
 ) (Block, error) {
 	// Child's timestamp is the later of now and this block's timestamp
 	newTimestamp := p.vm.Time().Truncate(time.Second)
@@ -186,12 +186,12 @@ func (p *postForkCommonComponents) buildChild(
 		newTimestamp = parentTimestamp
 	}
 
-	// The child's P-Chain height is proposed as the optimal P-Chain height that
-	// is at least the parent's P-Chain height
-	pChainHeight, err := p.vm.optimalPChainHeight(ctx, parentPChainHeight)
+	// The child's O-Chain height is proposed as the optimal O-Chain height that
+	// is at least the parent's O-Chain height
+	oChainHeight, err := p.vm.optimalOChainHeight(ctx, parentOChainHeight)
 	if err != nil {
 		p.vm.ctx.Log.Error("unexpected build block failure",
-			zap.String("reason", "failed to calculate optimal P-chain height"),
+			zap.String("reason", "failed to calculate optimal O-chain height"),
 			zap.Stringer("parentID", parentID),
 			zap.Error(err),
 		)
@@ -202,7 +202,7 @@ func (p *postForkCommonComponents) buildChild(
 	if delay < proposer.MaxDelay {
 		parentHeight := p.innerBlk.Height()
 		proposerID := p.vm.ctx.NodeID
-		minDelay, err := p.vm.Windower.Delay(ctx, parentHeight+1, parentPChainHeight, proposerID)
+		minDelay, err := p.vm.Windower.Delay(ctx, parentHeight+1, parentOChainHeight, proposerID)
 		if err != nil {
 			p.vm.ctx.Log.Error("unexpected build block failure",
 				zap.String("reason", "failed to calculate required timestamp delay"),
@@ -234,7 +234,7 @@ func (p *postForkCommonComponents) buildChild(
 	var innerBlock snowman.Block
 	if p.vm.blockBuilderVM != nil {
 		innerBlock, err = p.vm.blockBuilderVM.BuildBlockWithContext(ctx, &smblock.Context{
-			PChainHeight: parentPChainHeight,
+			OChainHeight: parentOChainHeight,
 		})
 	} else {
 		innerBlock, err = p.vm.ChainVM.BuildBlock(ctx)
@@ -249,14 +249,14 @@ func (p *postForkCommonComponents) buildChild(
 		statelessChild, err = block.BuildUnsigned(
 			parentID,
 			newTimestamp,
-			pChainHeight,
+			oChainHeight,
 			innerBlock.Bytes(),
 		)
 	} else {
 		statelessChild, err = block.Build(
 			parentID,
 			newTimestamp,
-			pChainHeight,
+			oChainHeight,
 			p.vm.stakingCertLeaf,
 			innerBlock.Bytes(),
 			p.vm.ctx.ChainID,

@@ -69,7 +69,7 @@ func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
 	slb, err := block.Build(
 		ids.Empty, // refer unknown parent
 		time.Time{},
-		0, // pChainHeight,
+		0, // oChainHeight,
 		proVM.stakingCertLeaf,
 		innerOracleBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -99,9 +99,9 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(100)
+	oChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 
 	// create parent block ...
@@ -154,7 +154,7 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 	childSlb, err := block.Build(
 		ids.Empty, // refer unknown parent
 		childCoreBlk.Timestamp(),
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -178,7 +178,7 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(), // refer known parent
 		prntProBlk.Timestamp().Add(proposer.MaxDelay),
-		pChainHeight,
+		oChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
@@ -197,9 +197,9 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(100)
+	oChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 
 	// create parent block ...
@@ -259,7 +259,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err := block.Build(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -279,14 +279,14 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	require.ErrorIs(err, errTimeNotMonotonic)
 
 	// block cannot arrive before its creator window starts
-	blkWinDelay, err := proVM.Delay(context.Background(), childCoreBlk.Height(), pChainHeight, proVM.ctx.NodeID)
+	blkWinDelay, err := proVM.Delay(context.Background(), childCoreBlk.Height(), oChainHeight, proVM.ctx.NodeID)
 	require.NoError(err)
 	beforeWinStart := prntTimestamp.Add(blkWinDelay).Add(-1 * time.Second)
 	proVM.Clock.Set(beforeWinStart)
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		beforeWinStart,
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -304,7 +304,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		atWindowStart,
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -321,7 +321,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		afterWindowStart,
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -337,7 +337,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		atSubWindowEnd,
-		pChainHeight,
+		oChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
@@ -349,7 +349,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	childSlb, err = block.Build(
 		prntProBlk.ID(),
 		afterSubWinEnd,
-		pChainHeight,
+		oChainHeight,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -361,7 +361,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	require.ErrorIs(err, errTimeTooAdvanced)
 }
 
-func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
+func TestBlockVerify_PostForkBlock_OChainHeightChecks(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
@@ -369,9 +369,9 @@ func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(100)
+	oChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 
 	// create parent block ...
@@ -414,7 +414,7 @@ func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
 	require.NoError(prntProBlk.Verify(context.Background()))
 	require.NoError(proVM.SetPreference(context.Background(), prntProBlk.ID()))
 
-	prntBlkPChainHeight := pChainHeight
+	prntBlkOChainHeight := oChainHeight
 
 	childCoreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
@@ -426,11 +426,11 @@ func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
 		TimestampV: prntProBlk.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	// child P-Chain height must not precede parent P-Chain height
+	// child O-Chain height must not precede parent O-Chain height
 	childSlb, err := block.Build(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight-1,
+		prntBlkOChainHeight-1,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -449,11 +449,11 @@ func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
 	err = childProBlk.Verify(context.Background())
 	require.ErrorIs(err, errTimeTooAdvanced)
 
-	// child P-Chain height can be equal to parent P-Chain height
+	// child O-Chain height can be equal to parent O-Chain height
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight,
+		prntBlkOChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
@@ -462,44 +462,44 @@ func TestBlockVerify_PostForkBlock_PChainHeightChecks(t *testing.T) {
 	proVM.Set(childCoreBlk.Timestamp())
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// child P-Chain height may follow parent P-Chain height
-	pChainHeight = prntBlkPChainHeight * 2 // move ahead pChainHeight
+	// child O-Chain height may follow parent O-Chain height
+	oChainHeight = prntBlkOChainHeight * 2 // move ahead oChainHeight
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight+1,
+		prntBlkOChainHeight+1,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block P-Chain height can be equal to current P-Chain height
-	currPChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
+	// block O-Chain height can be equal to current O-Chain height
+	currOChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currPChainHeight,
+		currOChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block P-Chain height cannot be at higher than current P-Chain height
+	// block O-Chain height cannot be at higher than current O-Chain height
 	childSlb, err = block.BuildUnsigned(
 		prntProBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currPChainHeight*2,
+		currOChainHeight*2,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	err = childProBlk.Verify(context.Background())
-	require.ErrorIs(err, errPChainHeightNotReached)
+	require.ErrorIs(err, errOChainHeightNotReached)
 }
 
-func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T) {
+func TestBlockVerify_PostForkBlockBuiltOnOption_OChainHeightChecks(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
@@ -507,9 +507,9 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T)
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(100)
+	oChainHeight := uint64(100)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 	// proVM.SetStartTime(timer.MaxTime) // switch off scheduler for current test
 
@@ -594,7 +594,7 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T)
 	require.NoError(parentBlk.Verify(context.Background()))
 	require.NoError(proVM.SetPreference(context.Background(), parentBlk.ID()))
 
-	prntBlkPChainHeight := pChainHeight
+	prntBlkOChainHeight := oChainHeight
 
 	childCoreBlk := &snowman.TestBlock{
 		TestDecidable: choices.TestDecidable{
@@ -606,11 +606,11 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T)
 		TimestampV: parentBlk.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	// child P-Chain height must not precede parent P-Chain height
+	// child O-Chain height must not precede parent O-Chain height
 	childSlb, err := block.Build(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight-1,
+		prntBlkOChainHeight-1,
 		proVM.stakingCertLeaf,
 		childCoreBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -629,11 +629,11 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T)
 	err = childProBlk.Verify(context.Background())
 	require.ErrorIs(err, errTimeTooAdvanced)
 
-	// child P-Chain height can be equal to parent P-Chain height
+	// child O-Chain height can be equal to parent O-Chain height
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight,
+		prntBlkOChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
@@ -642,41 +642,41 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_PChainHeightChecks(t *testing.T)
 	proVM.Set(childCoreBlk.Timestamp())
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// child P-Chain height may follow parent P-Chain height
-	pChainHeight = prntBlkPChainHeight * 2 // move ahead pChainHeight
+	// child O-Chain height may follow parent O-Chain height
+	oChainHeight = prntBlkOChainHeight * 2 // move ahead oChainHeight
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		prntBlkPChainHeight+1,
+		prntBlkOChainHeight+1,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block P-Chain height can be equal to current P-Chain height
-	currPChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
+	// block O-Chain height can be equal to current O-Chain height
+	currOChainHeight, _ := proVM.ctx.ValidatorState.GetCurrentHeight(context.Background())
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currPChainHeight,
+		currOChainHeight,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	require.NoError(childProBlk.Verify(context.Background()))
 
-	// block P-Chain height cannot be at higher than current P-Chain height
+	// block O-Chain height cannot be at higher than current O-Chain height
 	childSlb, err = block.BuildUnsigned(
 		parentBlk.ID(),
 		childCoreBlk.Timestamp(),
-		currPChainHeight*2,
+		currOChainHeight*2,
 		childCoreBlk.Bytes(),
 	)
 	require.NoError(err)
 	childProBlk.SignedBlock = childSlb
 	err = childProBlk.Verify(context.Background())
-	require.ErrorIs(err, errPChainHeightNotReached)
+	require.ErrorIs(err, errOChainHeightNotReached)
 }
 
 func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
@@ -689,9 +689,9 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(2000)
+	oChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 
 	coreBlk := &snowman.TestBlock{
@@ -737,7 +737,7 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 	require.NoError(builtBlk.Verify(context.Background()))
 
 	// rebuild a block with the same core block
-	pChainHeight++
+	oChainHeight++
 	_, err = proVM.BuildBlock(context.Background())
 	require.NoError(err)
 }
@@ -752,9 +752,9 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 		require.NoError(proVM.Shutdown(context.Background()))
 	}()
 
-	pChainHeight := uint64(2000)
+	oChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func(context.Context) (uint64, error) {
-		return pChainHeight, nil
+		return oChainHeight, nil
 	}
 
 	coreBlk := &snowman.TestBlock{
@@ -985,7 +985,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 	statelessChild, err := block.Build(
 		postForkOracleBlk.ID(),
 		postForkOracleBlk.Timestamp().Add(proposer.WindowDuration),
-		postForkOracleBlk.PChainHeight(),
+		postForkOracleBlk.OChainHeight(),
 		proVM.stakingCertLeaf,
 		oracleCoreBlk.opts[0].Bytes(),
 		proVM.ctx.ChainID,
@@ -1003,7 +1003,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 	require.ErrorIs(err, errUnexpectedBlockType)
 }
 
-func TestBlockVerify_PostForkBlock_PChainTooLow(t *testing.T) {
+func TestBlockVerify_PostForkBlock_OChainTooLow(t *testing.T) {
 	require := require.New(t)
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 5)
@@ -1058,5 +1058,5 @@ func TestBlockVerify_PostForkBlock_PChainTooLow(t *testing.T) {
 	}
 
 	err = invalidChild.Verify(context.Background())
-	require.ErrorIs(err, errPChainHeightTooLow)
+	require.ErrorIs(err, errOChainHeightTooLow)
 }

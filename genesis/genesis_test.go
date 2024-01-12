@@ -20,7 +20,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/hashing"
 	"github.com/DioneProtocol/odysseygo/utils/perms"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/genesis"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
 )
 
 var (

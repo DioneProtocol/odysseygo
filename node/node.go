@@ -77,8 +77,8 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms"
 	"github.com/DioneProtocol/odysseygo/vms/avm"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/registry"
 	"github.com/DioneProtocol/odysseygo/vms/rpcchainvm/runtime"
@@ -86,7 +86,7 @@ import (
 
 	ipcsapi "github.com/DioneProtocol/odysseygo/api/ipcs"
 	avmconfig "github.com/DioneProtocol/odysseygo/vms/avm/config"
-	platformconfig "github.com/DioneProtocol/odysseygo/vms/platformvm/config"
+	omegaconfig "github.com/DioneProtocol/odysseygo/vms/omegavm/config"
 )
 
 var (
@@ -631,21 +631,21 @@ func (n *Node) initIndexer() error {
 	return nil
 }
 
-// Initializes the Platform chain.
+// Initializes the Omega chain.
 // Its genesis data specifies the other chains that should be created.
 func (n *Node) initChains(genesisBytes []byte) error {
 	n.Log.Info("initializing chains")
 
-	platformChain := chains.ChainParameters{
-		ID:            constants.PlatformChainID,
+	omegaChain := chains.ChainParameters{
+		ID:            constants.OmegaChainID,
 		SubnetID:      constants.PrimaryNetworkID,
 		GenesisData:   genesisBytes, // Specifies other chains to create
-		VMID:          constants.PlatformVMID,
+		VMID:          constants.OmegaVMID,
 		CustomBeacons: n.bootstrappers,
 	}
 
-	// Start the chain creator with the Platform Chain
-	return n.chainManager.StartChainCreator(platformChain)
+	// Start the chain creator with the Omega Chain
+	return n.chainManager.StartChainCreator(omegaChain)
 }
 
 func (n *Node) initMetrics() {
@@ -751,7 +751,7 @@ func (n *Node) addDefaultVMAliases() error {
 }
 
 // Create the chainManager and register the following VMs:
-// AVM, Simple Payments DAG, Simple Payments Chain, and Platform VM
+// AVM, Simple Payments DAG, Simple Payments Chain, and Omega VM
 // Assumes n.DBManager, n.vdrs all initialized (non-nil)
 func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	createAVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.AVMID)
@@ -769,7 +769,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	// If any of these chains die, the node shuts down
 	criticalChains := set.Set[ids.ID]{}
 	criticalChains.Add(
-		constants.PlatformChainID,
+		constants.OmegaChainID,
 		xChainID,
 		cChainID,
 	)
@@ -844,7 +844,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		BootstrapAncestorsMaxContainersSent:     n.Config.BootstrapAncestorsMaxContainersSent,
 		BootstrapAncestorsMaxContainersReceived: n.Config.BootstrapAncestorsMaxContainersReceived,
 		ApricotPhase4Time:                       version.GetApricotPhase4Time(n.Config.NetworkID),
-		ApricotPhase4MinPChainHeight:            version.GetApricotPhase4MinPChainHeight(n.Config.NetworkID),
+		ApricotPhase4MinOChainHeight:            version.GetApricotPhase4MinOChainHeight(n.Config.NetworkID),
 		ResourceTracker:                         n.resourceTracker,
 		StateSyncBeacons:                        n.Config.StateSyncIDs,
 		TracingEnabled:                          n.Config.TraceConfig.Enabled,
@@ -863,7 +863,7 @@ func (n *Node) initVMs() error {
 
 	vdrs := n.vdrs
 
-	// If sybil protection is disabled, we provide the P-chain its own local
+	// If sybil protection is disabled, we provide the O-chain its own local
 	// validator manager that will not be used by the rest of the node. This
 	// allows the node's validator sets to be determined by network connections.
 	if !n.Config.SybilProtectionEnabled {
@@ -882,8 +882,8 @@ func (n *Node) initVMs() error {
 	// Register the VMs that Odyssey supports
 	errs := wrappers.Errs{}
 	errs.Add(
-		vmRegisterer.Register(context.TODO(), constants.PlatformVMID, &platformvm.Factory{
-			Config: platformconfig.Config{
+		vmRegisterer.Register(context.TODO(), constants.OmegaVMID, &omegavm.Factory{
+			Config: omegaconfig.Config{
 				Chains:                        n.chainManager,
 				Validators:                    vdrs,
 				UptimeLockedCalculator:        n.uptimeCalculator,
@@ -1477,7 +1477,7 @@ func (n *Node) Initialize(
 	n.health.Start(context.TODO(), n.Config.HealthCheckFreq)
 	n.initProfiler()
 
-	// Start the Platform chain
+	// Start the Omega chain
 	if err := n.initChains(n.Config.GenesisBytes); err != nil {
 		return fmt.Errorf("couldn't initialize chains: %w", err)
 	}

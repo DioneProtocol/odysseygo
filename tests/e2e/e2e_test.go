@@ -27,7 +27,7 @@ import (
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/banff"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/c"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/faultinjection"
-	_ "github.com/DioneProtocol/odysseygo/tests/e2e/p"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/o"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/static-handlers"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x/transfer"

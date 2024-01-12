@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	chainAlias = "P"
+	chainAlias = "O"
 	hrp        = "testnet"
 )
 

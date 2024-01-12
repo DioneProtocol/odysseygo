@@ -225,7 +225,7 @@ type Config struct {
 
 	TraceConfig trace.Config `json:"traceConfig"`
 
-	// See comment on [UseCurrentHeight] in platformvm.Config
+	// See comment on [UseCurrentHeight] in omegavm.Config
 	UseCurrentHeight bool `json:"useCurrentHeight"`
 
 	// ProvidedFlags contains all the flags set by the user

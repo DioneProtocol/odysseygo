@@ -1624,8 +1624,8 @@ type ImportArgs struct {
 	To string `json:"to"`
 }
 
-// Import imports an asset to this chain from the P/C-Chain.
-// The DIONE must have already been exported from the P/C-Chain.
+// Import imports an asset to this chain from the O/C-Chain.
+// The DIONE must have already been exported from the O/C-Chain.
 // Returns the ID of the newly created atomic transaction
 func (s *Service) Import(_ *http.Request, args *ImportArgs, reply *api.JSONTxID) error {
 	s.vm.ctx.Log.Warn("deprecated API called",
@@ -1747,8 +1747,8 @@ type ExportArgs struct {
 	AssetID string `json:"assetID"`
 }
 
-// Export sends an asset from this chain to the P/C-Chain.
-// After this tx is accepted, the DIONE must be imported to the P/C-chain with an importTx.
+// Export sends an asset from this chain to the O/C-Chain.
+// After this tx is accepted, the DIONE must be imported to the O/C-chain with an importTx.
 // Returns the ID of the newly created atomic transaction
 func (s *Service) Export(_ *http.Request, args *ExportArgs, reply *api.JSONTxIDChangeAddr) error {
 	s.vm.ctx.Log.Warn("deprecated API called",

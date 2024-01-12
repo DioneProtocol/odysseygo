@@ -49,7 +49,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/utils/storage"
 	"github.com/DioneProtocol/odysseygo/utils/timer"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/reward"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 	"github.com/DioneProtocol/odysseygo/vms/proposervm"
 )
 

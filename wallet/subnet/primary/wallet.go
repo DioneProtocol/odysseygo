@@ -10,9 +10,9 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/keychain"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/txs"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/c"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/p"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/o"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
@@ -21,19 +21,19 @@ var _ Wallet = (*wallet)(nil)
 
 // Wallet provides chain wallets for the primary network.
 type Wallet interface {
-	P() p.Wallet
+	O() o.Wallet
 	X() x.Wallet
 	C() c.Wallet
 }
 
 type wallet struct {
-	p p.Wallet
+	o o.Wallet
 	x x.Wallet
 	c c.Wallet
 }
 
-func (w *wallet) P() p.Wallet {
-	return w.p
+func (w *wallet) O() o.Wallet {
+	return w.o
 }
 
 func (w *wallet) X() x.Wallet {
@@ -45,9 +45,9 @@ func (w *wallet) C() c.Wallet {
 }
 
 // Creates a new default wallet
-func NewWallet(p p.Wallet, x x.Wallet, c c.Wallet) Wallet {
+func NewWallet(o o.Wallet, x x.Wallet, c c.Wallet) Wallet {
 	return &wallet{
-		p: p,
+		o: o,
 		x: x,
 		c: c,
 	}
@@ -56,7 +56,7 @@ func NewWallet(p p.Wallet, x x.Wallet, c c.Wallet) Wallet {
 // Creates a Wallet with the given set of options
 func NewWalletWithOptions(w Wallet, options ...common.Option) Wallet {
 	return NewWallet(
-		p.NewWalletWithOptions(w.P(), options...),
+		o.NewWalletWithOptions(w.O(), options...),
 		x.NewWalletWithOptions(w.X(), options...),
 		c.NewWalletWithOptions(w.C(), options...),
 	)
@@ -68,12 +68,12 @@ type WalletConfig struct {
 	// Keys to use for signing all transactions.
 	DIONEKeychain keychain.Keychain // required
 	EthKeychain   c.EthKeychain     // required
-	// Set of P-chain transactions that the wallet should know about to be able
+	// Set of O-chain transactions that the wallet should know about to be able
 	// to generate transactions.
-	PChainTxs map[ids.ID]*txs.Tx // optional
-	// Set of P-chain transactions that the wallet should fetch to be able to
+	OChainTxs map[ids.ID]*txs.Tx // optional
+	// Set of O-chain transactions that the wallet should fetch to be able to
 	// generate transactions.
-	PChainTxsToFetch set.Set[ids.ID] // optional
+	OChainTxsToFetch set.Set[ids.ID] // optional
 }
 
 // MakeWallet returns a wallet that supports issuing transactions to the chains
@@ -82,7 +82,7 @@ type WalletConfig struct {
 // On creation, the wallet attaches to the provided uri and fetches all UTXOs
 // that reference any of the provided keys. If the UTXOs are modified through an
 // external issuance process, such as another instance of the wallet, the UTXOs
-// may become out of sync. The wallet will also fetch all requested P-chain
+// may become out of sync. The wallet will also fetch all requested O-chain
 // transactions.
 //
 // The wallet manages all state locally, and performs all tx signing locally.
@@ -99,13 +99,13 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		return nil, err
 	}
 
-	pChainTxs := config.PChainTxs
-	if pChainTxs == nil {
-		pChainTxs = make(map[ids.ID]*txs.Tx)
+	oChainTxs := config.OChainTxs
+	if oChainTxs == nil {
+		oChainTxs = make(map[ids.ID]*txs.Tx)
 	}
 
-	for txID := range config.PChainTxsToFetch {
-		txBytes, err := dioneState.PClient.GetTx(ctx, txID)
+	for txID := range config.OChainTxsToFetch {
+		txBytes, err := dioneState.OClient.GetTx(ctx, txID)
 		if err != nil {
 			return nil, err
 		}
@@ -113,13 +113,13 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 		if err != nil {
 			return nil, err
 		}
-		pChainTxs[txID] = tx
+		oChainTxs[txID] = tx
 	}
 
-	pUTXOs := NewChainUTXOs(constants.PlatformChainID, dioneState.UTXOs)
-	pBackend := p.NewBackend(dioneState.PCTX, pUTXOs, pChainTxs)
-	pBuilder := p.NewBuilder(dioneAddrs, pBackend)
-	pSigner := p.NewSigner(config.DIONEKeychain, pBackend)
+	oUTXOs := NewChainUTXOs(constants.OmegaChainID, dioneState.UTXOs)
+	oBackend := o.NewBackend(dioneState.OCTX, oUTXOs, oChainTxs)
+	oBuilder := o.NewBuilder(dioneAddrs, oBackend)
+	oSigner := o.NewSigner(config.DIONEKeychain, oBackend)
 
 	xChainID := dioneState.XCTX.BlockchainID()
 	xUTXOs := NewChainUTXOs(xChainID, dioneState.UTXOs)
@@ -134,7 +134,7 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	cSigner := c.NewSigner(config.DIONEKeychain, config.EthKeychain, cBackend)
 
 	return NewWallet(
-		p.NewWallet(pBuilder, pSigner, dioneState.PClient, pBackend),
+		o.NewWallet(oBuilder, oSigner, dioneState.OClient, oBackend),
 		x.NewWallet(xBuilder, xSigner, dioneState.XClient, xBackend),
 		c.NewWallet(cBuilder, cSigner, dioneState.CClient, ethState.Client, cBackend),
 	), nil

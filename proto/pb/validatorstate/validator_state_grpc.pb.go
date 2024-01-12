@@ -33,12 +33,12 @@ type ValidatorStateClient interface {
 	// GetMinimumHeight returns the minimum height of the blocks in the optimal
 	// proposal window.
 	GetMinimumHeight(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetMinimumHeightResponse, error)
-	// GetCurrentHeight returns the current height of the P-chain.
+	// GetCurrentHeight returns the current height of the O-chain.
 	GetCurrentHeight(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCurrentHeightResponse, error)
 	// GetSubnetID returns the subnetID of the provided chain.
 	GetSubnetID(ctx context.Context, in *GetSubnetIDRequest, opts ...grpc.CallOption) (*GetSubnetIDResponse, error)
 	// GetValidatorSet returns the weights of the nodeIDs for the provided
-	// subnet at the requested P-chain height.
+	// subnet at the requested O-chain height.
 	GetValidatorSet(ctx context.Context, in *GetValidatorSetRequest, opts ...grpc.CallOption) (*GetValidatorSetResponse, error)
 }
 
@@ -93,12 +93,12 @@ type ValidatorStateServer interface {
 	// GetMinimumHeight returns the minimum height of the blocks in the optimal
 	// proposal window.
 	GetMinimumHeight(context.Context, *emptypb.Empty) (*GetMinimumHeightResponse, error)
-	// GetCurrentHeight returns the current height of the P-chain.
+	// GetCurrentHeight returns the current height of the O-chain.
 	GetCurrentHeight(context.Context, *emptypb.Empty) (*GetCurrentHeightResponse, error)
 	// GetSubnetID returns the subnetID of the provided chain.
 	GetSubnetID(context.Context, *GetSubnetIDRequest) (*GetSubnetIDResponse, error)
 	// GetValidatorSet returns the weights of the nodeIDs for the provided
-	// subnet at the requested P-chain height.
+	// subnet at the requested O-chain height.
 	GetValidatorSet(context.Context, *GetValidatorSetRequest) (*GetValidatorSetResponse, error)
 	mustEmbedUnimplementedValidatorStateServer()
 }

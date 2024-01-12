@@ -239,19 +239,19 @@ func (mr *MockPostForkBlockMockRecorder) getStatelessBlk() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "getStatelessBlk", reflect.TypeOf((*MockPostForkBlock)(nil).getStatelessBlk))
 }
 
-// pChainHeight mocks base method.
-func (m *MockPostForkBlock) pChainHeight(arg0 context.Context) (uint64, error) {
+// oChainHeight mocks base method.
+func (m *MockPostForkBlock) oChainHeight(arg0 context.Context) (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "pChainHeight", arg0)
+	ret := m.ctrl.Call(m, "oChainHeight", arg0)
 	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// pChainHeight indicates an expected call of pChainHeight.
-func (mr *MockPostForkBlockMockRecorder) pChainHeight(arg0 interface{}) *gomock.Call {
+// oChainHeight indicates an expected call of oChainHeight.
+func (mr *MockPostForkBlockMockRecorder) oChainHeight(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "pChainHeight", reflect.TypeOf((*MockPostForkBlock)(nil).pChainHeight), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "oChainHeight", reflect.TypeOf((*MockPostForkBlock)(nil).oChainHeight), arg0)
 }
 
 // setInnerBlk mocks base method.

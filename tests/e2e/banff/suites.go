@@ -20,7 +20,7 @@ import (
 )
 
 var _ = ginkgo.Describe("[Banff]", func() {
-	ginkgo.It("can send custom assets X->P and P->X",
+	ginkgo.It("can send custom assets X->O and O->X",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
 		ginkgo.Label(
@@ -31,8 +31,8 @@ var _ = ginkgo.Describe("[Banff]", func() {
 			keychain := e2e.Env.NewKeychain(1)
 			wallet := e2e.Env.NewWallet(keychain, e2e.Env.GetRandomNodeURI())
 
-			// Get the P-chain and the X-chain wallets
-			pWallet := wallet.P()
+			// Get the O-chain and the X-chain wallets
+			oWallet := wallet.O()
 			xWallet := wallet.X()
 
 			// Pull out useful constants to use when issuing transactions.
@@ -65,9 +65,9 @@ var _ = ginkgo.Describe("[Banff]", func() {
 				tests.Outf("{{green}}created new X-chain asset{{/}}: %s\n", assetID)
 			})
 
-			ginkgo.By("export new X-chain asset to P-chain", func() {
+			ginkgo.By("export new X-chain asset to O-chain", func() {
 				tx, err := xWallet.IssueExportTx(
-					constants.PlatformChainID,
+					constants.OmegaChainID,
 					[]*dione.TransferableOutput{
 						{
 							Asset: dione.Asset{
@@ -85,15 +85,15 @@ var _ = ginkgo.Describe("[Banff]", func() {
 				tests.Outf("{{green}}issued X-chain export{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("import new asset from X-chain on the P-chain", func() {
-				tx, err := pWallet.IssueImportTx(xChainID, owner)
+			ginkgo.By("import new asset from X-chain on the O-chain", func() {
+				tx, err := oWallet.IssueImportTx(xChainID, owner)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued P-chain import{{/}}: %s\n", tx.ID())
+				tests.Outf("{{green}}issued O-chain import{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("export asset from P-chain to the X-chain", func() {
-				tx, err := pWallet.IssueExportTx(
+			ginkgo.By("export asset from O-chain to the X-chain", func() {
+				tx, err := oWallet.IssueExportTx(
 					xChainID,
 					[]*dione.TransferableOutput{
 						{
@@ -109,11 +109,11 @@ var _ = ginkgo.Describe("[Banff]", func() {
 				)
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				tests.Outf("{{green}}issued P-chain export{{/}}: %s\n", tx.ID())
+				tests.Outf("{{green}}issued O-chain export{{/}}: %s\n", tx.ID())
 			})
 
-			ginkgo.By("import asset from P-chain on the X-chain", func() {
-				tx, err := xWallet.IssueImportTx(constants.PlatformChainID, owner)
+			ginkgo.By("import asset from O-chain on the X-chain", func() {
+				tx, err := xWallet.IssueImportTx(constants.OmegaChainID, owner)
 				gomega.Expect(err).Should(gomega.BeNil())
 
 				tests.Outf("{{green}}issued X-chain import{{/}}: %s\n", tx.ID())

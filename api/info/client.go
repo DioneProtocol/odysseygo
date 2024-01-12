@@ -9,7 +9,7 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/rpc"
-	"github.com/DioneProtocol/odysseygo/vms/platformvm/signer"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
 )
 
 var _ Client = (*client)(nil)
