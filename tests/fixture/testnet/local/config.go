@@ -44,7 +44,7 @@ func LocalFlags() testnet.FlagsMap {
 func LocalCChainConfig() testnet.FlagsMap {
 	// Supply only non-default configuration to ensure that default
 	// values will be used. Available C-Chain configuration options are
-	// defined in the `github.com/DioneProtocol/coreth/evm` package.
+	// defined in the `github.com/DioneProtocol/coreth/delta` package.
 	return testnet.FlagsMap{
 		"log-level": "trace",
 	}

@@ -24,7 +24,7 @@ import (
 
 	"go.uber.org/zap"
 
-	coreth "github.com/DioneProtocol/coreth/plugin/evm"
+	coreth "github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/DioneProtocol/odysseygo/api/admin"
 	"github.com/DioneProtocol/odysseygo/api/auth"
@@ -760,11 +760,11 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	}
 	xChainID := createAVMTx.ID()
 
-	createEVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.EVMID)
+	createDELTATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DELTAID)
 	if err != nil {
 		return err
 	}
-	cChainID := createEVMTx.ID()
+	cChainID := createDELTATx.ID()
 
 	// If any of these chains die, the node shuts down
 	criticalChains := set.Set[ids.ID]{}
@@ -920,7 +920,7 @@ func (n *Node) initVMs() error {
 				CreateAssetTxFee: n.Config.CreateAssetTxFee,
 			},
 		}),
-		vmRegisterer.Register(context.TODO(), constants.EVMID, &coreth.Factory{}),
+		vmRegisterer.Register(context.TODO(), constants.DELTAID, &coreth.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), secp256k1fx.ID, &secp256k1fx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), nftfx.ID, &nftfx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), propertyfx.ID, &propertyfx.Factory{}),

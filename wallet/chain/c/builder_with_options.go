@@ -6,7 +6,7 @@ package c
 import (
 	"math/big"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -59,7 +59,7 @@ func (b *builderWithOptions) NewImportTx(
 	to ethcommon.Address,
 	baseFee *big.Int,
 	options ...common.Option,
-) (*evm.UnsignedImportTx, error) {
+) (*delta.UnsignedImportTx, error) {
 	return b.Builder.NewImportTx(
 		chainID,
 		to,
@@ -73,7 +73,7 @@ func (b *builderWithOptions) NewExportTx(
 	outputs []*secp256k1fx.TransferOutput,
 	baseFee *big.Int,
 	options ...common.Option,
-) (*evm.UnsignedExportTx, error) {
+) (*delta.UnsignedExportTx, error) {
 	return b.Builder.NewExportTx(
 		chainID,
 		outputs,

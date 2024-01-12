@@ -9,7 +9,7 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -38,8 +38,8 @@ var (
 )
 
 type Signer interface {
-	SignUnsignedAtomic(ctx stdcontext.Context, tx evm.UnsignedAtomicTx) (*evm.Tx, error)
-	SignAtomic(ctx stdcontext.Context, tx *evm.Tx) error
+	SignUnsignedAtomic(ctx stdcontext.Context, tx delta.UnsignedAtomicTx) (*delta.Tx, error)
+	SignAtomic(ctx stdcontext.Context, tx *delta.Tx) error
 }
 
 type EthKeychain interface {
@@ -68,20 +68,20 @@ func NewSigner(dioneKC keychain.Keychain, ethKC EthKeychain, backend SignerBacke
 	}
 }
 
-func (s *txSigner) SignUnsignedAtomic(ctx stdcontext.Context, utx evm.UnsignedAtomicTx) (*evm.Tx, error) {
-	tx := &evm.Tx{UnsignedAtomicTx: utx}
+func (s *txSigner) SignUnsignedAtomic(ctx stdcontext.Context, utx delta.UnsignedAtomicTx) (*delta.Tx, error) {
+	tx := &delta.Tx{UnsignedAtomicTx: utx}
 	return tx, s.SignAtomic(ctx, tx)
 }
 
-func (s *txSigner) SignAtomic(ctx stdcontext.Context, tx *evm.Tx) error {
+func (s *txSigner) SignAtomic(ctx stdcontext.Context, tx *delta.Tx) error {
 	switch utx := tx.UnsignedAtomicTx.(type) {
-	case *evm.UnsignedImportTx:
+	case *delta.UnsignedImportTx:
 		signers, err := s.getImportSigners(ctx, utx.SourceChain, utx.ImportedInputs)
 		if err != nil {
 			return err
 		}
 		return sign(tx, true, signers)
-	case *evm.UnsignedExportTx:
+	case *delta.UnsignedExportTx:
 		signers := s.getExportSigners(utx.Ins)
 		return sign(tx, true, signers)
 	default:
@@ -134,7 +134,7 @@ func (s *txSigner) getImportSigners(ctx stdcontext.Context, sourceChainID ids.ID
 	return txSigners, nil
 }
 
-func (s *txSigner) getExportSigners(ins []evm.EVMInput) [][]keychain.Signer {
+func (s *txSigner) getExportSigners(ins []delta.DELTAInput) [][]keychain.Signer {
 	txSigners := make([][]keychain.Signer, len(ins))
 	for credIndex, input := range ins {
 		inputSigners := make([]keychain.Signer, 1)
@@ -152,8 +152,8 @@ func (s *txSigner) getExportSigners(ins []evm.EVMInput) [][]keychain.Signer {
 }
 
 // TODO: remove [signHash] after the ledger supports signing all transactions.
-func sign(tx *evm.Tx, signHash bool, txSigners [][]keychain.Signer) error {
-	unsignedBytes, err := evm.Codec.Marshal(version, &tx.UnsignedAtomicTx)
+func sign(tx *delta.Tx, signHash bool, txSigners [][]keychain.Signer) error {
+	unsignedBytes, err := delta.Codec.Marshal(version, &tx.UnsignedAtomicTx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal unsigned tx: %w", err)
 	}
@@ -214,7 +214,7 @@ func sign(tx *evm.Tx, signHash bool, txSigners [][]keychain.Signer) error {
 		}
 	}
 
-	signedBytes, err := evm.Codec.Marshal(version, tx)
+	signedBytes, err := delta.Codec.Marshal(version, tx)
 	if err != nil {
 		return fmt.Errorf("couldn't marshal tx: %w", err)
 	}
