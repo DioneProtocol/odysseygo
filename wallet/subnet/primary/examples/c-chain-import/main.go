@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/DioneProtocol/odysseygo/genesis"
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -24,7 +24,7 @@ func main() {
 	uri := primary.LocalAPIURI
 	kc := secp256k1fx.NewKeychain(key)
 	dioneAddr := key.Address()
-	ethAddr := evm.PublicKeyToEthAddress(key.PublicKey())
+	ethAddr := delta.PublicKeyToEthAddress(key.PublicKey())
 
 	ctx := context.Background()
 

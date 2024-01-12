@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/DioneProtocol/coreth/ethclient"
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/ethereum/go-ethereum/common"
 
@@ -59,7 +59,7 @@ type DIONEState struct {
 	OCTX    o.Context
 	XClient avm.Client
 	XCTX    x.Context
-	CClient evm.Client
+	CClient delta.Client
 	CCTX    c.Context
 	UTXOs   UTXOs
 }
@@ -75,7 +75,7 @@ func FetchState(
 	infoClient := info.NewClient(uri)
 	oClient := omegavm.NewClient(uri)
 	xClient := avm.NewClient(uri, "X")
-	cClient := evm.NewCChainClient(uri)
+	cClient := delta.NewCChainClient(uri)
 
 	oCTX, err := o.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
@@ -112,7 +112,7 @@ func FetchState(
 		{
 			id:     cCTX.BlockchainID(),
 			client: cClient,
-			codec:  evm.Codec,
+			codec:  delta.Codec,
 		},
 	}
 	for _, destinationChain := range chains {

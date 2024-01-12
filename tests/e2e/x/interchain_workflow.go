@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/tests/e2e"
@@ -43,7 +43,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 		oWallet := baseWallet.O()
 
 		ginkgo.By("defining common configuration")
-		recipientEthAddress := evm.GetEthAddress(recipientKey)
+		recipientEthAddress := delta.GetEthAddress(recipientKey)
 		dioneAssetID := xWallet.DIONEAssetID()
 		// Use the same owner for sending to X-Chain and importing funds to O-Chain
 		recipientOwner := secp256k1fx.OutputOwners{

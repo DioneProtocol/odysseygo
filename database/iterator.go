@@ -3,7 +3,7 @@
 
 // For ease of implementation, our database's interface matches Ethereum's
 // database implementation. This was to allow use to use Geth code as is for the
-// EVM chain.
+// DELTA chain.
 
 package database
 

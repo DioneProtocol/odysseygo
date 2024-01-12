@@ -17,7 +17,7 @@ import (
 
 	"github.com/DioneProtocol/coreth/core"
 	"github.com/DioneProtocol/coreth/params"
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/DioneProtocol/odysseygo/config"
 	"github.com/DioneProtocol/odysseygo/genesis"
@@ -143,7 +143,7 @@ func (c *NetworkConfig) EnsureGenesis(networkID uint32, validatorIDs []ids.NodeI
 	cChainBalances := make(core.GenesisAlloc, len(c.FundedKeys))
 	for _, key := range c.FundedKeys {
 		xChainBalances[key.Address()] = DefaultFundedKeyXChainAmount
-		cChainBalances[evm.GetEthAddress(key)] = core.GenesisAccount{
+		cChainBalances[delta.GetEthAddress(key)] = core.GenesisAccount{
 			Balance: DefaultFundedKeyCChainAmount,
 		}
 	}

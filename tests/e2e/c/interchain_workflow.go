@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/DioneProtocol/coreth/core/types"
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/tests/e2e"
@@ -41,11 +41,11 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 
 		ginkgo.By("allocating a pre-funded key to send from and a recipient key to deliver to")
 		senderKey := e2e.Env.AllocateFundedKey()
-		senderEthAddress := evm.GetEthAddress(senderKey)
+		senderEthAddress := delta.GetEthAddress(senderKey)
 		factory := secp256k1.Factory{}
 		recipientKey, err := factory.NewPrivateKey()
 		require.NoError(err)
-		recipientEthAddress := evm.GetEthAddress(recipientKey)
+		recipientEthAddress := delta.GetEthAddress(recipientKey)
 
 		ginkgo.By("sending funds from one address to another on the C-Chain", func() {
 			// Create transaction

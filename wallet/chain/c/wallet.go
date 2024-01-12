@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/DioneProtocol/coreth/ethclient"
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -42,7 +42,7 @@ type Wallet interface {
 		chainID ids.ID,
 		to ethcommon.Address,
 		options ...common.Option,
-	) (*evm.Tx, error)
+	) (*delta.Tx, error)
 
 	// IssueExportTx creates, signs, and issues an export transaction that
 	// attempts to send all the provided [outputs] to the requested [chainID].
@@ -53,17 +53,17 @@ type Wallet interface {
 		chainID ids.ID,
 		outputs []*secp256k1fx.TransferOutput,
 		options ...common.Option,
-	) (*evm.Tx, error)
+	) (*delta.Tx, error)
 
 	// IssueUnsignedTx signs and issues the unsigned tx.
 	IssueUnsignedAtomicTx(
-		utx evm.UnsignedAtomicTx,
+		utx delta.UnsignedAtomicTx,
 		options ...common.Option,
-	) (*evm.Tx, error)
+	) (*delta.Tx, error)
 
 	// IssueAtomicTx issues the signed tx.
 	IssueAtomicTx(
-		tx *evm.Tx,
+		tx *delta.Tx,
 		options ...common.Option,
 	) error
 }
@@ -71,7 +71,7 @@ type Wallet interface {
 func NewWallet(
 	builder Builder,
 	signer Signer,
-	dioneClient evm.Client,
+	dioneClient delta.Client,
 	ethClient ethclient.Client,
 	backend Backend,
 ) Wallet {
@@ -88,7 +88,7 @@ type wallet struct {
 	Backend
 	builder     Builder
 	signer      Signer
-	dioneClient evm.Client
+	dioneClient delta.Client
 	ethClient   ethclient.Client
 }
 
@@ -104,7 +104,7 @@ func (w *wallet) IssueImportTx(
 	chainID ids.ID,
 	to ethcommon.Address,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	baseFee, err := w.baseFee(options)
 	if err != nil {
 		return nil, err
@@ -121,7 +121,7 @@ func (w *wallet) IssueExportTx(
 	chainID ids.ID,
 	outputs []*secp256k1fx.TransferOutput,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	baseFee, err := w.baseFee(options)
 	if err != nil {
 		return nil, err
@@ -135,9 +135,9 @@ func (w *wallet) IssueExportTx(
 }
 
 func (w *wallet) IssueUnsignedAtomicTx(
-	utx evm.UnsignedAtomicTx,
+	utx delta.UnsignedAtomicTx,
 	options ...common.Option,
-) (*evm.Tx, error) {
+) (*delta.Tx, error) {
 	ops := common.NewOptions(options)
 	ctx := ops.Context()
 	tx, err := w.signer.SignUnsignedAtomic(ctx, utx)
@@ -149,7 +149,7 @@ func (w *wallet) IssueUnsignedAtomicTx(
 }
 
 func (w *wallet) IssueAtomicTx(
-	tx *evm.Tx,
+	tx *delta.Tx,
 	options ...common.Option,
 ) error {
 	ops := common.NewOptions(options)
@@ -178,9 +178,9 @@ func (w *wallet) IssueAtomicTx(
 		}
 
 		switch status {
-		case evm.Accepted:
+		case delta.Accepted:
 			return w.Backend.AcceptAtomicTx(ctx, tx)
-		case evm.Dropped, evm.Unknown:
+		case delta.Dropped, delta.Unknown:
 			return errNotCommitted
 		}
 

@@ -11,7 +11,7 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -33,7 +33,7 @@ type Backend interface {
 	BuilderBackend
 	SignerBackend
 
-	AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error
+	AcceptAtomicTx(ctx stdcontext.Context, tx *delta.Tx) error
 }
 
 type backend struct {
@@ -61,9 +61,9 @@ func NewBackend(
 	}
 }
 
-func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error {
+func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *delta.Tx) error {
 	switch tx := tx.UnsignedAtomicTx.(type) {
-	case *evm.UnsignedImportTx:
+	case *delta.UnsignedImportTx:
 		for _, input := range tx.ImportedInputs {
 			utxoID := input.InputID()
 			if err := b.RemoveUTXO(ctx, tx.SourceChain, utxoID); err != nil {
@@ -84,7 +84,7 @@ func (b *backend) AcceptAtomicTx(ctx stdcontext.Context, tx *evm.Tx) error {
 			balance.Mul(balance, dioneConversionRate)
 			account.Balance.Add(account.Balance, balance)
 		}
-	case *evm.UnsignedExportTx:
+	case *delta.UnsignedExportTx:
 		txID := tx.ID()
 		for i, out := range tx.ExportedOutputs {
 			err := b.AddUTXO(

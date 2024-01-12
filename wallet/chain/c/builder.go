@@ -9,7 +9,7 @@ import (
 
 	stdcontext "context"
 
-	"github.com/DioneProtocol/coreth/plugin/evm"
+	"github.com/DioneProtocol/coreth/plugin/delta"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 
@@ -35,7 +35,7 @@ var (
 	//
 	// This is only required for DIONE because the denomination of 1 DIONE is 9
 	// decimal places on the X and O chains, but is 18 decimal places within the
-	// EVM.
+	// DELTA.
 	dioneConversionRate = big.NewInt(dioneConversionRateInt)
 )
 
@@ -68,7 +68,7 @@ type Builder interface {
 		to ethcommon.Address,
 		baseFee *big.Int,
 		options ...common.Option,
-	) (*evm.UnsignedImportTx, error)
+	) (*delta.UnsignedImportTx, error)
 
 	// NewExportTx creates an export transaction that attempts to send all the
 	// provided [outputs] to the requested [chainID].
@@ -81,7 +81,7 @@ type Builder interface {
 		outputs []*secp256k1fx.TransferOutput,
 		baseFee *big.Int,
 		options ...common.Option,
-	) (*evm.UnsignedExportTx, error)
+	) (*delta.UnsignedExportTx, error)
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
@@ -177,7 +177,7 @@ func (b *builder) NewImportTx(
 	to ethcommon.Address,
 	baseFee *big.Int,
 	options ...common.Option,
-) (*evm.UnsignedImportTx, error) {
+) (*delta.UnsignedImportTx, error) {
 	ops := common.NewOptions(options)
 	utxos, err := b.backend.UTXOs(ops.Context(), chainID)
 	if err != nil {
@@ -217,7 +217,7 @@ func (b *builder) NewImportTx(
 	}
 
 	utils.Sort(importedInputs)
-	tx := &evm.UnsignedImportTx{
+	tx := &delta.UnsignedImportTx{
 		NetworkID:      b.backend.NetworkID(),
 		BlockchainID:   b.backend.BlockchainID(),
 		SourceChain:    chainID,
@@ -225,8 +225,8 @@ func (b *builder) NewImportTx(
 	}
 
 	// We must initialize the bytes of the tx to calculate the initial cost
-	wrappedTx := &evm.Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(evm.Codec, nil); err != nil {
+	wrappedTx := &delta.Tx{UnsignedAtomicTx: tx}
+	if err := wrappedTx.Sign(delta.Codec, nil); err != nil {
 		return nil, err
 	}
 
@@ -234,9 +234,9 @@ func (b *builder) NewImportTx(
 	if err != nil {
 		return nil, err
 	}
-	gasUsedWithOutput := gasUsedWithoutOutput + evm.EVMOutputGas
+	gasUsedWithOutput := gasUsedWithoutOutput + delta.DELTAOutputGas
 
-	txFee, err := evm.CalculateDynamicFee(gasUsedWithOutput, baseFee)
+	txFee, err := delta.CalculateDynamicFee(gasUsedWithOutput, baseFee)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ func (b *builder) NewImportTx(
 		return nil, errInsufficientFunds
 	}
 
-	tx.Outs = []evm.EVMOutput{{
+	tx.Outs = []delta.DELTAOutput{{
 		Address: to,
 		Amount:  importedAmount - txFee,
 		AssetID: dioneAssetID,
@@ -258,7 +258,7 @@ func (b *builder) NewExportTx(
 	outputs []*secp256k1fx.TransferOutput,
 	baseFee *big.Int,
 	options ...common.Option,
-) (*evm.UnsignedExportTx, error) {
+) (*delta.UnsignedExportTx, error) {
 	var (
 		dioneAssetID    = b.backend.DIONEAssetID()
 		exportedOutputs = make([]*dione.TransferableOutput, len(outputs))
@@ -277,8 +277,8 @@ func (b *builder) NewExportTx(
 		exportedAmount = newExportedAmount
 	}
 
-	dione.SortTransferableOutputs(exportedOutputs, evm.Codec)
-	tx := &evm.UnsignedExportTx{
+	dione.SortTransferableOutputs(exportedOutputs, delta.Codec)
+	tx := &delta.UnsignedExportTx{
 		NetworkID:        b.backend.NetworkID(),
 		BlockchainID:     b.backend.BlockchainID(),
 		DestinationChain: chainID,
@@ -286,8 +286,8 @@ func (b *builder) NewExportTx(
 	}
 
 	// We must initialize the bytes of the tx to calculate the initial cost
-	wrappedTx := &evm.Tx{UnsignedAtomicTx: tx}
-	if err := wrappedTx.Sign(evm.Codec, nil); err != nil {
+	wrappedTx := &delta.Tx{UnsignedAtomicTx: tx}
+	if err := wrappedTx.Sign(delta.Codec, nil); err != nil {
 		return nil, err
 	}
 
@@ -296,7 +296,7 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	initialFee, err := evm.CalculateDynamicFee(cost, baseFee)
+	initialFee, err := delta.CalculateDynamicFee(cost, baseFee)
 	if err != nil {
 		return nil, err
 	}
@@ -310,20 +310,20 @@ func (b *builder) NewExportTx(
 		ops    = common.NewOptions(options)
 		ctx    = ops.Context()
 		addrs  = ops.EthAddresses(b.ethAddrs)
-		inputs = make([]evm.EVMInput, 0, addrs.Len())
+		inputs = make([]delta.DELTAInput, 0, addrs.Len())
 	)
 	for addr := range addrs {
 		if amountToConsume == 0 {
 			break
 		}
 
-		prevFee, err := evm.CalculateDynamicFee(cost, baseFee)
+		prevFee, err := delta.CalculateDynamicFee(cost, baseFee)
 		if err != nil {
 			return nil, err
 		}
 
-		newCost := cost + evm.EVMInputGas
-		newFee, err := evm.CalculateDynamicFee(newCost, baseFee)
+		newCost := cost + delta.DELTAInputGas
+		newFee, err := delta.CalculateDynamicFee(newCost, baseFee)
 		if err != nil {
 			return nil, err
 		}
@@ -361,7 +361,7 @@ func (b *builder) NewExportTx(
 		}
 
 		inputAmount := math.Min(amountToConsume, dioneBalance)
-		inputs = append(inputs, evm.EVMInput{
+		inputs = append(inputs, delta.DELTAInput{
 			Address: addr,
 			Amount:  inputAmount,
 			AssetID: dioneAssetID,
