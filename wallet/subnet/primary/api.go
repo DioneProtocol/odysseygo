@@ -18,7 +18,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/rpc"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
@@ -39,7 +39,7 @@ const (
 // perform their own assertions.
 var (
 	_ UTXOClient = omegavm.Client(nil)
-	_ UTXOClient = avm.Client(nil)
+	_ UTXOClient = alpha.Client(nil)
 )
 
 type UTXOClient interface {
@@ -57,7 +57,7 @@ type UTXOClient interface {
 type DIONEState struct {
 	OClient omegavm.Client
 	OCTX    o.Context
-	XClient avm.Client
+	XClient alpha.Client
 	XCTX    x.Context
 	DClient delta.Client
 	DCTX    d.Context
@@ -74,7 +74,7 @@ func FetchState(
 ) {
 	infoClient := info.NewClient(uri)
 	oClient := omegavm.NewClient(uri)
-	xClient := avm.NewClient(uri, "X")
+	xClient := alpha.NewClient(uri, "X")
 	dClient := delta.NewDChainClient(uri)
 
 	oCTX, err := o.NewContextFromClients(ctx, infoClient, xClient)

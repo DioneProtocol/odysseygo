@@ -270,7 +270,7 @@ func TestGetTx(t *testing.T) {
 				return service.vm.txBuilder.NewCreateChainTx( // Test GetTx works for standard blocks
 					testSubnet1.ID(),
 					nil,
-					constants.AVMID,
+					constants.AlphaID,
 					nil,
 					"chain name",
 					[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -738,7 +738,7 @@ func TestGetBlock(t *testing.T) {
 			tx, err := service.vm.txBuilder.NewCreateChainTx( // Test GetTx works for standard blocks
 				testSubnet1.ID(),
 				nil,
-				constants.AVMID,
+				constants.AlphaID,
 				nil,
 				"chain name",
 				[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},

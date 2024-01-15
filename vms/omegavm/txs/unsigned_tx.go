@@ -14,7 +14,7 @@ import (
 // UnsignedTx is an unsigned transaction
 type UnsignedTx interface {
 	// TODO: Remove this initialization pattern from both the omegavm and the
-	// avm.
+	// alpha.
 	snow.ContextInitializable
 	secp256k1fx.UnsignedTx
 	SetBytes(unsignedBytes []byte)

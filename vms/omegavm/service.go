@@ -1787,11 +1787,11 @@ func (s *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchainArgs, 
 		}
 		fxIDs = append(fxIDs, fxID)
 	}
-	// If creating AVM instance, use secp256k1fx
+	// If creating ALPHA instance, use secp256k1fx
 	// TODO: Document FXs and have user specify them in API call
 	fxIDsSet := set.Set[ids.ID]{}
 	fxIDsSet.Add(fxIDs...)
-	if vmID == constants.AVMID && !fxIDsSet.Contains(secp256k1fx.ID) {
+	if vmID == constants.AlphaID && !fxIDsSet.Contains(secp256k1fx.ID) {
 		fxIDs = append(fxIDs, secp256k1fx.ID)
 	}
 

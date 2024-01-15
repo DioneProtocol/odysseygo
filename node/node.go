@@ -75,7 +75,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
@@ -85,7 +85,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
 	ipcsapi "github.com/DioneProtocol/odysseygo/api/ipcs"
-	avmconfig "github.com/DioneProtocol/odysseygo/vms/avm/config"
+	alphaconfig "github.com/DioneProtocol/odysseygo/vms/alpha/config"
 	omegaconfig "github.com/DioneProtocol/odysseygo/vms/omegavm/config"
 )
 
@@ -751,14 +751,14 @@ func (n *Node) addDefaultVMAliases() error {
 }
 
 // Create the chainManager and register the following VMs:
-// AVM, Simple Payments DAG, Simple Payments Chain, and Omega VM
+// ALPHA, Simple Payments DAG, Simple Payments Chain, and Omega VM
 // Assumes n.DBManager, n.vdrs all initialized (non-nil)
 func (n *Node) initChainManager(dioneAssetID ids.ID) error {
-	createAVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.AVMID)
+	createALPHATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.AlphaID)
 	if err != nil {
 		return err
 	}
-	xChainID := createAVMTx.ID()
+	xChainID := createALPHATx.ID()
 
 	createDELTATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DeltaID)
 	if err != nil {
@@ -914,8 +914,8 @@ func (n *Node) initVMs() error {
 				UseCurrentHeight:              n.Config.UseCurrentHeight,
 			},
 		}),
-		vmRegisterer.Register(context.TODO(), constants.AVMID, &avm.Factory{
-			Config: avmconfig.Config{
+		vmRegisterer.Register(context.TODO(), constants.AlphaID, &alpha.Factory{
+			Config: alphaconfig.Config{
 				TxFee:            n.Config.TxFee,
 				CreateAssetTxFee: n.Config.CreateAssetTxFee,
 			},
