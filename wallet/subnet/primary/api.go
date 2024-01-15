@@ -22,7 +22,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/c"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/d"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/o"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 )
@@ -60,7 +60,7 @@ type DIONEState struct {
 	XClient avm.Client
 	XCTX    x.Context
 	DClient delta.Client
-	DCTX    c.Context
+	DCTX    d.Context
 	UTXOs   UTXOs
 }
 
@@ -87,7 +87,7 @@ func FetchState(
 		return nil, err
 	}
 
-	dCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
+	dCTX, err := d.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func FetchState(
 
 type EthState struct {
 	Client   ethclient.Client
-	Accounts map[common.Address]*c.Account
+	Accounts map[common.Address]*d.Account
 }
 
 func FetchEthState(
@@ -162,7 +162,7 @@ func FetchEthState(
 		return nil, err
 	}
 
-	accounts := make(map[common.Address]*c.Account, addrs.Len())
+	accounts := make(map[common.Address]*d.Account, addrs.Len())
 	for addr := range addrs {
 		balance, err := client.BalanceAt(ctx, addr, nil)
 		if err != nil {
@@ -172,7 +172,7 @@ func FetchEthState(
 		if err != nil {
 			return nil, err
 		}
-		accounts[addr] = &c.Account{
+		accounts[addr] = &d.Account{
 			Balance: balance,
 			Nonce:   nonce,
 		}

@@ -25,7 +25,7 @@ import (
 
 	// ensure test packages are scanned by ginkgo
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/banff"
-	_ "github.com/DioneProtocol/odysseygo/tests/e2e/c"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/d"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/faultinjection"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/o"
 	_ "github.com/DioneProtocol/odysseygo/tests/e2e/static-handlers"
