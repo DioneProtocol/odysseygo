@@ -27,7 +27,7 @@ var (
 	errUnknownTxType = errors.New("unknown tx type")
 )
 
-// Backend defines the full interface required to support a C-chain wallet.
+// Backend defines the full interface required to support a D-chain wallet.
 type Backend interface {
 	common.ChainUTXOs
 	BuilderBackend

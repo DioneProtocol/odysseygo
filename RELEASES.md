@@ -22,7 +22,7 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 ### What's Changed
 
 - e2e: Save network data for each test run as an uploaded artifact by @marun in https://github.com/DioneProtocol/odysseygo/pull/1856
-- e2e: Ensure interchain workflow coverage for X-Chain and C-Chain by @marun in https://github.com/DioneProtocol/odysseygo/pull/1871
+- e2e: Ensure interchain workflow coverage for X-Chain and D-Chain by @marun in https://github.com/DioneProtocol/odysseygo/pull/1871
 - MerkleDB Adjust New View function(s) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1927
 - e2e: Migrate duplicate node id test from kurtosis by @marun in https://github.com/DioneProtocol/odysseygo/pull/1573
 - Add tracing levels to merkledb by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1933
@@ -134,7 +134,7 @@ The plugin version is updated to `28` all plugins must update to be compatible.
 - GetCanonicalValidatorSet minimal ValidatorState iface by @darioush in https://github.com/DioneProtocol/odysseygo/pull/1875
 - `sync` -- handle fatal error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1874
 - `merkledb` -- use `Maybe` for start bounds by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1872
-- Add C-chain wallet to the primary network by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1850
+- Add D-chain wallet to the primary network by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1850
 - e2e: Refactor keychain and wallet creation to test helpers by @marun in https://github.com/DioneProtocol/odysseygo/pull/1870
 - Update account nonce on exportTx accept by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1881
 - `sync` -- add workheap test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1879
@@ -261,7 +261,7 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 ### Fixes
 
-- Fixed C-chain tx tracer crashes
+- Fixed D-chain tx tracer crashes
 - Fixed merkledb panic during state sync
 - Fixed merkledb state sync stale target tracking
 
@@ -374,7 +374,7 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 ### Fixes
 
 - Fixed `proposervm` `preForkBlock.Status()` response after the fork has occurred
-- Fixed C-chain logs collection error when no receipts occur in a block
+- Fixed D-chain logs collection error when no receipts occur in a block
 - Fixed merkledb's `findNextKey` when an empty end proof is provided
 - Fixed 0 length key issues with proof generation and verification
 - Fixed Docker execution on non-amd64 architectures
@@ -712,7 +712,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ## [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0)
 
-[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the O-chain, and increases the maximum block size on the C-chain.
+[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the O-chain, and increases the maximum block size on the D-chain.
 
 The changes in the upgrade go into effect at 11 AM ET, April 25th 2023 on Mainnet.
 
@@ -1282,7 +1282,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Removed `Version` from the `peer.Network` interface
 - Removed `Pong` from the `peer.Network` interface
 - Reduced memory allocations inside the system throttler
-- Added `CChainID` to the `snow.Context`
+- Added `DChainID` to the `snow.Context`
 - Converted all sorting to utilize generics
 - Converted all set management to utilize generics
 
@@ -1456,8 +1456,8 @@ The supported plugin version is `17`.
 - Activated `TransformSubnetTx`s on the O-chain
 - Activated `AddPermissionlessValidatorTx`s on the O-chain
 - Activated `AddPermissionlessDelegatorTx`s on the O-chain
-- Deactivated ANT `ImportTx`/`ExportTx`s on the C-chain
-- Deactivated ANT precompiles on the C-chain
+- Deactivated ANT `ImportTx`/`ExportTx`s on the D-chain
+- Deactivated ANT precompiles on the D-chain
 
 ### Deprecations
 
@@ -1671,7 +1671,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### Fixes
 
 - Fixed bug in `codeToFetch` database accessors that caused an error when starting/stopping state sync
-- Fixed rare BAD BLOCK errors during C-chain bootstrapping
+- Fixed rare BAD BLOCK errors during D-chain bootstrapping
 - Fixed omegavm `couldn't get preferred block state` log due to attempted block building during bootstrapping
 - Fixed omegavm `failed to fetch next staker to reward` error log due to an incorrect `lastAcceptedID` reference
 - Fixed AWS AMI creation
@@ -1861,8 +1861,8 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 - Fixed proposervm state summary acceptance to only accept state summaries with heights higher than the locally last accepted block
 - Fixed proposervm state summary serving to only respond to requests after height indexing has finished
-- Improved C-chain state sync leaf request serving by optimistically reading leaves from snapshot
-- Refactored C-chain state sync block fetching
+- Improved D-chain state sync leaf request serving by optimistically reading leaves from snapshot
+- Refactored D-chain state sync block fetching
 
 ### Networking
 
@@ -1875,13 +1875,13 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Added process and golang metrics for the odysseygo binary
 - Added available disk space health check
   - Ensured that the disk space will not be fully utilized by shutting down the node if there is a critically low amount of free space remaining
-- Improved C-chain state sync metrics
+- Improved D-chain state sync metrics
 
 ### Performance
 
-- Added C-chain acceptor queue within `core/blockchain.go`
+- Added D-chain acceptor queue within `core/blockchain.go`
 - Removed rpcdb locking when committing batches and using iterators
-- Capped C-chain TrieDB dirties cache size during block acceptance to reduce commit size at 4096 block interval
+- Capped D-chain TrieDB dirties cache size during block acceptance to reduce commit size at 4096 block interval
 
 ### Cleanup
 
@@ -1900,7 +1900,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
-**The first startup of the C-Chain will cause an increase in CPU and IO usage due to an index update. This index update runs in the background and does not impact restart time.**
+**The first startup of the D-Chain will cause an increase in CPU and IO usage due to an index update. This index update runs in the background and does not impact restart time.**
 
 ### State Sync
 
@@ -2146,7 +2146,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Coreth
 
-- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the C-Chain.
+- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the D-Chain.
 - Enabled chain state metrics.
 - Migrated go-ethereum v1.10.16 changes.
 
@@ -2198,7 +2198,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
-**The first startup of the C-Chain will take a few minutes longer due to an index update.**
+**The first startup of the D-Chain will take a few minutes longer due to an index update.**
 
 ### Consensus
 
@@ -2211,7 +2211,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the C-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the D-Chain for the first restart.
 - Updated Geth dependency to `v1.10.15`.
 - Updated `networkID` to match `chainID`.
 
@@ -2258,7 +2258,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the C-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the D-Chain for the first restart.
 - Fixed bug in base fee estimation API that impacted custom defined networks.
 - Decreased minimum transaction re-gossiping interval from 1s to 500ms.
 - Removed websocket handler from the static vm APIs.
@@ -2324,7 +2324,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/DioneProtoc
 
 ## [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0)
 
-This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the O-chain and the C-chain.
+This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the O-chain and the D-chain.
 
 The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Mainnet. One should upgrade their node before the changes go into effect, otherwise they may experience loss of uptime.
 
@@ -2338,7 +2338,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 ### OmegaVM
 
 - Enabled `AtomicTx`s to be issued into `StandardBlock`s and deprecated `AtomicBlock`s.
-- Added the ability to export/import DIONE to/from the C-chain.
+- Added the ability to export/import DIONE to/from the D-chain.
 
 ### Coreth
 
@@ -2413,7 +2413,7 @@ This version is backwards compatible to [v1.6.0](https://github.com/DioneProtoco
 - Added method `GetContainerByID` to client implementation.
 - Client methods now return `[]byte` rather than `string` representations of a container.
 
-### C-Chain
+### D-Chain
 
 - Updated Geth dependency to 1.10.11.
 - Added a new admin API for updating the log level and measuring performance.

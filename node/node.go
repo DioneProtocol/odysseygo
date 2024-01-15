@@ -760,18 +760,18 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	}
 	xChainID := createAVMTx.ID()
 
-	createDELTATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DELTAID)
+	createDELTATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DeltaID)
 	if err != nil {
 		return err
 	}
-	cChainID := createDELTATx.ID()
+	dChainID := createDELTATx.ID()
 
 	// If any of these chains die, the node shuts down
 	criticalChains := set.Set[ids.ID]{}
 	criticalChains.Add(
 		constants.OmegaChainID,
 		xChainID,
-		cChainID,
+		dChainID,
 	)
 
 	// Manages network timeouts
@@ -827,7 +827,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		AtomicMemory:                            n.sharedMemory,
 		DIONEAssetID:                            dioneAssetID,
 		XChainID:                                xChainID,
-		CChainID:                                cChainID,
+		DChainID:                                dChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,
@@ -920,7 +920,7 @@ func (n *Node) initVMs() error {
 				CreateAssetTxFee: n.Config.CreateAssetTxFee,
 			},
 		}),
-		vmRegisterer.Register(context.TODO(), constants.DELTAID, &coreth.Factory{}),
+		vmRegisterer.Register(context.TODO(), constants.DeltaID, &coreth.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), secp256k1fx.ID, &secp256k1fx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), nftfx.ID, &nftfx.Factory{}),
 		n.VMManager.RegisterFactory(context.TODO(), propertyfx.ID, &propertyfx.Factory{}),

@@ -59,8 +59,8 @@ type DIONEState struct {
 	OCTX    o.Context
 	XClient avm.Client
 	XCTX    x.Context
-	CClient delta.Client
-	CCTX    c.Context
+	DClient delta.Client
+	DCTX    c.Context
 	UTXOs   UTXOs
 }
 
@@ -75,7 +75,7 @@ func FetchState(
 	infoClient := info.NewClient(uri)
 	oClient := omegavm.NewClient(uri)
 	xClient := avm.NewClient(uri, "X")
-	cClient := delta.NewCChainClient(uri)
+	dClient := delta.NewDChainClient(uri)
 
 	oCTX, err := o.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
@@ -87,7 +87,7 @@ func FetchState(
 		return nil, err
 	}
 
-	cCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
+	dCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
 		return nil, err
 	}
@@ -110,8 +110,8 @@ func FetchState(
 			codec:  x.Parser.Codec(),
 		},
 		{
-			id:     cCTX.BlockchainID(),
-			client: cClient,
+			id:     dCTX.BlockchainID(),
+			client: dClient,
 			codec:  delta.Codec,
 		},
 	}
@@ -136,8 +136,8 @@ func FetchState(
 		OCTX:    oCTX,
 		XClient: xClient,
 		XCTX:    xCTX,
-		CClient: cClient,
-		CCTX:    cCTX,
+		DClient: dClient,
+		DCTX:    dCTX,
 		UTXOs:   utxos,
 	}, nil
 }
@@ -153,7 +153,7 @@ func FetchEthState(
 	addrs set.Set[common.Address],
 ) (*EthState, error) {
 	path := fmt.Sprintf(
-		"%s/ext/%s/C/rpc",
+		"%s/ext/%s/D/rpc",
 		uri,
 		constants.ChainAliasPrefix,
 	)

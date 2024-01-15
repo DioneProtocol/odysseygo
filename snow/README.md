@@ -16,9 +16,9 @@ graph LR
 
 ## Intro
 
-The Odyssey primary network consists of 3 built-in blockchains: the X-Chain, C-Chain, and O-Chain. All three chains rely on the Snowman consensus protocol. The X-Chain, which previously used DAG-based Odyssey consensus, was upgraded to Snowman in the Cortina network update. 
+The Odyssey primary network consists of 3 built-in blockchains: the X-Chain, D-Chain, and O-Chain. All three chains rely on the Snowman consensus protocol. The X-Chain, which previously used DAG-based Odyssey consensus, was upgraded to Snowman in the Cortina network update. 
 
-The X-Chain is used to manage assets. The C-Chain is used to create and interact with smart contracts. The O-Chain is used to coordinate validators and stake. At the time of writing, the Odyssey network has ~1200 validators. A set of validators makes up a subnet. Subnets can validate 1 or more chains. It is a common misconception that 1 subnet = 1 chain and this is shown by the primary subnet of Odyssey which is made up of the X-Chain, C-Chain, and O-Chain.
+The X-Chain is used to manage assets. The D-Chain is used to create and interact with smart contracts. The O-Chain is used to coordinate validators and stake. At the time of writing, the Odyssey network has ~1200 validators. A set of validators makes up a subnet. Subnets can validate 1 or more chains. It is a common misconception that 1 subnet = 1 chain and this is shown by the primary subnet of Odyssey which is made up of the X-Chain, D-Chain, and O-Chain.
 
 A node in the Odyssey network can either be a validator or a non-validator. A validator stakes DIONE tokens and participates in consensus to earn rewards. A non-validator does not participate in consensus or have any DIONE staked but is used as a public API. Both validators and non-validator need to have their own copy of the chain and to know the current state of the mempool. At the time of writing, there are ~1200 validators and ~1800 non-validator.
 
@@ -53,7 +53,7 @@ Along with sending and gossiping, the networking library is also responsible for
 
 ## [Router](https://github.com/DioneProtocol/odysseygo/blob/master/snow/networking/router/chain_router.go)
 
-The `ChainRouter` routes all incoming messages to its respective blockchain using `ChainID`. It does this by pushing all the messages onto the respective Chain handler’s queue. The `ChainRouter` references all existing chains on the network such as the X-chain, C-chain, O-chain and possibly any other chain. The `ChainRouter` handles timeouts as well. When sending messages on the P2P layer, timeouts are registered on the sender and cleared on the `ChainRouter` side when a response is received. If no response is received, then we trigger a timeout. Because we handle timeouts on the `ChainRouter` side, the handler is reliable. Peers not responding means timeouts trigger and the `ChainRouter` will still notify the handler of failure cases. The timeout manager within `ChainRouter` is also adaptive. If the network is experiencing long latencies, timeouts will then be adjusted as well.
+The `ChainRouter` routes all incoming messages to its respective blockchain using `ChainID`. It does this by pushing all the messages onto the respective Chain handler’s queue. The `ChainRouter` references all existing chains on the network such as the X-chain, D-chain, O-chain and possibly any other chain. The `ChainRouter` handles timeouts as well. When sending messages on the P2P layer, timeouts are registered on the sender and cleared on the `ChainRouter` side when a response is received. If no response is received, then we trigger a timeout. Because we handle timeouts on the `ChainRouter` side, the handler is reliable. Peers not responding means timeouts trigger and the `ChainRouter` will still notify the handler of failure cases. The timeout manager within `ChainRouter` is also adaptive. If the network is experiencing long latencies, timeouts will then be adjusted as well.
 
 ## [Handler](https://github.com/DioneProtocol/odysseygo/blob/master/snow/networking/handler/handler.go)
 
@@ -74,4 +74,4 @@ Consensus is defined as getting a group of distributed systems to agree on an ou
 
 ## [Blockchain Creation](https://github.com/DioneProtocol/odysseygo/blob/master/chains/manager.go)
 
-The `Manager` is what kickstarts everything in regards to blockchain creation, starting with the O-Chain. Once the O-Chain finishes bootstrapping, it will kickstart C-Chain and O-Chain and any other chain. The `Manager`’s job is not done yet, if a create chain transaction is seen by a validator, a whole new process to create a chain will be started by the `Manager`. This can happen dynamically, long after the original 3 chains are created and bootstrapped.
+The `Manager` is what kickstarts everything in regards to blockchain creation, starting with the O-Chain. Once the O-Chain finishes bootstrapping, it will kickstart D-Chain and O-Chain and any other chain. The `Manager`’s job is not done yet, if a create chain transaction is seen by a validator, a whole new process to create a chain will be started by the `Manager`. This can happen dynamically, long after the original 3 chains are created and bootstrapped.

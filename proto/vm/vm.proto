@@ -121,7 +121,7 @@ message InitializeRequest {
   // produced by the warp messaging signer
   bytes public_key = 5;
   bytes x_chain_id = 6;
-  bytes c_chain_id = 7;
+  bytes d_chain_id = 7;
   bytes dione_asset_id = 8;
   string chain_data_dir = 9;
   bytes genesis_bytes = 10;

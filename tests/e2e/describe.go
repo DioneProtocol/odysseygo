@@ -25,8 +25,8 @@ func DescribeOChain(text string, body func()) bool {
 	return ginkgo.Describe("[O-Chain] "+text, body)
 }
 
-// DescribeCChain annotates the tests for C-Chain.
+// DescribeDChain annotates the tests for D-Chain.
 // Can run with any type of cluster (e.g., local, testnet, mainnet).
-func DescribeCChain(text string, body func()) bool {
-	return ginkgo.Describe("[C-Chain] "+text, body)
+func DescribeDChain(text string, body func()) bool {
+	return ginkgo.Describe("[D-Chain] "+text, body)
 }

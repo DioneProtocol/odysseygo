@@ -40,10 +40,10 @@ func LocalFlags() testnet.FlagsMap {
 	}
 }
 
-// C-Chain config for local testing.
-func LocalCChainConfig() testnet.FlagsMap {
+// D-Chain config for local testing.
+func LocalDChainConfig() testnet.FlagsMap {
 	// Supply only non-default configuration to ensure that default
-	// values will be used. Available C-Chain configuration options are
+	// values will be used. Available D-Chain configuration options are
 	// defined in the `github.com/DioneProtocol/coreth/delta` package.
 	return testnet.FlagsMap{
 		"log-level": "trace",

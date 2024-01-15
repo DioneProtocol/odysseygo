@@ -41,7 +41,7 @@ func NewContextFromClients(
 		return nil, err
 	}
 
-	chainID, err := infoClient.GetBlockchainID(ctx, "C")
+	chainID, err := infoClient.GetBlockchainID(ctx, "D")
 	if err != nil {
 		return nil, err
 	}

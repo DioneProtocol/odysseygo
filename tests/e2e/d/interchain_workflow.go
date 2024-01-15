@@ -23,7 +23,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary/common"
 )
 
-var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
+var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 	require := require.New(ginkgo.GinkgoT())
 
 	const (
@@ -31,7 +31,7 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 		gasLimit = uint64(21000)    // Standard gas limit
 	)
 
-	ginkgo.It("should ensure that funds can be transferred from the C-Chain to the X-Chain and the O-Chain", func() {
+	ginkgo.It("should ensure that funds can be transferred from the D-Chain to the X-Chain and the O-Chain", func() {
 		ginkgo.By("initializing a new eth client")
 		// Select a random node URI to use for both the eth client and
 		// the wallet to avoid having to verify that all nodes are at
@@ -47,7 +47,7 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 		require.NoError(err)
 		recipientEthAddress := delta.GetEthAddress(recipientKey)
 
-		ginkgo.By("sending funds from one address to another on the C-Chain", func() {
+		ginkgo.By("sending funds from one address to another on the D-Chain", func() {
 			// Create transaction
 			acceptedNonce, err := ethClient.AcceptedNonceAt(e2e.DefaultContext(), senderEthAddress)
 			require.NoError(err)
@@ -62,15 +62,15 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 			)
 
 			// Sign transaction
-			cChainID, err := ethClient.ChainID(e2e.DefaultContext())
+			dChainID, err := ethClient.ChainID(e2e.DefaultContext())
 			require.NoError(err)
-			signer := types.NewEIP155Signer(cChainID)
+			signer := types.NewEIP155Signer(dChainID)
 			signedTx, err := types.SignTx(tx, signer, senderKey.ToECDSA())
 			require.NoError(err)
 
 			_ = e2e.SendEthTransaction(ethClient, signedTx)
 
-			ginkgo.By("waiting for the C-Chain recipient address to have received the sent funds")
+			ginkgo.By("waiting for the D-Chain recipient address to have received the sent funds")
 			e2e.Eventually(func() bool {
 				balance, err := ethClient.BalanceAt(e2e.DefaultContext(), recipientEthAddress, nil)
 				require.NoError(err)
@@ -79,13 +79,13 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 		})
 
 		// Wallet must be initialized after sending funds on the
-		// C-Chain with the same node URI to ensure wallet state
+		// D-Chain with the same node URI to ensure wallet state
 		// matches on-chain state.
 		ginkgo.By("initializing a keychain and associated wallet")
 		keychain := secp256k1fx.NewKeychain(senderKey, recipientKey)
 		baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 		xWallet := baseWallet.X()
-		cWallet := baseWallet.C()
+		dWallet := baseWallet.D()
 		oWallet := baseWallet.O()
 
 		ginkgo.By("defining common configuration")
@@ -110,8 +110,8 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 			},
 		}
 
-		ginkgo.By("exporting DIONE from the C-Chain to the X-Chain", func() {
-			_, err := cWallet.IssueExportTx(
+		ginkgo.By("exporting DIONE from the D-Chain to the X-Chain", func() {
+			_, err := dWallet.IssueExportTx(
 				xWallet.BlockchainID(),
 				exportOutputs,
 				e2e.WithDefaultContext(),
@@ -120,9 +120,9 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("importing DIONE from the C-Chain to the X-Chain", func() {
+		ginkgo.By("importing DIONE from the D-Chain to the X-Chain", func() {
 			_, err := xWallet.IssueImportTx(
-				cWallet.BlockchainID(),
+				dWallet.BlockchainID(),
 				&recipientOwner,
 				e2e.WithDefaultContext(),
 			)
@@ -137,8 +137,8 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 			require.Positive(balances[dioneAssetID])
 		})
 
-		ginkgo.By("exporting DIONE from the C-Chain to the O-Chain", func() {
-			_, err := cWallet.IssueExportTx(
+		ginkgo.By("exporting DIONE from the D-Chain to the O-Chain", func() {
+			_, err := dWallet.IssueExportTx(
 				constants.OmegaChainID,
 				exportOutputs,
 				e2e.WithDefaultContext(),
@@ -147,9 +147,9 @@ var _ = e2e.DescribeCChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("importing DIONE from the C-Chain to the O-Chain", func() {
+		ginkgo.By("importing DIONE from the D-Chain to the O-Chain", func() {
 			_, err = oWallet.IssueImportTx(
-				cWallet.BlockchainID(),
+				dWallet.BlockchainID(),
 				&recipientOwner,
 				e2e.WithDefaultContext(),
 			)

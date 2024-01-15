@@ -43,8 +43,8 @@ const (
 )
 
 var (
-	// Arbitrarily large amount of DIONE (10^12) to fund keys on the C-Chain for testing
-	DefaultFundedKeyCChainAmount = new(big.Int).Exp(big.NewInt(10), big.NewInt(30), nil)
+	// Arbitrarily large amount of DIONE (10^12) to fund keys on the D-Chain for testing
+	DefaultFundedKeyDChainAmount = new(big.Int).Exp(big.NewInt(10), big.NewInt(30), nil)
 
 	errEmptyValidatorsForGenesis   = errors.New("failed to generate genesis: empty validator IDs")
 	errNoKeysForGenesis            = errors.New("failed to generate genesis: no keys to fund")
@@ -120,7 +120,7 @@ func DefaultJSONMarshal(v interface{}) ([]byte, error) {
 // common to all nodes in a given network.
 type NetworkConfig struct {
 	Genesis      *genesis.UnparsedConfig
-	CChainConfig FlagsMap
+	DChainConfig FlagsMap
 	DefaultFlags FlagsMap
 	FundedKeys   []*secp256k1.PrivateKey
 }
@@ -140,15 +140,15 @@ func (c *NetworkConfig) EnsureGenesis(networkID uint32, validatorIDs []ids.NodeI
 
 	// Ensure pre-funded keys have arbitrary large balances on both chains to support testing
 	xChainBalances := make(XChainBalanceMap, len(c.FundedKeys))
-	cChainBalances := make(core.GenesisAlloc, len(c.FundedKeys))
+	dChainBalances := make(core.GenesisAlloc, len(c.FundedKeys))
 	for _, key := range c.FundedKeys {
 		xChainBalances[key.Address()] = DefaultFundedKeyXChainAmount
-		cChainBalances[delta.GetEthAddress(key)] = core.GenesisAccount{
-			Balance: DefaultFundedKeyCChainAmount,
+		dChainBalances[delta.GetEthAddress(key)] = core.GenesisAccount{
+			Balance: DefaultFundedKeyDChainAmount,
 		}
 	}
 
-	genesis, err := NewTestGenesis(networkID, xChainBalances, cChainBalances, validatorIDs)
+	genesis, err := NewTestGenesis(networkID, xChainBalances, dChainBalances, validatorIDs)
 	if err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ type XChainBalanceMap map[ids.ShortID]uint64
 func NewTestGenesis(
 	networkID uint32,
 	xChainBalances XChainBalanceMap,
-	cChainBalances core.GenesisAlloc,
+	dChainBalances core.GenesisAlloc,
 	validatorIDs []ids.NodeID,
 ) (*genesis.UnparsedConfig, error) {
 	// Validate inputs
@@ -319,7 +319,7 @@ func NewTestGenesis(
 	if len(validatorIDs) == 0 {
 		return nil, errMissingValidatorsForGenesis
 	}
-	if len(xChainBalances) == 0 || len(cChainBalances) == 0 {
+	if len(xChainBalances) == 0 || len(dChainBalances) == 0 {
 		return nil, errMissingBalancesForGenesis
 	}
 
@@ -391,20 +391,20 @@ func NewTestGenesis(
 		)
 	}
 
-	// Define C-Chain genesis
-	cChainGenesis := &core.Genesis{
+	// Define D-Chain genesis
+	dChainGenesis := &core.Genesis{
 		Config: &params.ChainConfig{
 			ChainID: big.NewInt(43112), // Arbitrary chain ID is arbitrary
 		},
 		Difficulty: big.NewInt(0), // Difficulty is a mandatory field
 		GasLimit:   DefaultGasLimit,
-		Alloc:      cChainBalances,
+		Alloc:      dChainBalances,
 	}
-	cChainGenesisBytes, err := json.Marshal(cChainGenesis)
+	dChainGenesisBytes, err := json.Marshal(dChainGenesis)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal C-Chain genesis: %w", err)
+		return nil, fmt.Errorf("failed to marshal D-Chain genesis: %w", err)
 	}
-	config.CChainGenesis = string(cChainGenesisBytes)
+	config.DChainGenesis = string(dChainGenesisBytes)
 
 	// Give staking rewards for initial validators to a random address. Any testing of staking rewards
 	// will be easier to perform with nodes other than the initial validators since the timing of

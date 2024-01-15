@@ -118,7 +118,7 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 	if err != nil {
 		return nil, err
 	}
-	cChainID, err := ids.ToID(req.CChainId)
+	dChainID, err := ids.ToID(req.DChainId)
 	if err != nil {
 		return nil, err
 	}
@@ -241,7 +241,7 @@ func (vm *VMServer) Initialize(ctx context.Context, req *vmpb.InitializeRequest)
 		PublicKey: publicKey,
 
 		XChainID:     xChainID,
-		CChainID:     cChainID,
+		DChainID:     dChainID,
 		DIONEAssetID: dioneAssetID,
 
 		Log:          vm.log,

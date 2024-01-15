@@ -118,10 +118,10 @@ func TestNewImportTx(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			description:   "attempting to import from C-chain",
-			sourceChainID: cChainID,
+			description:   "attempting to import from D-chain",
+			sourceChainID: dChainID,
 			sharedMemory: fundedSharedMemory(
-				cChainID,
+				dChainID,
 				map[ids.ID]uint64{
 					env.ctx.DIONEAssetID: env.config.TxFee,
 				},

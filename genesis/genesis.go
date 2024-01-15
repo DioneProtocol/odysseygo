@@ -38,7 +38,7 @@ var (
 	errNoSupply                        = errors.New("initial supply must be > 0")
 	errNoStakeDuration                 = errors.New("initial stake duration must be > 0")
 	errNoStakers                       = errors.New("initial stakers must be > 0")
-	errNoCChainGenesis                 = errors.New("C-Chain genesis cannot be empty")
+	errNoDChainGenesis                 = errors.New("D-Chain genesis cannot be empty")
 	errNoTxs                           = errors.New("genesis creates no transactions")
 	errNoAllocationToStake             = errors.New("no allocation to stake")
 	errDuplicateInitiallyStakedAddress = errors.New("duplicate initially staked address")
@@ -173,8 +173,8 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 		return fmt.Errorf("initial staked funds validation failed: %w", err)
 	}
 
-	if len(config.CChainGenesis) == 0 {
-		return errNoCChainGenesis
+	if len(config.DChainGenesis) == 0 {
+		return errNoDChainGenesis
 	}
 
 	return nil
@@ -436,7 +436,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	}
 
 	// Specify the chains that exist upon this network's creation
-	genesisStr, err := formatting.Encode(defaultEncoding, []byte(config.CChainGenesis))
+	genesisStr, err := formatting.Encode(defaultEncoding, []byte(config.DChainGenesis))
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("couldn't encode message: %w", err)
 	}
@@ -455,8 +455,8 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		{
 			GenesisData: genesisStr,
 			SubnetID:    constants.PrimaryNetworkID,
-			VMID:        constants.DELTAID,
-			Name:        "C-Chain",
+			VMID:        constants.DeltaID,
+			Name:        "D-Chain",
 		},
 	}
 

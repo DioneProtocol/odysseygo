@@ -28,7 +28,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 
 	const transferAmount = 10 * units.Dione
 
-	ginkgo.It("should ensure that funds can be transferred from the X-Chain to the C-Chain and the O-Chain", func() {
+	ginkgo.It("should ensure that funds can be transferred from the X-Chain to the D-Chain and the O-Chain", func() {
 		nodeURI := e2e.Env.GetRandomNodeURI()
 
 		ginkgo.By("creating wallet with a funded key to send from and recipient key to deliver to")
@@ -39,7 +39,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 		keychain.Add(recipientKey)
 		baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 		xWallet := baseWallet.X()
-		cWallet := baseWallet.C()
+		dWallet := baseWallet.D()
 		oWallet := baseWallet.O()
 
 		ginkgo.By("defining common configuration")
@@ -52,7 +52,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 				recipientKey.Address(),
 			},
 		}
-		// Use the same outputs for both C-Chain and O-Chain exports
+		// Use the same outputs for both D-Chain and O-Chain exports
 		exportOutputs := []*dione.TransferableOutput{
 			{
 				Asset: dione.Asset{
@@ -94,9 +94,9 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 			require.Greater(balances[dioneAssetID], uint64(0))
 		})
 
-		ginkgo.By("exporting DIONE from the X-Chain to the C-Chain", func() {
+		ginkgo.By("exporting DIONE from the X-Chain to the D-Chain", func() {
 			_, err := xWallet.IssueExportTx(
-				cWallet.BlockchainID(),
+				dWallet.BlockchainID(),
 				exportOutputs,
 				e2e.WithDefaultContext(),
 			)
@@ -106,8 +106,8 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 		ginkgo.By("initializing a new eth client")
 		ethClient := e2e.Env.NewEthClient(nodeURI)
 
-		ginkgo.By("importing DIONE from the X-Chain to the C-Chain", func() {
-			_, err := cWallet.IssueImportTx(
+		ginkgo.By("importing DIONE from the X-Chain to the D-Chain", func() {
+			_, err := dWallet.IssueImportTx(
 				xWallet.BlockchainID(),
 				recipientEthAddress,
 				e2e.WithDefaultContext(),
@@ -116,7 +116,7 @@ var _ = e2e.DescribeXChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("checking that the recipient address has received imported funds on the C-Chain")
+		ginkgo.By("checking that the recipient address has received imported funds on the D-Chain")
 		e2e.Eventually(func() bool {
 			balance, err := ethClient.BalanceAt(e2e.DefaultContext(), recipientEthAddress, nil)
 			require.NoError(err)
