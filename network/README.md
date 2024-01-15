@@ -77,9 +77,9 @@ Note over Node,Peer: Version message
 Node->>Peer: OdysseyGo v1.9.4
 Note right of Peer: LGTM!
 Note over Node,Peer: PeerList message
-Peer->>Node: Peer-X, Peer-Y, Peer-Z
+Peer->>Node: Peer-A, Peer-Y, Peer-Z
 Note over Node,Peer: Handshake Complete
-Node->>Peer: ACK Peer-X, Peer-Y, Peer-Z
+Node->>Peer: ACK Peer-A, Peer-Y, Peer-Z
 ```
 
 Once the node attempting to join the network receives this `PeerList` message, the handshake is complete and the node is now connected to the peer. The node attempts to connect to the new peers discovered in the `PeerList` message. Each connection results in another peer handshake, which results in the node incrementally discovering more and more peers in the network as more and more `PeerList` messages are exchanged.

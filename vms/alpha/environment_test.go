@@ -246,11 +246,11 @@ func newContext(tb testing.TB) *snow.Context {
 	ctx.NetworkID = constants.UnitTestID
 	ctx.ChainID = chainID
 	ctx.DIONEAssetID = tx.ID()
-	ctx.XChainID = ids.Empty.Prefix(0)
+	ctx.AChainID = ids.Empty.Prefix(0)
 	ctx.DChainID = ids.Empty.Prefix(1)
 	aliaser := ctx.BCLookup.(ids.Aliaser)
 
-	require.NoError(aliaser.Alias(chainID, "X"))
+	require.NoError(aliaser.Alias(chainID, "A"))
 	require.NoError(aliaser.Alias(chainID, chainID.String()))
 	require.NoError(aliaser.Alias(constants.OmegaChainID, "O"))
 	require.NoError(aliaser.Alias(constants.OmegaChainID, constants.OmegaChainID.String()))

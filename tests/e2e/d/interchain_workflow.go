@@ -31,7 +31,7 @@ var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 		gasLimit = uint64(21000)    // Standard gas limit
 	)
 
-	ginkgo.It("should ensure that funds can be transferred from the D-Chain to the X-Chain and the O-Chain", func() {
+	ginkgo.It("should ensure that funds can be transferred from the D-Chain to the A-Chain and the O-Chain", func() {
 		ginkgo.By("initializing a new eth client")
 		// Select a random node URI to use for both the eth client and
 		// the wallet to avoid having to verify that all nodes are at
@@ -84,20 +84,20 @@ var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 		ginkgo.By("initializing a keychain and associated wallet")
 		keychain := secp256k1fx.NewKeychain(senderKey, recipientKey)
 		baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
-		xWallet := baseWallet.X()
+		aWallet := baseWallet.A()
 		dWallet := baseWallet.D()
 		oWallet := baseWallet.O()
 
 		ginkgo.By("defining common configuration")
-		dioneAssetID := xWallet.DIONEAssetID()
-		// Use the same owner for import funds to X-Chain and O-Chain
+		dioneAssetID := aWallet.DIONEAssetID()
+		// Use the same owner for import funds to A-Chain and O-Chain
 		recipientOwner := secp256k1fx.OutputOwners{
 			Threshold: 1,
 			Addrs: []ids.ShortID{
 				recipientKey.Address(),
 			},
 		}
-		// Use the same outputs for both X-Chain and O-Chain exports
+		// Use the same outputs for both A-Chain and O-Chain exports
 		exportOutputs := []*secp256k1fx.TransferOutput{
 			{
 				Amt: txAmount,
@@ -110,9 +110,9 @@ var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 			},
 		}
 
-		ginkgo.By("exporting DIONE from the D-Chain to the X-Chain", func() {
+		ginkgo.By("exporting DIONE from the D-Chain to the A-Chain", func() {
 			_, err := dWallet.IssueExportTx(
-				xWallet.BlockchainID(),
+				aWallet.BlockchainID(),
 				exportOutputs,
 				e2e.WithDefaultContext(),
 				e2e.WithSuggestedGasPrice(ethClient),
@@ -120,8 +120,8 @@ var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("importing DIONE from the D-Chain to the X-Chain", func() {
-			_, err := xWallet.IssueImportTx(
+		ginkgo.By("importing DIONE from the D-Chain to the A-Chain", func() {
+			_, err := aWallet.IssueImportTx(
 				dWallet.BlockchainID(),
 				&recipientOwner,
 				e2e.WithDefaultContext(),
@@ -129,8 +129,8 @@ var _ = e2e.DescribeDChain("[Interchain Workflow]", func() {
 			require.NoError(err)
 		})
 
-		ginkgo.By("checking that the recipient address has received imported funds on the X-Chain", func() {
-			balances, err := xWallet.Builder().GetFTBalance(common.WithCustomAddresses(set.Of(
+		ginkgo.By("checking that the recipient address has received imported funds on the A-Chain", func() {
+			balances, err := aWallet.Builder().GetFTBalance(common.WithCustomAddresses(set.Of(
 				recipientKey.Address(),
 			)))
 			require.NoError(err)

@@ -72,7 +72,7 @@ var (
 	preFundedKeys             = secp256k1.TestKeys()
 	dioneAssetID              = ids.ID{'y', 'e', 'e', 't'}
 	defaultTxFee              = uint64(100)
-	xChainID                  = ids.Empty.Prefix(0)
+	aChainID                  = ids.Empty.Prefix(0)
 	dChainID                  = ids.Empty.Prefix(1)
 
 	testSubnet1            *txs.Tx
@@ -252,7 +252,7 @@ func defaultState(
 func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = 10
-	ctx.XChainID = xChainID
+	ctx.AChainID = aChainID
 	ctx.DChainID = dChainID
 	ctx.DIONEAssetID = dioneAssetID
 
@@ -268,7 +268,7 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
 				constants.OmegaChainID: constants.PrimaryNetworkID,
-				xChainID:               constants.PrimaryNetworkID,
+				aChainID:               constants.PrimaryNetworkID,
 				dChainID:               constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {

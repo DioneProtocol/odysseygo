@@ -545,7 +545,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -591,7 +591,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	m := atomic.NewMemory(prefixdb.New([]byte{5}, baseDB))
 
 	mutableSharedMemory.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.AChainID)
 
 	utxoBytes, err := txs.Codec.Marshal(txs.Version, utxo)
 	require.NoError(err)
@@ -795,7 +795,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -840,7 +840,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	m := atomic.NewMemory(prefixdb.New([]byte{5}, baseDB))
 
 	mutableSharedMemory.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.AChainID)
 
 	utxoBytes, err := txs.Codec.Marshal(txs.Version, utxo)
 	require.NoError(err)

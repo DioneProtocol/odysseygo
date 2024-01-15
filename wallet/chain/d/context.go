@@ -27,14 +27,14 @@ type context struct {
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	xChainClient := alpha.NewClient(uri, "X")
-	return NewContextFromClients(ctx, infoClient, xChainClient)
+	aChainClient := alpha.NewClient(uri, "A")
+	return NewContextFromClients(ctx, infoClient, aChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	xChainClient alpha.Client,
+	aChainClient alpha.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
@@ -46,7 +46,7 @@ func NewContextFromClients(
 		return nil, err
 	}
 
-	asset, err := xChainClient.GetAssetDescription(ctx, "DIONE")
+	asset, err := aChainClient.GetAssetDescription(ctx, "DIONE")
 	if err != nil {
 		return nil, err
 	}

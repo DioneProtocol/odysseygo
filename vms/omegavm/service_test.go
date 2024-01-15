@@ -182,7 +182,7 @@ func TestGetTxStatus(t *testing.T) {
 	m := atomic.NewMemory(prefixdb.New([]byte{}, service.vm.dbManager.Current().Database))
 
 	sm := m.NewSharedMemory(service.vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(xChainID)
+	peerSharedMemory := m.NewSharedMemory(aChainID)
 
 	// #nosec G404
 	utxo := &dione.UTXO{
@@ -221,7 +221,7 @@ func TestGetTxStatus(t *testing.T) {
 	oldSharedMemory := mutableSharedMemory.SharedMemory
 	mutableSharedMemory.SharedMemory = sm
 
-	tx, err := service.vm.txBuilder.NewImportTx(xChainID, ids.ShortEmpty, []*secp256k1.PrivateKey{recipientKey}, ids.ShortEmpty)
+	tx, err := service.vm.txBuilder.NewImportTx(aChainID, ids.ShortEmpty, []*secp256k1.PrivateKey{recipientKey}, ids.ShortEmpty)
 	require.NoError(err)
 
 	mutableSharedMemory.SharedMemory = oldSharedMemory
@@ -298,7 +298,7 @@ func TestGetTx(t *testing.T) {
 			func(service *Service) (*txs.Tx, error) {
 				return service.vm.txBuilder.NewExportTx( // Test GetTx works for proposal blocks
 					100,
-					service.vm.ctx.XChainID,
+					service.vm.ctx.AChainID,
 					ids.GenerateTestShortID(),
 					[]*secp256k1.PrivateKey{keys[0]},
 					keys[0].PublicKey().Address(), // change addr

@@ -300,9 +300,9 @@ func addNodeFlags(fs *pflag.FlagSet) {
 	// Consensus
 	fs.Int(SnowSampleSizeKey, snowball.DefaultParameters.K, "Number of nodes to query for each network poll")
 	fs.Int(SnowQuorumSizeKey, snowball.DefaultParameters.Alpha, "Alpha value to use for required number positive results")
-	// TODO: Replace this temporary flag description after the X-chain
+	// TODO: Replace this temporary flag description after the A-chain
 	// linearization with "Beta value to use for virtuous transactions"
-	fs.Int(SnowVirtuousCommitThresholdKey, snowball.DefaultParameters.BetaVirtuous, "This flag is temporarily ignored due to the X-chain linearization")
+	fs.Int(SnowVirtuousCommitThresholdKey, snowball.DefaultParameters.BetaVirtuous, "This flag is temporarily ignored due to the A-chain linearization")
 	fs.Int(SnowRogueCommitThresholdKey, snowball.DefaultParameters.BetaRogue, "Beta value to use for rogue transactions")
 	fs.Int(SnowConcurrentRepollsKey, snowball.DefaultParameters.ConcurrentRepolls, "Minimum number of concurrent polls for finalizing consensus")
 	fs.Int(SnowOptimalProcessingKey, snowball.DefaultParameters.OptimalProcessing, "Optimal number of processing containers in consensus")

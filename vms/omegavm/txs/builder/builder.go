@@ -323,7 +323,7 @@ func (b *builder) NewExportTx(
 			Outs:         outs, // Non-exported outputs
 		}},
 		DestinationChain: chainID,
-		ExportedOutputs: []*dione.TransferableOutput{{ // Exported to X-Chain
+		ExportedOutputs: []*dione.TransferableOutput{{ // Exported to A-Chain
 			Asset: dione.Asset{ID: b.ctx.DIONEAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,

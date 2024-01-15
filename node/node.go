@@ -758,7 +758,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	if err != nil {
 		return err
 	}
-	xChainID := createALPHATx.ID()
+	aChainID := createALPHATx.ID()
 
 	createDELTATx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.DeltaID)
 	if err != nil {
@@ -770,7 +770,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 	criticalChains := set.Set[ids.ID]{}
 	criticalChains.Add(
 		constants.OmegaChainID,
-		xChainID,
+		aChainID,
 		dChainID,
 	)
 
@@ -826,7 +826,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		Keystore:                                n.keystore,
 		AtomicMemory:                            n.sharedMemory,
 		DIONEAssetID:                            dioneAssetID,
-		XChainID:                                xChainID,
+		AChainID:                                aChainID,
 		DChainID:                                dChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,

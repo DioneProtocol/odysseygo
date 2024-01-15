@@ -23,7 +23,7 @@ type Password struct {
 type NewTokenArgs struct {
 	Password
 	// Endpoints that may be accessed with this token e.g. if endpoints is
-	// ["/ext/bc/X", "/ext/admin"] then the token holder can hit the X-Chain API
+	// ["/ext/bc/A", "/ext/admin"] then the token holder can hit the A-Chain API
 	// and the admin API. If [Endpoints] contains an element "*" then the token
 	// allows access to all API endpoints. [Endpoints] must have between 1 and
 	// [maxEndpoints] elements

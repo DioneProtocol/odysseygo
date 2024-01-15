@@ -18,7 +18,7 @@ import (
 func TestAddAddressesParseAddresses(t *testing.T) {
 	require := require.New(t)
 
-	chainAlias := "X"
+	chainAlias := "A"
 	hrp := constants.GetHRP(5)
 
 	addrID := ids.ShortID{1}

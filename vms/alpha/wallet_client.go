@@ -24,7 +24,7 @@ type WalletClient interface {
 	// Send [amount] of [assetID] to address [to]
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	Send(
 		ctx context.Context,
 		user api.UserPass,
@@ -39,7 +39,7 @@ type WalletClient interface {
 	// SendMultiple sends a transaction from [user] funding all [outputs]
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	SendMultiple(
 		ctx context.Context,
 		user api.UserPass,
@@ -59,7 +59,7 @@ type walletClient struct {
 // NewWalletClient returns an ALPHA wallet client for interacting with alpha managed wallet on [chain]
 //
 // Deprecated: Transactions should be issued using the
-// `odysseygo/wallet/chain/x.Wallet` utility.
+// `odysseygo/wallet/chain/a.Wallet` utility.
 func NewWalletClient(uri, chain string) WalletClient {
 	path := fmt.Sprintf(
 		"%s/ext/%s/%s/wallet",

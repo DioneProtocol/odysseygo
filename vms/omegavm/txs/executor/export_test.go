@@ -32,8 +32,8 @@ func TestNewExportTx(t *testing.T) {
 
 	tests := []test{
 		{
-			description:        "O->X export",
-			destinationChainID: xChainID,
+			description:        "O->A export",
+			destinationChainID: aChainID,
 			sourceKeys:         []*secp256k1.PrivateKey{sourceKey},
 			timestamp:          defaultValidateStartTime,
 		},

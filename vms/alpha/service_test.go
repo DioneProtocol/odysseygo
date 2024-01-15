@@ -512,7 +512,7 @@ func TestServiceGetTxJSON_BaseTx(t *testing.T) {
 	jsonString := string(jsonTxBytes)
 	require.Contains(jsonString, `"memo":"0x0102030405060708"`)
 	require.Contains(jsonString, `"inputs":[{"txID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","outputIndex":2,"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
-	require.Contains(jsonString, `"outputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]`)
+	require.Contains(jsonString, `"outputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]`)
 }
 
 func TestServiceGetTxJSON_ExportTx(t *testing.T) {
@@ -538,7 +538,7 @@ func TestServiceGetTxJSON_ExportTx(t *testing.T) {
 	require.NoError(err)
 	jsonString := string(jsonTxBytes)
 	require.Contains(jsonString, `"inputs":[{"txID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","outputIndex":2,"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
-	require.Contains(jsonString, `"exportedOutputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]}`)
+	require.Contains(jsonString, `"exportedOutputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]}`)
 }
 
 func TestServiceGetTxJSON_CreateAssetTx(t *testing.T) {
@@ -571,8 +571,8 @@ func TestServiceGetTxJSON_CreateAssetTx(t *testing.T) {
 	jsonString := string(jsonTxBytes)
 
 	// contains the address in the right format
-	require.Contains(jsonString, `"outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":1,"locktime":0,"threshold":1},{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":2,"locktime":0,"threshold":1}]}`)
-	require.Contains(jsonString, `"initialStates":[{"fxIndex":0,"fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1},{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1}]},{"fxIndex":1,"fxID":"qd2U4HDWUvMrVUeTcCHp6xH3Qpnn1XbU5MDdnBoiifFqvgXwT","outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":1,"locktime":0,"threshold":1},{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":2,"locktime":0,"threshold":1}]},{"fxIndex":2,"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy","outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1},{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1}]}]},"credentials":[],"id":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS"}`)
+	require.Contains(jsonString, `"outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":1,"locktime":0,"threshold":1},{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":2,"locktime":0,"threshold":1}]}`)
+	require.Contains(jsonString, `"initialStates":[{"fxIndex":0,"fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1},{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1}]},{"fxIndex":1,"fxID":"qd2U4HDWUvMrVUeTcCHp6xH3Qpnn1XbU5MDdnBoiifFqvgXwT","outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":1,"locktime":0,"threshold":1},{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"groupID":2,"locktime":0,"threshold":1}]},{"fxIndex":2,"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy","outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1},{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"locktime":0,"threshold":1}]}]},"credentials":[],"id":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS"}`)
 }
 
 func TestServiceGetTxJSON_OperationTxWithNftxMintOp(t *testing.T) {
@@ -612,7 +612,7 @@ func TestServiceGetTxJSON_OperationTxWithNftxMintOp(t *testing.T) {
 	require.Contains(jsonString, `"memo":"0x"`)
 	require.Contains(jsonString, `"payload":"0x68656c6c6f"`)
 	// contains the address in the right format
-	require.Contains(jsonString, `"outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
 	// contains the fxID
 	require.Contains(jsonString, `"operations":[{"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":2}],"fxID":"qd2U4HDWUvMrVUeTcCHp6xH3Qpnn1XbU5MDdnBoiifFqvgXwT"`)
 	require.Contains(jsonString, `"credentials":[{"fxID":"qd2U4HDWUvMrVUeTcCHp6xH3Qpnn1XbU5MDdnBoiifFqvgXwT","credential":{"signatures":["0x571f18cfdb254263ab6b987f742409bd5403eafe08b4dbc297c5cd8d1c85eb8812e4541e11d3dc692cd14b5f4bccc1835ec001df6d8935ce881caf97017c2a4801"]}}]`)
@@ -656,7 +656,7 @@ func TestServiceGetTxJSON_OperationTxWithMultipleNftxMintOp(t *testing.T) {
 	jsonString := string(jsonTxBytes)
 
 	// contains the address in the right format
-	require.Contains(jsonString, `"outputs":[{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"outputs":[{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
 
 	// contains the fxID
 	require.Contains(jsonString, `"operations":[{"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":2}],"fxID":"qd2U4HDWUvMrVUeTcCHp6xH3Qpnn1XbU5MDdnBoiifFqvgXwT"`)
@@ -700,8 +700,8 @@ func TestServiceGetTxJSON_OperationTxWithSecpMintOp(t *testing.T) {
 	// ensure memo is in hex
 	require.Contains(jsonString, `"memo":"0x"`)
 	// contains the address in the right format
-	require.Contains(jsonString, `"mintOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
-	require.Contains(jsonString, `"transferOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":1,"locktime":0,"threshold":1}}}]}`)
+	require.Contains(jsonString, `"mintOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"transferOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":1,"locktime":0,"threshold":1}}}]}`)
 
 	// contains the fxID
 	require.Contains(jsonString, `"operations":[{"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":0}],"fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ"`)
@@ -746,8 +746,8 @@ func TestServiceGetTxJSON_OperationTxWithMultipleSecpMintOp(t *testing.T) {
 	jsonString := string(jsonTxBytes)
 
 	// contains the address in the right format
-	require.Contains(jsonString, `"mintOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
-	require.Contains(jsonString, `"transferOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":1,"locktime":0,"threshold":1}}}`)
+	require.Contains(jsonString, `"mintOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"transferOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":1,"locktime":0,"threshold":1}}}`)
 
 	// contains the fxID
 	require.Contains(jsonString, `"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":1}],"fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ"`)
@@ -791,7 +791,7 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOp(t *testing.T) {
 	// ensure memo is in hex
 	require.Contains(jsonString, `"memo":"0x"`)
 	// contains the address in the right format
-	require.Contains(jsonString, `"mintOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"mintOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
 
 	// contains the fxID
 	require.Contains(jsonString, `"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":4}],"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy"`)
@@ -836,7 +836,7 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOpMultiple(t *testing.T) 
 	jsonString := string(jsonTxBytes)
 
 	// contains the address in the right format
-	require.Contains(jsonString, `"mintOutput":{"addresses":["X-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
+	require.Contains(jsonString, `"mintOutput":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"]`)
 
 	// contains the fxID
 	require.Contains(jsonString, `"operations":[{"assetID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","inputIDs":[{"txID":"2MDgrsBHMRsEPa4D4NA1Bo1pjkVLUK173S3dd9BgT2nCJNiDuS","outputIndex":4}],"fxID":"rXJsCSEYXg2TehWxCEEGj6JU2PWKTkd6cBdNLjoe2SpsKD9cy"`)
@@ -1179,13 +1179,13 @@ func TestServiceGetUTXOs(t *testing.T) {
 	}))
 
 	hrp := constants.GetHRP(env.vm.ctx.NetworkID)
-	xAddr, err := env.vm.FormatLocalAddress(rawAddr)
+	aAddr, err := env.vm.FormatLocalAddress(rawAddr)
 	require.NoError(t, err)
 	oAddr, err := env.vm.FormatAddress(constants.OmegaChainID, rawAddr)
 	require.NoError(t, err)
 	unknownChainAddr, err := address.Format("R", hrp, rawAddr.Bytes())
 	require.NoError(t, err)
-	xEmptyAddr, err := env.vm.FormatLocalAddress(rawEmptyAddr)
+	aEmptyAddr, err := env.vm.FormatLocalAddress(rawEmptyAddr)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -1249,20 +1249,20 @@ func TestServiceGetUTXOs(t *testing.T) {
 			args:        &api.GetUTXOsArgs{},
 		},
 		{
-			label: "get all X-chain UTXOs",
+			label: "get all A-chain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 			},
 		},
 		{
-			label: "get one X-chain UTXO",
+			label: "get one A-chain UTXO",
 			count: 1,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 				Limit: 1,
 			},
@@ -1272,7 +1272,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 				Limit: json.Uint32(numUTXOs + 1),
 			},
@@ -1282,7 +1282,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count: 0,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xEmptyAddr,
+					aEmptyAddr,
 				},
 			},
 		},
@@ -1291,8 +1291,8 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xEmptyAddr,
-					xAddr,
+					aEmptyAddr,
+					aAddr,
 				},
 			},
 		},
@@ -1301,7 +1301,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 				SourceChain: "O",
 			},
@@ -1312,7 +1312,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count:       numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 				SourceChain: "HomeRunDerby",
 			},
@@ -1322,7 +1322,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 				},
 				SourceChain: "O",
 			},
@@ -1332,7 +1332,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			expectedErr: dione.ErrMismatchedChainIDs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
-					xAddr,
+					aAddr,
 					oAddr,
 				},
 			},

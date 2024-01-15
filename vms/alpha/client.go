@@ -21,7 +21,7 @@ import (
 
 var _ Client = (*client)(nil)
 
-// Client for interacting with an ALPHA (X-Chain) instance
+// Client for interacting with an ALPHA (A-Chain) instance
 type Client interface {
 	WalletClient
 	// GetBlock returns the block with the given id.
@@ -77,7 +77,7 @@ type Client interface {
 	// CreateAsset creates a new asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	CreateAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -93,7 +93,7 @@ type Client interface {
 	// CreateFixedCapAsset creates a new fixed cap asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	CreateFixedCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -108,7 +108,7 @@ type Client interface {
 	// CreateVariableCapAsset creates a new variable cap asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	CreateVariableCapAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -123,7 +123,7 @@ type Client interface {
 	// CreateNFTAsset creates a new NFT asset and returns its assetID
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	CreateNFTAsset(
 		ctx context.Context,
 		user api.UserPass,
@@ -153,7 +153,7 @@ type Client interface {
 	// Mint [amount] of [assetID] to be owned by [to]
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	Mint(
 		ctx context.Context,
 		user api.UserPass,
@@ -167,7 +167,7 @@ type Client interface {
 	// SendNFT sends an NFT and returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	SendNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -181,7 +181,7 @@ type Client interface {
 	// MintNFT issues a MintNFT transaction and returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	MintNFT(
 		ctx context.Context,
 		user api.UserPass,
@@ -196,13 +196,13 @@ type Client interface {
 	// returns the ID of the newly created transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	Import(ctx context.Context, user api.UserPass, to ids.ShortID, sourceChain string, options ...rpc.Option) (ids.ID, error) // Export sends an asset from this chain to the O/D-Chain.
 	// After this tx is accepted, the DIONE must be imported to the O/D-chain with an importTx.
 	// Returns the ID of the newly created atomic transaction
 	//
 	// Deprecated: Transactions should be issued using the
-	// `odysseygo/wallet/chain/x.Wallet` utility.
+	// `odysseygo/wallet/chain/a.Wallet` utility.
 	Export(
 		ctx context.Context,
 		user api.UserPass,

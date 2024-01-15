@@ -38,12 +38,12 @@ func ExampleWallet() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the O-chain and the X-chain wallets
+	// Get the O-chain and the A-chain wallets
 	oWallet := wallet.O()
-	xWallet := wallet.X()
+	aWallet := wallet.A()
 
 	// Pull out useful constants to use when issuing transactions.
-	xChainID := xWallet.BlockchainID()
+	aChainID := aWallet.BlockchainID()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
@@ -53,7 +53,7 @@ func ExampleWallet() {
 
 	// Create a custom asset to send to the O-chain.
 	createAssetStartTime := time.Now()
-	createAssetTx, err := xWallet.IssueCreateAssetTx(
+	createAssetTx, err := aWallet.IssueCreateAssetTx(
 		"RnM",
 		"RNM",
 		9,
@@ -67,15 +67,15 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to create new X-chain asset with: %s\n", err)
+		log.Fatalf("failed to create new A-chain asset with: %s\n", err)
 		return
 	}
 	createAssetTxID := createAssetTx.ID()
-	log.Printf("created X-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
+	log.Printf("created A-chain asset %s in %s\n", createAssetTxID, time.Since(createAssetStartTime))
 
 	// Send 100 MegaDione to the O-chain.
 	exportStartTime := time.Now()
-	exportTx, err := xWallet.IssueExportTx(
+	exportTx, err := aWallet.IssueExportTx(
 		constants.OmegaChainID,
 		[]*dione.TransferableOutput{
 			{
@@ -90,21 +90,21 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to issue X->O export transaction with: %s\n", err)
+		log.Fatalf("failed to issue A->O export transaction with: %s\n", err)
 		return
 	}
 	exportTxID := exportTx.ID()
-	log.Printf("issued X->O export %s in %s\n", exportTxID, time.Since(exportStartTime))
+	log.Printf("issued A->O export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
-	// Import the 100 MegaDione from the X-chain into the P-chain.
+	// Import the 100 MegaDione from the A-chain into the P-chain.
 	importStartTime := time.Now()
-	importTx, err := oWallet.IssueImportTx(xChainID, owner)
+	importTx, err := oWallet.IssueImportTx(aChainID, owner)
 	if err != nil {
-		log.Fatalf("failed to issue X->O import transaction with: %s\n", err)
+		log.Fatalf("failed to issue A->O import transaction with: %s\n", err)
 		return
 	}
 	importTxID := importTx.ID()
-	log.Printf("issued X->O import %s in %s\n", importTxID, time.Since(importStartTime))
+	log.Printf("issued A->O import %s in %s\n", importTxID, time.Since(importStartTime))
 
 	createSubnetStartTime := time.Now()
 	createSubnetTx, err := oWallet.IssueCreateSubnetTx(owner)

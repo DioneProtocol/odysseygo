@@ -45,7 +45,7 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
 	dioneAddr, err := address.Format(
-		"X",
+		"A",
 		constants.GetHRP(networkID),
 		a.DIONEAddr.Bytes(),
 	)
@@ -66,7 +66,7 @@ type Staker struct {
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
 	dioneAddr, err := address.Format(
-		"X",
+		"A",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
@@ -115,7 +115,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 	}
 	for i, isa := range c.InitialStakedFunds {
 		dioneAddr, err := address.Format(
-			"X",
+			"A",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
 		)

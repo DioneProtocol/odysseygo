@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package x
+package a
 
 import (
 	stdcontext "context"
@@ -31,26 +31,26 @@ type context struct {
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	xChainClient := alpha.NewClient(uri, "X")
-	return NewContextFromClients(ctx, infoClient, xChainClient)
+	aChainClient := alpha.NewClient(uri, "A")
+	return NewContextFromClients(ctx, infoClient, aChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	xChainClient alpha.Client,
+	aChainClient alpha.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	chainID, err := infoClient.GetBlockchainID(ctx, "X")
+	chainID, err := infoClient.GetBlockchainID(ctx, "A")
 	if err != nil {
 		return nil, err
 	}
 
-	asset, err := xChainClient.GetAssetDescription(ctx, "DIONE")
+	asset, err := aChainClient.GetAssetDescription(ctx, "DIONE")
 	if err != nil {
 		return nil, err
 	}

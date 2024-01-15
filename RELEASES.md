@@ -22,7 +22,7 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 ### What's Changed
 
 - e2e: Save network data for each test run as an uploaded artifact by @marun in https://github.com/DioneProtocol/odysseygo/pull/1856
-- e2e: Ensure interchain workflow coverage for X-Chain and D-Chain by @marun in https://github.com/DioneProtocol/odysseygo/pull/1871
+- e2e: Ensure interchain workflow coverage for A-Chain and D-Chain by @marun in https://github.com/DioneProtocol/odysseygo/pull/1871
 - MerkleDB Adjust New View function(s) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1927
 - e2e: Migrate duplicate node id test from kurtosis by @marun in https://github.com/DioneProtocol/odysseygo/pull/1573
 - Add tracing levels to merkledb by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1933
@@ -304,7 +304,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 The plugin version is updated to `27` all plugins must update to be compatible.
 
-**The first startup of the X-Chain will perform an indexing operation. This indexing runs in the background and does not impact restart time.**
+**The first startup of the A-Chain will perform an indexing operation. This indexing runs in the background and does not impact restart time.**
 
 ### APIs
 
@@ -328,7 +328,7 @@ The plugin version is updated to `27` all plugins must update to be compatible.
 - Make ALPHA implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1699
 - ProposerVM nits by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1688
 - Sorting -- Remove old `IsSortedAndUnique`, rename `IsSortedAndUniqueSortable` to `IsSortedAndUnique` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1666
-- Update snow consensus doc post X-chain linearization by @exdx in https://github.com/DioneProtocol/odysseygo/pull/1703
+- Update snow consensus doc post A-chain linearization by @exdx in https://github.com/DioneProtocol/odysseygo/pull/1703
 - `merkledb` / `sync` -- remove TODOs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1718
 - remove cache TODOs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1721
 - Adjust `NewSizedCache` to take in a size function by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1725
@@ -355,7 +355,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - v1.10.3`.
 
-**The first startup of the X-Chain will perform a pruning operation. This pruning runs in the background and does not impact restart time.**
+**The first startup of the A-Chain will perform a pruning operation. This pruning runs in the background and does not impact restart time.**
 
 ### APIs
 
@@ -369,7 +369,7 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 ### Configs
 
 - Added `--staking-host` to allow binding only on a specific address for staking
-- Added `checksums-enabled` to the X-chain and O-chain configs
+- Added `checksums-enabled` to the A-chain and O-chain configs
 
 ### Fixes
 
@@ -403,13 +403,13 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 - Remove unneeded functions from UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1643
 - Simplify tx verification by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1654
 - `merkledb` --  fix `findNextKey` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1653
-- Cleanup X-chain UniqueTx Dependencies by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1656
-- Prune X-chain State by @coffeedione in https://github.com/DioneProtocol/odysseygo/pull/1427
+- Cleanup A-chain UniqueTx Dependencies by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1656
+- Prune A-chain State by @coffeedione in https://github.com/DioneProtocol/odysseygo/pull/1427
 - Support building docker image on ARM64 by @dshiell in https://github.com/DioneProtocol/odysseygo/pull/1103
 - remove goreleaser by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1660
 - Fix Dockerfile on non amd64 omegas by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1661
 - Improve metrics error message by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1663
-- Remove X-chain UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1662
+- Remove A-chain UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1662
 - Add state checksums by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1658
 - Modify proposervm window by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1638
 - sorting nit by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1665
@@ -489,11 +489,11 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - `x/sync` -- Use proto for sending Change Proofs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1541
 - Only send `PushQuery` messages after building the block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1428
 - Rename APIAllowedOrigins to HTTPAllowedOrigins by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1567
-- Add GetBalance examples for the O-chain and X-chain wallets by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1569
+- Add GetBalance examples for the O-chain and A-chain wallets by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1569
 - Reduce number of test iterations by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1568
 - Re-add upgrade tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1410
 - Remove lists from Chits messages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1412
-- Add more X-chain tests by @coffeedione in https://github.com/DioneProtocol/odysseygo/pull/1487
+- Add more A-chain tests by @coffeedione in https://github.com/DioneProtocol/odysseygo/pull/1487
 - fix typo by @meaghanfitzgerald in https://github.com/DioneProtocol/odysseygo/pull/1570
 - Reduce the number of test health checks by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1571
 - Fix proposervm.GetAncestors test flake by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1572
@@ -629,7 +629,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
   - `alpha.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
   - `alpha.getBlockByHeight` now includes `id` in the `block` response and in the internal `tx` fields
 - Removed `alpha.issueStopVertex`
-- Fixed `wallet` methods to correctly allow issuance of dependent transactions after the X-chain linearization
+- Fixed `wallet` methods to correctly allow issuance of dependent transactions after the A-chain linearization
 - Added `validatorOnly` flag in `omega.getStake`
 - Removed all odyssey consensus metrics
 - Fixed `msgHandlingTime` metrics
@@ -641,7 +641,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ### Fixes
 
-- Fixed panic when restarting partially completed X-chain snowman bootstrapping
+- Fixed panic when restarting partially completed A-chain snowman bootstrapping
 - Fixed `--network-allow-private-ips` handling to correctly prevent outbound connections to private IP ranges
 - Fixed UniformSampler to support sampling numbers between MaxInt64 and MaxUint64
 - Fixed data race in txID access during transaction gossip in the ALPHA
@@ -683,7 +683,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Ban usage of require.Error by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1346
 - Remove slice capacity hint in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1350
 - Simplify `syncWorkHeap` less function in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1351
-- Replace `switch` with `txs.Visitor` in X chain signer by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1404
+- Replace `switch` with `txs.Visitor` in A chain signer by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1404
 - Include IDs in json marshalling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1408
 - Adjust find next key logic in x/Sync by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1331
 - Remove bitmask from writeMsgLen by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1342
@@ -712,7 +712,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ## [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0)
 
-[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the O-chain, and increases the maximum block size on the D-chain.
+[This upgrade](https://medium.com/odysseydione/cortina-x-chain-linearization-a1d9305553f6) linearizes the A-chain, introduces delegation batching to the O-chain, and increases the maximum block size on the D-chain.
 
 The changes in the upgrade go into effect at 11 AM ET, April 25th 2023 on Mainnet.
 
@@ -741,7 +741,7 @@ The supported plugin version is `25`.
 - Use `maps.Equal` in `set.Equals` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1290
 - return accrued delegator rewards in `GetCurrentValidators` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1291
 - Add zstd compression by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1278
-- implement `txs.Visitor` in X chain wallet by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1299
+- implement `txs.Visitor` in A chain wallet by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1299
 - Parallelize gzip compression by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1293
 - Add zip bomb tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1300
 - Gossip Odyssey frontier after the linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1303
@@ -786,7 +786,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Fixed `x/merkledb.ChangeProof#getLargestKey` to correctly handle no changes
 - Added test for `alpha/txs/executor.SemanticVerifier#verifyFxUsage` with multiple valid fxs
 - Fixed CPU + bandwidth performance regression during vertex processing
-- Added example usage of the `/ext/index/X/block` API
+- Added example usage of the `/ext/index/A/block` API
 - Reduced the default value of `--snow-optimal-processing` from `50` to `10`
 - Updated the year in the license header
 
@@ -866,7 +866,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 ### Examples
 
 - Added O-chain `RemoveSubnetValidatorTx` example using the wallet
-- Added X-chain `CreateAssetTx` example using the wallet
+- Added A-chain `CreateAssetTx` example using the wallet
 
 ### Configs
 
@@ -1092,7 +1092,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 - Fixed `RemoveSubnetValidatorTx` weight diff corruption
 - Released network lock before attempting to close a peer connection
-- Fixed X-Chain last accepted block initialization to use the genesis block, not the stop vertex after linearization
+- Fixed A-Chain last accepted block initialization to use the genesis block, not the stop vertex after linearization
 - Removed plugin directory handling from AMI generation
 - Removed copy of plugins directory from tar script
 
@@ -1712,7 +1712,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
   - Supporting easier parsing and usage of blocks
   - Improving separation of block execution with block definition
   - Unifying state definitions
-- Introduced support to send custom X-chain assets to the O-chain to be activated in a future upgrade
+- Introduced support to send custom A-chain assets to the O-chain to be activated in a future upgrade
 - Introduced support to use custom assets on the O-chain to be activated in a future upgrade
 - Added VMs README to begin fully documenting plugin invariants
 - Added various comments around expected usages of VM tools
@@ -2071,13 +2071,13 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Miscellaneous
 
-- Fixed incorrect `BlockchainID` usage in the X-chain `ImportTx` builder.
+- Fixed incorrect `BlockchainID` usage in the A-chain `ImportTx` builder.
 - Fixed incorrect `OutputOwners` in the O-chain `ImportTx` builder.
 - Improved FD limit error logging and warnings.
 - Rounded bootstrapping ETAs to the nearest second.
 - Added gossip config support to the subnet configs.
 - Optimized various queue removals for improved memory freeing.
-- Added a basic X-chain E2E usage test to the new testing framework.
+- Added a basic A-chain E2E usage test to the new testing framework.
 
 ## [v1.7.7](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.7)
 
@@ -2153,7 +2153,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented X-chain + O-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented A-chain + O-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.
@@ -2206,7 +2206,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 - Updated bootstrapping logs to no longer reset counters after a node restart.
 - Added bootstrapping ETAs for fetching Snowman blocks and executing operations.
 - Renamed the `MultiPut` message to the `Ancestors` message to match other message naming conventions.
-- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future X-chain improvements.
+- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future A-chain improvements.
 - Refactored the separation between the Bootstrapping engine and the Consensus engine to support Fast-Sync.
 
 ### Coreth
@@ -2254,7 +2254,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Consensus
 
-- Introduced a notion of vertex conflicts that will be used in future X-chain improvements.
+- Introduced a notion of vertex conflicts that will be used in future A-chain improvements.
 
 ### Coreth
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package x
+package a
 
 import (
 	"errors"
@@ -29,7 +29,7 @@ var (
 	_ Builder = (*builder)(nil)
 )
 
-// Builder provides a convenient interface for building unsigned X-chain
+// Builder provides a convenient interface for building unsigned A-chain
 // transactions.
 type Builder interface {
 	// GetFTBalance calculates the amount of each fungible asset that this
@@ -149,7 +149,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// X-chain transactions.
+// A-chain transactions.
 type BuilderBackend interface {
 	Context
 

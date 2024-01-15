@@ -406,7 +406,7 @@ func TestVMFormat(t *testing.T) {
 	}{
 		{
 			in:       ids.ShortEmpty,
-			expected: "X-testing1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqtu2yas",
+			expected: "A-testing1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqtu2yas",
 		},
 	}
 	for _, test := range tests {

@@ -1292,7 +1292,7 @@ func (x *AcceptedStateSummary) GetSummaryIds() [][]byte {
 }
 
 // Message to request for the accepted frontier of the "remote" peer.
-// For instance, the accepted frontier of X-chain DAG is the set of
+// For instance, the accepted frontier of A-chain DAG is the set of
 // accepted vertices that do not have any accepted descendants (i.e., frontier).
 //
 // During bootstrap, the local node sends out "get_accepted_frontier" to validators
@@ -1373,7 +1373,7 @@ func (x *GetAcceptedFrontier) GetEngineType() EngineType {
 
 // Message that contains the list of accepted frontier in response to
 // "get_accepted_frontier". For instance, on receiving "get_accepted_frontier",
-// the X-chain engine responds with the accepted frontier of X-chain DAG.
+// the A-chain engine responds with the accepted frontier of A-chain DAG.
 //
 // See "snow/engine/common/bootstrapper.go#AcceptedFrontier".
 type AcceptedFrontier struct {
@@ -1527,8 +1527,8 @@ func (x *GetAccepted) GetEngineType() EngineType {
 
 // Message that contains the list of accepted block/vertex IDs in response to
 // "get_accepted". For instance, on receiving "get_accepted" that contains
-// the sender's accepted frontier IDs, the X-chain engine responds only with
-// the accepted vertex IDs of the X-chain DAG.
+// the sender's accepted frontier IDs, the A-chain engine responds only with
+// the accepted vertex IDs of the A-chain DAG.
 //
 // See "snow/engine/odyssey#GetAccepted" and "SendAccepted".
 // See "snow/engine/common/bootstrapper.go#Accepted".

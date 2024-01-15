@@ -202,7 +202,7 @@ func (vm *VMClient) Initialize(
 		ChainId:      chainCtx.ChainID[:],
 		NodeId:       chainCtx.NodeID.Bytes(),
 		PublicKey:    bls.PublicKeyToBytes(chainCtx.PublicKey),
-		XChainId:     chainCtx.XChainID[:],
+		AChainId:     chainCtx.AChainID[:],
 		DChainId:     chainCtx.DChainID[:],
 		DioneAssetId: chainCtx.DIONEAssetID[:],
 		ChainDataDir: chainCtx.ChainDataDir,
