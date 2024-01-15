@@ -193,7 +193,7 @@ type ManagerConfig struct {
 	AtomicMemory                *atomic.Memory
 	DIONEAssetID                ids.ID
 	XChainID                    ids.ID          // ID of the X-Chain,
-	CChainID                    ids.ID          // ID of the C-Chain,
+	DChainID                    ids.ID          // ID of the D-Chain,
 	CriticalChains              set.Set[ids.ID] // Chains that can't exit gracefully
 	TimeoutManager              timeout.Manager // Manages request timeouts when sending messages to other validators
 	Health                      health.Registerer
@@ -342,7 +342,7 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	chain, err := m.buildChain(chainParams, sb)
 	if err != nil {
 		if m.CriticalChains.Contains(chainParams.ID) {
-			// Shut down if we fail to create a required chain (i.e. X, O or C)
+			// Shut down if we fail to create a required chain (i.e. X, O or D)
 			m.Log.Fatal("error creating required chain",
 				zap.Stringer("subnetID", chainParams.SubnetID),
 				zap.Stringer("chainID", chainParams.ID),
@@ -421,7 +421,7 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	}
 
 	// Tell the chain to start processing messages.
-	// If the X, O, or C Chain panics, do not attempt to recover
+	// If the X, O, or D Chain panics, do not attempt to recover
 	chain.Handler.Start(context.TODO(), !m.CriticalChains.Contains(chainParams.ID))
 }
 
@@ -474,7 +474,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			PublicKey: bls.PublicFromSecretKey(m.StakingBLSKey),
 
 			XChainID:     m.XChainID,
-			CChainID:     m.CChainID,
+			DChainID:     m.DChainID,
 			DIONEAssetID: m.DIONEAssetID,
 
 			Log:          chainLog,

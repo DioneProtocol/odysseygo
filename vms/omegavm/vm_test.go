@@ -114,7 +114,7 @@ var (
 	testSubnet1ControlKeys = keys[0:3]
 
 	xChainID = ids.Empty.Prefix(0)
-	cChainID = ids.Empty.Prefix(1)
+	dChainID = ids.Empty.Prefix(1)
 
 	// Used to create and use keys.
 	testKeyFactory secp256k1.Factory
@@ -132,7 +132,7 @@ func defaultContext(t *testing.T) *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = constants.UnitTestID
 	ctx.XChainID = xChainID
-	ctx.CChainID = cChainID
+	ctx.DChainID = dChainID
 	ctx.DIONEAssetID = dioneAssetID
 	aliaser := ids.NewAliaser()
 
@@ -140,8 +140,8 @@ func defaultContext(t *testing.T) *snow.Context {
 	require.NoError(aliaser.Alias(constants.OmegaChainID, constants.OmegaChainID.String()))
 	require.NoError(aliaser.Alias(xChainID, "X"))
 	require.NoError(aliaser.Alias(xChainID, xChainID.String()))
-	require.NoError(aliaser.Alias(cChainID, "C"))
-	require.NoError(aliaser.Alias(cChainID, cChainID.String()))
+	require.NoError(aliaser.Alias(dChainID, "C"))
+	require.NoError(aliaser.Alias(dChainID, dChainID.String()))
 
 	ctx.BCLookup = aliaser
 
@@ -150,7 +150,7 @@ func defaultContext(t *testing.T) *snow.Context {
 			subnetID, ok := map[ids.ID]ids.ID{
 				constants.OmegaChainID: constants.PrimaryNetworkID,
 				xChainID:               constants.PrimaryNetworkID,
-				cChainID:               constants.PrimaryNetworkID,
+				dChainID:               constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errMissing

@@ -247,7 +247,7 @@ func newContext(tb testing.TB) *snow.Context {
 	ctx.ChainID = chainID
 	ctx.DIONEAssetID = tx.ID()
 	ctx.XChainID = ids.Empty.Prefix(0)
-	ctx.CChainID = ids.Empty.Prefix(1)
+	ctx.DChainID = ids.Empty.Prefix(1)
 	aliaser := ctx.BCLookup.(ids.Aliaser)
 
 	require.NoError(aliaser.Alias(chainID, "X"))

@@ -392,7 +392,7 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	validatorState := validators.NewMockState(ctrl)
-	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.CChainID).AnyTimes().Return(ctx.SubnetID, nil)
+	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.DChainID).AnyTimes().Return(ctx.SubnetID, nil)
 	ctx.ValidatorState = validatorState
 
 	typeToFxIndex := make(map[reflect.Type]int)
@@ -439,7 +439,7 @@ func TestSemanticVerifierExportTx(t *testing.T) {
 	}
 	exportTx := txs.ExportTx{
 		BaseTx:           baseTx,
-		DestinationChain: ctx.CChainID,
+		DestinationChain: ctx.DChainID,
 	}
 
 	backend := &Backend{
@@ -760,7 +760,7 @@ func TestSemanticVerifierExportTxDifferentSubnet(t *testing.T) {
 	ctx := newContext(t)
 
 	validatorState := validators.NewMockState(ctrl)
-	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.CChainID).AnyTimes().Return(ids.GenerateTestID(), nil)
+	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.DChainID).AnyTimes().Return(ids.GenerateTestID(), nil)
 	ctx.ValidatorState = validatorState
 
 	typeToFxIndex := make(map[reflect.Type]int)
@@ -807,7 +807,7 @@ func TestSemanticVerifierExportTxDifferentSubnet(t *testing.T) {
 	}
 	exportTx := txs.ExportTx{
 		BaseTx:           baseTx,
-		DestinationChain: ctx.CChainID,
+		DestinationChain: ctx.DChainID,
 	}
 
 	backend := &Backend{
@@ -879,7 +879,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	ctx := newContext(t)
 
 	validatorState := validators.NewMockState(ctrl)
-	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.CChainID).AnyTimes().Return(ctx.SubnetID, nil)
+	validatorState.EXPECT().GetSubnetID(gomock.Any(), ctx.DChainID).AnyTimes().Return(ctx.SubnetID, nil)
 	ctx.ValidatorState = validatorState
 
 	baseDBManager := manager.NewMemDB(version.Semantic1_0_0)
@@ -938,7 +938,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	}
 	unsignedImportTx := txs.ImportTx{
 		BaseTx:      baseTx,
-		SourceChain: ctx.CChainID,
+		SourceChain: ctx.DChainID,
 		ImportedIns: []*dione.TransferableInput{
 			&input,
 		},
@@ -981,7 +981,7 @@ func TestSemanticVerifierImportTx(t *testing.T) {
 	utxoBytes, err := codec.Marshal(txs.CodecVersion, utxo)
 	require.NoError(t, err)
 
-	peerSharedMemory := m.NewSharedMemory(ctx.CChainID)
+	peerSharedMemory := m.NewSharedMemory(ctx.DChainID)
 	inputID := utxo.InputID()
 	require.NoError(t, peerSharedMemory.Apply(map[ids.ID]*atomic.Requests{ctx.ChainID: {PutRequests: []*atomic.Element{{
 		Key:   inputID[:],

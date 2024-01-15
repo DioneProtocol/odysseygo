@@ -137,7 +137,7 @@ func (te *TestEnvironment) NewWallet(keychain *secp256k1fx.Keychain, nodeURI tes
 func (te *TestEnvironment) NewEthClient(nodeURI testnet.NodeURI) ethclient.Client {
 	tests.Outf("{{blue}} initializing a new eth client for node %s with URI: %s {{/}}\n", nodeURI.NodeID, nodeURI.URI)
 	nodeAddress := strings.Split(nodeURI.URI, "//")[1]
-	uri := fmt.Sprintf("ws://%s/ext/bc/C/ws", nodeAddress)
+	uri := fmt.Sprintf("ws://%s/ext/bc/D/ws", nodeAddress)
 	client, err := ethclient.Dial(uri)
 	te.require.NoError(err)
 	return client

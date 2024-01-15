@@ -39,7 +39,7 @@ func newContext(t testing.TB) *snow.Context {
 	ctx.NetworkID = constants.UnitTestID
 	ctx.ChainID = ids.GenerateTestID()
 	ctx.XChainID = ctx.ChainID
-	ctx.CChainID = ids.GenerateTestID()
+	ctx.DChainID = ids.GenerateTestID()
 
 	aliaser := ctx.BCLookup.(ids.Aliaser)
 	require.NoError(aliaser.Alias(ctx.XChainID, "X"))
@@ -1564,7 +1564,7 @@ func TestSyntacticVerifierImportTx(t *testing.T) {
 	}
 	tx := txs.ImportTx{
 		BaseTx:      txs.BaseTx{BaseTx: baseTx},
-		SourceChain: ctx.CChainID,
+		SourceChain: ctx.DChainID,
 		ImportedIns: []*dione.TransferableInput{
 			&input,
 		},
@@ -1962,7 +1962,7 @@ func TestSyntacticVerifierExportTx(t *testing.T) {
 	}
 	tx := txs.ExportTx{
 		BaseTx:           txs.BaseTx{BaseTx: baseTx},
-		DestinationChain: ctx.CChainID,
+		DestinationChain: ctx.DChainID,
 		ExportedOuts: []*dione.TransferableOutput{
 			&output,
 		},

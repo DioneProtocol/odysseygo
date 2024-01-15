@@ -69,7 +69,7 @@ var (
 	dioneAssetID              = ids.ID{'y', 'e', 'e', 't'}
 	defaultTxFee              = uint64(100)
 	xChainID                  = ids.Empty.Prefix(0)
-	cChainID                  = ids.Empty.Prefix(1)
+	dChainID                  = ids.Empty.Prefix(1)
 	lastAcceptedID            = ids.GenerateTestID()
 
 	testSubnet1            *txs.Tx
@@ -249,7 +249,7 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = 10
 	ctx.XChainID = xChainID
-	ctx.CChainID = cChainID
+	ctx.DChainID = dChainID
 	ctx.DIONEAssetID = dioneAssetID
 
 	atomicDB := prefixdb.New([]byte{1}, db)
@@ -265,7 +265,7 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 			subnetID, ok := map[ids.ID]ids.ID{
 				constants.OmegaChainID: constants.PrimaryNetworkID,
 				xChainID:               constants.PrimaryNetworkID,
-				cChainID:               constants.PrimaryNetworkID,
+				dChainID:               constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errMissing
