@@ -247,7 +247,7 @@ type InitializeRequest struct {
 	// public_key is the BLS public key that would correspond with any signatures
 	// produced by the warp messaging signer
 	PublicKey    []byte               `protobuf:"bytes,5,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
-	AChainId     []byte               `protobuf:"bytes,6,opt,name=x_chain_id,json=aChainId,proto3" json:"x_chain_id,omitempty"`
+	AChainId     []byte               `protobuf:"bytes,6,opt,name=a_chain_id,json=aChainId,proto3" json:"a_chain_id,omitempty"`
 	DChainId     []byte               `protobuf:"bytes,7,opt,name=d_chain_id,json=dChainId,proto3" json:"d_chain_id,omitempty"`
 	DioneAssetId  []byte               `protobuf:"bytes,8,opt,name=dione_asset_id,json=dioneAssetId,proto3" json:"dione_asset_id,omitempty"`
 	ChainDataDir string               `protobuf:"bytes,9,opt,name=chain_data_dir,json=chainDataDir,proto3" json:"chain_data_dir,omitempty"`
