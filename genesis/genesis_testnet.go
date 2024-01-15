@@ -19,11 +19,11 @@ var (
 	// TestnetParams are the params used for the testnet testnet
 	TestnetParams = Params{
 		TxFeeConfig: TxFeeConfig{
-			TxFee:                         units.MilliDione,
-			CreateAssetTxFee:              10 * units.MilliDione,
-			CreateSubnetTxFee:             100 * units.MilliDione,
-			TransformSubnetTxFee:          1 * units.Dione,
-			CreateBlockchainTxFee:         100 * units.MilliDione,
+			TxFee:                         50 * units.MilliDione,
+			CreateAssetTxFee:              100 * units.MilliDione,
+			CreateSubnetTxFee:             1 * units.Dione,
+			TransformSubnetTxFee:          10 * units.Dione,
+			CreateBlockchainTxFee:         10 * units.Dione,
 			AddPrimaryNetworkValidatorFee: 0,
 			AddPrimaryNetworkDelegatorFee: 0,
 			AddSubnetValidatorFee:         units.MilliDione,

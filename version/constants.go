@@ -96,8 +96,8 @@ var (
 	BanffDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	CortinaTimes = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2023, time.April, 25, 15, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2023, time.April, 6, 15, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2023, time.April, 25, 15, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2023, time.April, 6, 15, 0, 0, 0, time.UTC),
 	}
 	CortinaDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 )
