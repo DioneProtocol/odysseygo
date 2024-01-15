@@ -7,6 +7,6 @@ import "github.com/DioneProtocol/odysseygo/ids"
 
 var (
 	OmegaVMID = ids.ID{'o', 'm', 'e', 'g', 'a', 'v', 'm'}
-	AVMID     = ids.ID{'a', 'v', 'm'}
+	AlphaID   = ids.ID{'a', 'l', 'p', 'h', 'a'}
 	DeltaID   = ids.ID{'d', 'e', 'l', 't', 'a'}
 )

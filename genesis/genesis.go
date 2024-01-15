@@ -15,15 +15,15 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 	"github.com/DioneProtocol/odysseygo/utils/json"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
-	"github.com/DioneProtocol/odysseygo/vms/avm/fxs"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/DioneProtocol/odysseygo/vms/alpha/fxs"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/api"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
 	"github.com/DioneProtocol/odysseygo/vms/propertyfx"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 
-	xchaintxs "github.com/DioneProtocol/odysseygo/vms/avm/txs"
+	xchaintxs "github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	ochaintxs "github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 )
 
@@ -274,13 +274,13 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 	amount := uint64(0)
 
-	// Specify the genesis state of the AVM
-	avmArgs := avm.BuildGenesisArgs{
+	// Specify the genesis state of the ALPHA
+	alphaArgs := alpha.BuildGenesisArgs{
 		NetworkID: json.Uint32(config.NetworkID),
 		Encoding:  defaultEncoding,
 	}
 	{
-		dione := avm.AssetDefinition{
+		dione := alpha.AssetDefinition{
 			Name:         "Odyssey",
 			Symbol:       "DIONE",
 			Denomination: 9,
@@ -301,7 +301,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				return nil, ids.ID{}, err
 			}
 
-			dione.InitialState["fixedCap"] = append(dione.InitialState["fixedCap"], avm.Holder{
+			dione.InitialState["fixedCap"] = append(dione.InitialState["fixedCap"], alpha.Holder{
 				Amount:  json.Uint64(allocation.InitialAmount),
 				Address: addr,
 			})
@@ -314,21 +314,21 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("couldn't parse memo bytes to string: %w", err)
 		}
-		avmArgs.GenesisData = map[string]avm.AssetDefinition{
-			"DIONE": dione, // The AVM starts out with one asset: DIONE
+		alphaArgs.GenesisData = map[string]alpha.AssetDefinition{
+			"DIONE": dione, // The ALPHA starts out with one asset: DIONE
 		}
 	}
-	avmReply := avm.BuildGenesisReply{}
+	alphaReply := alpha.BuildGenesisReply{}
 
-	avmSS := avm.CreateStaticService()
-	err := avmSS.BuildGenesis(nil, &avmArgs, &avmReply)
+	alphaSS := alpha.CreateStaticService()
+	err := alphaSS.BuildGenesis(nil, &alphaArgs, &alphaReply)
 	if err != nil {
 		return nil, ids.ID{}, err
 	}
 
-	bytes, err := formatting.Decode(defaultEncoding, avmReply.Bytes)
+	bytes, err := formatting.Decode(defaultEncoding, alphaReply.Bytes)
 	if err != nil {
-		return nil, ids.ID{}, fmt.Errorf("couldn't parse avm genesis reply: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("couldn't parse alpha genesis reply: %w", err)
 	}
 	dioneAssetID, err := DIONEAssetID(bytes)
 	if err != nil {
@@ -442,9 +442,9 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	}
 	omegavmArgs.Chains = []api.Chain{
 		{
-			GenesisData: avmReply.Bytes,
+			GenesisData: alphaReply.Bytes,
 			SubnetID:    constants.PrimaryNetworkID,
-			VMID:        constants.AVMID,
+			VMID:        constants.AlphaID,
 			FxIDs: []ids.ID{
 				secp256k1fx.ID,
 				nftfx.ID,
@@ -551,7 +551,7 @@ func VMGenesis(genesisBytes []byte, vmID ids.ID) (*ochaintxs.Tx, error) {
 	return nil, fmt.Errorf("couldn't find blockchain with VM ID %s", vmID)
 }
 
-func DIONEAssetID(avmGenesisBytes []byte) (ids.ID, error) {
+func DIONEAssetID(alphaGenesisBytes []byte) (ids.ID, error) {
 	parser, err := xchaintxs.NewParser([]fxs.Fx{
 		&secp256k1fx.Fx{},
 	})
@@ -560,8 +560,8 @@ func DIONEAssetID(avmGenesisBytes []byte) (ids.ID, error) {
 	}
 
 	genesisCodec := parser.GenesisCodec()
-	genesis := avm.Genesis{}
-	if _, err := genesisCodec.Unmarshal(avmGenesisBytes, &genesis); err != nil {
+	genesis := alpha.Genesis{}
+	if _, err := genesisCodec.Unmarshal(alphaGenesisBytes, &genesis); err != nil {
 		return ids.Empty, err
 	}
 

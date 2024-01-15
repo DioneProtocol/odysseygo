@@ -79,7 +79,7 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 - Add function to initialize SampleableSet by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2017
 - add `IsCortinaActivated` helper by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2013
 - Fix O-chain Import by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2035
-- Rename avm/blocks package to avm/block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1970
+- Rename alpha/blocks package to alpha/block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1970
 - Merkledb Update rangeproof proto to be consistent with changeproof proto by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2040
 - `merkledb` -- encode lengths as uvarints by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/2039
 - MerkleDB Remove GetNodeFromParent by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2041
@@ -325,7 +325,7 @@ The plugin version is updated to `27` all plugins must update to be compatible.
 - stop persisting rejected blocks on O-chain by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1696
 - Ensure scripts/lint.sh failure when used with incompatible grep by @marun in https://github.com/DioneProtocol/odysseygo/pull/1711
 - sum peers clock skew into metric by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1695
-- Make AVM implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1699
+- Make ALPHA implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1699
 - ProposerVM nits by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1688
 - Sorting -- Remove old `IsSortedAndUnique`, rename `IsSortedAndUniqueSortable` to `IsSortedAndUnique` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1666
 - Update snow consensus doc post X-chain linearization by @exdx in https://github.com/DioneProtocol/odysseygo/pull/1703
@@ -394,7 +394,7 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 - Remove MaxConnectionAge gRPC StreamID overflow mitigation by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1388
 - add fuzzing action by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1635
 - Remove dagState and GetUTXOFromID by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1632
-- Update all AVM tests for post-linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1631
+- Update all ALPHA tests for post-linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1631
 - Remove PendingTxs from the DAGVM interface by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1641
 - Remove GetTx from the DAGVM interface by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1642
 - Bump coreth v0.12.4 by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1646
@@ -621,14 +621,14 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 
 ### APIs
 
-- Enabled `avm.getBlockByHeight` to take in `height` as a string
+- Enabled `alpha.getBlockByHeight` to take in `height` as a string
 - Added IDs to json formats
   - `omega.getTx` now includes `id` in the `tx` response
   - `omega.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
-  - `avm.getTx` now includes `id` in the `tx` response
-  - `avm.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
-  - `avm.getBlockByHeight` now includes `id` in the `block` response and in the internal `tx` fields
-- Removed `avm.issueStopVertex`
+  - `alpha.getTx` now includes `id` in the `tx` response
+  - `alpha.getBlock` now includes `id` in the `block` response and in the internal `tx` fields
+  - `alpha.getBlockByHeight` now includes `id` in the `block` response and in the internal `tx` fields
+- Removed `alpha.issueStopVertex`
 - Fixed `wallet` methods to correctly allow issuance of dependent transactions after the X-chain linearization
 - Added `validatorOnly` flag in `omega.getStake`
 - Removed all odyssey consensus metrics
@@ -644,7 +644,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Fixed panic when restarting partially completed X-chain snowman bootstrapping
 - Fixed `--network-allow-private-ips` handling to correctly prevent outbound connections to private IP ranges
 - Fixed UniformSampler to support sampling numbers between MaxInt64 and MaxUint64
-- Fixed data race in txID access during transaction gossip in the AVM
+- Fixed data race in txID access during transaction gossip in the ALPHA
 
 ### What's Changed
 
@@ -653,7 +653,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Update linkedhashmap to only Rlock when possible by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1329
 - Remove no-op changes from history results by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1335
 - Cleanup type assertions in the linkedHashmap by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1341
-- Fix racy avm tx access by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1349
+- Fix racy alpha tx access by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1349
 - Update Testnet beacon ips by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1354
 - Remove duplicate TLS verification by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1364
 - Adjust Merkledb Trie invalidation locking by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1355
@@ -700,7 +700,7 @@ This version is backwards compatible to [v1.10.0](https://github.com/DioneProtoc
 - Fix msgHandlingTime by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1432
 - Change ChangeProofs to only have one list of key/value change instead of key/values and deleted by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1385
 - Update AMI generation workflow by @charlie-ava in https://github.com/DioneProtocol/odysseygo/pull/1289
-- Support `height` as a string in `avm.getBlockByHeight` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1437
+- Support `height` as a string in `alpha.getBlockByHeight` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1437
 - Defer Snowman Bootstrapper parser initialization to Start by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1442
 - Cleanup proposervm ancestors packing @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1446
 
@@ -746,7 +746,7 @@ The supported plugin version is `25`.
 - Add zip bomb tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1300
 - Gossip Odyssey frontier after the linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1303
 - Add fine grained metrics+logging for handling, processing, and grab l… by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1301
-- Persist stateless block in AVM state by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1305
+- Persist stateless block in ALPHA state by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1305
 - Initialize FxID fields in GetBlock and GetBlockByHeight by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1306
 - Filterable Health Tags by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1304
 - increase health await timeout by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1317
@@ -784,7 +784,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 - Fixed `x/merkledb.ChangeProof#getLargestKey` to correctly handle no changes
-- Added test for `avm/txs/executor.SemanticVerifier#verifyFxUsage` with multiple valid fxs
+- Added test for `alpha/txs/executor.SemanticVerifier#verifyFxUsage` with multiple valid fxs
 - Fixed CPU + bandwidth performance regression during vertex processing
 - Added example usage of the `/ext/index/X/block` API
 - Reduced the default value of `--snow-optimal-processing` from `50` to `10`
@@ -820,20 +820,20 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Replaced `consensus` and `decision` dispatchers with `block`, `tx`, and `vertex` dispatchers
 - Removed `Odyssey` bootstrapping restarts during the switch to `Snowman` consensus
 
-### AVM
+### ALPHA
 
-- Added `avm` block execution manager
-- Added `avm` block builder
-- Refactored `avm` transaction syntactic verification
-- Refactored `avm` transaction semantic verification
-- Refactored `avm` transaction execution
-- Added `avm` mempool gossip
-- Removed block timer interface from `avm` `mempool`
-- Moved `toEngine` channel into the `avm` `mempool`
-- Added `GetUTXOFromID` to the `avm` `state.Chain` interface
-- Added unpopulated `MerkleRoot` to `avm` blocks
-- Added `avm` transaction based metrics
-- Replaced error strings with error interfaces in the `avm` mempool
+- Added `alpha` block execution manager
+- Added `alpha` block builder
+- Refactored `alpha` transaction syntactic verification
+- Refactored `alpha` transaction semantic verification
+- Refactored `alpha` transaction execution
+- Added `alpha` mempool gossip
+- Removed block timer interface from `alpha` `mempool`
+- Moved `toEngine` channel into the `alpha` `mempool`
+- Added `GetUTXOFromID` to the `alpha` `state.Chain` interface
+- Added unpopulated `MerkleRoot` to `alpha` blocks
+- Added `alpha` transaction based metrics
+- Replaced error strings with error interfaces in the `alpha` mempool
 
 ### OmegaVM
 
@@ -878,11 +878,11 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### APIs
 
-- Added `avm` block APIs
-  - `avm.getBlock`
-  - `avm.getBlockByHeight`
-  - `avm.getHeight`
-- Converted `avm` APIs to only surface accepted state
+- Added `alpha` block APIs
+  - `alpha.getBlock`
+  - `alpha.getBlockByHeight`
+  - `alpha.getHeight`
+- Converted `alpha` APIs to only surface accepted state
 - Deprecated all `ipcs` APIs
   - `ipcs.publishBlockchain`
   - `ipcs.unpublishBlockchain`
@@ -893,27 +893,27 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
   - `keystore.listUsers`
   - `keystore.importUser`
   - `keystore.exportUser`
-- Deprecated the `avm/pubsub` API endpoint
-- Deprecated various `avm` APIs
-  - `avm.getAddressTxs`
-  - `avm.getBalance`
-  - `avm.getAllBalances`
-  - `avm.createAsset`
-  - `avm.createFixedCapAsset`
-  - `avm.createVariableCapAsset`
-  - `avm.createNFTAsset`
-  - `avm.createAddress`
-  - `avm.listAddresses`
-  - `avm.exportKey`
-  - `avm.importKey`
-  - `avm.mint`
-  - `avm.sendNFT`
-  - `avm.mintNFT`
-  - `avm.import`
-  - `avm.export`
-  - `avm.send`
-  - `avm.sendMultiple`
-- Deprecated the `avm/wallet` API endpoint
+- Deprecated the `alpha/pubsub` API endpoint
+- Deprecated various `alpha` APIs
+  - `alpha.getAddressTxs`
+  - `alpha.getBalance`
+  - `alpha.getAllBalances`
+  - `alpha.createAsset`
+  - `alpha.createFixedCapAsset`
+  - `alpha.createVariableCapAsset`
+  - `alpha.createNFTAsset`
+  - `alpha.createAddress`
+  - `alpha.listAddresses`
+  - `alpha.exportKey`
+  - `alpha.importKey`
+  - `alpha.mint`
+  - `alpha.sendNFT`
+  - `alpha.mintNFT`
+  - `alpha.import`
+  - `alpha.export`
+  - `alpha.send`
+  - `alpha.sendMultiple`
+- Deprecated the `alpha/wallet` API endpoint
   - `wallet.issueTx`
   - `wallet.send`
   - `wallet.sendMultiple`
@@ -968,11 +968,11 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Fixed error handling during `merkledb` intermediate node eviction
 - Replaced values larger than `32` bytes with a hash in the `merkledb` hash representation
 
-### AVM
+### ALPHA
 
-- Refactored `avm` API tx creation into a standalone `Spender` implementation
-- Migrated UTXO interfaces from the `omegavm` into the `components` for use in the `avm`
-- Refactored `avm` `tx.SyntacticVerify` to expect the config rather than the fee fields
+- Refactored `alpha` API tx creation into a standalone `Spender` implementation
+- Migrated UTXO interfaces from the `omegavm` into the `components` for use in the `alpha`
+- Refactored `alpha` `tx.SyntacticVerify` to expect the config rather than the fee fields
 
 ### Miscellaneous
 
@@ -988,7 +988,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 - Removed support for the `--whitelisted-subnets` flag
 - Removed unnecessary abstractions from the `app` package
-- Removed `Factory` embedding from `omegavm.VM` and `avm.VM`
+- Removed `Factory` embedding from `omegavm.VM` and `alpha.VM`
 - Removed `validator` package from the `omegavm`
 - Removed `timer.TimeoutManager`
 - Replaced `snow.Context` in `Factory.New` with `logging.Logger`
@@ -1045,7 +1045,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 - Added `allowedNodes` to the subnet config for `validatorOnly` subnets
 - Removed the `hashicorp/go-plugin` dependency to improve plugin flexibility
 - Replaced specialized `bag` implementations with generic `bag` implementations
-- Added `mempool` package to the `avm`
+- Added `mempool` package to the `alpha`
 - Added `chain.State#IsProcessing` to simplify integration with `block.WithVerifyContext`
 - Added `StateSyncMinVersion` to `sync.ClientConfig`
 - Added validity checks for `InitialStakeDuration` in a custom network genesis
@@ -1108,7 +1108,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 ### Miscellaneous
 
-- Added AVM `state.Chain` interface
+- Added ALPHA `state.Chain` interface
 - Added generic atomic value utility
 - Added test for the AMI builder during RCs
 - Converted cache implementations to use generics
@@ -1151,7 +1151,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/DioneProtoco
 
 - Populated non-trivial logger in the `rpcchainvm` `Server`'s `snow.Context`
 - Updated `rpcchainvm` proto definitions to use enums
-- Added `Block` format and definition to the `AVM`
+- Added `Block` format and definition to the `ALPHA`
 - Removed `proposervm` height index reset
 
 ### Metrics
@@ -1885,7 +1885,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 
 ### Cleanup
 
-- Refactored the avm to utilize the external txs package
+- Refactored the alpha to utilize the external txs package
 - Unified omegavm dropped tx handling
 - Clarified snowman child block acceptance calls
 - Fixed small consensus typos
@@ -1996,7 +1996,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### APIs
 
 - Added support for specifying additional headers and query params in the RPC client implementations.
-- Added static API clients for the `omegavm` and the `avm`.
+- Added static API clients for the `omegavm` and the `alpha`.
 
 ### OmegaVM
 
@@ -2218,10 +2218,10 @@ This version is backwards compatible to [v1.7.0](https://github.com/DioneProtoco
 ### VMs
 
 - Refactored `omegavm` rewards calculations to enable usage from an external library.
-- Fixed `omegavm` and `avm` UTXO fetching to not re-iterate the UTXO set if no UTXOs are fetched.
+- Fixed `omegavm` and `alpha` UTXO fetching to not re-iterate the UTXO set if no UTXOs are fetched.
 - Refactored `omegavm` status definitions.
 - Added support for multiple address balance lookups in the `omegavm`.
-- Refactored `omegavm` and `avm` keystore users to reuse similar code.
+- Refactored `omegavm` and `alpha` keystore users to reuse similar code.
 
 ### RPCChainVM
 
