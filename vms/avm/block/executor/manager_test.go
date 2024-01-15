@@ -13,6 +13,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/ava-labs/avalanchego/ids"
+	"github.com/ava-labs/avalanchego/snow"
 	"github.com/ava-labs/avalanchego/utils/set"
 	"github.com/ava-labs/avalanchego/vms/avm/block"
 	"github.com/ava-labs/avalanchego/vms/avm/states"
@@ -171,6 +172,9 @@ func TestManagerVerifyTx(t *testing.T) {
 				return &manager{
 					backend: &executor.Backend{
 						Bootstrapped: true,
+						Ctx: &snow.Context{
+							AVAXAssetID: ids.ID{},
+						},
 					},
 					state:        state,
 					lastAccepted: preferred,
@@ -204,6 +208,9 @@ func TestManagerVerifyTx(t *testing.T) {
 				return &manager{
 					backend: &executor.Backend{
 						Bootstrapped: true,
+						Ctx: &snow.Context{
+							AVAXAssetID: ids.ID{},
+						},
 					},
 					state:        state,
 					lastAccepted: preferred,
@@ -244,6 +251,9 @@ func TestManagerVerifyTx(t *testing.T) {
 				return &manager{
 					backend: &executor.Backend{
 						Bootstrapped: true,
+						Ctx: &snow.Context{
+							AVAXAssetID: ids.ID{},
+						},
 					},
 					blkIDToState: map[ids.ID]*blockState{
 						preferredID: {
@@ -283,6 +293,9 @@ func TestManagerVerifyTx(t *testing.T) {
 				return &manager{
 					backend: &executor.Backend{
 						Bootstrapped: true,
+						Ctx: &snow.Context{
+							AVAXAssetID: ids.ID{},
+						},
 					},
 					state:        state,
 					lastAccepted: preferred,

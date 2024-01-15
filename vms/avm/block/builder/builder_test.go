@@ -273,6 +273,8 @@ func TestBuilderBuildBlock(t *testing.T) {
 						return nil
 					},
 				)
+				unsignedTx1.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
+				unsignedTx1.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
 				unsignedTx1.EXPECT().SetBytes(gomock.Any()).AnyTimes()
 				tx1 := &txs.Tx{Unsigned: unsignedTx1}
 				// Set the bytes of tx1 to something other than nil
@@ -382,6 +384,8 @@ func TestBuilderBuildBlock(t *testing.T) {
 						return nil
 					},
 				)
+				unsignedTx.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
+				unsignedTx.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
 				unsignedTx.EXPECT().SetBytes(gomock.Any()).AnyTimes()
 				tx := &txs.Tx{Unsigned: unsignedTx}
 
@@ -456,6 +460,8 @@ func TestBuilderBuildBlock(t *testing.T) {
 						return nil
 					},
 				)
+				unsignedTx.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
+				unsignedTx.EXPECT().Visit(gomock.Any()).Return(nil) // Pass burned fee calculation
 				unsignedTx.EXPECT().SetBytes(gomock.Any()).AnyTimes()
 				tx := &txs.Tx{Unsigned: unsignedTx}
 

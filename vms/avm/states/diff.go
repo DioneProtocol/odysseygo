@@ -6,6 +6,7 @@ package states
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/database"
@@ -25,6 +26,7 @@ type Diff interface {
 	Chain
 
 	Apply(Chain)
+	GetTxFeeAsset() ids.ID
 }
 
 type diff struct {
@@ -39,25 +41,33 @@ type diff struct {
 
 	lastAccepted ids.ID
 	timestamp    time.Time
+
+	txFeeAsset        ids.ID
+	addAccumulatedFee *big.Int
+	subAccumulatedFee *big.Int
 }
 
 func NewDiff(
 	parentID ids.ID,
 	stateVersions Versions,
+	txFeeAsset ids.ID,
 ) (Diff, error) {
 	parentState, ok := stateVersions.GetState(parentID)
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:      parentID,
-		stateVersions: stateVersions,
-		modifiedUTXOs: make(map[ids.ID]*avax.UTXO),
-		addedTxs:      make(map[ids.ID]*txs.Tx),
-		addedBlockIDs: make(map[uint64]ids.ID),
-		addedBlocks:   make(map[ids.ID]block.Block),
-		lastAccepted:  parentState.GetLastAccepted(),
-		timestamp:     parentState.GetTimestamp(),
+		parentID:          parentID,
+		stateVersions:     stateVersions,
+		modifiedUTXOs:     make(map[ids.ID]*avax.UTXO),
+		addedTxs:          make(map[ids.ID]*txs.Tx),
+		addedBlockIDs:     make(map[uint64]ids.ID),
+		addedBlocks:       make(map[ids.ID]block.Block),
+		lastAccepted:      parentState.GetLastAccepted(),
+		timestamp:         parentState.GetTimestamp(),
+		txFeeAsset:        txFeeAsset,
+		addAccumulatedFee: big.NewInt(0),
+		subAccumulatedFee: big.NewInt(0),
 	}, nil
 }
 
@@ -98,6 +108,8 @@ func (d *diff) GetTx(txID ids.ID) (*txs.Tx, error) {
 
 func (d *diff) AddTx(tx *txs.Tx) {
 	d.addedTxs[tx.ID()] = tx
+	burned := new(big.Int).SetUint64(tx.Burned(d.txFeeAsset))
+	d.addAccumulatedFee.Add(d.addAccumulatedFee, burned)
 }
 
 func (d *diff) GetBlockIDAtHeight(height uint64) (ids.ID, error) {
@@ -146,6 +158,27 @@ func (d *diff) SetTimestamp(t time.Time) {
 	d.timestamp = t
 }
 
+func (d *diff) GetAccumulatedFee() *big.Int {
+	return new(big.Int).Set(d.addAccumulatedFee)
+}
+
+func (d *diff) SetAccumulatedFee(f *big.Int) {
+	d.subAccumulatedFee.Set(big.NewInt(0))
+	d.addAccumulatedFee.Set(f)
+}
+
+func (d *diff) AddAccumulatedFee(f *big.Int) {
+	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
+}
+
+func (d *diff) SubAccumulatedFee(f *big.Int) {
+	d.subAccumulatedFee.Add(d.subAccumulatedFee, f)
+}
+
+func (d *diff) GetTxFeeAsset() ids.ID {
+	return d.txFeeAsset
+}
+
 func (d *diff) Apply(state Chain) {
 	for utxoID, utxo := range d.modifiedUTXOs {
 		if utxo != nil {
@@ -165,4 +198,8 @@ func (d *diff) Apply(state Chain) {
 
 	state.SetLastAccepted(d.lastAccepted)
 	state.SetTimestamp(d.timestamp)
+	state.AddAccumulatedFee(d.addAccumulatedFee)
+	if d.subAccumulatedFee.Sign() > 0 {
+		state.SubAccumulatedFee(d.subAccumulatedFee)
+	}
 }
