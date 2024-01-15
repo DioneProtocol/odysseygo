@@ -13,7 +13,7 @@ import (
 const (
 	// Constants defining the names of shell variables whose value can
 	// configure local network orchestration.
-	OdysseyGoPathEnvName = "AVALANCHEGO_PATH"
+	OdysseyGoPathEnvName = "ODYSSEYGO_PATH"
 	NetworkDirEnvName    = "TESTNETCTL_NETWORK_DIR"
 	RootDirEnvName       = "TESTNETCTL_ROOT_DIR"
 

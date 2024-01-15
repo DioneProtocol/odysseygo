@@ -80,7 +80,7 @@ func New(
 			if err := ctx.Registerer.Register(counter); err != nil {
 				return nil, fmt.Errorf("couldn't register metric for %s: %w", op, err)
 			}
-		case p2p.EngineType_ENGINE_TYPE_AVALANCHE:
+		case p2p.EngineType_ENGINE_TYPE_ODYSSEY:
 			if err := ctx.OdysseyRegisterer.Register(counter); err != nil {
 				return nil, fmt.Errorf("couldn't register metric for %s: %w", op, err)
 			}

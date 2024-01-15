@@ -39,7 +39,7 @@ import (
 )
 
 const (
-	engineType         = p2p.EngineType_ENGINE_TYPE_AVALANCHE
+	engineType         = p2p.EngineType_ENGINE_TYPE_ODYSSEY
 	testThreadPoolSize = 2
 )
 

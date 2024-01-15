@@ -18,7 +18,7 @@ It works by starting the VM's as a subprocess of OdysseyGo by `os.Exec`.
 
 - `VMRegistry` calls the RPC Chain VM `Factory`.
 - Factory Starts an instanace of a `VMRE` server that consumes a `runtime.Initializer` interface implementation.
-- The address of this server is passed as a ENV variable `AVALANCHE_VM_RUNTIME_ENGINE_ADDR` via `os.Exec` which starts the VM binary.
+- The address of this server is passed as a ENV variable `ODYSSEY_VM_RUNTIME_ENGINE_ADDR` via `os.Exec` which starts the VM binary.
 - The VM uses the address of the `VMRE` server to create a client.
 - Client sends a `Initialize` RPC informing the server of the `Protocol Version` and future `Address` of the RPC Chain VM server allowing it to perform a validation `Handshake`.
 - After the `Handshake` is complete the RPC Chain VM server is started which serves the `ChainVM` implementation.

@@ -23,9 +23,9 @@ while getopts 'r' flag; do
 done
 
 # Odysseygo root folder
-AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
-source "$AVALANCHE_PATH"/scripts/constants.sh
+source "$ODYSSEY_PATH"/scripts/constants.sh
 
 # Download dependencies
 echo "Downloading dependencies..."
@@ -34,7 +34,7 @@ go mod download
 build_args="$race"
 
 # Build odysseygo
-"$AVALANCHE_PATH"/scripts/build_odyssey.sh $build_args
+"$ODYSSEY_PATH"/scripts/build_odyssey.sh $build_args
 
 # Exit build successfully if the OdysseyGo binary is created successfully
 if [[ -f "$odysseygo_path" ]]; then

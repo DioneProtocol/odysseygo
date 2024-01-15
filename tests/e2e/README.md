@@ -71,7 +71,7 @@ ginkgo -v ./tests/e2e -- \
     --use-persistent-network \
     --network-dir=/path/to/network
 
-# It is also possible to set the AVALANCHEGO_PATH env var instead of supplying --odysseygo-path
+# It is also possible to set the ODYSSEYGO_PATH env var instead of supplying --odysseygo-path
 # and to set TESTNETCTL_NETWORK_DIR instead of supplying --network-dir.
 ```
 

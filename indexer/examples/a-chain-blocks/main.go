@@ -11,6 +11,7 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/indexer"
 	"github.com/DioneProtocol/odysseygo/vms/proposervm/block"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/a"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 

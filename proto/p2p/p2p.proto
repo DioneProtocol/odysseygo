@@ -176,7 +176,7 @@ message AcceptedStateSummary {
 
 enum EngineType {
   ENGINE_TYPE_UNSPECIFIED = 0;
-  ENGINE_TYPE_AVALANCHE = 1;
+  ENGINE_TYPE_ODYSSEY = 1;
   ENGINE_TYPE_SNOWMAN = 2;
 }
 

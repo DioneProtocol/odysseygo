@@ -28,7 +28,7 @@ const (
 	DefaultHTTPPort    = 9650
 	DefaultStakingPort = 9651
 
-	OdysseyGoDataDirVar      = "AVALANCHEGO_DATA_DIR"
+	OdysseyGoDataDirVar      = "ODYSSEYGO_DATA_DIR"
 	defaultUnexpandedDataDir = "$" + OdysseyGoDataDirVar
 
 	DefaultProcessContextFilename = "process.json"
