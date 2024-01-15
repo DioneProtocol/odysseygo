@@ -600,7 +600,7 @@ func (m *manager) createOdysseyChain(
 	defer ctx.Lock.Unlock()
 
 	ctx.State.Set(snow.EngineState{
-		Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+		Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 		State: snow.Initializing,
 	})
 
@@ -637,7 +637,7 @@ func (m *manager) createOdysseyChain(
 		m.Net,
 		m.ManagerConfig.Router,
 		m.TimeoutManager,
-		p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+		p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 		sb,
 	)
 	if err != nil {

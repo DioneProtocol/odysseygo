@@ -477,7 +477,7 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 	}{
 		{
 			name:                "current - odyssey, requested - unspecified",
-			currentEngineType:   p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+			currentEngineType:   p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 			requestedEngineType: p2p.EngineType_ENGINE_TYPE_UNSPECIFIED,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
@@ -492,8 +492,8 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 		},
 		{
 			name:                "current - odyssey, requested - odyssey",
-			currentEngineType:   p2p.EngineType_ENGINE_TYPE_AVALANCHE,
-			requestedEngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+			currentEngineType:   p2p.EngineType_ENGINE_TYPE_ODYSSEY,
+			requestedEngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
 					Odyssey: &Engine{
@@ -523,7 +523,7 @@ func TestDynamicEngineTypeDispatch(t *testing.T) {
 		{
 			name:                "current - snowman, requested - odyssey",
 			currentEngineType:   p2p.EngineType_ENGINE_TYPE_SNOWMAN,
-			requestedEngineType: p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+			requestedEngineType: p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 			setup: func(h Handler, b common.BootstrapableEngine, e common.Engine) {
 				h.SetEngineManager(&EngineManager{
 					Odyssey: &Engine{

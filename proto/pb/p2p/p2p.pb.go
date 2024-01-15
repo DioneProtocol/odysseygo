@@ -24,7 +24,7 @@ type EngineType int32
 
 const (
 	EngineType_ENGINE_TYPE_UNSPECIFIED EngineType = 0
-	EngineType_ENGINE_TYPE_AVALANCHE   EngineType = 1
+	EngineType_ENGINE_TYPE_ODYSSEY   EngineType = 1
 	EngineType_ENGINE_TYPE_SNOWMAN     EngineType = 2
 )
 
@@ -32,12 +32,12 @@ const (
 var (
 	EngineType_name = map[int32]string{
 		0: "ENGINE_TYPE_UNSPECIFIED",
-		1: "ENGINE_TYPE_AVALANCHE",
+		1: "ENGINE_TYPE_ODYSSEY",
 		2: "ENGINE_TYPE_SNOWMAN",
 	}
 	EngineType_value = map[string]int32{
 		"ENGINE_TYPE_UNSPECIFIED": 0,
-		"ENGINE_TYPE_AVALANCHE":   1,
+		"ENGINE_TYPE_ODYSSEY":   1,
 		"ENGINE_TYPE_SNOWMAN":     2,
 	}
 )

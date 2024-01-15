@@ -11,7 +11,7 @@ import (
 
 const (
 	// Address of the runtime engine server.
-	EngineAddressKey = "AVALANCHE_VM_RUNTIME_ENGINE_ADDR"
+	EngineAddressKey = "ODYSSEY_VM_RUNTIME_ENGINE_ADDR"
 
 	// Duration before handshake timeout during bootstrap.
 	DefaultHandshakeTimeout = 5 * time.Second
