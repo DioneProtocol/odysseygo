@@ -241,6 +241,11 @@ func TestBlockVerify(t *testing.T) {
 						},
 						clk:          &mockable.Clock{},
 						lastAccepted: parentID,
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 					},
 				}
 			},
@@ -290,6 +295,11 @@ func TestBlockVerify(t *testing.T) {
 						},
 						clk:          &mockable.Clock{},
 						lastAccepted: parentID,
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 					},
 				}
 			},
@@ -332,7 +342,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -372,6 +386,7 @@ func TestBlockVerify(t *testing.T) {
 						return nil
 					},
 				).Times(1)
+				mockUnsignedTx1.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				mockUnsignedTx2 := txs.NewMockUnsignedTx(ctrl)
 				mockUnsignedTx2.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Syntactic verification passes
 				mockUnsignedTx2.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Semantic verification fails
@@ -410,7 +425,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -450,6 +469,7 @@ func TestBlockVerify(t *testing.T) {
 						return nil
 					},
 				).Times(1)
+				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				tx := &txs.Tx{
 					Unsigned: mockUnsignedTx,
 				}
@@ -468,7 +488,11 @@ func TestBlockVerify(t *testing.T) {
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -497,6 +521,7 @@ func TestBlockVerify(t *testing.T) {
 				mockUnsignedTx := txs.NewMockUnsignedTx(ctrl)
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Syntactic verification passes
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Semantic verification fails
+				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Execution passes
 				tx := &txs.Tx{
 					Unsigned: mockUnsignedTx,
@@ -520,7 +545,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mockMempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								AVAXAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,

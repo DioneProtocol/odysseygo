@@ -82,7 +82,7 @@ func (b *builder) BuildBlock(context.Context) (snowman.Block, error) {
 		nextTimestamp = preferredTimestamp
 	}
 
-	stateDiff, err := states.NewDiff(preferredID, b.manager)
+	stateDiff, err := states.NewDiff(preferredID, b.manager, ctx.AVAXAssetID)
 	if err != nil {
 		return nil, err
 	}
@@ -175,8 +175,8 @@ func (s stateGetter) GetState(ids.ID) (states.Chain, bool) {
 	return s.state, true
 }
 
-func wrapState(parentState states.Chain) (states.Diff, error) {
+func wrapState(parentState states.Diff) (states.Diff, error) {
 	return states.NewDiff(ids.Empty, stateGetter{
 		state: parentState,
-	})
+	}, parentState.GetTxFeeAsset())
 }

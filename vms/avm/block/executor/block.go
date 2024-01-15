@@ -106,7 +106,8 @@ func (b *Block) Verify(context.Context) error {
 		)
 	}
 
-	stateDiff, err := states.NewDiff(parentID, b.manager)
+	avaxAssetId := b.manager.backend.Ctx.AVAXAssetID
+	stateDiff, err := states.NewDiff(parentID, b.manager, avaxAssetId)
 	if err != nil {
 		return err
 	}

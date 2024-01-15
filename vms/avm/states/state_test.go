@@ -135,7 +135,7 @@ func TestDiff(t *testing.T) {
 		chains: map[ids.ID]Chain{
 			parentID: s,
 		},
-	})
+	}, populatedUTXO.AssetID())
 	require.NoError(err)
 
 	ChainUTXOTest(t, d)
