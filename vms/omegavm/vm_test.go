@@ -1191,7 +1191,7 @@ func TestAtomicImport(t *testing.T) {
 	)
 	require.ErrorIs(err, txbuilder.ErrNoFunds)
 
-	// Provide the avm UTXO
+	// Provide the alpha UTXO
 
 	utxo := &dione.UTXO{
 		UTXOID: utxoID,

@@ -113,7 +113,7 @@ func newInitializedState(require *require.Assertions) (State, database.Database)
 	initialChain := &txs.CreateChainTx{
 		SubnetID:   constants.PrimaryNetworkID,
 		ChainName:  "x",
-		VMID:       constants.AVMID,
+		VMID:       constants.AlphaID,
 		SubnetAuth: &secp256k1fx.Input{},
 	}
 	initialChainTx := &txs.Tx{Unsigned: initialChain}

@@ -8,7 +8,7 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/api/info"
 	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/avm"
+	"github.com/DioneProtocol/odysseygo/vms/alpha"
 )
 
 var _ Context = (*context)(nil)
@@ -41,14 +41,14 @@ type context struct {
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	xChainClient := avm.NewClient(uri, "X")
+	xChainClient := alpha.NewClient(uri, "X")
 	return NewContextFromClients(ctx, infoClient, xChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	xChainClient avm.Client,
+	xChainClient alpha.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {

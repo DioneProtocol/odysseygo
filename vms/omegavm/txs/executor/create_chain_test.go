@@ -33,7 +33,7 @@ func TestCreateChainTxInsufficientControlSigs(t *testing.T) {
 	tx, err := env.txBuilder.NewCreateChainTx(
 		testSubnet1.ID(),
 		nil,
-		constants.AVMID,
+		constants.AlphaID,
 		nil,
 		"chain name",
 		[]*secp256k1.PrivateKey{preFundedKeys[0], preFundedKeys[1]},
@@ -68,7 +68,7 @@ func TestCreateChainTxWrongControlSig(t *testing.T) {
 	tx, err := env.txBuilder.NewCreateChainTx(
 		testSubnet1.ID(),
 		nil,
-		constants.AVMID,
+		constants.AlphaID,
 		nil,
 		"chain name",
 		[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -111,7 +111,7 @@ func TestCreateChainTxNoSuchSubnet(t *testing.T) {
 	tx, err := env.txBuilder.NewCreateChainTx(
 		testSubnet1.ID(),
 		nil,
-		constants.AVMID,
+		constants.AlphaID,
 		nil,
 		"chain name",
 		[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -145,7 +145,7 @@ func TestCreateChainTxValid(t *testing.T) {
 	tx, err := env.txBuilder.NewCreateChainTx(
 		testSubnet1.ID(),
 		nil,
-		constants.AVMID,
+		constants.AlphaID,
 		nil,
 		"chain name",
 		[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -219,7 +219,7 @@ func TestCreateChainTxAP3FeeChange(t *testing.T) {
 					Outs:         outs,
 				}},
 				SubnetID:   testSubnet1.ID(),
-				VMID:       constants.AVMID,
+				VMID:       constants.AlphaID,
 				SubnetAuth: subnetAuth,
 			}
 			tx := &txs.Tx{Unsigned: utx}

@@ -385,7 +385,7 @@ func TestVMGenesis(t *testing.T) {
 			networkID: constants.MainnetID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.AVMID,
+					vmID:       constants.AlphaID,
 					expectedID: "2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM",
 				},
 				{
@@ -398,7 +398,7 @@ func TestVMGenesis(t *testing.T) {
 			networkID: constants.TestnetID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.AVMID,
+					vmID:       constants.AlphaID,
 					expectedID: "2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm",
 				},
 				{
@@ -411,7 +411,7 @@ func TestVMGenesis(t *testing.T) {
 			networkID: constants.LocalID,
 			vmTest: []vmTest{
 				{
-					vmID:       constants.AVMID,
+					vmID:       constants.AlphaID,
 					expectedID: "2eNy1mUFdmaxXNj1eQHUe7Np4gju9sJsEtWQ4MX3ToiNKuADed",
 				},
 				{

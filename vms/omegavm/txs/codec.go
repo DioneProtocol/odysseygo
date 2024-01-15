@@ -62,7 +62,7 @@ func RegisterUnsignedTxsTypes(targetCodec linearcodec.Codec) error {
 	errs := wrappers.Errs{}
 
 	// The secp256k1fx is registered here because this is the same place it is
-	// registered in the AVM. This ensures that the typeIDs match up for utxos
+	// registered in the ALPHA. This ensures that the typeIDs match up for utxos
 	// in shared memory.
 	errs.Add(targetCodec.RegisterType(&secp256k1fx.TransferInput{}))
 	targetCodec.SkipRegistrations(1)
