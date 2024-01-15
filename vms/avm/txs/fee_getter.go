@@ -22,20 +22,31 @@ type burned struct {
 	burned  uint64
 }
 
-func (b *burned) calculateBurned(tx *avax.BaseTx) error {
-	var totalInputs, totalOutputs uint64
-	for _, i := range tx.Ins {
-		if i.AssetID() == b.assetId {
+func calculateInputs(ins []*avax.TransferableInput, assetId ids.ID) uint64 {
+	var totalInputs uint64
+	for _, i := range ins {
+		if i.AssetID() == assetId {
 			totalInputs += i.In.Amount()
 		}
 	}
-	for _, o := range tx.Outs {
-		if o.AssetID() == b.assetId {
+	return totalInputs
+}
+
+func calculateOutputs(outs []*avax.TransferableOutput, assetId ids.ID) uint64 {
+	var totalOutputs uint64
+	for _, o := range outs {
+		if o.AssetID() == assetId {
 			totalOutputs += o.Out.Amount()
 		}
 	}
-	if totalOutputs < totalInputs {
-		b.burned = totalInputs - totalOutputs
+	return totalOutputs
+}
+
+func (b *burned) setDifference(tx *avax.BaseTx) error {
+	ins := calculateInputs(tx.Ins, b.assetId)
+	outs := calculateOutputs(tx.Outs, b.assetId)
+	if ins > outs {
+		b.burned = ins - outs
 	} else {
 		b.burned = 0
 	}
@@ -43,21 +54,41 @@ func (b *burned) calculateBurned(tx *avax.BaseTx) error {
 }
 
 func (b *burned) BaseTx(tx *BaseTx) error {
-	return b.calculateBurned(&tx.BaseTx)
+	return b.setDifference(&tx.BaseTx)
 }
 
 func (b *burned) CreateAssetTx(tx *CreateAssetTx) error {
-	return b.calculateBurned(&tx.BaseTx.BaseTx)
+	return b.setDifference(&tx.BaseTx.BaseTx)
 }
 
 func (b *burned) ExportTx(tx *ExportTx) error {
-	return b.calculateBurned(&tx.BaseTx.BaseTx)
+	baseTx := &tx.BaseTx.BaseTx
+	ins := calculateInputs(baseTx.Ins, b.assetId)
+	baseOuts := calculateOutputs(baseTx.Outs, b.assetId)
+	exportedOuts := calculateOutputs(tx.ExportedOuts, b.assetId)
+	outs := baseOuts + exportedOuts
+	if ins > outs {
+		b.burned = ins - outs
+	} else {
+		b.burned = 0
+	}
+	return nil
 }
 
 func (b *burned) ImportTx(tx *ImportTx) error {
-	return b.calculateBurned(&tx.BaseTx.BaseTx)
+	baseTx := &tx.BaseTx.BaseTx
+	outs := calculateOutputs(baseTx.Outs, b.assetId)
+	baseIns := calculateInputs(baseTx.Ins, b.assetId)
+	importedIns := calculateInputs(tx.ImportedIns, b.assetId)
+	ins := baseIns + importedIns
+	if ins > outs {
+		b.burned = ins - outs
+	} else {
+		b.burned = 0
+	}
+	return nil
 }
 
 func (b *burned) OperationTx(tx *OperationTx) error {
-	return b.calculateBurned(&tx.BaseTx.BaseTx)
+	return b.setDifference(&tx.BaseTx.BaseTx)
 }
