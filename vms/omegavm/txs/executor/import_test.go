@@ -95,9 +95,9 @@ func TestNewImportTx(t *testing.T) {
 	tests := []test{
 		{
 			description:   "can't pay fee",
-			sourceChainID: env.ctx.XChainID,
+			sourceChainID: env.ctx.AChainID,
 			sharedMemory: fundedSharedMemory(
-				env.ctx.XChainID,
+				env.ctx.AChainID,
 				map[ids.ID]uint64{
 					env.ctx.DIONEAssetID: env.config.TxFee - 1,
 				},
@@ -107,9 +107,9 @@ func TestNewImportTx(t *testing.T) {
 		},
 		{
 			description:   "can barely pay fee",
-			sourceChainID: env.ctx.XChainID,
+			sourceChainID: env.ctx.AChainID,
 			sharedMemory: fundedSharedMemory(
-				env.ctx.XChainID,
+				env.ctx.AChainID,
 				map[ids.ID]uint64{
 					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
@@ -131,10 +131,10 @@ func TestNewImportTx(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			description:   "attempting to import non-dione from X-chain",
-			sourceChainID: env.ctx.XChainID,
+			description:   "attempting to import non-dione from A-chain",
+			sourceChainID: env.ctx.AChainID,
 			sharedMemory: fundedSharedMemory(
-				env.ctx.XChainID,
+				env.ctx.AChainID,
 				map[ids.ID]uint64{
 					env.ctx.DIONEAssetID: env.config.TxFee,
 					customAssetID:        1,

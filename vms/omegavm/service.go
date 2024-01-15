@@ -1568,8 +1568,8 @@ type ExportDIONEArgs struct {
 	To string `json:"to"`
 }
 
-// ExportDIONE exports DIONE from the O-Chain to the X-Chain
-// It must be imported on the X-Chain to complete the transfer
+// ExportDIONE exports DIONE from the O-Chain to the A-Chain
+// It must be imported on the A-Chain to complete the transfer
 func (s *Service) ExportDIONE(_ *http.Request, args *ExportDIONEArgs, response *api.JSONTxIDChangeAddr) error {
 	s.vm.ctx.Log.Warn("deprecated API called",
 		zap.String("service", "omega"),
@@ -1659,8 +1659,8 @@ type ImportDIONEArgs struct {
 	To string `json:"to"`
 }
 
-// ImportDIONE issues a transaction to import DIONE from the X-chain. The DIONE
-// must have already been exported from the X-Chain.
+// ImportDIONE issues a transaction to import DIONE from the A-chain. The DIONE
+// must have already been exported from the A-Chain.
 func (s *Service) ImportDIONE(_ *http.Request, args *ImportDIONEArgs, response *api.JSONTxIDChangeAddr) error {
 	s.vm.ctx.Log.Warn("deprecated API called",
 		zap.String("service", "omega"),

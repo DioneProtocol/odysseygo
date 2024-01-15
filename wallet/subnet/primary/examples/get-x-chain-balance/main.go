@@ -11,13 +11,13 @@ import (
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/formatting/address"
 	"github.com/DioneProtocol/odysseygo/utils/set"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/a"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
 
 func main() {
 	uri := primary.LocalAPIURI
-	addrStr := "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
+	addrStr := "A-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u"
 
 	addr, err := address.ParseToID(addrStr)
 	if err != nil {
@@ -36,18 +36,18 @@ func main() {
 	}
 	log.Printf("fetched state of %s in %s\n", addrStr, time.Since(fetchStartTime))
 
-	xChainID := state.XCTX.BlockchainID()
+	aChainID := state.ACTX.BlockchainID()
 
-	xUTXOs := primary.NewChainUTXOs(xChainID, state.UTXOs)
-	xBackend := x.NewBackend(state.XCTX, xUTXOs)
-	xBuilder := x.NewBuilder(addresses, xBackend)
+	aUTXOs := primary.NewChainUTXOs(aChainID, state.UTXOs)
+	aBackend := a.NewBackend(state.ACTX, aUTXOs)
+	aBuilder := a.NewBuilder(addresses, aBackend)
 
-	currentBalances, err := xBuilder.GetFTBalance()
+	currentBalances, err := aBuilder.GetFTBalance()
 	if err != nil {
 		log.Fatalf("failed to get the balance: %s\n", err)
 	}
 
-	dioneID := state.XCTX.DIONEAssetID()
+	dioneID := state.ACTX.DIONEAssetID()
 	dioneBalance := currentBalances[dioneID]
 	log.Printf("current DIONE balance of %s is %d nDIONE\n", addrStr, dioneBalance)
 }

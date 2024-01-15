@@ -41,8 +41,8 @@ var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 			baseWallet := e2e.Env.NewWallet(keychain, nodeURI)
 
 			oWallet := baseWallet.O()
-			xWallet := baseWallet.X()
-			xChainID := xWallet.BlockchainID()
+			aWallet := baseWallet.A()
+			aChainID := aWallet.BlockchainID()
 
 			var validatorID ids.NodeID
 			ginkgo.By("retrieving the node ID of a primary network validator", func() {
@@ -78,7 +78,7 @@ var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 			var subnetAssetID ids.ID
 			ginkgo.By("create a custom asset for the permissionless subnet", func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				subnetAssetTx, err := xWallet.IssueCreateAssetTx(
+				subnetAssetTx, err := aWallet.IssueCreateAssetTx(
 					"RnM",
 					"RNM",
 					9,
@@ -99,7 +99,7 @@ var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 
 			ginkgo.By(fmt.Sprintf("Send 100 MegaDione of asset %s to the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
-				_, err := xWallet.IssueExportTx(
+				_, err := aWallet.IssueExportTx(
 					constants.OmegaChainID,
 					[]*dione.TransferableOutput{
 						{
@@ -118,10 +118,10 @@ var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 			})
 
-			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the X-chain into the O-chain", subnetAssetID), func() {
+			ginkgo.By(fmt.Sprintf("Import the 100 MegaDione of asset %s from the A-chain into the O-chain", subnetAssetID), func() {
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultTimeout)
 				_, err := oWallet.IssueImportTx(
-					xChainID,
+					aChainID,
 					owner,
 					common.WithContext(ctx),
 				)

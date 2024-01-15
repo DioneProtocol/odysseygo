@@ -37,7 +37,7 @@ type Context struct {
 	NodeID    ids.NodeID
 	PublicKey *bls.PublicKey
 
-	XChainID     ids.ID
+	AChainID     ids.ID
 	DChainID     ids.ID
 	DIONEAssetID ids.ID
 

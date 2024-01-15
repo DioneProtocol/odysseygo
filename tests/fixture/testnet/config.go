@@ -38,8 +38,8 @@ const (
 
 	DefaultGasLimit = uint64(100_000_000) // Gas limit is arbitrary
 
-	// Arbitrarily large amount of DIONE to fund keys on the X-Chain for testing
-	DefaultFundedKeyXChainAmount = 30 * units.MegaDione
+	// Arbitrarily large amount of DIONE to fund keys on the A-Chain for testing
+	DefaultFundedKeyAChainAmount = 30 * units.MegaDione
 )
 
 var (
@@ -139,16 +139,16 @@ func (c *NetworkConfig) EnsureGenesis(networkID uint32, validatorIDs []ids.NodeI
 	}
 
 	// Ensure pre-funded keys have arbitrary large balances on both chains to support testing
-	xChainBalances := make(XChainBalanceMap, len(c.FundedKeys))
+	aChainBalances := make(AChainBalanceMap, len(c.FundedKeys))
 	dChainBalances := make(core.GenesisAlloc, len(c.FundedKeys))
 	for _, key := range c.FundedKeys {
-		xChainBalances[key.Address()] = DefaultFundedKeyXChainAmount
+		aChainBalances[key.Address()] = DefaultFundedKeyAChainAmount
 		dChainBalances[delta.GetEthAddress(key)] = core.GenesisAccount{
 			Balance: DefaultFundedKeyDChainAmount,
 		}
 	}
 
-	genesis, err := NewTestGenesis(networkID, xChainBalances, dChainBalances, validatorIDs)
+	genesis, err := NewTestGenesis(networkID, aChainBalances, dChainBalances, validatorIDs)
 	if err != nil {
 		return err
 	}
@@ -299,15 +299,15 @@ func (nc *NodeConfig) EnsureNodeID() error {
 	return nil
 }
 
-// Helper type to simplify configuring X-Chain genesis balances
-type XChainBalanceMap map[ids.ShortID]uint64
+// Helper type to simplify configuring A-Chain genesis balances
+type AChainBalanceMap map[ids.ShortID]uint64
 
 // Create a genesis struct valid for bootstrapping a test
 // network. Note that many of the genesis fields (e.g. reward
 // addresses) are randomly generated or hard-coded.
 func NewTestGenesis(
 	networkID uint32,
-	xChainBalances XChainBalanceMap,
+	aChainBalances AChainBalanceMap,
 	dChainBalances core.GenesisAlloc,
 	validatorIDs []ids.NodeID,
 ) (*genesis.UnparsedConfig, error) {
@@ -319,13 +319,13 @@ func NewTestGenesis(
 	if len(validatorIDs) == 0 {
 		return nil, errMissingValidatorsForGenesis
 	}
-	if len(xChainBalances) == 0 || len(dChainBalances) == 0 {
+	if len(aChainBalances) == 0 || len(dChainBalances) == 0 {
 		return nil, errMissingBalancesForGenesis
 	}
 
 	// Address that controls stake doesn't matter -- generate it randomly
 	stakeAddress, err := address.Format(
-		"X",
+		"A",
 		constants.GetHRP(networkID),
 		ids.GenerateTestShortID().Bytes(),
 	)
@@ -366,11 +366,11 @@ func NewTestGenesis(
 		Message:                    "hello odyssey!",
 	}
 
-	// Set X-Chain balances
-	for xChainAddress, balance := range xChainBalances {
-		dioneAddr, err := address.Format("X", constants.GetHRP(networkID), xChainAddress[:])
+	// Set A-Chain balances
+	for aChainAddress, balance := range aChainBalances {
+		dioneAddr, err := address.Format("A", constants.GetHRP(networkID), aChainAddress[:])
 		if err != nil {
-			return nil, fmt.Errorf("failed to format X-Chain address: %w", err)
+			return nil, fmt.Errorf("failed to format A-Chain address: %w", err)
 		}
 		config.Allocations = append(
 			config.Allocations,
@@ -409,7 +409,7 @@ func NewTestGenesis(
 	// Give staking rewards for initial validators to a random address. Any testing of staking rewards
 	// will be easier to perform with nodes other than the initial validators since the timing of
 	// staking can be more easily controlled.
-	rewardAddr, err := address.Format("X", constants.GetHRP(networkID), ids.GenerateTestShortID().Bytes())
+	rewardAddr, err := address.Format("A", constants.GetHRP(networkID), ids.GenerateTestShortID().Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("failed to format reward address: %w", err)
 	}

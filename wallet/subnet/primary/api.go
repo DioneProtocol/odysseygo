@@ -24,7 +24,6 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/d"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/o"
-	"github.com/DioneProtocol/odysseygo/wallet/chain/x"
 )
 
 const (
@@ -57,8 +56,8 @@ type UTXOClient interface {
 type DIONEState struct {
 	OClient omegavm.Client
 	OCTX    o.Context
-	XClient alpha.Client
-	XCTX    x.Context
+	AClient alpha.Client
+	ACTX    a.Context
 	DClient delta.Client
 	DCTX    d.Context
 	UTXOs   UTXOs
@@ -74,20 +73,20 @@ func FetchState(
 ) {
 	infoClient := info.NewClient(uri)
 	oClient := omegavm.NewClient(uri)
-	xClient := alpha.NewClient(uri, "X")
+	aClient := alpha.NewClient(uri, "A")
 	dClient := delta.NewDChainClient(uri)
 
-	oCTX, err := o.NewContextFromClients(ctx, infoClient, xClient)
+	oCTX, err := o.NewContextFromClients(ctx, infoClient, aClient)
 	if err != nil {
 		return nil, err
 	}
 
-	xCTX, err := x.NewContextFromClients(ctx, infoClient, xClient)
+	aCTX, err := a.NewContextFromClients(ctx, infoClient, aClient)
 	if err != nil {
 		return nil, err
 	}
 
-	dCTX, err := d.NewContextFromClients(ctx, infoClient, xClient)
+	dCTX, err := d.NewContextFromClients(ctx, infoClient, aClient)
 	if err != nil {
 		return nil, err
 	}
@@ -105,9 +104,9 @@ func FetchState(
 			codec:  txs.Codec,
 		},
 		{
-			id:     xCTX.BlockchainID(),
-			client: xClient,
-			codec:  x.Parser.Codec(),
+			id:     aCTX.BlockchainID(),
+			client: aClient,
+			codec:  a.Parser.Codec(),
 		},
 		{
 			id:     dCTX.BlockchainID(),
@@ -134,8 +133,8 @@ func FetchState(
 	return &DIONEState{
 		OClient: oClient,
 		OCTX:    oCTX,
-		XClient: xClient,
-		XCTX:    xCTX,
+		AClient: aClient,
+		ACTX:    aCTX,
 		DClient: dClient,
 		DCTX:    dCTX,
 		UTXOs:   utxos,

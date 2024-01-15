@@ -185,7 +185,7 @@ override the default by setting an explicit value for
 `--chain-config-dir` and ensuring the D-Chain config file exists at
 `[chain-config-dir]/D/config.json`.
 
-TODO(marun) Enable configuration of X-Chain and O-Chain.
+TODO(marun) Enable configuration of A-Chain and O-Chain.
 
 ### Network env
 

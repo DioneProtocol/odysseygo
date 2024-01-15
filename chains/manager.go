@@ -192,7 +192,7 @@ type ManagerConfig struct {
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
 	DIONEAssetID                ids.ID
-	XChainID                    ids.ID          // ID of the X-Chain,
+	AChainID                    ids.ID          // ID of the A-Chain,
 	DChainID                    ids.ID          // ID of the D-Chain,
 	CriticalChains              set.Set[ids.ID] // Chains that can't exit gracefully
 	TimeoutManager              timeout.Manager // Manages request timeouts when sending messages to other validators
@@ -342,7 +342,7 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	chain, err := m.buildChain(chainParams, sb)
 	if err != nil {
 		if m.CriticalChains.Contains(chainParams.ID) {
-			// Shut down if we fail to create a required chain (i.e. X, O or D)
+			// Shut down if we fail to create a required chain (i.e. A, O or D)
 			m.Log.Fatal("error creating required chain",
 				zap.Stringer("subnetID", chainParams.SubnetID),
 				zap.Stringer("chainID", chainParams.ID),
@@ -421,7 +421,7 @@ func (m *manager) createChain(chainParams ChainParameters) {
 	}
 
 	// Tell the chain to start processing messages.
-	// If the X, O, or D Chain panics, do not attempt to recover
+	// If the A, O, or D Chain panics, do not attempt to recover
 	chain.Handler.Start(context.TODO(), !m.CriticalChains.Contains(chainParams.ID))
 }
 
@@ -473,7 +473,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			NodeID:    m.NodeID,
 			PublicKey: bls.PublicFromSecretKey(m.StakingBLSKey),
 
-			XChainID:     m.XChainID,
+			AChainID:     m.AChainID,
 			DChainID:     m.DChainID,
 			DIONEAssetID: m.DIONEAssetID,
 
@@ -942,7 +942,7 @@ func (m *manager) createOdysseyChain(
 
 	// create bootstrap gear
 	_, specifiedLinearizationTime := version.CortinaTimes[ctx.NetworkID]
-	specifiedLinearizationTime = specifiedLinearizationTime && ctx.ChainID == m.XChainID
+	specifiedLinearizationTime = specifiedLinearizationTime && ctx.ChainID == m.AChainID
 	odysseyBootstrapperConfig := odbootstrap.Config{
 		Config:             odysseyCommonCfg,
 		AllGetsServer:      avaGetHandler,

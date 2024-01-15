@@ -59,9 +59,9 @@ var (
 	_ block.BatchedChainVM  = (*VM)(nil)
 	_ block.StateSyncableVM = (*VM)(nil)
 
-	// TODO: remove after the X-chain supports height indexing.
-	mainnetXChainID ids.ID
-	testnetXChainID ids.ID
+	// TODO: remove after the A-chain supports height indexing.
+	mainnetAChainID ids.ID
+	testnetAChainID ids.ID
 
 	dbPrefix = []byte("proposervm")
 
@@ -70,12 +70,12 @@ var (
 
 func init() {
 	var err error
-	mainnetXChainID, err = ids.FromString("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM")
+	mainnetAChainID, err = ids.FromString("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM")
 	if err != nil {
 		panic(err)
 	}
 
-	testnetXChainID, err = ids.FromString("2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm")
+	testnetAChainID, err = ids.FromString("2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm")
 	if err != nil {
 		panic(err)
 	}
@@ -730,7 +730,7 @@ func (vm *VM) getBlock(ctx context.Context, id ids.ID) (Block, error) {
 	return vm.getPreForkBlock(ctx, id)
 }
 
-// TODO: remove after the O-chain and X-chain support height indexing.
+// TODO: remove after the O-chain and A-chain support height indexing.
 func (vm *VM) getForkHeight() (uint64, error) {
 	// The fork block can be easily identified with the provided links because
 	// the `Parent Hash` is equal to the `Proposer Parent ID`.
@@ -742,10 +742,10 @@ func (vm *VM) getForkHeight() (uint64, error) {
 		case constants.TestnetID:
 			return 47529, nil // https://subnets-test.dione.network/o-chain/block/47529
 		}
-	case mainnetXChainID:
-		return 1, nil // https://subnets.dione.network/x-chain/block/1
-	case testnetXChainID:
-		return 1, nil // https://subnets-test.dione.network/x-chain/block/1
+	case mainnetAChainID:
+		return 1, nil // https://subnets.dione.network/a-chain/block/1
+	case testnetAChainID:
+		return 1, nil // https://subnets-test.dione.network/a-chain/block/1
 	}
 	return vm.GetForkHeight()
 }

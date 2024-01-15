@@ -28,15 +28,15 @@ Create a new package to implement feature-specific tests, or add tests to an exi
     ├── README.md
     ├── e2e.go
     ├── e2e_test.go
-    └── x
+    └── a
         └── transfer.go
             └── virtuous.go
 ```
 
 `e2e.go` defines common configuration for other test
-packages. `x/transfer/virtuous.go` defines X-Chain transfer tests,
-labeled with `x`, which can be selected by `./tests/e2e/e2e.test
---ginkgo.label-filter "x"`.
+packages. `a/transfer/virtuous.go` defines A-Chain transfer tests,
+labeled with `a`, which can be selected by `./tests/e2e/e2e.test
+--ginkgo.label-filter "a"`.
 
 ## Testing against a persistent network
 
