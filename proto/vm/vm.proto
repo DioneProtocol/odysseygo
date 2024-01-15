@@ -120,7 +120,7 @@ message InitializeRequest {
   // public_key is the BLS public key that would correspond with any signatures
   // produced by the warp messaging signer
   bytes public_key = 5;
-  bytes x_chain_id = 6;
+  bytes a_chain_id = 6;
   bytes d_chain_id = 7;
   bytes dione_asset_id = 8;
   string chain_data_dir = 9;
