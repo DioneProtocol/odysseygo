@@ -22,6 +22,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
+	"github.com/DioneProtocol/odysseygo/wallet/chain/a"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/d"
 	"github.com/DioneProtocol/odysseygo/wallet/chain/o"
 )

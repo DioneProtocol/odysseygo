@@ -51,10 +51,10 @@ if version_lt "$(go_version)" "$go_version_minimum"; then
 fi
 
 # Odysseygo root folder
-AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the constants
-source "$AVALANCHE_PATH"/scripts/constants.sh
+source "$ODYSSEY_PATH"/scripts/constants.sh
 
 build_args="$race"
 echo "Building OdysseyGo..."
-go build $build_args -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit $static_ld_flags" -o "$odysseygo_path" "$AVALANCHE_PATH/main/"*.go
+go build $build_args -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit $static_ld_flags" -o "$odysseygo_path" "$ODYSSEY_PATH/main/"*.go

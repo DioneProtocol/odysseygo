@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Odyssey root directory
-AVALANCHE_PATH=$(
+ODYSSEY_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   cd .. && pwd
 )

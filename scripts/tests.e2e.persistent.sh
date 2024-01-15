@@ -15,15 +15,15 @@ if ! [[ "$0" =~ scripts/tests.e2e.persistent.sh ]]; then
   exit 255
 fi
 
-AVALANCHEGO_PATH="${1-${AVALANCHEGO_PATH:-}}"
-if [[ -z "${AVALANCHEGO_PATH}" ]]; then
-  echo "Missing AVALANCHEGO_PATH argument!"
-  echo "Usage: ${0} [AVALANCHEGO_PATH]" >>/dev/stderr
+ODYSSEYGO_PATH="${1-${ODYSSEYGO_PATH:-}}"
+if [[ -z "${ODYSSEYGO_PATH}" ]]; then
+  echo "Missing ODYSSEYGO_PATH argument!"
+  echo "Usage: ${0} [ODYSSEYGO_PATH]" >>/dev/stderr
   exit 255
 fi
 # Ensure an absolute path to avoid dependency on the working directory
 # of script execution.
-export AVALANCHEGO_PATH="$(realpath ${AVALANCHEGO_PATH})"
+export ODYSSEYGO_PATH="$(realpath ${ODYSSEYGO_PATH})"
 
 # Provide visual separation between testing and setup/teardown
 function print_separator {

@@ -890,7 +890,7 @@ func TestSender_Bootstrap_Responses(t *testing.T) {
 		ctx               = snow.DefaultContextTest()
 		summaryIDs        = []ids.ID{ids.GenerateTestID(), ids.GenerateTestID()}
 		summary           = []byte{1, 2, 3}
-		engineType        = p2p.EngineType_ENGINE_TYPE_AVALANCHE
+		engineType        = p2p.EngineType_ENGINE_TYPE_ODYSSEY
 	)
 	ctx.ChainID = chainID
 	ctx.SubnetID = subnetID

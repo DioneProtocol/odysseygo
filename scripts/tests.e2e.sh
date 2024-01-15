@@ -32,15 +32,15 @@ if [[ -n "${E2E_USE_PERSISTENT_NETWORK}" && -n "${TESTNETCTL_NETWORK_DIR}" ]]; t
   echo "running e2e tests against a persistent network configured at ${TESTNETCTL_NETWORK_DIR}"
   E2E_ARGS="--use-persistent-network"
 else
-  AVALANCHEGO_PATH="${1-${AVALANCHEGO_PATH:-}}"
-  if [[ -z "${AVALANCHEGO_PATH}" ]]; then
-    echo "Missing AVALANCHEGO_PATH argument!"
-    echo "Usage: ${0} [AVALANCHEGO_PATH]" >>/dev/stderr
+  ODYSSEYGO_PATH="${1-${ODYSSEYGO_PATH:-}}"
+  if [[ -z "${ODYSSEYGO_PATH}" ]]; then
+    echo "Missing ODYSSEYGO_PATH argument!"
+    echo "Usage: ${0} [ODYSSEYGO_PATH]" >>/dev/stderr
     exit 255
   fi
-  echo "running e2e tests against an ephemeral local cluster deployed with ${AVALANCHEGO_PATH}"
-  AVALANCHEGO_PATH="$(realpath ${AVALANCHEGO_PATH})"
-  E2E_ARGS="--odysseygo-path=${AVALANCHEGO_PATH}"
+  echo "running e2e tests against an ephemeral local cluster deployed with ${ODYSSEYGO_PATH}"
+  ODYSSEYGO_PATH="$(realpath ${ODYSSEYGO_PATH})"
+  E2E_ARGS="--odysseygo-path=${ODYSSEYGO_PATH}"
 fi
 
 #################################
