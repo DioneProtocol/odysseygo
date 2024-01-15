@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package x
+package a
 
 import (
 	stdcontext "context"
@@ -12,7 +12,7 @@ import (
 
 var _ Backend = (*backend)(nil)
 
-// Backend defines the full interface required to support an X-chain wallet.
+// Backend defines the full interface required to support an A-chain wallet.
 type Backend interface {
 	common.ChainUTXOs
 	BuilderBackend

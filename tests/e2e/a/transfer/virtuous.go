@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2023, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// Implements X-chain transfer tests.
+// Implements A-chain transfer tests.
 package transfer
 
 import (
@@ -35,12 +35,12 @@ const (
 
 // This test requires that the network not have ongoing blocks and
 // cannot reliably be run in parallel.
-var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx DIONE]", func() {
+var _ = e2e.DescribeAChainSerial("[Virtuous Transfer Tx DIONE]", func() {
 	ginkgo.It("can issue a virtuous transfer tx for DIONE asset",
 		// use this for filtering tests by labels
 		// ref. https://onsi.github.io/ginkgo/#spec-labels
 		ginkgo.Label(
-			"x",
+			"a",
 			"virtuous-transfer-tx-dione",
 		),
 		func() {
@@ -88,7 +88,7 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx DIONE]", func() {
 
 				keychain := secp256k1fx.NewKeychain(testKeys...)
 				baseWallet := e2e.Env.NewWallet(keychain, e2e.Env.GetRandomNodeURI())
-				dioneAssetID := baseWallet.X().DIONEAssetID()
+				dioneAssetID := baseWallet.A().DIONEAssetID()
 
 				wallets := make([]primary.Wallet, len(testKeys))
 				shortAddrs := make([]ids.ShortID, len(testKeys))
@@ -111,7 +111,7 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx DIONE]", func() {
 
 				testBalances := make([]uint64, 0)
 				for i, w := range wallets {
-					balances, err := w.X().Builder().GetFTBalance()
+					balances, err := w.A().Builder().GetFTBalance()
 					gomega.Expect(err).Should(gomega.BeNil())
 
 					bal := balances[dioneAssetID]
@@ -152,12 +152,12 @@ var _ = e2e.DescribeXChainSerial("[Virtuous Transfer Tx DIONE]", func() {
 
 				amountToTransfer := senderOrigBal / 10
 
-				senderNewBal := senderOrigBal - amountToTransfer - baseWallet.X().BaseTxFee()
+				senderNewBal := senderOrigBal - amountToTransfer - baseWallet.A().BaseTxFee()
 				receiverNewBal := receiverOrigBal + amountToTransfer
 
-				ginkgo.By("X-Chain transfer with wrong amount must fail", func() {
+				ginkgo.By("A-Chain transfer with wrong amount must fail", func() {
 					ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-					_, err := wallets[fromIdx].X().IssueBaseTx(
+					_, err := wallets[fromIdx].A().IssueBaseTx(
 						[]*dione.TransferableOutput{{
 							Asset: dione.Asset{
 								ID: dioneAssetID,
@@ -200,7 +200,7 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 				)
 
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-				tx, err := wallets[fromIdx].X().IssueBaseTx(
+				tx, err := wallets[fromIdx].A().IssueBaseTx(
 					[]*dione.TransferableOutput{{
 						Asset: dione.Asset{
 							ID: dioneAssetID,
@@ -218,12 +218,12 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 				cancel()
 				gomega.Expect(err).Should(gomega.BeNil())
 
-				balances, err := wallets[fromIdx].X().Builder().GetFTBalance()
+				balances, err := wallets[fromIdx].A().Builder().GetFTBalance()
 				gomega.Expect(err).Should(gomega.BeNil())
 				senderCurBalX := balances[dioneAssetID]
 				tests.Outf("{{green}}first wallet balance:{{/}}  %d\n", senderCurBalX)
 
-				balances, err = wallets[toIdx].X().Builder().GetFTBalance()
+				balances, err = wallets[toIdx].A().Builder().GetFTBalance()
 				gomega.Expect(err).Should(gomega.BeNil())
 				receiverCurBalX := balances[dioneAssetID]
 				tests.Outf("{{green}}second wallet balance:{{/}} %d\n", receiverCurBalX)
@@ -233,7 +233,7 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 
 				txID := tx.ID()
 				for _, u := range rpcEps {
-					xc := alpha.NewClient(u, "X")
+					xc := alpha.NewClient(u, "A")
 					ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 					status, err := xc.ConfirmTx(ctx, txID, 2*time.Second)
 					cancel()
@@ -242,7 +242,7 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 				}
 
 				for _, u := range rpcEps {
-					xc := alpha.NewClient(u, "X")
+					xc := alpha.NewClient(u, "A")
 					ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 					status, err := xc.ConfirmTx(ctx, txID, 2*time.Second)
 					cancel()
@@ -254,11 +254,11 @@ RECEIVER  NEW BALANCE (AFTER) : %21d DIONE
 
 					prev := metricsBeforeTx[u]
 
-					// +0 since X-chain tx must have been processed and accepted
+					// +0 since A-chain tx must have been processed and accepted
 					// by now
 					gomega.Expect(mm[metricBlksProcessing]).Should(gomega.Equal(prev[metricBlksProcessing]))
 
-					// +1 since X-chain tx must have been accepted by now
+					// +1 since A-chain tx must have been accepted by now
 					gomega.Expect(mm[metricBlksAccepted]).Should(gomega.Equal(prev[metricBlksAccepted] + 1))
 
 					metricsBeforeTx[u] = mm

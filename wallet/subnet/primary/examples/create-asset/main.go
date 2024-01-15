@@ -37,8 +37,8 @@ func main() {
 	}
 	log.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the X-chain wallet
-	xWallet := wallet.X()
+	// Get the A-chain wallet
+	aWallet := wallet.A()
 
 	// Pull out useful constants to use when issuing transactions.
 	owner := &secp256k1fx.OutputOwners{
@@ -49,7 +49,7 @@ func main() {
 	}
 
 	createAssetStartTime := time.Now()
-	createAssetTx, err := xWallet.IssueCreateAssetTx(
+	createAssetTx, err := aWallet.IssueCreateAssetTx(
 		"HI",
 		"HI",
 		1,

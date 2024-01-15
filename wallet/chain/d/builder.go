@@ -30,11 +30,11 @@ var (
 	errInsufficientFunds = errors.New("insufficient funds")
 
 	// dioneConversionRate is the conversion rate between the smallest
-	// denomination on the X-Chain and O-chain, 1 nDIONE, and the smallest
+	// denomination on the A-Chain and O-chain, 1 nDIONE, and the smallest
 	// denomination on the D-Chain 1 wei. Where 1 nDIONE = 1 gWei.
 	//
 	// This is only required for DIONE because the denomination of 1 DIONE is 9
-	// decimal places on the X and O chains, but is 18 decimal places within the
+	// decimal places on the A and O chains, but is 18 decimal places within the
 	// DELTA.
 	dioneConversionRate = big.NewInt(dioneConversionRateInt)
 )

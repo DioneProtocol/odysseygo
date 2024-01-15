@@ -113,7 +113,7 @@ var (
 	testSubnet1            *txs.Tx
 	testSubnet1ControlKeys = keys[0:3]
 
-	xChainID = ids.Empty.Prefix(0)
+	aChainID = ids.Empty.Prefix(0)
 	dChainID = ids.Empty.Prefix(1)
 
 	// Used to create and use keys.
@@ -131,15 +131,15 @@ func defaultContext(t *testing.T) *snow.Context {
 
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = constants.UnitTestID
-	ctx.XChainID = xChainID
+	ctx.AChainID = aChainID
 	ctx.DChainID = dChainID
 	ctx.DIONEAssetID = dioneAssetID
 	aliaser := ids.NewAliaser()
 
 	require.NoError(aliaser.Alias(constants.OmegaChainID, "O"))
 	require.NoError(aliaser.Alias(constants.OmegaChainID, constants.OmegaChainID.String()))
-	require.NoError(aliaser.Alias(xChainID, "X"))
-	require.NoError(aliaser.Alias(xChainID, xChainID.String()))
+	require.NoError(aliaser.Alias(aChainID, "A"))
+	require.NoError(aliaser.Alias(aChainID, aChainID.String()))
 	require.NoError(aliaser.Alias(dChainID, "C"))
 	require.NoError(aliaser.Alias(dChainID, dChainID.String()))
 
@@ -149,7 +149,7 @@ func defaultContext(t *testing.T) *snow.Context {
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
 				constants.OmegaChainID: constants.PrimaryNetworkID,
-				xChainID:               constants.PrimaryNetworkID,
+				aChainID:               constants.PrimaryNetworkID,
 				dChainID:               constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
@@ -1181,10 +1181,10 @@ func TestAtomicImport(t *testing.T) {
 	m := atomic.NewMemory(prefixdb.New([]byte{5}, baseDB))
 
 	mutableSharedMemory.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.AChainID)
 
 	_, err := vm.txBuilder.NewImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.AChainID,
 		recipientKey.PublicKey().Address(),
 		[]*secp256k1.PrivateKey{keys[0]},
 		ids.ShortEmpty, // change addr
@@ -1223,7 +1223,7 @@ func TestAtomicImport(t *testing.T) {
 	}))
 
 	tx, err := vm.txBuilder.NewImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.AChainID,
 		recipientKey.PublicKey().Address(),
 		[]*secp256k1.PrivateKey{recipientKey},
 		ids.ShortEmpty, // change addr
@@ -1244,7 +1244,7 @@ func TestAtomicImport(t *testing.T) {
 	require.Equal(status.Committed, txStatus)
 
 	inputID = utxoID.InputID()
-	_, err = vm.ctx.SharedMemory.Get(vm.ctx.XChainID, [][]byte{inputID[:]})
+	_, err = vm.ctx.SharedMemory.Get(vm.ctx.AChainID, [][]byte{inputID[:]})
 	require.ErrorIs(err, database.ErrNotFound)
 }
 
@@ -1263,7 +1263,7 @@ func TestOptimisticAtomicImport(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -1372,7 +1372,7 @@ func TestRestartFullyAccepted(t *testing.T) {
 			NetworkID:    firstVM.ctx.NetworkID,
 			BlockchainID: firstVM.ctx.ChainID,
 		}},
-		SourceChain: firstVM.ctx.XChainID,
+		SourceChain: firstVM.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -1508,7 +1508,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -1819,7 +1819,7 @@ func TestUnverifiedParent(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -1855,7 +1855,7 @@ func TestUnverifiedParent(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.AChainID,
 		ImportedInputs: []*dione.TransferableInput{{
 			UTXOID: dione.UTXOID{
 				TxID:        ids.Empty.Prefix(2),

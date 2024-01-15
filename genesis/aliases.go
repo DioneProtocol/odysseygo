@@ -40,12 +40,12 @@ func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, err
 		switch uChain.VMID {
 		case constants.AlphaID:
 			apiAliases[endpoint] = []string{
-				"X",
+				"A",
 				"alpha",
-				path.Join(constants.ChainAliasPrefix, "X"),
+				path.Join(constants.ChainAliasPrefix, "A"),
 				path.Join(constants.ChainAliasPrefix, "alpha"),
 			}
-			chainAliases[chainID] = GetXChainAliases()
+			chainAliases[chainID] = GetAChainAliases()
 		case constants.DeltaID:
 			apiAliases[endpoint] = []string{
 				"D",
@@ -63,8 +63,8 @@ func GetDChainAliases() []string {
 	return []string{"D", "delta"}
 }
 
-func GetXChainAliases() []string {
-	return []string{"X", "alpha"}
+func GetAChainAliases() []string {
+	return []string{"A", "alpha"}
 }
 
 func GetVMAliases() map[ids.ID][]string {

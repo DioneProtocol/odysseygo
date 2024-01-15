@@ -38,12 +38,12 @@ func newContext(t testing.TB) *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = constants.UnitTestID
 	ctx.ChainID = ids.GenerateTestID()
-	ctx.XChainID = ctx.ChainID
+	ctx.AChainID = ctx.ChainID
 	ctx.DChainID = ids.GenerateTestID()
 
 	aliaser := ctx.BCLookup.(ids.Aliaser)
-	require.NoError(aliaser.Alias(ctx.XChainID, "X"))
-	require.NoError(aliaser.Alias(ctx.XChainID, ctx.XChainID.String()))
+	require.NoError(aliaser.Alias(ctx.AChainID, "A"))
+	require.NoError(aliaser.Alias(ctx.AChainID, ctx.AChainID.String()))
 	require.NoError(aliaser.Alias(constants.OmegaChainID, "O"))
 	require.NoError(aliaser.Alias(constants.OmegaChainID, constants.OmegaChainID.String()))
 	return ctx
@@ -538,7 +538,7 @@ func TestSyntacticVerifierCreateAssetTx(t *testing.T) {
 			name: "name too long",
 			txFunc: func() *txs.Tx {
 				tx := tx
-				tx.Name = strings.Repeat("X", maxNameLen+1)
+				tx.Name = strings.Repeat("A", maxNameLen+1)
 				return &txs.Tx{
 					Unsigned: &tx,
 					Creds:    creds,
@@ -562,7 +562,7 @@ func TestSyntacticVerifierCreateAssetTx(t *testing.T) {
 			name: "symbol too long",
 			txFunc: func() *txs.Tx {
 				tx := tx
-				tx.Symbol = strings.Repeat("X", maxSymbolLen+1)
+				tx.Symbol = strings.Repeat("A", maxSymbolLen+1)
 				return &txs.Tx{
 					Unsigned: &tx,
 					Creds:    creds,

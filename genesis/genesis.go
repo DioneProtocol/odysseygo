@@ -29,7 +29,7 @@ import (
 
 const (
 	defaultEncoding    = formatting.Hex
-	configChainIDAlias = "X"
+	configChainIDAlias = "A"
 )
 
 var (
@@ -287,15 +287,15 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 			InitialState: map[string][]interface{}{},
 		}
 		memoBytes := []byte{}
-		xAllocations := []Allocation(nil)
+		aAllocations := []Allocation(nil)
 		for _, allocation := range config.Allocations {
 			if allocation.InitialAmount > 0 {
-				xAllocations = append(xAllocations, allocation)
+				aAllocations = append(aAllocations, allocation)
 			}
 		}
-		utils.Sort(xAllocations)
+		utils.Sort(aAllocations)
 
-		for _, allocation := range xAllocations {
+		for _, allocation := range aAllocations {
 			addr, err := address.FormatBech32(hrp, allocation.DIONEAddr.Bytes())
 			if err != nil {
 				return nil, ids.ID{}, err
@@ -450,7 +450,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				nftfx.ID,
 				propertyfx.ID,
 			},
-			Name: "X-Chain",
+			Name: "A-Chain",
 		},
 		{
 			GenesisData: genesisStr,
@@ -489,7 +489,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 	currentNodeAmount := uint64(0)
 	for _, allocation := range allocations {
 		currentAllocation := allocation
-		// Already added to the X-chain
+		// Already added to the A-chain
 		currentAllocation.InitialAmount = 0
 		// Going to be added until the correct amount is reached
 		currentAllocation.UnlockSchedule = nil
@@ -512,7 +512,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 				currentNodeAmount = 0
 
 				currentAllocation = allocation
-				// Already added to the X-chain
+				// Already added to the A-chain
 				currentAllocation.InitialAmount = 0
 				// Going to be added until the correct amount is reached
 				currentAllocation.UnlockSchedule = nil
