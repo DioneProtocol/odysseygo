@@ -148,8 +148,8 @@ HOME
             │   │   └── ...
             │   └── process.json                         // Node process details (PID, API URI, staking address)
             ├── chains
-            │   └── C
-            │       └── config.json                      // C-Chain config for all nodes
+            │   └── D
+            │       └── config.json                      // D-Chain config for all nodes
             ├── defaults.json                            // Default flags and configuration for network
             ├── genesis.json                             // Genesis for all nodes
             ├── network.env                              // Sets network dir env to simplify use of network
@@ -175,15 +175,15 @@ content will be generated with reasonable defaults if not
 supplied. Each node in the network can override the default by setting
 an explicit value for `--genesis-file` or `--genesis-file-content`.
 
-### C-Chain config
+### D-Chain config
 
-The C-Chain config for a local network is stored at
-`[network-dir]/chains/C/config.json` and referenced by default by all
-nodes in the network. The C-Chain config will be generated with
+The D-Chain config for a local network is stored at
+`[network-dir]/chains/D/config.json` and referenced by default by all
+nodes in the network. The D-Chain config will be generated with
 reasonable defaults if not supplied. Each node in the network can
 override the default by setting an explicit value for
-`--chain-config-dir` and ensuring the C-Chain config file exists at
-`[chain-config-dir]/C/config.json`.
+`--chain-config-dir` and ensuring the D-Chain config file exists at
+`[chain-config-dir]/D/config.json`.
 
 TODO(marun) Enable configuration of X-Chain and O-Chain.
 

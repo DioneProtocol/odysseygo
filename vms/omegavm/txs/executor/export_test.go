@@ -38,8 +38,8 @@ func TestNewExportTx(t *testing.T) {
 			timestamp:          defaultValidateStartTime,
 		},
 		{
-			description:        "O->C export",
-			destinationChainID: cChainID,
+			description:        "O->D export",
+			destinationChainID: dChainID,
 			sourceKeys:         []*secp256k1.PrivateKey{sourceKey},
 			timestamp:          env.config.ApricotPhase5Time,
 		},

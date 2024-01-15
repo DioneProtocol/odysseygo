@@ -38,7 +38,7 @@ type Context struct {
 	PublicKey *bls.PublicKey
 
 	XChainID     ids.ID
-	CChainID     ids.ID
+	DChainID     ids.ID
 	DIONEAssetID ids.ID
 
 	Log          logging.Logger

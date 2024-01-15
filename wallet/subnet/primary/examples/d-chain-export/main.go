@@ -8,13 +8,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/DioneProtocol/coreth/plugin/delta"
-
 	"github.com/DioneProtocol/odysseygo/genesis"
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/units"
-	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
 	"github.com/DioneProtocol/odysseygo/wallet/subnet/primary"
 )
@@ -24,7 +21,6 @@ func main() {
 	uri := primary.LocalAPIURI
 	kc := secp256k1fx.NewKeychain(key)
 	dioneAddr := key.Address()
-	ethAddr := delta.PublicKeyToEthAddress(key.PublicKey())
 
 	ctx := context.Background()
 
@@ -43,11 +39,10 @@ func main() {
 
 	// Get the O-chain wallet
 	oWallet := wallet.O()
-	cWallet := wallet.C()
+	dWallet := wallet.D()
 
 	// Pull out useful constants to use when issuing transactions.
-	cChainID := cWallet.BlockchainID()
-	dioneAssetID := cWallet.DIONEAssetID()
+	dChainID := dWallet.BlockchainID()
 	owner := secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{
@@ -56,22 +51,22 @@ func main() {
 	}
 
 	exportStartTime := time.Now()
-	exportTx, err := oWallet.IssueExportTx(cChainID, []*dione.TransferableOutput{{
-		Asset: dione.Asset{ID: dioneAssetID},
-		Out: &secp256k1fx.TransferOutput{
+	exportTx, err := dWallet.IssueExportTx(
+		constants.OmegaChainID,
+		[]*secp256k1fx.TransferOutput{{
 			Amt:          units.Dione,
 			OutputOwners: owner,
-		},
-	}})
+		}},
+	)
 	if err != nil {
 		log.Fatalf("failed to issue export transaction: %s\n", err)
 	}
 	log.Printf("issued export %s in %s\n", exportTx.ID(), time.Since(exportStartTime))
 
 	importStartTime := time.Now()
-	importTx, err := cWallet.IssueImportTx(constants.OmegaChainID, ethAddr)
+	importTx, err := oWallet.IssueImportTx(dChainID, &owner)
 	if err != nil {
 		log.Fatalf("failed to issue import transaction: %s\n", err)
 	}
-	log.Printf("issued import %s to %s in %s\n", importTx.ID(), ethAddr.Hex(), time.Since(importStartTime))
+	log.Printf("issued import %s in %s\n", importTx.ID(), time.Since(importStartTime))
 }

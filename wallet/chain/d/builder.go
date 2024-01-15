@@ -31,7 +31,7 @@ var (
 
 	// dioneConversionRate is the conversion rate between the smallest
 	// denomination on the X-Chain and O-chain, 1 nDIONE, and the smallest
-	// denomination on the C-Chain 1 wei. Where 1 nDIONE = 1 gWei.
+	// denomination on the D-Chain 1 wei. Where 1 nDIONE = 1 gWei.
 	//
 	// This is only required for DIONE because the denomination of 1 DIONE is 9
 	// decimal places on the X and O chains, but is 18 decimal places within the
@@ -39,7 +39,7 @@ var (
 	dioneConversionRate = big.NewInt(dioneConversionRateInt)
 )
 
-// Builder provides a convenient interface for building unsigned C-chain
+// Builder provides a convenient interface for building unsigned D-chain
 // transactions.
 type Builder interface {
 	// GetBalance calculates the amount of DIONE that this builder has control
@@ -85,7 +85,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// C-chain transactions.
+// D-chain transactions.
 type BuilderBackend interface {
 	Context
 

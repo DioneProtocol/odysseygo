@@ -269,8 +269,8 @@ func (ln *LocalNetwork) PopulateLocalNetworkConfig(networkID uint32, nodeCount i
 		return err
 	}
 
-	if ln.CChainConfig == nil {
-		ln.CChainConfig = LocalCChainConfig()
+	if ln.DChainConfig == nil {
+		ln.DChainConfig = LocalDChainConfig()
 	}
 
 	// Default flags need to be set in advance of node config
@@ -472,26 +472,26 @@ func (ln *LocalNetwork) GetChainConfigDir() string {
 	return filepath.Join(ln.Dir, "chains")
 }
 
-func (ln *LocalNetwork) GetCChainConfigPath() string {
+func (ln *LocalNetwork) GetDChainConfigPath() string {
 	return filepath.Join(ln.GetChainConfigDir(), "C", "config.json")
 }
 
-func (ln *LocalNetwork) ReadCChainConfig() error {
-	chainConfig, err := testnet.ReadFlagsMap(ln.GetCChainConfigPath(), "C-Chain config")
+func (ln *LocalNetwork) ReadDChainConfig() error {
+	chainConfig, err := testnet.ReadFlagsMap(ln.GetDChainConfigPath(), "D-Chain config")
 	if err != nil {
 		return err
 	}
-	ln.CChainConfig = *chainConfig
+	ln.DChainConfig = *chainConfig
 	return nil
 }
 
-func (ln *LocalNetwork) WriteCChainConfig() error {
-	path := ln.GetCChainConfigPath()
+func (ln *LocalNetwork) WriteDChainConfig() error {
+	path := ln.GetDChainConfigPath()
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, perms.ReadWriteExecute); err != nil {
-		return fmt.Errorf("failed to create C-Chain config dir: %w", err)
+		return fmt.Errorf("failed to create D-Chain config dir: %w", err)
 	}
-	return ln.CChainConfig.Write(path, "C-Chain config")
+	return ln.DChainConfig.Write(path, "D-Chain config")
 }
 
 // Used to marshal/unmarshal persistent local network defaults.
@@ -569,7 +569,7 @@ func (ln *LocalNetwork) WriteAll() error {
 	if err := ln.WriteGenesis(); err != nil {
 		return err
 	}
-	if err := ln.WriteCChainConfig(); err != nil {
+	if err := ln.WriteDChainConfig(); err != nil {
 		return err
 	}
 	if err := ln.WriteDefaults(); err != nil {
@@ -586,7 +586,7 @@ func (ln *LocalNetwork) ReadConfig() error {
 	if err := ln.ReadGenesis(); err != nil {
 		return err
 	}
-	if err := ln.ReadCChainConfig(); err != nil {
+	if err := ln.ReadDChainConfig(); err != nil {
 		return err
 	}
 	return ln.ReadDefaults()

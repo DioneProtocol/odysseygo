@@ -23,7 +23,7 @@ var _ Wallet = (*wallet)(nil)
 type Wallet interface {
 	O() o.Wallet
 	X() x.Wallet
-	C() c.Wallet
+	D() c.Wallet
 }
 
 type wallet struct {
@@ -40,7 +40,7 @@ func (w *wallet) X() x.Wallet {
 	return w.x
 }
 
-func (w *wallet) C() c.Wallet {
+func (w *wallet) D() c.Wallet {
 	return w.c
 }
 
@@ -58,7 +58,7 @@ func NewWalletWithOptions(w Wallet, options ...common.Option) Wallet {
 	return NewWallet(
 		o.NewWalletWithOptions(w.O(), options...),
 		x.NewWalletWithOptions(w.X(), options...),
-		c.NewWalletWithOptions(w.C(), options...),
+		c.NewWalletWithOptions(w.D(), options...),
 	)
 }
 
@@ -127,15 +127,15 @@ func MakeWallet(ctx context.Context, config *WalletConfig) (Wallet, error) {
 	xBuilder := x.NewBuilder(dioneAddrs, xBackend)
 	xSigner := x.NewSigner(config.DIONEKeychain, xBackend)
 
-	cChainID := dioneState.CCTX.BlockchainID()
-	cUTXOs := NewChainUTXOs(cChainID, dioneState.UTXOs)
-	cBackend := c.NewBackend(dioneState.CCTX, cUTXOs, ethState.Accounts)
-	cBuilder := c.NewBuilder(dioneAddrs, ethAddrs, cBackend)
-	cSigner := c.NewSigner(config.DIONEKeychain, config.EthKeychain, cBackend)
+	dChainID := dioneState.DCTX.BlockchainID()
+	dUTXOs := NewChainUTXOs(dChainID, dioneState.UTXOs)
+	dBackend := c.NewBackend(dioneState.DCTX, dUTXOs, ethState.Accounts)
+	dBuilder := c.NewBuilder(dioneAddrs, ethAddrs, dBackend)
+	dSigner := c.NewSigner(config.DIONEKeychain, config.EthKeychain, dBackend)
 
 	return NewWallet(
 		o.NewWallet(oBuilder, oSigner, dioneState.OClient, oBackend),
 		x.NewWallet(xBuilder, xSigner, dioneState.XClient, xBackend),
-		c.NewWallet(cBuilder, cSigner, dioneState.CClient, ethState.Client, cBackend),
+		c.NewWallet(dBuilder, dSigner, dioneState.DClient, ethState.Client, dBackend),
 	), nil
 }
