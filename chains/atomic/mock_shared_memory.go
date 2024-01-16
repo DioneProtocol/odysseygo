@@ -72,6 +72,21 @@ func (mr *MockSharedMemoryMockRecorder) Get(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockSharedMemory)(nil).Get), arg0, arg1)
 }
 
+// GetOutbound mocks base method.
+func (m *MockSharedMemory) GetOutbound(arg0 ids.ID, arg1 [][]byte) ([][]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOutbound", arg0, arg1)
+	ret0, _ := ret[0].([][]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOutbound indicates an expected call of GetOutbound.
+func (mr *MockSharedMemoryMockRecorder) GetOutbound(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOutbound", reflect.TypeOf((*MockSharedMemory)(nil).GetOutbound), arg0, arg1)
+}
+
 // Indexed mocks base method.
 func (m *MockSharedMemory) Indexed(arg0 ids.ID, arg1 [][]byte, arg2, arg3 []byte, arg4 int) ([][]byte, []byte, []byte, error) {
 	m.ctrl.T.Helper()

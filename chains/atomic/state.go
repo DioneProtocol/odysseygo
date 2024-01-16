@@ -92,7 +92,35 @@ func (s *state) SetValue(e *Element) error {
 		// An unexpected error occurred, so we should propagate that error
 		return err
 	}
+	return s.setValueUnchecked(e)
+}
 
+// SetValueMightDuplicate places the element [e] into the state and maps each of the traits of
+// the element to its key, so that the element can be looked up by any of its
+// traits.
+//
+// This allows to update the value of an existing key
+func (s *state) SetValueMightDuplicate(e *Element) error {
+	value, err := s.loadValue(e.Key)
+	if err == nil {
+		// The key was already registered with the state.
+
+		if !value.Present {
+			// This was previously optimistically deleted from the database, so
+			// it should be immediately removed.
+			return s.valueDB.Delete(e.Key)
+		}
+	} else if err != database.ErrNotFound {
+		// An unexpected error occurred, so we should propagate that error
+		return err
+	}
+	return s.setValueUnchecked(e)
+}
+
+// setValueUnchecked places the element [e] into the state and maps each of the traits of
+// the element to its key, so that the element can be looked up by any of its
+// traits.
+func (s *state) setValueUnchecked(e *Element) error {
 	for _, trait := range e.Traits {
 		traitDB := prefixdb.New(trait, s.indexDB)
 		traitList := linkeddb.NewDefault(traitDB)
