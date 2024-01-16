@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"go.uber.org/zap"
@@ -25,6 +26,8 @@ const SyncBound = 10 * time.Second
 
 var (
 	_ snowman.Block = (*Block)(nil)
+
+	feeKey = []byte("fee")
 
 	ErrUnexpectedMerkleRoot        = errors.New("unexpected merkle root")
 	ErrTimestampBeyondSyncBound    = errors.New("proposed timestamp is too far in the future relative to local time")
@@ -185,6 +188,39 @@ func (b *Block) Verify(context.Context) error {
 
 			chainRequests.PutRequests = append(chainRequests.PutRequests, txRequests.PutRequests...)
 			chainRequests.RemoveRequests = append(chainRequests.RemoveRequests, txRequests.RemoveRequests...)
+		}
+	}
+
+	// TODO: transfer accumulated fees periodically
+	accumulatedFee := new(big.Int).Add(b.manager.state.GetAccumulatedFee(), stateDiff.GetAccumulatedFee())
+	if accumulatedFee.Sign() > 0 {
+		// Send atomicRequests to the primary chain
+		primaryChainId := ids.Empty
+		chainRequests, exists := blockState.atomicRequests[primaryChainId]
+
+		var value *big.Int
+		values, err := b.manager.backend.Ctx.SharedMemory.GetOutbound(primaryChainId, [][]byte{feeKey})
+		if err == database.ErrNotFound {
+			value = big.NewInt(0)
+		} else if err != nil {
+			return err
+		} else {
+			value = new(big.Int).SetBytes(values[0])
+		}
+
+		value.Add(value, accumulatedFee)
+		stateDiff.SubAccumulatedFee(accumulatedFee)
+		feeSyncElement := atomic.Element{
+			Key:              feeKey,
+			Value:            value.Bytes(),
+			AllowDuplication: true,
+		}
+		if !exists {
+			blockState.atomicRequests[primaryChainId] = &atomic.Requests{
+				PutRequests: []*atomic.Element{&feeSyncElement},
+			}
+		} else {
+			chainRequests.PutRequests = append(chainRequests.PutRequests, &feeSyncElement)
 		}
 	}
 

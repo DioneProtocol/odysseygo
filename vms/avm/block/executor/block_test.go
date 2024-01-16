@@ -6,6 +6,7 @@ package executor
 import (
 	"context"
 	"errors"
+	"math/big"
 	"testing"
 	"time"
 
@@ -485,9 +486,13 @@ func TestBlockVerify(t *testing.T) {
 				mockParentState.EXPECT().GetLastAccepted().Return(parentID)
 				mockParentState.EXPECT().GetTimestamp().Return(blockTimestamp)
 
+				mockState := states.NewMockState(ctrl)
+				mockState.EXPECT().GetAccumulatedFee().Return(big.NewInt(0))
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
+						state: mockState,
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								AVAXAssetID: ids.ID{},
@@ -540,9 +545,14 @@ func TestBlockVerify(t *testing.T) {
 
 				mockMempool := mempool.NewMockMempool(ctrl)
 				mockMempool.EXPECT().Remove([]*txs.Tx{tx})
+
+				mockState := states.NewMockState(ctrl)
+				mockState.EXPECT().GetAccumulatedFee().Return(big.NewInt(0))
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
+						state:   mockState,
 						mempool: mockMempool,
 						metrics: metrics.NewMockMetrics(ctrl),
 						backend: &executor.Backend{

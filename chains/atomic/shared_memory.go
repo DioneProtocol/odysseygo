@@ -20,9 +20,10 @@ type Requests struct {
 }
 
 type Element struct {
-	Key    []byte   `serialize:"true"`
-	Value  []byte   `serialize:"true"`
-	Traits [][]byte `serialize:"true"`
+	Key              []byte   `serialize:"true"`
+	Value            []byte   `serialize:"true"`
+	Traits           [][]byte `serialize:"true"`
+	AllowDuplication bool     `serialize:"true"`
 }
 
 type SharedMemory interface {
@@ -32,6 +33,12 @@ type SharedMemory interface {
 	// Invariant: Get guarantees that the resulting values array is the same
 	//            length as keys.
 	Get(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
+	// Get fetches the values corresponding to [keys] that have been sent from
+	// thisChainID to [peerChainID]
+	//
+	// Invariant: Get guarantees that the resulting values array is the same
+	//            length as keys.
+	GetOutbound(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
 	// Indexed returns a paginated result of values that possess any of the
 	// given traits and were sent from [peerChainID].
 	Indexed(
@@ -71,6 +78,22 @@ func (sm *sharedMemory) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error)
 		valueDB: inbound.getValueDB(sm.thisChainID, peerChainID, db),
 	}
 
+	return sm.getCommon(&s, peerChainID, keys)
+}
+
+func (sm *sharedMemory) GetOutbound(peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
+	sharedID := sharedID(peerChainID, sm.thisChainID)
+	db := sm.m.GetSharedDatabase(sm.m.db, sharedID)
+	defer sm.m.ReleaseSharedDatabase(sharedID)
+
+	s := state{
+		valueDB: outbound.getValueDB(sm.thisChainID, peerChainID, db),
+	}
+
+	return sm.getCommon(&s, peerChainID, keys)
+}
+
+func (sm *sharedMemory) getCommon(s *state, peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
 	values := make([][]byte, len(keys))
 	for i, key := range keys {
 		elem, err := s.Value(key)
@@ -148,8 +171,14 @@ func (sm *sharedMemory) Apply(requests map[ids.ID]*Requests, batches ...database
 		// Add Put requests to the outbound database.
 		s.valueDB, s.indexDB = outbound.getValueAndIndexDB(sm.thisChainID, req.peerChainID, db)
 		for _, putRequest := range req.PutRequests {
-			if err := s.SetValue(putRequest); err != nil {
-				return err
+			if putRequest.AllowDuplication {
+				if err := s.SetValueMightDuplicate(putRequest); err != nil {
+					return err
+				}
+			} else {
+				if err := s.SetValue(putRequest); err != nil {
+					return err
+				}
 			}
 		}
 	}
