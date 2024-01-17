@@ -36,10 +36,6 @@ func (c *Client) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
 	return resp.Values, nil
 }
 
-func (c *Client) GetOutbound(peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
-	return c.Get(peerChainID, keys)
-}
-
 func (c *Client) Indexed(
 	peerChainID ids.ID,
 	traits [][]byte,

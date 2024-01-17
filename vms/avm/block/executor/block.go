@@ -17,6 +17,7 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
+	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/vms/avm/block"
 	"github.com/ava-labs/avalanchego/vms/avm/states"
 	"github.com/ava-labs/avalanchego/vms/avm/txs/executor"
@@ -195,32 +196,18 @@ func (b *Block) Verify(context.Context) error {
 	accumulatedFee := new(big.Int).Add(b.manager.state.GetAccumulatedFee(), stateDiff.GetAccumulatedFee())
 	if accumulatedFee.Sign() > 0 {
 		// Send atomicRequests to the primary chain
-		primaryChainId := ids.Empty
-		chainRequests, exists := blockState.atomicRequests[primaryChainId]
-
-		var value *big.Int
-		values, err := b.manager.backend.Ctx.SharedMemory.GetOutbound(primaryChainId, [][]byte{feeKey})
-		if err == database.ErrNotFound {
-			value = big.NewInt(0)
-		} else if err != nil {
-			return err
-		} else {
-			value = new(big.Int).SetBytes(values[0])
-		}
-
-		value.Add(value, accumulatedFee)
+		chainRequests, exists := blockState.atomicRequests[constants.PlatformChainID]
 		stateDiff.SubAccumulatedFee(accumulatedFee)
-		feeSyncElement := atomic.Element{
-			Key:              feeKey,
-			Value:            value.Bytes(),
-			AllowDuplication: true,
+		feeSyncElement := atomic.UpdateIntRequest{
+			Key:   feeKey,
+			Delta: accumulatedFee,
 		}
 		if !exists {
-			blockState.atomicRequests[primaryChainId] = &atomic.Requests{
-				PutRequests: []*atomic.Element{&feeSyncElement},
+			blockState.atomicRequests[constants.PlatformChainID] = &atomic.Requests{
+				UpdateIntRequests: []*atomic.UpdateIntRequest{&feeSyncElement},
 			}
 		} else {
-			chainRequests.PutRequests = append(chainRequests.PutRequests, &feeSyncElement)
+			chainRequests.UpdateIntRequests = append(chainRequests.UpdateIntRequests, &feeSyncElement)
 		}
 	}
 
