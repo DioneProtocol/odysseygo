@@ -178,7 +178,7 @@ message Handler {
 }
 
 message BuildBlockRequest {
-  optional uint64 p_chain_height = 1;
+  optional uint64 o_chain_height = 1;
 }
 
 // Note: The status of a freshly built block is assumed to be Processing.
@@ -228,7 +228,7 @@ message BlockVerifyRequest {
 
   // If set, the VM server casts the block to a [block.WithVerifyContext] and
   // calls [VerifyWithContext] instead of [Verify].
-  optional uint64 p_chain_height = 2;
+  optional uint64 o_chain_height = 2;
 }
 
 message BlockVerifyResponse {
