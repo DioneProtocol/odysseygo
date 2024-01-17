@@ -6,6 +6,7 @@ package atomic
 import (
 	"bytes"
 	"errors"
+	"math/big"
 
 	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/database/linkeddb"
@@ -95,26 +96,29 @@ func (s *state) SetValue(e *Element) error {
 	return s.setValueUnchecked(e)
 }
 
-// SetValueMightDuplicate places the element [e] into the state and maps each of the traits of
-// the element to its key, so that the element can be looked up by any of its
-// traits.
-//
-// This allows to update the value of an existing key
-func (s *state) SetValueMightDuplicate(e *Element) error {
-	value, err := s.loadValue(e.Key)
+// UpdateInt places the int value [i] into the state or updates existing one.
+func (s *state) UpdateInt(i *UpdateIntRequest) error {
+	var elemValue *big.Int
+	dbValue, err := s.loadValue(i.Key)
 	if err == nil {
 		// The key was already registered with the state.
-
-		if !value.Present {
+		if !dbValue.Present {
 			// This was previously optimistically deleted from the database, so
 			// it should be immediately removed.
-			return s.valueDB.Delete(e.Key)
+			return s.valueDB.Delete(i.Key)
 		}
-	} else if err != database.ErrNotFound {
-		// An unexpected error occurred, so we should propagate that error
+		elemValue = new(big.Int).SetBytes(dbValue.Value)
+	} else if err == database.ErrNotFound {
+		elemValue = big.NewInt(0)
+	} else {
 		return err
 	}
-	return s.setValueUnchecked(e)
+	elemValue.Add(elemValue, i.Delta)
+	elem := Element{
+		Key:   i.Key,
+		Value: elemValue.Bytes(),
+	}
+	return s.setValueUnchecked(&elem)
 }
 
 // setValueUnchecked places the element [e] into the state and maps each of the traits of

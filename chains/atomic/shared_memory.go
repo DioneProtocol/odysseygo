@@ -4,6 +4,8 @@
 package atomic
 
 import (
+	"math/big"
+
 	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/database/versiondb"
 	"github.com/ava-labs/avalanchego/ids"
@@ -13,17 +15,22 @@ import (
 var _ SharedMemory = (*sharedMemory)(nil)
 
 type Requests struct {
-	RemoveRequests [][]byte   `serialize:"true"`
-	PutRequests    []*Element `serialize:"true"`
+	RemoveRequests    [][]byte            `serialize:"true"`
+	PutRequests       []*Element          `serialize:"true"`
+	UpdateIntRequests []*UpdateIntRequest `serialize:"true"`
 
 	peerChainID ids.ID
 }
 
+type UpdateIntRequest struct {
+	Key   []byte   `serialize:"true"`
+	Delta *big.Int `serialize:"true"`
+}
+
 type Element struct {
-	Key              []byte   `serialize:"true"`
-	Value            []byte   `serialize:"true"`
-	Traits           [][]byte `serialize:"true"`
-	AllowDuplication bool     `serialize:"true"`
+	Key    []byte   `serialize:"true"`
+	Value  []byte   `serialize:"true"`
+	Traits [][]byte `serialize:"true"`
 }
 
 type SharedMemory interface {
@@ -33,12 +40,6 @@ type SharedMemory interface {
 	// Invariant: Get guarantees that the resulting values array is the same
 	//            length as keys.
 	Get(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
-	// Get fetches the values corresponding to [keys] that have been sent from
-	// thisChainID to [peerChainID]
-	//
-	// Invariant: Get guarantees that the resulting values array is the same
-	//            length as keys.
-	GetOutbound(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
 	// Indexed returns a paginated result of values that possess any of the
 	// given traits and were sent from [peerChainID].
 	Indexed(
@@ -76,18 +77,6 @@ func (sm *sharedMemory) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error)
 
 	s := state{
 		valueDB: inbound.getValueDB(sm.thisChainID, peerChainID, db),
-	}
-
-	return sm.getCommon(&s, peerChainID, keys)
-}
-
-func (sm *sharedMemory) GetOutbound(peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
-	sharedID := sharedID(peerChainID, sm.thisChainID)
-	db := sm.m.GetSharedDatabase(sm.m.db, sharedID)
-	defer sm.m.ReleaseSharedDatabase(sharedID)
-
-	s := state{
-		valueDB: outbound.getValueDB(sm.thisChainID, peerChainID, db),
 	}
 
 	return sm.getCommon(&s, peerChainID, keys)
@@ -171,14 +160,13 @@ func (sm *sharedMemory) Apply(requests map[ids.ID]*Requests, batches ...database
 		// Add Put requests to the outbound database.
 		s.valueDB, s.indexDB = outbound.getValueAndIndexDB(sm.thisChainID, req.peerChainID, db)
 		for _, putRequest := range req.PutRequests {
-			if putRequest.AllowDuplication {
-				if err := s.SetValueMightDuplicate(putRequest); err != nil {
-					return err
-				}
-			} else {
-				if err := s.SetValue(putRequest); err != nil {
-					return err
-				}
+			if err := s.SetValue(putRequest); err != nil {
+				return err
+			}
+		}
+		for _, updateRequest := range req.UpdateIntRequests {
+			if err := s.UpdateInt(updateRequest); err != nil {
+				return err
 			}
 		}
 	}
