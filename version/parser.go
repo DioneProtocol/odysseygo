@@ -39,7 +39,7 @@ func ParseApplication(s string) (*Application, error) {
 		return nil, fmt.Errorf("%w: %q", errMissingApplicationPrefix, s)
 	}
 
-	s = s[10:]
+	s = s[8:]
 	major, minor, patch, err := parseVersions(s)
 	if err != nil {
 		return nil, err
