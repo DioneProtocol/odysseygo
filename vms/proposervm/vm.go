@@ -738,9 +738,9 @@ func (vm *VM) getForkHeight() (uint64, error) {
 	case constants.OmegaChainID:
 		switch vm.ctx.NetworkID {
 		case constants.MainnetID:
-			return 805732, nil // https://subnets.dione.network/o-chain/block/805732
+			return 1, nil // https://subnets.dione.network/o-chain/block/805732
 		case constants.TestnetID:
-			return 47529, nil // https://subnets-test.dione.network/o-chain/block/47529
+			return 1, nil // https://subnets-test.dione.network/o-chain/block/47529
 		}
 	case mainnetAChainID:
 		return 1, nil // https://subnets.dione.network/a-chain/block/1
