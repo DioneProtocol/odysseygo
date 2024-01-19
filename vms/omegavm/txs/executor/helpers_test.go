@@ -298,7 +298,6 @@ func defaultConfig(postBanff, postCortina bool) config.Config {
 		CreateSubnetTxFee:      100 * defaultTxFee,
 		CreateBlockchainTxFee:  100 * defaultTxFee,
 		MinValidatorStake:      5 * units.MilliDione,
-		MaxValidatorStake:      500 * units.MilliDione,
 		MinDelegatorStake:      1 * units.MilliDione,
 		MinStakeDuration:       defaultMinStakingDuration,
 		MaxStakeDuration:       defaultMaxStakingDuration,

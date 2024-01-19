@@ -42,7 +42,6 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 		unsignedTransformTx = &txs.TransformSubnetTx{
 			AssetID:           customAssetID,
 			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
 			MinStakeDuration:  3,
 			MaxStakeDuration:  4,
 			MinDelegationFee:  5,
@@ -181,32 +180,6 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			expectedErr: ErrWeightTooSmall,
 		},
 		{
-			name: "weight too high",
-			backendF: func(*gomock.Controller) *Backend {
-				bootstrapped := &utils.Atomic[bool]{}
-				bootstrapped.Set(true)
-				return &Backend{
-					Ctx:          snow.DefaultContextTest(),
-					Bootstrapped: bootstrapped,
-				}
-			},
-			stateF: func(ctrl *gomock.Controller) state.Chain {
-				state := state.NewMockChain(ctrl)
-				state.EXPECT().GetTimestamp().Return(time.Unix(0, 0))
-				state.EXPECT().GetSubnetTransformation(subnetID).Return(&transformTx, nil)
-				return state
-			},
-			sTxF: func() *txs.Tx {
-				return &verifiedSignedTx
-			},
-			txF: func() *txs.AddPermissionlessValidatorTx {
-				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake + 1
-				return &tx
-			},
-			expectedErr: ErrWeightTooLarge,
-		},
-		{
 			name: "insufficient delegation fee",
 			backendF: func(*gomock.Controller) *Backend {
 				bootstrapped := &utils.Atomic[bool]{}
@@ -227,7 +200,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake
 				tx.DelegationShares = unsignedTransformTx.MinDelegationFee - 1
 				return &tx
 			},
@@ -254,7 +227,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake
 				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is 1 less than the minimum
 				tx.Validator.Start = 1
@@ -284,7 +257,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			},
 			txF: func() *txs.AddPermissionlessValidatorTx {
 				tx := verifiedTx // Note that this copies [verifiedTx]
-				tx.Validator.Wght = unsignedTransformTx.MaxValidatorStake
+				tx.Validator.Wght = unsignedTransformTx.MinValidatorStake
 				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is more than the maximum
 				tx.Validator.Start = 1
@@ -557,7 +530,6 @@ func TestGetValidatorRules(t *testing.T) {
 	var (
 		config = &config.Config{
 			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
 			MinStakeDuration:  time.Second,
 			MaxStakeDuration:  2 * time.Second,
 			MinDelegationFee:  1337,
@@ -583,7 +555,6 @@ func TestGetValidatorRules(t *testing.T) {
 			expectedRules: &addValidatorRules{
 				assetID:           dioneAssetID,
 				minValidatorStake: config.MinValidatorStake,
-				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  config.MinStakeDuration,
 				maxStakeDuration:  config.MaxStakeDuration,
 				minDelegationFee:  config.MinDelegationFee,
@@ -626,7 +597,6 @@ func TestGetValidatorRules(t *testing.T) {
 					Unsigned: &txs.TransformSubnetTx{
 						AssetID:           customAssetID,
 						MinValidatorStake: config.MinValidatorStake,
-						MaxValidatorStake: config.MaxValidatorStake,
 						MinStakeDuration:  1337,
 						MaxStakeDuration:  42,
 						MinDelegationFee:  config.MinDelegationFee,
@@ -638,7 +608,6 @@ func TestGetValidatorRules(t *testing.T) {
 			expectedRules: &addValidatorRules{
 				assetID:           customAssetID,
 				minValidatorStake: config.MinValidatorStake,
-				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  1337 * time.Second,
 				maxStakeDuration:  42 * time.Second,
 				minDelegationFee:  config.MinDelegationFee,
@@ -676,7 +645,6 @@ func TestGetDelegatorRules(t *testing.T) {
 	var (
 		config = &config.Config{
 			MinDelegatorStake: 1,
-			MaxValidatorStake: 2,
 			MinStakeDuration:  time.Second,
 			MaxStakeDuration:  2 * time.Second,
 		}
@@ -700,7 +668,6 @@ func TestGetDelegatorRules(t *testing.T) {
 			expectedRules: &addDelegatorRules{
 				assetID:                  dioneAssetID,
 				minDelegatorStake:        config.MinDelegatorStake,
-				maxValidatorStake:        config.MaxValidatorStake,
 				minStakeDuration:         config.MinStakeDuration,
 				maxStakeDuration:         config.MaxStakeDuration,
 				maxValidatorWeightFactor: MaxValidatorWeightFactor,
@@ -744,7 +711,6 @@ func TestGetDelegatorRules(t *testing.T) {
 						AssetID:                  customAssetID,
 						MinDelegatorStake:        config.MinDelegatorStake,
 						MinValidatorStake:        config.MinValidatorStake,
-						MaxValidatorStake:        config.MaxValidatorStake,
 						MinStakeDuration:         1337,
 						MaxStakeDuration:         42,
 						MinDelegationFee:         config.MinDelegationFee,
@@ -757,7 +723,6 @@ func TestGetDelegatorRules(t *testing.T) {
 			expectedRules: &addDelegatorRules{
 				assetID:                  customAssetID,
 				minDelegatorStake:        config.MinDelegatorStake,
-				maxValidatorStake:        config.MaxValidatorStake,
 				minStakeDuration:         1337 * time.Second,
 				maxStakeDuration:         42 * time.Second,
 				maxValidatorWeightFactor: 21,

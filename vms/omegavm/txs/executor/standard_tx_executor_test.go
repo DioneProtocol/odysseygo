@@ -137,7 +137,7 @@ func TestStandardTxExecutorAddDelegator(t *testing.T) {
 	// pending validator set with the maximum staking amount
 	addMaxStakeValidator := func(target *environment) {
 		tx, err := target.txBuilder.NewAddValidatorTx(
-			target.config.MaxValidatorStake, // stake amount
+			target.config.MinValidatorStake, // stake amount
 			newValidatorStartTime,           // start time
 			newValidatorEndTime,             // end time
 			newValidatorID,                  // node ID
@@ -1365,7 +1365,6 @@ func newTransformSubnetTx(t *testing.T) (*txs.TransformSubnetTx, *txs.Tx) {
 		MinConsumptionRate:       0,
 		MaxConsumptionRate:       reward.PercentDenominator,
 		MinValidatorStake:        2,
-		MaxValidatorStake:        10,
 		MinStakeDuration:         1,
 		MaxStakeDuration:         2,
 		MinDelegationFee:         reward.PercentDenominator,
