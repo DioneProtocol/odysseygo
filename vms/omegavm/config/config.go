@@ -71,9 +71,6 @@ type Config struct {
 	// The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake uint64
 
-	// The maximum amount of tokens that can be bonded on a validator
-	MaxValidatorStake uint64
-
 	// Minimum stake, in nDIONE, that can be delegated on the primary network
 	MinDelegatorStake uint64
 

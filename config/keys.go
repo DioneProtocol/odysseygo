@@ -24,7 +24,6 @@ const (
 	AddSubnetDelegatorFeeKey                           = "add-subnet-delegator-fee"
 	UptimeRequirementKey                               = "uptime-requirement"
 	MinValidatorStakeKey                               = "min-validator-stake"
-	MaxValidatorStakeKey                               = "max-validator-stake"
 	MinDelegatorStakeKey                               = "min-delegator-stake"
 	MinDelegatorFeeKey                                 = "min-delegation-fee"
 	MinStakeDurationKey                                = "min-stake-duration"

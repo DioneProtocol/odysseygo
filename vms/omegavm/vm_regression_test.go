@@ -171,7 +171,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 func TestAddDelegatorTxHeapCorruption(t *testing.T) {
 	validatorStartTime := banffForkTime.Add(executor.SyncBound).Add(1 * time.Second)
 	validatorEndTime := validatorStartTime.Add(360 * 24 * time.Hour)
-	validatorStake := defaultMaxValidatorStake / 5
+	validatorStake := defaultMinValidatorStake * 2
 
 	delegator1StartTime := validatorStartTime
 	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinStakingDuration)
@@ -183,11 +183,11 @@ func TestAddDelegatorTxHeapCorruption(t *testing.T) {
 
 	delegator3StartTime := validatorStartTime.Add(2 * defaultMinStakingDuration)
 	delegator3EndTime := delegator1StartTime.Add(4 * defaultMinStakingDuration)
-	delegator3Stake := defaultMaxValidatorStake - validatorStake - 2*defaultMinValidatorStake
+	delegator3Stake := defaultMinValidatorStake * 3
 
 	delegator4StartTime := validatorStartTime.Add(5 * defaultMinStakingDuration)
 	delegator4EndTime := delegator1StartTime.Add(7 * defaultMinStakingDuration)
-	delegator4Stake := defaultMaxValidatorStake - validatorStake - defaultMinValidatorStake
+	delegator4Stake := defaultMinValidatorStake * 4
 
 	tests := []struct {
 		name    string
@@ -701,7 +701,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	// Create the tx to add the first new validator
 	addValidatorTx0, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MaxValidatorStake,
+		vm.MinValidatorStake,
 		uint64(newValidatorStartTime0.Unix()),
 		uint64(newValidatorEndTime0.Unix()),
 		nodeID0,
@@ -874,7 +874,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	// Create the tx to add the second new validator
 	addValidatorTx1, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MaxValidatorStake,
+		vm.MinValidatorStake,
 		uint64(newValidatorStartTime1.Unix()),
 		uint64(newValidatorEndTime1.Unix()),
 		nodeID1,
@@ -1041,7 +1041,7 @@ func TestValidatorSetAtCacheOverwriteRegression(t *testing.T) {
 
 	// Create the tx to add the first new validator
 	addValidatorTx0, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MaxValidatorStake,
+		vm.MinValidatorStake,
 		uint64(newValidatorStartTime0.Unix()),
 		uint64(newValidatorEndTime0.Unix()),
 		nodeID5,
@@ -1125,7 +1125,7 @@ func TestValidatorSetAtCacheOverwriteRegression(t *testing.T) {
 		nodeID2: defaultWeight,
 		nodeID3: defaultWeight,
 		nodeID4: defaultWeight,
-		nodeID5: vm.MaxValidatorStake,
+		nodeID5: vm.MinValidatorStake,
 	}
 	validators, err = vm.GetValidatorSet(context.Background(), 3, constants.PrimaryNetworkID)
 	require.NoError(err)
@@ -1139,15 +1139,15 @@ func TestAddDelegatorTxAddBeforeRemove(t *testing.T) {
 
 	validatorStartTime := banffForkTime.Add(executor.SyncBound).Add(1 * time.Second)
 	validatorEndTime := validatorStartTime.Add(360 * 24 * time.Hour)
-	validatorStake := defaultMaxValidatorStake / 5
+	validatorStake := defaultMinValidatorStake * 2
 
 	delegator1StartTime := validatorStartTime
 	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinStakingDuration)
-	delegator1Stake := defaultMaxValidatorStake - validatorStake
+	delegator1Stake := defaultMinValidatorStake * 3
 
 	delegator2StartTime := delegator1EndTime
 	delegator2EndTime := delegator2StartTime.Add(3 * defaultMinStakingDuration)
-	delegator2Stake := defaultMaxValidatorStake - validatorStake
+	delegator2Stake := defaultMinValidatorStake * 4
 
 	vm, _, _ := defaultVM(t)
 
@@ -1249,7 +1249,7 @@ func TestRemovePermissionedValidatorDuringPendingToCurrentTransitionNotTracked(t
 	changeAddr := keys[0].PublicKey().Address()
 
 	addValidatorTx, err := vm.txBuilder.NewAddValidatorTx(
-		defaultMaxValidatorStake,
+		defaultMinValidatorStake,
 		uint64(validatorStartTime.Unix()),
 		uint64(validatorEndTime.Unix()),
 		ids.NodeID(id),
@@ -1287,7 +1287,7 @@ func TestRemovePermissionedValidatorDuringPendingToCurrentTransitionNotTracked(t
 	require.NoError(vm.SetPreference(context.Background(), vm.manager.LastAccepted()))
 
 	addSubnetValidatorTx, err := vm.txBuilder.NewAddSubnetValidatorTx(
-		defaultMaxValidatorStake,
+		defaultMinValidatorStake,
 		uint64(validatorStartTime.Unix()),
 		uint64(validatorEndTime.Unix()),
 		ids.NodeID(id),
@@ -1366,7 +1366,7 @@ func TestRemovePermissionedValidatorDuringPendingToCurrentTransitionTracked(t *t
 	changeAddr := keys[0].PublicKey().Address()
 
 	addValidatorTx, err := vm.txBuilder.NewAddValidatorTx(
-		defaultMaxValidatorStake,
+		defaultMinValidatorStake,
 		uint64(validatorStartTime.Unix()),
 		uint64(validatorEndTime.Unix()),
 		ids.NodeID(id),
@@ -1410,7 +1410,7 @@ func TestRemovePermissionedValidatorDuringPendingToCurrentTransitionTracked(t *t
 	require.True(vm.Validators.Add(createSubnetTx.ID(), subnetValidators))
 
 	addSubnetValidatorTx, err := vm.txBuilder.NewAddSubnetValidatorTx(
-		defaultMaxValidatorStake,
+		defaultMinValidatorStake,
 		uint64(validatorStartTime.Unix()),
 		uint64(validatorEndTime.Unix()),
 		ids.NodeID(id),
