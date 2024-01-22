@@ -11,6 +11,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
 	"github.com/ava-labs/avalanchego/snow/engine/common"
@@ -33,6 +34,8 @@ const targetBlockSize = 128 * units.KiB
 
 var (
 	_ Builder = (*builder)(nil)
+
+	feeKey = []byte("fee")
 
 	ErrEndOfTime       = errors.New("program time is suspiciously far in the future")
 	ErrNoPendingBlocks = errors.New("no pending blocks")
@@ -80,6 +83,8 @@ type builder struct {
 	// the validator set. When it goes off ResetTimer() is called, potentially
 	// triggering creation of a new block.
 	timer *timer.Timer
+
+	accumulatedFeeChainIDs []ids.ID
 }
 
 func New(
@@ -89,13 +94,15 @@ func New(
 	blkManager blockexecutor.Manager,
 	toEngine chan<- common.Message,
 	appSender common.AppSender,
+	accumulatedFeeChainIDs []ids.ID,
 ) Builder {
 	builder := &builder{
-		Mempool:           mempool,
-		txBuilder:         txBuilder,
-		txExecutorBackend: txExecutorBackend,
-		blkManager:        blkManager,
-		toEngine:          toEngine,
+		Mempool:                mempool,
+		txBuilder:              txBuilder,
+		txExecutorBackend:      txExecutorBackend,
+		blkManager:             blkManager,
+		toEngine:               toEngine,
+		accumulatedFeeChainIDs: accumulatedFeeChainIDs,
 	}
 
 	builder.timer = timer.NewTimer(builder.setNextBuildBlockTime)
@@ -155,6 +162,29 @@ func (b *builder) AddUnverifiedTx(tx *txs.Tx) error {
 		}
 	}
 	return b.GossipTx(tx)
+}
+
+func (b *builder) getAccumulatedFees() (map[ids.ID][]byte, error) {
+	var accumulatedFees map[ids.ID][]byte
+	for _, chain := range b.accumulatedFeeChainIDs {
+		values, err := b.txExecutorBackend.Ctx.SharedMemory.Get(chain, [][]byte{feeKey})
+		if err == database.ErrNotFound {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		value := values[0]
+		neg := value[0]
+		if neg != byte(0) {
+			return nil, fmt.Errorf("negative accumulated fees")
+		}
+		if len(accumulatedFees) == 0 {
+			accumulatedFees = make(map[ids.ID][]byte)
+		}
+		accumulatedFees[chain] = value[1:]
+	}
+	return accumulatedFees, nil
 }
 
 // BuildBlock builds a block to be added to consensus.
@@ -359,11 +389,17 @@ func buildBlock(
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
 
-		return blocks.NewBanffProposalBlock(
+		accumulatedFees, err := builder.getAccumulatedFees()
+		if err != nil {
+			return nil, fmt.Errorf("could not get accumulated fees: %w", err)
+		}
+
+		return blocks.NewBanffProposalBlockWithFee(
 			timestamp,
 			parentID,
 			height,
 			rewardValidatorTx,
+			accumulatedFees,
 		)
 	}
 

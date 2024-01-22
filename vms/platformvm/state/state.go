@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"sync"
 	"time"
 
@@ -93,6 +94,7 @@ var (
 	heightsIndexedKey = []byte("heights indexed")
 	initializedKey    = []byte("initialized")
 	prunedKey         = []byte("pruned")
+	accumulatedFeeKey = []byte("fee")
 )
 
 // Chain collects all methods to manage the state of the chain for block
@@ -125,6 +127,11 @@ type Chain interface {
 
 	GetTx(txID ids.ID) (*txs.Tx, status.Status, error)
 	AddTx(tx *txs.Tx, status status.Status)
+
+	SetAccumulatedFee(f *big.Int)
+	AddAccumulatedFee(f *big.Int)
+	SubAccumulatedFee(f *big.Int)
+	GetAccumulatedFee() *big.Int
 }
 
 type State interface {
@@ -373,6 +380,8 @@ type state struct {
 	lastAccepted, persistedLastAccepted ids.ID
 	indexedHeights                      *heightRange
 	singletonDB                         database.Database
+
+	accumulatedFee, persistedAccumulatedFee *big.Int
 }
 
 // heightRange is used to track which heights are safe to use the native DB
@@ -684,6 +693,9 @@ func newState(
 		chainDBCache: chainDBCache,
 
 		singletonDB: prefixdb.New(singletonPrefix, baseDB),
+
+		accumulatedFee:          big.NewInt(0),
+		persistedAccumulatedFee: big.NewInt(0),
 	}, nil
 }
 
@@ -963,6 +975,23 @@ func (s *state) AddTx(tx *txs.Tx, status status.Status) {
 		tx:     tx,
 		status: status,
 	}
+}
+
+func (s *state) SetAccumulatedFee(f *big.Int) {
+	s.accumulatedFee.Set(f)
+}
+
+func (s *state) AddAccumulatedFee(f *big.Int) {
+	s.accumulatedFee.Add(s.accumulatedFee, f)
+	fmt.Println("ACCUMULATED FEE", s.accumulatedFee.String())
+}
+
+func (s *state) SubAccumulatedFee(f *big.Int) {
+	s.accumulatedFee.Add(s.accumulatedFee, f)
+}
+
+func (s *state) GetAccumulatedFee() *big.Int {
+	return new(big.Int).Set(s.accumulatedFee)
 }
 
 func (s *state) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
@@ -1405,6 +1434,13 @@ func (s *state) loadMetadata() error {
 		return nil
 	}
 	s.indexedHeights = indexedHeights
+
+	accumulatedFee, err := database.GetBigInt(s.singletonDB, accumulatedFeeKey)
+	if err != nil && err != database.ErrNotFound {
+		return err
+	}
+	s.persistedAccumulatedFee.Set(accumulatedFee)
+	s.accumulatedFee.Set(accumulatedFee)
 	return nil
 }
 
@@ -2344,6 +2380,13 @@ func (s *state) writeMetadata() error {
 		if err := s.singletonDB.Put(heightsIndexedKey, indexedHeightsBytes); err != nil {
 			return fmt.Errorf("failed to write indexed range: %w", err)
 		}
+	}
+
+	if s.accumulatedFee.Cmp(s.persistedAccumulatedFee) != 0 {
+		if err := database.PutBigInt(s.singletonDB, accumulatedFeeKey, s.accumulatedFee); err != nil {
+			return fmt.Errorf("failed to write accumulated fee: %w", err)
+		}
+		s.persistedAccumulatedFee.Set(s.accumulatedFee)
 	}
 
 	return nil

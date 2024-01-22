@@ -6,6 +6,7 @@ package executor
 import (
 	"errors"
 	"fmt"
+	"math/big"
 
 	"github.com/ava-labs/avalanchego/chains/atomic"
 	"github.com/ava-labs/avalanchego/ids"
@@ -19,6 +20,8 @@ import (
 
 var (
 	_ blocks.Visitor = (*verifier)(nil)
+
+	feeKey = []byte("fee")
 
 	errApricotBlockIssuedAfterFork                = errors.New("apricot block issued after fork")
 	errBanffProposalBlockWithMultipleTransactions = errors.New("BanffProposalBlock contains multiple transactions")
@@ -67,6 +70,28 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	onAbortState, err := state.NewDiff(parentID, v.backend)
 	if err != nil {
 		return err
+	}
+
+	var atomicRequests map[ids.ID]*atomic.Requests
+	for chain, accumulatedFeeBytes := range b.AccumulatedFee {
+		accumulatedFee := new(big.Int).SetBytes(accumulatedFeeBytes)
+		onCommitState.AddAccumulatedFee(accumulatedFee)
+		onAbortState.AddAccumulatedFee(accumulatedFee)
+		atomicRequests = make(map[ids.ID]*atomic.Requests)
+		atomicRequests[chain] = &atomic.Requests{
+			UpdateIntRequests: []*atomic.UpdateIntRequest{
+				{
+					Key:   feeKey,
+					Delta: new(big.Int).Neg(accumulatedFee),
+				},
+			},
+		}
+	}
+
+	if len(atomicRequests) != 0 {
+		if err := v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
+			return err
+		}
 	}
 
 	// Apply the changes, if any, from advancing the chain time.
