@@ -8,8 +8,6 @@ import (
 	"time"
 
 	_ "embed"
-
-	"github.com/DioneProtocol/odysseygo/utils/constants"
 )
 
 // RPCChainVMProtocol should be bumped anytime changes are made which require
@@ -61,37 +59,37 @@ var (
 	RPCChainVMProtocolCompatibility map[uint][]*Semantic
 
 	ApricotPhase3Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.August, 24, 14, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2021, time.August, 16, 19, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2021, time.August, 24, 14, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2021, time.August, 16, 19, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase3DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	ApricotPhase4Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.September, 22, 21, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2021, time.September, 22, 21, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase4DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 	ApricotPhase4MinOChainHeight = map[uint32]uint64{
-		constants.MainnetID: 793005,
-		constants.TestnetID: 47437,
+		// constants.MainnetID: 793005,
+		// constants.TestnetID: 47437,
 	}
 	ApricotPhase4DefaultMinOChainHeight uint64
 
 	ApricotPhase5Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2021, time.December, 2, 18, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2021, time.November, 24, 15, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2021, time.December, 2, 18, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2021, time.November, 24, 15, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase5DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	ApricotPhase6Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2022, time.September, 6, 20, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase6DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	BanffTimes = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2022, time.October, 18, 16, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
+		// constants.MainnetID: time.Date(2022, time.October, 18, 16, 0, 0, 0, time.UTC),
+		// constants.TestnetID: time.Date(2022, time.October, 3, 14, 0, 0, 0, time.UTC),
 	}
 	BanffDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
