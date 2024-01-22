@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -95,6 +96,19 @@ func ParseUInt32(b []byte) (uint32, error) {
 		return 0, errWrongSize
 	}
 	return binary.BigEndian.Uint32(b), nil
+}
+
+func PutBigInt(db KeyValueReaderWriter, key []byte, val *big.Int) error {
+	valBytes := val.Bytes()
+	return db.Put(key, valBytes)
+}
+
+func GetBigInt(db KeyValueReader, key []byte) (*big.Int, error) {
+	b, err := db.Get(key)
+	if err != nil {
+		return big.NewInt(0), err
+	}
+	return new(big.Int).SetBytes(b), nil
 }
 
 func PutTimestamp(db KeyValueWriter, key []byte, val time.Time) error {

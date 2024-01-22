@@ -473,11 +473,11 @@ func (s *state) InitializeChainState(stopVertexID ids.ID, genesisTimestamp time.
 	if err != nil {
 		return err
 	}
-	feeBytes, err := s.singletonDB.Get(accumulatedFeeKey)
+	accumulatedFee, err := database.GetBigInt(s.singletonDB, accumulatedFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return err
 	} else {
-		s.accumulatedFee = new(big.Int).SetBytes(feeBytes)
+		s.accumulatedFee = accumulatedFee
 		s.persistedAccumulatedFee = new(big.Int).Set(s.accumulatedFee)
 	}
 	return nil
@@ -663,7 +663,7 @@ func (s *state) writeMetadata() error {
 		s.persistedLastAccepted = s.lastAccepted
 	}
 	if s.persistedAccumulatedFee.Cmp(s.accumulatedFee) != 0 {
-		if err := s.singletonDB.Put(accumulatedFeeKey, s.accumulatedFee.Bytes()); err != nil {
+		if err := database.PutBigInt(s.singletonDB, accumulatedFeeKey, s.accumulatedFee); err != nil {
 			return fmt.Errorf("failed to write accumulated fee: %w", err)
 		}
 		s.persistedAccumulatedFee.Set(s.accumulatedFee)
