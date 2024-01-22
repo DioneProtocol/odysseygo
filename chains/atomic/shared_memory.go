@@ -156,6 +156,14 @@ func (sm *sharedMemory) Apply(requests map[ids.ID]*Requests, batches ...database
 				return err
 			}
 		}
+		// Negative updateInt requests are coming from the primary chain
+		for _, updateRequest := range req.UpdateIntRequests {
+			if updateRequest.Delta.Sign() < 0 {
+				if err := s.UpdateInt(updateRequest); err != nil {
+					return err
+				}
+			}
+		}
 
 		// Add Put requests to the outbound database.
 		s.valueDB, s.indexDB = outbound.getValueAndIndexDB(sm.thisChainID, req.peerChainID, db)
@@ -164,9 +172,12 @@ func (sm *sharedMemory) Apply(requests map[ids.ID]*Requests, batches ...database
 				return err
 			}
 		}
+		// Positive updateInt requests are coming from the X- and C-chains
 		for _, updateRequest := range req.UpdateIntRequests {
-			if err := s.UpdateInt(updateRequest); err != nil {
-				return err
+			if updateRequest.Delta.Sign() > 0 {
+				if err := s.UpdateInt(updateRequest); err != nil {
+					return err
+				}
 			}
 		}
 	}
