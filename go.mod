@@ -10,7 +10,6 @@ go 1.20
 require (
 	github.com/DataDog/zstd v1.5.2
 	github.com/DioneProtocol/coreth v0.12.5-rc.6
-	github.com/DioneProtocol/ledger-odyssey/go v0.0.0-00010101000000-000000000000
 	github.com/Microsoft/go-winio v0.5.2
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/ava-labs/avalanche-network-runner-sdk v0.3.0
@@ -150,5 +149,3 @@ require (
 )
 
 replace github.com/DioneProtocol/coreth => ../coreth
-
-replace github.com/DioneProtocol/ledger-odyssey/go => ../ledger-odyssey
