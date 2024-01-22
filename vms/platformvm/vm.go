@@ -193,6 +193,16 @@ func (vm *VM) Initialize(
 		txExecutorBackend,
 		validatorManager,
 	)
+
+	accumulatedFeeChainsTx, err := vm.state.GetChains(constants.PlatformChainID)
+	if err != nil {
+		return fmt.Errorf("failed to receive chains: %w", err)
+	}
+
+	accumulatedFeeChainsIDs := make([]ids.ID, len(accumulatedFeeChainsTx))
+	for i, tx := range accumulatedFeeChainsTx {
+		accumulatedFeeChainsIDs[i] = tx.ID()
+	}
 	vm.Builder = blockbuilder.New(
 		mempool,
 		vm.txBuilder,
@@ -200,6 +210,7 @@ func (vm *VM) Initialize(
 		vm.manager,
 		toEngine,
 		appSender,
+		accumulatedFeeChainsIDs,
 	)
 
 	// Create all of the chains that the database says exist

@@ -6,6 +6,7 @@ package state
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/database"
@@ -58,6 +59,9 @@ type diff struct {
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	modifiedUTXOs map[ids.ID]*avax.UTXO
+
+	addAccumulatedFee *big.Int
+	subAccumulatedFee *big.Int
 }
 
 func NewDiff(
@@ -69,9 +73,11 @@ func NewDiff(
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:      parentID,
-		stateVersions: stateVersions,
-		timestamp:     parentState.GetTimestamp(),
+		parentID:          parentID,
+		stateVersions:     stateVersions,
+		timestamp:         parentState.GetTimestamp(),
+		addAccumulatedFee: big.NewInt(0),
+		subAccumulatedFee: big.NewInt(0),
 	}, nil
 }
 
@@ -430,6 +436,23 @@ func (d *diff) AddTx(tx *txs.Tx, status status.Status) {
 	}
 }
 
+func (d *diff) SetAccumulatedFee(f *big.Int) {
+	d.subAccumulatedFee = big.NewInt(0)
+	d.addAccumulatedFee.Set(f)
+}
+
+func (d *diff) AddAccumulatedFee(f *big.Int) {
+	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
+}
+
+func (d *diff) SubAccumulatedFee(f *big.Int) {
+	d.subAccumulatedFee.Add(d.subAccumulatedFee, f)
+}
+
+func (d *diff) GetAccumulatedFee() *big.Int {
+	return new(big.Int).Set(d.addAccumulatedFee)
+}
+
 func (d *diff) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
 	if utxos, exists := d.addedRewardUTXOs[txID]; exists {
 		return utxos, nil
@@ -486,6 +509,13 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
+	if d.addAccumulatedFee.Sign() > 0 {
+		baseState.AddAccumulatedFee(d.addAccumulatedFee)
+	}
+	if d.subAccumulatedFee.Sign() > 0 {
+		baseState.SubAccumulatedFee(d.subAccumulatedFee)
+	}
+
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}
