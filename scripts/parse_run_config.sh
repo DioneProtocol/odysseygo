@@ -44,6 +44,15 @@ for line in $RAW_BOOTSTRAP_IPS; do
 done
 BOOTSTRAP_IPS=$(echo $BOOTSTRAP_IPS | sed 's/.$//')
 
+RAW_BOOTSTRAP_HOST_IPS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.bootstrapNodes[].hostIp' | sed -e 's/^"//' -e 's/"$//')
+BOOTSTRAP_HOST_IPS=""
+i=0
+for line in $RAW_BOOTSTRAP_HOST_IPS; do
+  BOOTSTRAP_HOST_IPS+="${line}:${BOOTSTRAP_STAKING_PORTS[$i]},"
+  i=$(($i + 1))
+done
+BOOTSTRAP_HOST_IPS=$(echo $BOOTSTRAP_HOST_IPS | sed 's/.$//')
+
 RAW_IPS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.nodes[].ip' | sed -e 's/^"//' -e 's/"$//')
 PUBLIC_IPS=()
 for line in $RAW_BOOTSTRAP_IPS; do
