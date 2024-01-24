@@ -39,6 +39,29 @@ type verifier struct {
 	txExecutorBackend *executor.Backend
 }
 
+func (v *verifier) addAccumulatedFeeToState(accumulatedFee map[ids.ID][]byte, states ...state.Chain) error {
+	var atomicRequests map[ids.ID]*atomic.Requests
+	for chain, accumulatedFeeBytes := range accumulatedFee {
+		accumulatedFee := new(big.Int).SetBytes(accumulatedFeeBytes)
+		for _, state := range states {
+			state.AddAccumulatedFee(accumulatedFee)
+		}
+		atomicRequests = make(map[ids.ID]*atomic.Requests)
+		atomicRequests[chain] = &atomic.Requests{
+			UpdateIntRequests: []*atomic.UpdateIntRequest{
+				{
+					Key:   feeKey,
+					Delta: new(big.Int).Neg(accumulatedFee),
+				},
+			},
+		}
+	}
+	if len(atomicRequests) != 0 {
+		return v.ctx.SharedMemory.Apply(atomicRequests)
+	}
+	return nil
+}
+
 func (v *verifier) BanffAbortBlock(b *blocks.BanffAbortBlock) error {
 	if err := v.banffOptionBlock(b); err != nil {
 		return err
@@ -71,27 +94,9 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	if err != nil {
 		return err
 	}
-
-	var atomicRequests map[ids.ID]*atomic.Requests
-	for chain, accumulatedFeeBytes := range b.AccumulatedFee {
-		accumulatedFee := new(big.Int).SetBytes(accumulatedFeeBytes)
-		onCommitState.AddAccumulatedFee(accumulatedFee)
-		onAbortState.AddAccumulatedFee(accumulatedFee)
-		atomicRequests = make(map[ids.ID]*atomic.Requests)
-		atomicRequests[chain] = &atomic.Requests{
-			UpdateIntRequests: []*atomic.UpdateIntRequest{
-				{
-					Key:   feeKey,
-					Delta: new(big.Int).Neg(accumulatedFee),
-				},
-			},
-		}
-	}
-
-	if len(atomicRequests) != 0 {
-		if err := v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
-			return err
-		}
+	err = v.addAccumulatedFeeToState(b.AccumulatedFee, onCommitState, onAbortState)
+	if err != nil {
+		return err
 	}
 
 	// Apply the changes, if any, from advancing the chain time.
@@ -120,7 +125,8 @@ func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	}
 
 	parentID := b.Parent()
-	onAcceptState, err := state.NewDiff(parentID, v.backend)
+	feeTxAsset := v.ctx.AVAXAssetID
+	onAcceptState, err := state.NewDiffWithFee(parentID, v.backend, feeTxAsset)
 	if err != nil {
 		return err
 	}
@@ -186,7 +192,8 @@ func (v *verifier) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
 	}
 
 	parentID := b.Parent()
-	onAcceptState, err := state.NewDiff(parentID, v)
+	feeTxAsset := v.ctx.AVAXAssetID
+	onAcceptState, err := state.NewDiffWithFee(parentID, v, feeTxAsset)
 	if err != nil {
 		return err
 	}

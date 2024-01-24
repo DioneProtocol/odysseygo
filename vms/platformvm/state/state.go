@@ -983,7 +983,6 @@ func (s *state) SetAccumulatedFee(f *big.Int) {
 
 func (s *state) AddAccumulatedFee(f *big.Int) {
 	s.accumulatedFee.Add(s.accumulatedFee, f)
-	fmt.Println("ACCUMULATED FEE", s.accumulatedFee.String())
 }
 
 func (s *state) SubAccumulatedFee(f *big.Int) {

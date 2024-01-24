@@ -224,7 +224,8 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		Mempool: mempool,
 		state:   s,
 		ctx: &snow.Context{
-			Log: logging.NoLog{},
+			Log:         logging.NoLog{},
+			AVAXAssetID: ids.ID{1},
 		},
 	}
 	verifier := &verifier{
@@ -263,6 +264,7 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 			return nil
 		},
 	).Times(1)
+	blkTx.EXPECT().Visit(gomock.AssignableToTypeOf(&txs.BurnedAssetCalculator{})).Times(1)
 
 	// We can't serialize [blkTx] because it isn't
 	// registered with the blocks.Codec.
@@ -700,7 +702,8 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 		Mempool: mempool,
 		state:   s,
 		ctx: &snow.Context{
-			Log: logging.NoLog{},
+			Log:         logging.NoLog{},
+			AVAXAssetID: ids.ID{1},
 		},
 	}
 	verifier := &verifier{
@@ -735,6 +738,7 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 			return nil
 		},
 	).Times(1)
+	blkTx.EXPECT().Visit(gomock.AssignableToTypeOf(&txs.BurnedAssetCalculator{})).Times(1)
 
 	// We can't serialize [blkTx] because it isn't
 	// registered with the blocks.Codec.

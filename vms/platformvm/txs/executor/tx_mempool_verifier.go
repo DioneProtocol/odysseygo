@@ -98,7 +98,8 @@ func (v *MempoolTxVerifier) standardTx(tx txs.UnsignedTx) error {
 // but against the block timestamp. [baseTime] calculates
 // the right timestamp to be used to mempool tx verification
 func (v *MempoolTxVerifier) standardBaseState() (state.Diff, error) {
-	state, err := state.NewDiff(v.ParentID, v.StateVersions)
+	feeTxAsset := v.Ctx.AVAXAssetID
+	state, err := state.NewDiffWithFee(v.ParentID, v.StateVersions, feeTxAsset)
 	if err != nil {
 		return nil, err
 	}

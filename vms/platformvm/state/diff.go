@@ -60,14 +60,15 @@ type diff struct {
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	modifiedUTXOs map[ids.ID]*avax.UTXO
 
+	txFeeAsset        ids.ID
 	addAccumulatedFee *big.Int
 	subAccumulatedFee *big.Int
 }
 
-func NewDiff(
+func newDiff(
 	parentID ids.ID,
 	stateVersions Versions,
-) (Diff, error) {
+) (*diff, error) {
 	parentState, ok := stateVersions.GetState(parentID)
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
@@ -79,6 +80,26 @@ func NewDiff(
 		addAccumulatedFee: big.NewInt(0),
 		subAccumulatedFee: big.NewInt(0),
 	}, nil
+}
+
+func NewDiff(
+	parentID ids.ID,
+	stateVersions Versions,
+) (Diff, error) {
+	return newDiff(parentID, stateVersions)
+}
+
+func NewDiffWithFee(
+	parentID ids.ID,
+	stateVersions Versions,
+	txFeeAsset ids.ID,
+) (Diff, error) {
+	diff, err := newDiff(parentID, stateVersions)
+	if err != nil {
+		return nil, err
+	}
+	diff.txFeeAsset = txFeeAsset
+	return diff, nil
 }
 
 func (d *diff) GetTimestamp() time.Time {
@@ -421,11 +442,15 @@ func (d *diff) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 	return parentState.GetTx(txID)
 }
 
-func (d *diff) AddTx(tx *txs.Tx, status status.Status) {
+func (d *diff) AddTx(tx *txs.Tx, s status.Status) {
 	txID := tx.ID()
 	txStatus := &txAndStatus{
 		tx:     tx,
-		status: status,
+		status: s,
+	}
+	if s == status.Committed && d.txFeeAsset != ids.Empty {
+		burned := new(big.Int).SetUint64(tx.Burned(d.txFeeAsset))
+		d.AddAccumulatedFee(burned)
 	}
 	if d.addedTxs == nil {
 		d.addedTxs = map[ids.ID]*txAndStatus{
