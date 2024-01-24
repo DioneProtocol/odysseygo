@@ -40,6 +40,9 @@ type SharedMemory interface {
 	// Invariant: Get guarantees that the resulting values array is the same
 	//            length as keys.
 	Get(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
+	// GetBigInt fetches and parses the value corresponding to [key] that have
+	// been sent from [peerChainID]
+	GetBigInt(peerChainID ids.ID, key []byte) (value *big.Int, err error)
 	// Indexed returns a paginated result of values that possess any of the
 	// given traits and were sent from [peerChainID].
 	Indexed(
@@ -80,6 +83,23 @@ func (sm *sharedMemory) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error)
 	}
 
 	return sm.getCommon(&s, peerChainID, keys)
+}
+
+func (sm *sharedMemory) GetBigInt(peerChainID ids.ID, key []byte) (*big.Int, error) {
+	values, err := sm.Get(peerChainID, [][]byte{key})
+	result := big.NewInt(0)
+	if err == database.ErrNotFound {
+		return result, nil
+	} else if err != nil {
+		return result, err
+	}
+	value := values[0]
+	neg := value[0]
+	result.SetBytes(value[1:])
+	if neg != 0 {
+		result.Neg(result)
+	}
+	return result, nil
 }
 
 func (sm *sharedMemory) getCommon(s *state, peerChainID ids.ID, keys [][]byte) ([][]byte, error) {

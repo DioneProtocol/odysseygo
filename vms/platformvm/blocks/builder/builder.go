@@ -11,7 +11,6 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
 	"github.com/ava-labs/avalanchego/snow/engine/common"
@@ -167,22 +166,20 @@ func (b *builder) AddUnverifiedTx(tx *txs.Tx) error {
 func (b *builder) getAccumulatedFees() (map[ids.ID][]byte, error) {
 	var accumulatedFees map[ids.ID][]byte
 	for _, chain := range b.accumulatedFeeChainIDs {
-		values, err := b.txExecutorBackend.Ctx.SharedMemory.Get(chain, [][]byte{feeKey})
-		if err == database.ErrNotFound {
-			continue
-		}
+		value, err := b.txExecutorBackend.Ctx.SharedMemory.GetBigInt(chain, feeKey)
 		if err != nil {
 			return nil, err
 		}
-		value := values[0]
-		neg := value[0]
-		if neg != byte(0) {
+		switch value.Sign() {
+		case -1:
 			return nil, fmt.Errorf("negative accumulated fees")
+		case 0:
+			continue
 		}
 		if len(accumulatedFees) == 0 {
 			accumulatedFees = make(map[ids.ID][]byte)
 		}
-		accumulatedFees[chain] = value[1:]
+		accumulatedFees[chain] = value.Bytes()
 	}
 	return accumulatedFees, nil
 }
@@ -376,6 +373,7 @@ func buildBlock(
 	forceAdvanceTime bool,
 	parentState state.Chain,
 ) (blocks.Block, error) {
+	fmt.Println("BUILD BLOCK")
 	// Try rewarding stakers whose staking period ends at the new chain time.
 	// This is done first to prioritize advancing the timestamp as quickly as
 	// possible.
