@@ -18,8 +18,7 @@ var (
 )
 
 type BanffProposalBlock struct {
-	Time           uint64            `serialize:"true" json:"time"`
-	AccumulatedFee map[ids.ID][]byte `serialize:"true" json:"accumulatedFee"`
+	Time uint64 `serialize:"true" json:"time"`
 	// Transactions is currently unused. This is populated so that introducing
 	// them in the future will not require a codec change.
 	//
@@ -71,22 +70,23 @@ func NewBanffProposalBlockWithFee(
 	accumulatedFee map[ids.ID][]byte,
 ) (*BanffProposalBlock, error) {
 	blk := &BanffProposalBlock{
-		Time:           uint64(timestamp.Unix()),
-		AccumulatedFee: accumulatedFee,
+		Time: uint64(timestamp.Unix()),
 		ApricotProposalBlock: ApricotProposalBlock{
 			CommonBlock: CommonBlock{
 				PrntID: parentID,
 				Hght:   height,
 			},
-			Tx: tx,
+			AccumulatedFee: accumulatedFee,
+			Tx:             tx,
 		},
 	}
 	return blk, initialize(blk)
 }
 
 type ApricotProposalBlock struct {
-	CommonBlock `serialize:"true"`
-	Tx          *txs.Tx `serialize:"true" json:"tx"`
+	CommonBlock    `serialize:"true"`
+	Tx             *txs.Tx           `serialize:"true" json:"tx"`
+	AccumulatedFee map[ids.ID][]byte `serialize:"true" json:"accumulatedFee"`
 }
 
 func (b *ApricotProposalBlock) initialize(bytes []byte) error {

@@ -358,10 +358,10 @@ func TestBuildBlock(t *testing.T) {
 				// The tx builder should be asked to build a reward tx
 				txBuilder := txbuilder.NewMockBuilder(ctrl)
 				txBuilder.EXPECT().NewRewardValidatorTx(stakerTxID).Return(transactions[0], nil)
-
 				return &builder{
-					Mempool:   mempool,
-					txBuilder: txBuilder,
+					Mempool:           mempool,
+					txBuilder:         txBuilder,
+					txExecutorBackend: &txexecutor.Backend{},
 				}
 			},
 			timestamp:        parentTimestamp,
@@ -405,7 +405,8 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(transactions)
 				return &builder{
-					Mempool: mempool,
+					Mempool:           mempool,
+					txExecutorBackend: &txexecutor.Backend{},
 				}
 			},
 			timestamp:        parentTimestamp,

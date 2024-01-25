@@ -82,8 +82,6 @@ type builder struct {
 	// the validator set. When it goes off ResetTimer() is called, potentially
 	// triggering creation of a new block.
 	timer *timer.Timer
-
-	accumulatedFeeChainIDs []ids.ID
 }
 
 func New(
@@ -93,15 +91,13 @@ func New(
 	blkManager blockexecutor.Manager,
 	toEngine chan<- common.Message,
 	appSender common.AppSender,
-	accumulatedFeeChainIDs []ids.ID,
 ) Builder {
 	builder := &builder{
-		Mempool:                mempool,
-		txBuilder:              txBuilder,
-		txExecutorBackend:      txExecutorBackend,
-		blkManager:             blkManager,
-		toEngine:               toEngine,
-		accumulatedFeeChainIDs: accumulatedFeeChainIDs,
+		Mempool:           mempool,
+		txBuilder:         txBuilder,
+		txExecutorBackend: txExecutorBackend,
+		blkManager:        blkManager,
+		toEngine:          toEngine,
 	}
 
 	builder.timer = timer.NewTimer(builder.setNextBuildBlockTime)
@@ -161,27 +157,6 @@ func (b *builder) AddUnverifiedTx(tx *txs.Tx) error {
 		}
 	}
 	return b.GossipTx(tx)
-}
-
-func (b *builder) getAccumulatedFees() (map[ids.ID][]byte, error) {
-	var accumulatedFees map[ids.ID][]byte
-	for _, chain := range b.accumulatedFeeChainIDs {
-		value, err := b.txExecutorBackend.Ctx.SharedMemory.GetBigInt(chain, feeKey)
-		if err != nil {
-			return nil, err
-		}
-		switch value.Sign() {
-		case -1:
-			return nil, fmt.Errorf("negative accumulated fees")
-		case 0:
-			continue
-		}
-		if len(accumulatedFees) == 0 {
-			accumulatedFees = make(map[ids.ID][]byte)
-		}
-		accumulatedFees[chain] = value.Bytes()
-	}
-	return accumulatedFees, nil
 }
 
 // BuildBlock builds a block to be added to consensus.
@@ -364,6 +339,14 @@ func (b *builder) notifyBlockReady() {
 	}
 }
 
+func isSyncFeeNeeded(tx *txs.Tx) bool {
+	switch tx.Unsigned.(type) {
+	case *txs.AddDelegatorTx, *txs.AddValidatorTx, *txs.AddPermissionlessDelegatorTx, *txs.AddPermissionlessValidatorTx:
+		return true
+	}
+	return false
+}
+
 // [timestamp] is min(max(now, parent timestamp), next staker change time)
 func buildBlock(
 	builder *builder,
@@ -373,7 +356,6 @@ func buildBlock(
 	forceAdvanceTime bool,
 	parentState state.Chain,
 ) (blocks.Block, error) {
-	fmt.Println("BUILD BLOCK")
 	// Try rewarding stakers whose staking period ends at the new chain time.
 	// This is done first to prioritize advancing the timestamp as quickly as
 	// possible.
@@ -387,7 +369,7 @@ func buildBlock(
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
 
-		accumulatedFees, err := builder.getAccumulatedFees()
+		accumulatedFees, err := builder.txExecutorBackend.GetAccumulatedFees(feeKey)
 		if err != nil {
 			return nil, fmt.Errorf("could not get accumulated fees: %w", err)
 		}
@@ -410,12 +392,26 @@ func buildBlock(
 		return nil, ErrNoPendingBlocks
 	}
 
+	txs := builder.Mempool.PeekTxs(targetBlockSize)
+	var accumulatedFees map[ids.ID][]byte
+	for _, tx := range txs {
+		if !isSyncFeeNeeded(tx) {
+			continue
+		}
+		accumulatedFees, err = builder.txExecutorBackend.GetAccumulatedFees(feeKey)
+		if err != nil {
+			return nil, err
+		}
+		break
+	}
+
 	// Issue a block with as many transactions as possible.
-	return blocks.NewBanffStandardBlock(
+	return blocks.NewBanffStandardBlockWithFee(
 		timestamp,
 		parentID,
 		height,
-		builder.Mempool.PeekTxs(targetBlockSize),
+		txs,
+		accumulatedFees,
 	)
 }
 
