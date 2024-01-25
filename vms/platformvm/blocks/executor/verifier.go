@@ -39,7 +39,7 @@ type verifier struct {
 	txExecutorBackend *executor.Backend
 }
 
-func (v *verifier) addAccumulatedFeeToState(accumulatedFee map[ids.ID][]byte, states ...state.Chain) error {
+func (v *verifier) addAccumulatedFeeToState(accumulatedFee map[ids.ID][]byte, states ...state.Chain) map[ids.ID]*atomic.Requests {
 	var atomicRequests map[ids.ID]*atomic.Requests
 	for chain, accumulatedFeeBytes := range accumulatedFee {
 		accumulatedFee := new(big.Int).SetBytes(accumulatedFeeBytes)
@@ -56,10 +56,7 @@ func (v *verifier) addAccumulatedFeeToState(accumulatedFee map[ids.ID][]byte, st
 			},
 		}
 	}
-	if len(atomicRequests) != 0 {
-		return v.ctx.SharedMemory.Apply(atomicRequests)
-	}
-	return nil
+	return atomicRequests
 }
 
 func (v *verifier) BanffAbortBlock(b *blocks.BanffAbortBlock) error {
@@ -94,9 +91,11 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	if err != nil {
 		return err
 	}
-	err = v.addAccumulatedFeeToState(b.AccumulatedFee, onCommitState, onAbortState)
-	if err != nil {
-		return err
+	atomicRequests := v.addAccumulatedFeeToState(b.AccumulatedFee, onCommitState, onAbortState)
+	if len(atomicRequests) != 0 {
+		if err = v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
+			return err
+		}
 	}
 
 	// Apply the changes, if any, from advancing the chain time.
@@ -433,6 +432,13 @@ func (v *verifier) standardBlock(
 		onAcceptState:  onAcceptState,
 		timestamp:      onAcceptState.GetTimestamp(),
 		atomicRequests: make(map[ids.ID]*atomic.Requests),
+	}
+
+	if len(b.AccumulatedFee) != 0 {
+		atomicRequests := v.addAccumulatedFeeToState(b.AccumulatedFee, onAcceptState)
+		if err := v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
+			return err
+		}
 	}
 
 	// Finally we process the transactions

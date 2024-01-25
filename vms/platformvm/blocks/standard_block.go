@@ -49,9 +49,31 @@ func NewBanffStandardBlock(
 	return blk, initialize(blk)
 }
 
+func NewBanffStandardBlockWithFee(
+	timestamp time.Time,
+	parentID ids.ID,
+	height uint64,
+	txs []*txs.Tx,
+	accumulatedFee map[ids.ID][]byte,
+) (*BanffStandardBlock, error) {
+	blk := &BanffStandardBlock{
+		Time: uint64(timestamp.Unix()),
+		ApricotStandardBlock: ApricotStandardBlock{
+			CommonBlock: CommonBlock{
+				PrntID: parentID,
+				Hght:   height,
+			},
+			AccumulatedFee: accumulatedFee,
+			Transactions:   txs,
+		},
+	}
+	return blk, initialize(blk)
+}
+
 type ApricotStandardBlock struct {
-	CommonBlock  `serialize:"true"`
-	Transactions []*txs.Tx `serialize:"true" json:"txs"`
+	CommonBlock    `serialize:"true"`
+	Transactions   []*txs.Tx         `serialize:"true" json:"txs"`
+	AccumulatedFee map[ids.ID][]byte `serialize:"true" json:"accumulatedFee"`
 }
 
 func (b *ApricotStandardBlock) initialize(bytes []byte) error {
