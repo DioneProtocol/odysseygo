@@ -4,15 +4,11 @@
 package txs
 
 import (
-	"errors"
-
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
 var (
-	errOutsGreaterThanInputs = errors.New("outputs are greater than inputs")
-
 	_ Visitor = (*BurnedAssetCalculator)(nil)
 )
 

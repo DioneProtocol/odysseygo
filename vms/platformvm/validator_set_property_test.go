@@ -35,6 +35,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/units"
 	"github.com/ava-labs/avalanchego/version"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/platformvm/api"
 	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
 	"github.com/ava-labs/avalanchego/vms/platformvm/config"
@@ -743,6 +744,13 @@ func buildVM(t *testing.T) (*VM, ids.ID, error) {
 
 	m := atomic.NewMemory(atomicDB)
 	ctx.SharedMemory = m.NewSharedMemory(ctx.ChainID)
+
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	if err != nil {
+		return nil, ids.Empty, err
+	}
+	ctx.FeeCollector = f
 
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()

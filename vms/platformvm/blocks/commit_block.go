@@ -4,6 +4,7 @@
 package blocks
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -63,6 +64,18 @@ func (*ApricotCommitBlock) Txs() []*txs.Tx {
 
 func (b *ApricotCommitBlock) Visit(v Visitor) error {
 	return v.ApricotCommitBlock(b)
+}
+
+func (b *ApricotCommitBlock) FeeFromXChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotCommitBlock) FeeFromCChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotCommitBlock) AccumulatedFee() *big.Int {
+	return new(big.Int)
 }
 
 func NewApricotCommitBlock(

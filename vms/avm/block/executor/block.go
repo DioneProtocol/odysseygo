@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 	"time"
 
 	"go.uber.org/zap"
@@ -17,7 +16,6 @@ import (
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/choices"
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
-	"github.com/ava-labs/avalanchego/utils/constants"
 	"github.com/ava-labs/avalanchego/vms/avm/block"
 	"github.com/ava-labs/avalanchego/vms/avm/states"
 	"github.com/ava-labs/avalanchego/vms/avm/txs/executor"
@@ -27,8 +25,6 @@ const SyncBound = 10 * time.Second
 
 var (
 	_ snowman.Block = (*Block)(nil)
-
-	feeKey = []byte("fee")
 
 	ErrUnexpectedMerkleRoot        = errors.New("unexpected merkle root")
 	ErrTimestampBeyondSyncBound    = errors.New("proposed timestamp is too far in the future relative to local time")
@@ -110,8 +106,7 @@ func (b *Block) Verify(context.Context) error {
 		)
 	}
 
-	avaxAssetId := b.manager.backend.Ctx.AVAXAssetID
-	stateDiff, err := states.NewDiff(parentID, b.manager, avaxAssetId)
+	stateDiff, err := states.NewDiff(parentID, b.manager)
 	if err != nil {
 		return err
 	}
@@ -192,25 +187,6 @@ func (b *Block) Verify(context.Context) error {
 		}
 	}
 
-	// TODO: transfer accumulated fees periodically
-	accumulatedFee := new(big.Int).Add(b.manager.state.GetAccumulatedFee(), stateDiff.GetAccumulatedFee())
-	if accumulatedFee.Sign() > 0 {
-		// Send atomicRequests to the primary chain
-		chainRequests, exists := blockState.atomicRequests[constants.PlatformChainID]
-		stateDiff.SubAccumulatedFee(accumulatedFee)
-		feeSyncElement := atomic.UpdateIntRequest{
-			Key:   feeKey,
-			Delta: accumulatedFee,
-		}
-		if !exists {
-			blockState.atomicRequests[constants.PlatformChainID] = &atomic.Requests{
-				UpdateIntRequests: []*atomic.UpdateIntRequest{&feeSyncElement},
-			}
-		} else {
-			chainRequests.UpdateIntRequests = append(chainRequests.UpdateIntRequests, &feeSyncElement)
-		}
-	}
-
 	// Verify that none of the transactions consumed any inputs that were
 	// already imported in a currently processing block.
 	err = b.manager.VerifyUniqueInputs(parentID, blockState.importedInputs)
@@ -262,6 +238,11 @@ func (b *Block) Accept(context.Context) error {
 			blkID,
 			err,
 		)
+	}
+
+	_, err = b.manager.backend.Ctx.FeeCollector.AddXChainValue(b.AccumulatedFee())
+	if err != nil {
+		return fmt.Errorf("failed to collect fee: %w", err)
 	}
 
 	// Note that this method writes [batch] to the database.

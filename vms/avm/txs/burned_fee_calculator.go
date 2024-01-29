@@ -4,19 +4,15 @@
 package txs
 
 import (
-	"errors"
-
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
 )
 
 var (
-	errOutsGreaterThanInputs = errors.New("outputs are greater than inputs")
-
-	_ Visitor = (*burned)(nil)
+	_ Visitor = (*BurnedFeeCalculator)(nil)
 )
 
-type burned struct {
+type BurnedFeeCalculator struct {
 	tx      *Tx
 	assetId ids.ID
 	burned  uint64
@@ -42,7 +38,7 @@ func calculateOutputs(outs []*avax.TransferableOutput, assetId ids.ID) uint64 {
 	return totalOutputs
 }
 
-func (b *burned) setDifference(tx *avax.BaseTx) error {
+func (b *BurnedFeeCalculator) setDifference(tx *avax.BaseTx) error {
 	ins := calculateInputs(tx.Ins, b.assetId)
 	outs := calculateOutputs(tx.Outs, b.assetId)
 	if ins > outs {
@@ -53,15 +49,15 @@ func (b *burned) setDifference(tx *avax.BaseTx) error {
 	return nil
 }
 
-func (b *burned) BaseTx(tx *BaseTx) error {
+func (b *BurnedFeeCalculator) BaseTx(tx *BaseTx) error {
 	return b.setDifference(&tx.BaseTx)
 }
 
-func (b *burned) CreateAssetTx(tx *CreateAssetTx) error {
+func (b *BurnedFeeCalculator) CreateAssetTx(tx *CreateAssetTx) error {
 	return b.setDifference(&tx.BaseTx.BaseTx)
 }
 
-func (b *burned) ExportTx(tx *ExportTx) error {
+func (b *BurnedFeeCalculator) ExportTx(tx *ExportTx) error {
 	baseTx := &tx.BaseTx.BaseTx
 	ins := calculateInputs(baseTx.Ins, b.assetId)
 	baseOuts := calculateOutputs(baseTx.Outs, b.assetId)
@@ -75,7 +71,7 @@ func (b *burned) ExportTx(tx *ExportTx) error {
 	return nil
 }
 
-func (b *burned) ImportTx(tx *ImportTx) error {
+func (b *BurnedFeeCalculator) ImportTx(tx *ImportTx) error {
 	baseTx := &tx.BaseTx.BaseTx
 	outs := calculateOutputs(baseTx.Outs, b.assetId)
 	baseIns := calculateInputs(baseTx.Ins, b.assetId)
@@ -89,6 +85,6 @@ func (b *burned) ImportTx(tx *ImportTx) error {
 	return nil
 }
 
-func (b *burned) OperationTx(tx *OperationTx) error {
+func (b *BurnedFeeCalculator) OperationTx(tx *OperationTx) error {
 	return b.setDifference(&tx.BaseTx.BaseTx)
 }

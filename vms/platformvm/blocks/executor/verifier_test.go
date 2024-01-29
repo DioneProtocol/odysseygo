@@ -264,7 +264,6 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 			return nil
 		},
 	).Times(1)
-	blkTx.EXPECT().Visit(gomock.AssignableToTypeOf(&txs.BurnedAssetCalculator{})).Times(1)
 
 	// We can't serialize [blkTx] because it isn't
 	// registered with the blocks.Codec.
@@ -738,7 +737,6 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 			return nil
 		},
 	).Times(1)
-	blkTx.EXPECT().Visit(gomock.AssignableToTypeOf(&txs.BurnedAssetCalculator{})).Times(1)
 
 	// We can't serialize [blkTx] because it isn't
 	// registered with the blocks.Codec.

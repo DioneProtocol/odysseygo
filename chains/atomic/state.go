@@ -6,7 +6,6 @@ package atomic
 import (
 	"bytes"
 	"errors"
-	"math/big"
 
 	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/database/linkeddb"
@@ -17,11 +16,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/set"
 )
 
-var (
-	negValueFlag = byte(1)
-
-	errDuplicatedOperation = errors.New("duplicated operation on provided value")
-)
+var errDuplicatedOperation = errors.New("duplicated operation on provided value")
 
 type dbElement struct {
 	// Present indicates the value was removed before existing.
@@ -97,55 +92,7 @@ func (s *state) SetValue(e *Element) error {
 		// An unexpected error occurred, so we should propagate that error
 		return err
 	}
-	return s.setValueUnchecked(e)
-}
 
-// UpdateInt places the int value [i] into the state or updates existing one.
-//
-// The first byte is responsible for the sign (0 means non-negative).
-// The remaining bytes are part of the unsigned int
-func (s *state) UpdateInt(i *UpdateIntRequest) error {
-	var elemValue *big.Int
-	dbValue, err := s.loadValue(i.Key)
-	if err == nil {
-		// The key was already registered with the state.
-		if !dbValue.Present {
-			// This was previously optimistically deleted from the database, so
-			// it should be immediately removed.
-			return s.valueDB.Delete(i.Key)
-		}
-		neg := dbValue.Value[0]
-		elemValue = new(big.Int).SetBytes(dbValue.Value[1:])
-		if neg == negValueFlag {
-			elemValue.Neg(elemValue)
-		}
-	} else if err == database.ErrNotFound {
-		elemValue = big.NewInt(0)
-	} else {
-		return err
-	}
-
-	elemValue.Add(elemValue, i.Delta)
-
-	var dbBytes []byte
-	if elemValue.Sign() >= 0 {
-		dbBytes = []byte{0}
-	} else {
-		dbBytes = []byte{negValueFlag}
-	}
-
-	dbBytes = append(dbBytes, elemValue.Bytes()...)
-	elem := Element{
-		Key:   i.Key,
-		Value: dbBytes,
-	}
-	return s.setValueUnchecked(&elem)
-}
-
-// setValueUnchecked places the element [e] into the state and maps each of the traits of
-// the element to its key, so that the element can be looked up by any of its
-// traits.
-func (s *state) setValueUnchecked(e *Element) error {
 	for _, trait := range e.Traits {
 		traitDB := prefixdb.New(trait, s.indexDB)
 		traitList := linkeddb.NewDefault(traitDB)

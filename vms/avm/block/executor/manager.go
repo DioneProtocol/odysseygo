@@ -155,7 +155,7 @@ func (m *manager) VerifyTx(tx *txs.Tx) error {
 		return err
 	}
 
-	stateDiff, err := states.NewDiff(m.preferred, m, m.backend.Ctx.AVAXAssetID)
+	stateDiff, err := states.NewDiff(m.preferred, m)
 	if err != nil {
 		return err
 	}

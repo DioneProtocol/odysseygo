@@ -50,6 +50,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/units"
 	"github.com/ava-labs/avalanchego/version"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/platformvm/api"
 	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
 	"github.com/ava-labs/avalanchego/vms/platformvm/config"
@@ -335,6 +336,11 @@ func defaultVM(t *testing.T) (*VM, database.Database, *mutableSharedMemory) {
 	}
 	ctx.SharedMemory = msm
 
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	require.NoError(err)
+	ctx.FeeCollector = f
+
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()
 	_, genesisBytes := defaultGenesis(t)
@@ -361,7 +367,6 @@ func defaultVM(t *testing.T) (*VM, database.Database, *mutableSharedMemory) {
 	// Create a subnet and store it in testSubnet1
 	// Note: following Banff activation, block acceptance will move
 	// chain time ahead
-	var err error
 	testSubnet1, err = vm.txBuilder.NewCreateSubnetTx(
 		2, // threshold; 2 sigs from keys[0], keys[1], keys[2] needed to add validator to this subnet
 		// control keys are keys[0], keys[1], keys[2]
@@ -1339,6 +1344,11 @@ func TestRestartFullyAccepted(t *testing.T) {
 	}
 	firstCtx.SharedMemory = msm
 
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	require.NoError(err)
+	firstCtx.FeeCollector = f
+
 	initialClkTime := banffForkTime.Add(time.Second)
 	firstVM.clock.Set(initialClkTime)
 	firstCtx.Lock.Lock()
@@ -1419,6 +1429,7 @@ func TestRestartFullyAccepted(t *testing.T) {
 
 	secondCtx := defaultContext(t)
 	secondCtx.SharedMemory = msm
+	secondCtx.FeeCollector = f
 	secondVM.clock.Set(initialClkTime)
 	secondCtx.Lock.Lock()
 	defer func() {
@@ -1481,6 +1492,11 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		SharedMemory: m.NewSharedMemory(ctx.ChainID),
 	}
 	ctx.SharedMemory = msm
+
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	require.NoError(err)
+	ctx.FeeCollector = f
 
 	consensusCtx := snow.DefaultConsensusContextTest()
 	consensusCtx.Context = ctx
@@ -1952,6 +1968,12 @@ func TestUptimeDisallowedWithRestart(t *testing.T) {
 	}}
 
 	firstCtx := defaultContext(t)
+
+	baseDBManager := manager.NewMemDB(version.Semantic1_0_0)
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	require.NoError(err)
+	firstCtx.FeeCollector = f
 	firstCtx.Lock.Lock()
 
 	firstMsgChan := make(chan common.Message, 1)
@@ -1993,6 +2015,7 @@ func TestUptimeDisallowedWithRestart(t *testing.T) {
 	}}
 
 	secondCtx := defaultContext(t)
+	secondCtx.FeeCollector = f
 	secondCtx.Lock.Lock()
 	defer func() {
 		require.NoError(secondVM.Shutdown(context.Background()))
@@ -2125,6 +2148,11 @@ func TestUptimeDisallowedAfterNeverConnecting(t *testing.T) {
 	}}
 
 	ctx := defaultContext(t)
+	baseDBManager := manager.NewMemDB(version.Semantic1_0_0)
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	require.NoError(err)
+	ctx.FeeCollector = f
 	ctx.Lock.Lock()
 
 	msgChan := make(chan common.Message, 1)

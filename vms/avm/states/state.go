@@ -7,7 +7,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"math/big"
 	"sync"
 	"time"
 
@@ -53,10 +52,9 @@ var (
 	blockPrefix     = []byte("block")
 	singletonPrefix = []byte("singleton")
 
-	isInitializedKey  = []byte{0x00}
-	timestampKey      = []byte{0x01}
-	lastAcceptedKey   = []byte{0x02}
-	accumulatedFeeKey = []byte{0x08}
+	isInitializedKey = []byte{0x00}
+	timestampKey     = []byte{0x01}
+	lastAcceptedKey  = []byte{0x02}
 
 	errStatusWithoutTx = errors.New("unexpected status without transactions")
 
@@ -71,18 +69,10 @@ type ReadOnlyChain interface {
 	GetBlock(blkID ids.ID) (block.Block, error)
 	GetLastAccepted() ids.ID
 	GetTimestamp() time.Time
-	GetAccumulatedFee() *big.Int
-}
-
-type AccumulatedFee interface {
-	SetAccumulatedFee(*big.Int)
-	AddAccumulatedFee(*big.Int)
-	SubAccumulatedFee(*big.Int)
 }
 
 type Chain interface {
 	ReadOnlyChain
-	AccumulatedFee
 	avax.UTXOAdder
 	avax.UTXODeleter
 
@@ -186,8 +176,6 @@ type state struct {
 
 	trackChecksum bool
 	txChecksum    ids.ID
-
-	accumulatedFee, persistedAccumulatedFee *big.Int
 }
 
 func New(
@@ -269,9 +257,7 @@ func New(
 
 		singletonDB: singletonDB,
 
-		trackChecksum:           trackChecksums,
-		accumulatedFee:          big.NewInt(0),
-		persistedAccumulatedFee: big.NewInt(0),
+		trackChecksum: trackChecksums,
 	}
 	return s, s.initTxChecksum()
 }
@@ -470,17 +456,7 @@ func (s *state) InitializeChainState(stopVertexID ids.ID, genesisTimestamp time.
 	s.persistedLastAccepted = lastAccepted
 	s.timestamp, err = database.GetTimestamp(s.singletonDB, timestampKey)
 	s.persistedTimestamp = s.timestamp
-	if err != nil {
-		return err
-	}
-	accumulatedFee, err := database.GetBigInt(s.singletonDB, accumulatedFeeKey)
-	if err != nil && err != database.ErrNotFound {
-		return err
-	} else {
-		s.accumulatedFee = accumulatedFee
-		s.persistedAccumulatedFee = new(big.Int).Set(s.accumulatedFee)
-	}
-	return nil
+	return err
 }
 
 func (s *state) initializeChainState(stopVertexID ids.ID, genesisTimestamp time.Time) error {
@@ -523,22 +499,6 @@ func (s *state) GetTimestamp() time.Time {
 
 func (s *state) SetTimestamp(t time.Time) {
 	s.timestamp = t
-}
-
-func (s *state) GetAccumulatedFee() *big.Int {
-	return new(big.Int).Set(s.accumulatedFee)
-}
-
-func (s *state) SetAccumulatedFee(f *big.Int) {
-	s.accumulatedFee.Set(f)
-}
-
-func (s *state) AddAccumulatedFee(f *big.Int) {
-	s.accumulatedFee.Add(s.accumulatedFee, f)
-}
-
-func (s *state) SubAccumulatedFee(f *big.Int) {
-	s.accumulatedFee.Sub(s.accumulatedFee, f)
 }
 
 func (s *state) Commit() error {
@@ -661,12 +621,6 @@ func (s *state) writeMetadata() error {
 			return fmt.Errorf("failed to write last accepted: %w", err)
 		}
 		s.persistedLastAccepted = s.lastAccepted
-	}
-	if s.persistedAccumulatedFee.Cmp(s.accumulatedFee) != 0 {
-		if err := database.PutBigInt(s.singletonDB, accumulatedFeeKey, s.accumulatedFee); err != nil {
-			return fmt.Errorf("failed to write accumulated fee: %w", err)
-		}
-		s.persistedAccumulatedFee.Set(s.accumulatedFee)
 	}
 	return nil
 }

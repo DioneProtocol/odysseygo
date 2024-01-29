@@ -4,7 +4,6 @@
 package executor
 
 import (
-	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow"
 	"github.com/ava-labs/avalanchego/snow/uptime"
 	"github.com/ava-labs/avalanchego/utils"
@@ -16,13 +15,12 @@ import (
 )
 
 type Backend struct {
-	Config                 *config.Config
-	Ctx                    *snow.Context
-	Clk                    *mockable.Clock
-	Fx                     fx.Fx
-	FlowChecker            utxo.Verifier
-	Uptimes                uptime.Manager
-	Rewards                reward.Calculator
-	Bootstrapped           *utils.Atomic[bool]
-	AccumulatedFeeChainIDs []ids.ID
+	Config       *config.Config
+	Ctx          *snow.Context
+	Clk          *mockable.Clock
+	Fx           fx.Fx
+	FlowChecker  utxo.Verifier
+	Uptimes      uptime.Manager
+	Rewards      reward.Calculator
+	Bootstrapped *utils.Atomic[bool]
 }

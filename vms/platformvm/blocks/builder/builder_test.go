@@ -6,6 +6,7 @@ package builder
 import (
 	"context"
 	"errors"
+	"math/big"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/logging"
 	"github.com/ava-labs/avalanchego/utils/timer/mockable"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/components/verify"
 	"github.com/ava-labs/avalanchego/vms/platformvm/blocks"
 	"github.com/ava-labs/avalanchego/vms/platformvm/state"
@@ -358,10 +360,19 @@ func TestBuildBlock(t *testing.T) {
 				// The tx builder should be asked to build a reward tx
 				txBuilder := txbuilder.NewMockBuilder(ctrl)
 				txBuilder.EXPECT().NewRewardValidatorTx(stakerTxID).Return(transactions[0], nil)
+
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetXChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetCChainValue().Return(new(big.Int)).Times(1)
+
 				return &builder{
-					Mempool:           mempool,
-					txBuilder:         txBuilder,
-					txExecutorBackend: &txexecutor.Backend{},
+					Mempool:   mempool,
+					txBuilder: txBuilder,
+					txExecutorBackend: &txexecutor.Backend{
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
+					},
 				}
 			},
 			timestamp:        parentTimestamp,
@@ -404,9 +415,18 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasStakerTx().Return(false)
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(transactions)
+
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetXChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetCChainValue().Return(new(big.Int)).Times(1)
+
 				return &builder{
-					Mempool:           mempool,
-					txExecutorBackend: &txexecutor.Backend{},
+					Mempool: mempool,
+					txExecutorBackend: &txexecutor.Backend{
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
+					},
 				}
 			},
 			timestamp:        parentTimestamp,
@@ -556,12 +576,19 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetXChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetCChainValue().Return(new(big.Int)).Times(1)
+
 				clk := &mockable.Clock{}
 				clk.Set(now)
 				return &builder{
 					Mempool: mempool,
 					txExecutorBackend: &txexecutor.Backend{
 						Clk: clk,
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
 					},
 				}
 			},
@@ -610,12 +637,19 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetXChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetCChainValue().Return(new(big.Int)).Times(1)
+
 				clk := &mockable.Clock{}
 				clk.Set(now)
 				return &builder{
 					Mempool: mempool,
 					txExecutorBackend: &txexecutor.Backend{
 						Clk: clk,
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
 					},
 				}
 			},

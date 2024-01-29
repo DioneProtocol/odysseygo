@@ -91,7 +91,7 @@ func (t *Tx) UTXOs() []*avax.UTXO {
 
 // Burned returns the amount of asset that will be burned
 func (t *Tx) Burned(assetId ids.ID) uint64 {
-	b := burned{tx: t, assetId: assetId}
+	b := BurnedFeeCalculator{tx: t, assetId: assetId}
 	// The visit error is explicitly dropped here because no error is ever
 	// returned from the utxoGetter.
 	_ = t.Unsigned.Visit(&b)
