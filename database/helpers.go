@@ -24,8 +24,9 @@ const (
 )
 
 var (
-	boolFalseKey = []byte{BoolFalse}
-	boolTrueKey  = []byte{BoolTrue}
+	boolFalseKey  = []byte{BoolFalse}
+	boolTrueKey   = []byte{BoolTrue}
+	intSignPrefix = []byte("sign")
 
 	errWrongSize = errors.New("value has unexpected size")
 )
@@ -100,7 +101,15 @@ func ParseUInt32(b []byte) (uint32, error) {
 
 func PutBigInt(db KeyValueReaderWriter, key []byte, val *big.Int) error {
 	valBytes := val.Bytes()
-	return db.Put(key, valBytes)
+	err := db.Put(key, valBytes)
+	if err != nil {
+		return err
+	}
+
+	signKey := []byte{}
+	signKey = append(signKey, intSignPrefix...)
+	signKey = append(signKey, key...)
+	return PutBool(db, signKey, val.Sign() < 0)
 }
 
 func GetBigInt(db KeyValueReader, key []byte) (*big.Int, error) {
@@ -108,7 +117,18 @@ func GetBigInt(db KeyValueReader, key []byte) (*big.Int, error) {
 	if err != nil {
 		return big.NewInt(0), err
 	}
-	return new(big.Int).SetBytes(b), nil
+	signKey := []byte{}
+	signKey = append(signKey, intSignPrefix...)
+	signKey = append(signKey, key...)
+	negative, err := GetBool(db, signKey)
+	if err != nil {
+		return big.NewInt(0), err
+	}
+	value := new(big.Int).SetBytes(b)
+	if negative {
+		value.Neg(value)
+	}
+	return value, nil
 }
 
 func PutTimestamp(db KeyValueWriter, key []byte, val time.Time) error {

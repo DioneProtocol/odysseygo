@@ -168,24 +168,15 @@ func (vm *VM) Initialize(
 		utxoHandler,
 	)
 
-	accumulatedFeeChainsTx, err := vm.state.GetChains(constants.PlatformChainID)
-	if err != nil {
-		return fmt.Errorf("failed to receive chains: %w", err)
-	}
-	accumulatedFeeChainsIDs := make([]ids.ID, len(accumulatedFeeChainsTx))
-	for i, tx := range accumulatedFeeChainsTx {
-		accumulatedFeeChainsIDs[i] = tx.ID()
-	}
 	txExecutorBackend := &txexecutor.Backend{
-		Config:                 &vm.Config,
-		Ctx:                    vm.ctx,
-		Clk:                    &vm.clock,
-		Fx:                     vm.fx,
-		FlowChecker:            utxoHandler,
-		Uptimes:                vm.uptimeManager,
-		Rewards:                rewards,
-		Bootstrapped:           &vm.bootstrapped,
-		AccumulatedFeeChainIDs: accumulatedFeeChainsIDs,
+		Config:       &vm.Config,
+		Ctx:          vm.ctx,
+		Clk:          &vm.clock,
+		Fx:           vm.fx,
+		FlowChecker:  utxoHandler,
+		Uptimes:      vm.uptimeManager,
+		Rewards:      rewards,
+		Bootstrapped: &vm.bootstrapped,
 	}
 
 	// Note: There is a circular dependency between the mempool and block
@@ -202,7 +193,6 @@ func (vm *VM) Initialize(
 		txExecutorBackend,
 		validatorManager,
 	)
-
 	vm.Builder = blockbuilder.New(
 		mempool,
 		vm.txBuilder,

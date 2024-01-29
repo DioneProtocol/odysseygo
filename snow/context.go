@@ -16,6 +16,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils"
 	"github.com/ava-labs/avalanchego/utils/crypto/bls"
 	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
 )
 
@@ -45,6 +46,7 @@ type Context struct {
 	Lock         sync.RWMutex
 	Keystore     keystore.BlockchainKeystore
 	SharedMemory atomic.SharedMemory
+	FeeCollector feecollector.FeeCollector
 	BCLookup     ids.AliaserReader
 	Metrics      metrics.OptionalGatherer
 

@@ -52,6 +52,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/set"
 	"github.com/ava-labs/avalanchego/version"
 	"github.com/ava-labs/avalanchego/vms"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/metervm"
 	"github.com/ava-labs/avalanchego/vms/platformvm/warp"
 	"github.com/ava-labs/avalanchego/vms/proposervm"
@@ -191,6 +192,7 @@ type ManagerConfig struct {
 	Server                      server.Server // Handles HTTP API calls
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
+	FeeCollector                feecollector.FeeCollector
 	AVAXAssetID                 ids.ID
 	XChainID                    ids.ID          // ID of the X-Chain,
 	CChainID                    ids.ID          // ID of the C-Chain,
@@ -480,6 +482,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			Log:          chainLog,
 			Keystore:     m.Keystore.NewBlockchainKeyStore(chainParams.ID),
 			SharedMemory: m.AtomicMemory.NewSharedMemory(chainParams.ID),
+			FeeCollector: m.FeeCollector,
 			BCLookup:     m,
 			Metrics:      vmMetrics,
 

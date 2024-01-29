@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"go.uber.org/zap"
@@ -33,8 +34,6 @@ const targetBlockSize = 128 * units.KiB
 
 var (
 	_ Builder = (*builder)(nil)
-
-	feeKey = []byte("fee")
 
 	ErrEndOfTime       = errors.New("program time is suspiciously far in the future")
 	ErrNoPendingBlocks = errors.New("no pending blocks")
@@ -339,7 +338,7 @@ func (b *builder) notifyBlockReady() {
 	}
 }
 
-func isSyncFeeNeeded(tx *txs.Tx) bool {
+func isFeeSyncNeeded(tx *txs.Tx) bool {
 	switch tx.Unsigned.(type) {
 	case *txs.AddDelegatorTx, *txs.AddValidatorTx, *txs.AddPermissionlessDelegatorTx, *txs.AddPermissionlessValidatorTx:
 		return true
@@ -363,23 +362,24 @@ func buildBlock(
 	if err != nil {
 		return nil, fmt.Errorf("could not find next staker to reward: %w", err)
 	}
+
 	if shouldReward {
 		rewardValidatorTx, err := builder.txBuilder.NewRewardValidatorTx(stakerTxID)
 		if err != nil {
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
 
-		accumulatedFees, err := builder.txExecutorBackend.GetAccumulatedFees(feeKey)
-		if err != nil {
-			return nil, fmt.Errorf("could not get accumulated fees: %w", err)
-		}
+		feeFromXChain := builder.txExecutorBackend.Ctx.FeeCollector.GetXChainValue()
+		feeFromCChain := builder.txExecutorBackend.Ctx.FeeCollector.GetCChainValue()
 
 		return blocks.NewBanffProposalBlockWithFee(
 			timestamp,
 			parentID,
 			height,
 			rewardValidatorTx,
-			accumulatedFees,
+			new(big.Int),
+			feeFromXChain,
+			feeFromCChain,
 		)
 	}
 
@@ -392,17 +392,20 @@ func buildBlock(
 		return nil, ErrNoPendingBlocks
 	}
 
+	accumulatedFees := new(big.Int)
+	feeFromXChain := new(big.Int)
+	feeFromCChain := new(big.Int)
+	synced := false
+
 	txs := builder.Mempool.PeekTxs(targetBlockSize)
-	var accumulatedFees map[ids.ID][]byte
 	for _, tx := range txs {
-		if !isSyncFeeNeeded(tx) {
-			continue
+		burned := tx.Burned(builder.txExecutorBackend.Ctx.AVAXAssetID)
+		accumulatedFees.Add(accumulatedFees, new(big.Int).SetUint64(burned))
+		if !synced && isFeeSyncNeeded(tx) {
+			synced = true
+			feeFromXChain = builder.txExecutorBackend.Ctx.FeeCollector.GetXChainValue()
+			feeFromCChain = builder.txExecutorBackend.Ctx.FeeCollector.GetCChainValue()
 		}
-		accumulatedFees, err = builder.txExecutorBackend.GetAccumulatedFees(feeKey)
-		if err != nil {
-			return nil, err
-		}
-		break
 	}
 
 	// Issue a block with as many transactions as possible.
@@ -412,6 +415,8 @@ func buildBlock(
 		height,
 		txs,
 		accumulatedFees,
+		feeFromXChain,
+		feeFromCChain,
 	)
 }
 

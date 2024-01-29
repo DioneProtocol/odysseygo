@@ -5,6 +5,7 @@ package blocks
 
 import (
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -25,6 +26,10 @@ type Block interface {
 
 	// Visit calls [visitor] with this block's concrete type
 	Visit(visitor Visitor) error
+
+	AccumulatedFee() *big.Int
+	FeeFromXChain() *big.Int
+	FeeFromCChain() *big.Int
 
 	// note: initialize does not assume that block transactions
 	// are initialized, and initializes them itself if they aren't.

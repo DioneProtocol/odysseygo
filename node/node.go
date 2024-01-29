@@ -76,6 +76,7 @@ import (
 	"github.com/ava-labs/avalanchego/version"
 	"github.com/ava-labs/avalanchego/vms"
 	"github.com/ava-labs/avalanchego/vms/avm"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/nftfx"
 	"github.com/ava-labs/avalanchego/vms/platformvm"
 	"github.com/ava-labs/avalanchego/vms/platformvm/signer"
@@ -122,6 +123,9 @@ type Node struct {
 
 	// Manages shared memory
 	sharedMemory *atomic.Memory
+
+	// Storage for collection
+	feeCollector feecollector.FeeCollector
 
 	// Monitors node health and runs health checks
 	health health.Health
@@ -825,6 +829,7 @@ func (n *Node) initChainManager(avaxAssetID ids.ID) error {
 		Server:                                  n.APIServer,
 		Keystore:                                n.keystore,
 		AtomicMemory:                            n.sharedMemory,
+		FeeCollector:                            n.feeCollector,
 		AVAXAssetID:                             avaxAssetID,
 		XChainID:                                xChainID,
 		CChainID:                                cChainID,
@@ -952,6 +957,15 @@ func (n *Node) initVMs() error {
 			zap.Error(err),
 		)
 	}
+	return err
+}
+
+// initSharedMemory initializes the fee collector
+func (n *Node) initFeeCollector() error {
+	n.Log.Info("initializing FeeCollector")
+	feeCollectorDB := prefixdb.New([]byte("fee collector"), n.DB)
+	feeCollector, err := feecollector.New(feeCollectorDB)
+	n.feeCollector = feeCollector
 	return err
 }
 
@@ -1405,6 +1419,10 @@ func (n *Node) Initialize(
 
 	if err := n.initKeystoreAPI(); err != nil { // Start the Keystore API
 		return fmt.Errorf("couldn't initialize keystore API: %w", err)
+	}
+
+	if err := n.initFeeCollector(); err != nil { // Initialize fee collector
+		return fmt.Errorf("couldn't initialize fee collector: %w", err)
 	}
 
 	n.initSharedMemory() // Initialize shared memory

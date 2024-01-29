@@ -6,6 +6,7 @@ package builder
 import (
 	"context"
 	"errors"
+	"math/big"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow/consensus/snowman"
@@ -82,7 +83,7 @@ func (b *builder) BuildBlock(context.Context) (snowman.Block, error) {
 		nextTimestamp = preferredTimestamp
 	}
 
-	stateDiff, err := states.NewDiff(preferredID, b.manager, ctx.AVAXAssetID)
+	stateDiff, err := states.NewDiff(preferredID, b.manager)
 	if err != nil {
 		return nil, err
 	}
@@ -153,11 +154,18 @@ func (b *builder) BuildBlock(context.Context) (snowman.Block, error) {
 		return nil, ErrNoTransactions
 	}
 
-	statelessBlk, err := block.NewStandardBlock(
+	accumulatedFee := big.NewInt(0)
+	for _, tx := range blockTxs {
+		burned := tx.Burned(b.backend.Ctx.AVAXAssetID)
+		accumulatedFee.Add(accumulatedFee, new(big.Int).SetUint64(burned))
+	}
+
+	statelessBlk, err := block.NewStandardBlockWithFee(
 		preferredID,
 		nextHeight,
 		nextTimestamp,
 		blockTxs,
+		accumulatedFee,
 		b.backend.Codec,
 	)
 	if err != nil {
@@ -178,5 +186,5 @@ func (s stateGetter) GetState(ids.ID) (states.Chain, bool) {
 func wrapState(parentState states.Diff) (states.Diff, error) {
 	return states.NewDiff(ids.Empty, stateGetter{
 		state: parentState,
-	}, parentState.GetTxFeeAsset())
+	})
 }

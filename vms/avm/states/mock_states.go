@@ -8,7 +8,6 @@
 package states
 
 import (
-	big "math/big"
 	reflect "reflect"
 	sync "sync"
 	time "time"
@@ -43,18 +42,6 @@ func NewMockChain(ctrl *gomock.Controller) *MockChain {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockChain) EXPECT() *MockChainMockRecorder {
 	return m.recorder
-}
-
-// AddAccumulatedFee mocks base method.
-func (m *MockChain) AddAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddAccumulatedFee", arg0)
-}
-
-// AddAccumulatedFee indicates an expected call of AddAccumulatedFee.
-func (mr *MockChainMockRecorder) AddAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAccumulatedFee", reflect.TypeOf((*MockChain)(nil).AddAccumulatedFee), arg0)
 }
 
 // AddBlock mocks base method.
@@ -103,20 +90,6 @@ func (m *MockChain) DeleteUTXO(arg0 ids.ID) {
 func (mr *MockChainMockRecorder) DeleteUTXO(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUTXO", reflect.TypeOf((*MockChain)(nil).DeleteUTXO), arg0)
-}
-
-// GetAccumulatedFee mocks base method.
-func (m *MockChain) GetAccumulatedFee() *big.Int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccumulatedFee")
-	ret0, _ := ret[0].(*big.Int)
-	return ret0
-}
-
-// GetAccumulatedFee indicates an expected call of GetAccumulatedFee.
-func (mr *MockChainMockRecorder) GetAccumulatedFee() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccumulatedFee", reflect.TypeOf((*MockChain)(nil).GetAccumulatedFee))
 }
 
 // GetBlock mocks base method.
@@ -207,18 +180,6 @@ func (mr *MockChainMockRecorder) GetUTXO(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUTXO", reflect.TypeOf((*MockChain)(nil).GetUTXO), arg0)
 }
 
-// SetAccumulatedFee mocks base method.
-func (m *MockChain) SetAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetAccumulatedFee", arg0)
-}
-
-// SetAccumulatedFee indicates an expected call of SetAccumulatedFee.
-func (mr *MockChainMockRecorder) SetAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccumulatedFee", reflect.TypeOf((*MockChain)(nil).SetAccumulatedFee), arg0)
-}
-
 // SetLastAccepted mocks base method.
 func (m *MockChain) SetLastAccepted(arg0 ids.ID) {
 	m.ctrl.T.Helper()
@@ -241,18 +202,6 @@ func (m *MockChain) SetTimestamp(arg0 time.Time) {
 func (mr *MockChainMockRecorder) SetTimestamp(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTimestamp", reflect.TypeOf((*MockChain)(nil).SetTimestamp), arg0)
-}
-
-// SubAccumulatedFee mocks base method.
-func (m *MockChain) SubAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SubAccumulatedFee", arg0)
-}
-
-// SubAccumulatedFee indicates an expected call of SubAccumulatedFee.
-func (mr *MockChainMockRecorder) SubAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubAccumulatedFee", reflect.TypeOf((*MockChain)(nil).SubAccumulatedFee), arg0)
 }
 
 // MockState is a mock of State interface.
@@ -288,18 +237,6 @@ func (m *MockState) Abort() {
 func (mr *MockStateMockRecorder) Abort() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Abort", reflect.TypeOf((*MockState)(nil).Abort))
-}
-
-// AddAccumulatedFee mocks base method.
-func (m *MockState) AddAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddAccumulatedFee", arg0)
-}
-
-// AddAccumulatedFee indicates an expected call of AddAccumulatedFee.
-func (mr *MockStateMockRecorder) AddAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAccumulatedFee", reflect.TypeOf((*MockState)(nil).AddAccumulatedFee), arg0)
 }
 
 // AddBlock mocks base method.
@@ -406,20 +343,6 @@ func (m *MockState) DeleteUTXO(arg0 ids.ID) {
 func (mr *MockStateMockRecorder) DeleteUTXO(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUTXO", reflect.TypeOf((*MockState)(nil).DeleteUTXO), arg0)
-}
-
-// GetAccumulatedFee mocks base method.
-func (m *MockState) GetAccumulatedFee() *big.Int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccumulatedFee")
-	ret0, _ := ret[0].(*big.Int)
-	return ret0
-}
-
-// GetAccumulatedFee indicates an expected call of GetAccumulatedFee.
-func (mr *MockStateMockRecorder) GetAccumulatedFee() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccumulatedFee", reflect.TypeOf((*MockState)(nil).GetAccumulatedFee))
 }
 
 // GetBlock mocks base method.
@@ -553,18 +476,6 @@ func (mr *MockStateMockRecorder) Prune(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Prune", reflect.TypeOf((*MockState)(nil).Prune), arg0, arg1)
 }
 
-// SetAccumulatedFee mocks base method.
-func (m *MockState) SetAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetAccumulatedFee", arg0)
-}
-
-// SetAccumulatedFee indicates an expected call of SetAccumulatedFee.
-func (mr *MockStateMockRecorder) SetAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccumulatedFee", reflect.TypeOf((*MockState)(nil).SetAccumulatedFee), arg0)
-}
-
 // SetInitialized mocks base method.
 func (m *MockState) SetInitialized() error {
 	m.ctrl.T.Helper()
@@ -603,18 +514,6 @@ func (mr *MockStateMockRecorder) SetTimestamp(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTimestamp", reflect.TypeOf((*MockState)(nil).SetTimestamp), arg0)
 }
 
-// SubAccumulatedFee mocks base method.
-func (m *MockState) SubAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SubAccumulatedFee", arg0)
-}
-
-// SubAccumulatedFee indicates an expected call of SubAccumulatedFee.
-func (mr *MockStateMockRecorder) SubAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubAccumulatedFee", reflect.TypeOf((*MockState)(nil).SubAccumulatedFee), arg0)
-}
-
 // UTXOIDs mocks base method.
 func (m *MockState) UTXOIDs(arg0 []byte, arg1 ids.ID, arg2 int) ([]ids.ID, error) {
 	m.ctrl.T.Helper()
@@ -651,18 +550,6 @@ func NewMockDiff(ctrl *gomock.Controller) *MockDiff {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockDiff) EXPECT() *MockDiffMockRecorder {
 	return m.recorder
-}
-
-// AddAccumulatedFee mocks base method.
-func (m *MockDiff) AddAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddAccumulatedFee", arg0)
-}
-
-// AddAccumulatedFee indicates an expected call of AddAccumulatedFee.
-func (mr *MockDiffMockRecorder) AddAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).AddAccumulatedFee), arg0)
 }
 
 // AddBlock mocks base method.
@@ -723,20 +610,6 @@ func (m *MockDiff) DeleteUTXO(arg0 ids.ID) {
 func (mr *MockDiffMockRecorder) DeleteUTXO(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUTXO", reflect.TypeOf((*MockDiff)(nil).DeleteUTXO), arg0)
-}
-
-// GetAccumulatedFee mocks base method.
-func (m *MockDiff) GetAccumulatedFee() *big.Int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAccumulatedFee")
-	ret0, _ := ret[0].(*big.Int)
-	return ret0
-}
-
-// GetAccumulatedFee indicates an expected call of GetAccumulatedFee.
-func (mr *MockDiffMockRecorder) GetAccumulatedFee() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).GetAccumulatedFee))
 }
 
 // GetBlock mocks base method.
@@ -812,20 +685,6 @@ func (mr *MockDiffMockRecorder) GetTx(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTx", reflect.TypeOf((*MockDiff)(nil).GetTx), arg0)
 }
 
-// GetTxFeeAsset mocks base method.
-func (m *MockDiff) GetTxFeeAsset() ids.ID {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTxFeeAsset")
-	ret0, _ := ret[0].(ids.ID)
-	return ret0
-}
-
-// GetTxFeeAsset indicates an expected call of GetTxFeeAsset.
-func (mr *MockDiffMockRecorder) GetTxFeeAsset() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTxFeeAsset", reflect.TypeOf((*MockDiff)(nil).GetTxFeeAsset))
-}
-
 // GetUTXO mocks base method.
 func (m *MockDiff) GetUTXO(arg0 ids.ID) (*avax.UTXO, error) {
 	m.ctrl.T.Helper()
@@ -839,18 +698,6 @@ func (m *MockDiff) GetUTXO(arg0 ids.ID) (*avax.UTXO, error) {
 func (mr *MockDiffMockRecorder) GetUTXO(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUTXO", reflect.TypeOf((*MockDiff)(nil).GetUTXO), arg0)
-}
-
-// SetAccumulatedFee mocks base method.
-func (m *MockDiff) SetAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetAccumulatedFee", arg0)
-}
-
-// SetAccumulatedFee indicates an expected call of SetAccumulatedFee.
-func (mr *MockDiffMockRecorder) SetAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).SetAccumulatedFee), arg0)
 }
 
 // SetLastAccepted mocks base method.
@@ -875,16 +722,4 @@ func (m *MockDiff) SetTimestamp(arg0 time.Time) {
 func (mr *MockDiffMockRecorder) SetTimestamp(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetTimestamp", reflect.TypeOf((*MockDiff)(nil).SetTimestamp), arg0)
-}
-
-// SubAccumulatedFee mocks base method.
-func (m *MockDiff) SubAccumulatedFee(arg0 *big.Int) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SubAccumulatedFee", arg0)
-}
-
-// SubAccumulatedFee indicates an expected call of SubAccumulatedFee.
-func (mr *MockDiffMockRecorder) SubAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).SubAccumulatedFee), arg0)
 }

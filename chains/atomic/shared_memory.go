@@ -4,8 +4,6 @@
 package atomic
 
 import (
-	"math/big"
-
 	"github.com/ava-labs/avalanchego/database"
 	"github.com/ava-labs/avalanchego/database/versiondb"
 	"github.com/ava-labs/avalanchego/ids"
@@ -15,16 +13,10 @@ import (
 var _ SharedMemory = (*sharedMemory)(nil)
 
 type Requests struct {
-	RemoveRequests    [][]byte            `serialize:"true"`
-	PutRequests       []*Element          `serialize:"true"`
-	UpdateIntRequests []*UpdateIntRequest `serialize:"true"`
+	RemoveRequests [][]byte   `serialize:"true"`
+	PutRequests    []*Element `serialize:"true"`
 
 	peerChainID ids.ID
-}
-
-type UpdateIntRequest struct {
-	Key   []byte   `serialize:"true"`
-	Delta *big.Int `serialize:"true"`
 }
 
 type Element struct {
@@ -40,9 +32,6 @@ type SharedMemory interface {
 	// Invariant: Get guarantees that the resulting values array is the same
 	//            length as keys.
 	Get(peerChainID ids.ID, keys [][]byte) (values [][]byte, err error)
-	// GetBigInt fetches and parses the value corresponding to [key] that have
-	// been sent from [peerChainID]
-	GetBigInt(peerChainID ids.ID, key []byte) (value *big.Int, err error)
 	// Indexed returns a paginated result of values that possess any of the
 	// given traits and were sent from [peerChainID].
 	Indexed(
@@ -82,27 +71,6 @@ func (sm *sharedMemory) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error)
 		valueDB: inbound.getValueDB(sm.thisChainID, peerChainID, db),
 	}
 
-	return sm.getCommon(&s, peerChainID, keys)
-}
-
-func (sm *sharedMemory) GetBigInt(peerChainID ids.ID, key []byte) (*big.Int, error) {
-	values, err := sm.Get(peerChainID, [][]byte{key})
-	result := big.NewInt(0)
-	if err == database.ErrNotFound {
-		return result, nil
-	} else if err != nil {
-		return result, err
-	}
-	value := values[0]
-	neg := value[0]
-	result.SetBytes(value[1:])
-	if neg != 0 {
-		result.Neg(result)
-	}
-	return result, nil
-}
-
-func (sm *sharedMemory) getCommon(s *state, peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
 	values := make([][]byte, len(keys))
 	for i, key := range keys {
 		elem, err := s.Value(key)
@@ -176,28 +144,12 @@ func (sm *sharedMemory) Apply(requests map[ids.ID]*Requests, batches ...database
 				return err
 			}
 		}
-		// Negative updateInt requests are coming from the primary chain
-		for _, updateRequest := range req.UpdateIntRequests {
-			if updateRequest.Delta.Sign() < 0 {
-				if err := s.UpdateInt(updateRequest); err != nil {
-					return err
-				}
-			}
-		}
 
 		// Add Put requests to the outbound database.
 		s.valueDB, s.indexDB = outbound.getValueAndIndexDB(sm.thisChainID, req.peerChainID, db)
 		for _, putRequest := range req.PutRequests {
 			if err := s.SetValue(putRequest); err != nil {
 				return err
-			}
-		}
-		// Positive updateInt requests are coming from the X- and C-chains
-		for _, updateRequest := range req.UpdateIntRequests {
-			if updateRequest.Delta.Sign() > 0 {
-				if err := s.UpdateInt(updateRequest); err != nil {
-					return err
-				}
 			}
 		}
 	}

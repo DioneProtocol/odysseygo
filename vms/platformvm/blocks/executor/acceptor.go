@@ -287,5 +287,32 @@ func (a *acceptor) commonAccept(b blocks.Block) error {
 	a.state.SetHeight(b.Height())
 	a.state.AddStatelessBlock(b)
 	a.validators.OnAcceptedBlockID(blkID)
+
+	feeFromXChain := b.FeeFromXChain()
+	if feeFromXChain.Sign() > 0 {
+		_, err := a.ctx.FeeCollector.SubXChainValue(feeFromXChain)
+		if err != nil {
+			return fmt.Errorf("failed to substract fee: %w", err)
+		}
+	}
+
+	feeFromCChain := b.FeeFromCChain()
+	if feeFromCChain.Sign() > 0 {
+		_, err := a.ctx.FeeCollector.SubCChainValue(feeFromCChain)
+		if err != nil {
+			return fmt.Errorf("failed to substract fee: %w", err)
+		}
+	}
+
+	accumulatedFee := b.AccumulatedFee()
+	accumulatedFee.Add(accumulatedFee, feeFromXChain)
+	accumulatedFee.Add(accumulatedFee, feeFromCChain)
+	if accumulatedFee.Sign() > 0 {
+		_, err := a.ctx.FeeCollector.AddPChainValue(accumulatedFee)
+		if err != nil {
+			return fmt.Errorf("failed to collect fee: %w", err)
+		}
+	}
+
 	return nil
 }

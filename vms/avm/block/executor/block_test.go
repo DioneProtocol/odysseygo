@@ -29,6 +29,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/vms/avm/txs/executor"
 	"github.com/ava-labs/avalanchego/vms/avm/txs/mempool"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 )
 
 func TestBlockVerify(t *testing.T) {
@@ -387,7 +388,6 @@ func TestBlockVerify(t *testing.T) {
 						return nil
 					},
 				).Times(1)
-				mockUnsignedTx1.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				mockUnsignedTx2 := txs.NewMockUnsignedTx(ctrl)
 				mockUnsignedTx2.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Syntactic verification passes
 				mockUnsignedTx2.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Semantic verification fails
@@ -470,7 +470,6 @@ func TestBlockVerify(t *testing.T) {
 						return nil
 					},
 				).Times(1)
-				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				tx := &txs.Tx{
 					Unsigned: mockUnsignedTx,
 				}
@@ -486,13 +485,9 @@ func TestBlockVerify(t *testing.T) {
 				mockParentState.EXPECT().GetLastAccepted().Return(parentID)
 				mockParentState.EXPECT().GetTimestamp().Return(blockTimestamp)
 
-				mockState := states.NewMockState(ctrl)
-				mockState.EXPECT().GetAccumulatedFee().Return(big.NewInt(0))
-
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
-						state: mockState,
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								AVAXAssetID: ids.ID{},
@@ -525,7 +520,6 @@ func TestBlockVerify(t *testing.T) {
 
 				mockUnsignedTx := txs.NewMockUnsignedTx(ctrl)
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Syntactic verification passes
-				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Semantic verification fails
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Execution passes
 				tx := &txs.Tx{
@@ -546,13 +540,9 @@ func TestBlockVerify(t *testing.T) {
 				mockMempool := mempool.NewMockMempool(ctrl)
 				mockMempool.EXPECT().Remove([]*txs.Tx{tx})
 
-				mockState := states.NewMockState(ctrl)
-				mockState.EXPECT().GetAccumulatedFee().Return(big.NewInt(0))
-
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
-						state:   mockState,
 						mempool: mockMempool,
 						metrics: metrics.NewMockMetrics(ctrl),
 						backend: &executor.Backend{
@@ -689,6 +679,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -705,6 +696,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddXChainValue(big.NewInt(100)).Times(1)
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
@@ -713,6 +707,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},
@@ -733,6 +728,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -749,6 +745,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddXChainValue(big.NewInt(100)).Times(1)
+
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(errTest)
 
@@ -761,6 +760,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},
@@ -783,6 +783,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock.EXPECT().Height().Return(uint64(0)).AnyTimes()
 				mockBlock.EXPECT().Parent().Return(ids.GenerateTestID()).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -800,6 +801,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddXChainValue(big.NewInt(100)).Times(1)
+
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(nil)
 
@@ -812,6 +816,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},

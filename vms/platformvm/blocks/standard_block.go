@@ -5,6 +5,7 @@ package blocks
 
 import (
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -43,6 +44,9 @@ func NewBanffStandardBlock(
 				PrntID: parentID,
 				Hght:   height,
 			},
+			AccFee:       []byte{},
+			FeeXChain:    []byte{},
+			FeeCChain:    []byte{},
 			Transactions: txs,
 		},
 	}
@@ -54,7 +58,9 @@ func NewBanffStandardBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	txs []*txs.Tx,
-	accumulatedFee map[ids.ID][]byte,
+	accumulatedFee *big.Int,
+	feeFromXChain *big.Int,
+	feeFromCChain *big.Int,
 ) (*BanffStandardBlock, error) {
 	blk := &BanffStandardBlock{
 		Time: uint64(timestamp.Unix()),
@@ -63,17 +69,21 @@ func NewBanffStandardBlockWithFee(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			AccumulatedFee: accumulatedFee,
-			Transactions:   txs,
+			AccFee:       accumulatedFee.Bytes(),
+			FeeXChain:    feeFromXChain.Bytes(),
+			FeeCChain:    feeFromCChain.Bytes(),
+			Transactions: txs,
 		},
 	}
 	return blk, initialize(blk)
 }
 
 type ApricotStandardBlock struct {
-	CommonBlock    `serialize:"true"`
-	Transactions   []*txs.Tx         `serialize:"true" json:"txs"`
-	AccumulatedFee map[ids.ID][]byte `serialize:"true" json:"accumulatedFee"`
+	CommonBlock  `serialize:"true"`
+	Transactions []*txs.Tx `serialize:"true" json:"txs"`
+	AccFee       []byte    `serialize:"true" json:"accumulatedFee"`
+	FeeXChain    []byte    `serialize:"true" json:"feeFromXChain"`
+	FeeCChain    []byte    `serialize:"true" json:"feeFromCChain"`
 }
 
 func (b *ApricotStandardBlock) initialize(bytes []byte) error {
@@ -100,6 +110,18 @@ func (b *ApricotStandardBlock) Visit(v Visitor) error {
 	return v.ApricotStandardBlock(b)
 }
 
+func (b *ApricotStandardBlock) FeeFromXChain() *big.Int {
+	return new(big.Int).SetBytes(b.FeeXChain)
+}
+
+func (b *ApricotStandardBlock) FeeFromCChain() *big.Int {
+	return new(big.Int).SetBytes(b.FeeCChain)
+}
+
+func (b *ApricotStandardBlock) AccumulatedFee() *big.Int {
+	return new(big.Int).SetBytes(b.AccFee)
+}
+
 // NewApricotStandardBlock is kept for testing purposes only.
 // Following Banff activation and subsequent code cleanup, Apricot Standard blocks
 // should be only verified (upon bootstrap), never created anymore
@@ -113,6 +135,9 @@ func NewApricotStandardBlock(
 			PrntID: parentID,
 			Hght:   height,
 		},
+		AccFee:       []byte{},
+		FeeXChain:    []byte{},
+		FeeCChain:    []byte{},
 		Transactions: txs,
 	}
 	return blk, initialize(blk)

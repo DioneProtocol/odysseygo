@@ -5,6 +5,7 @@ package blocks
 
 import (
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -56,7 +57,10 @@ func NewBanffProposalBlock(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			Tx: tx,
+			AccFee:    []byte{},
+			FeeXChain: []byte{},
+			FeeCChain: []byte{},
+			Tx:        tx,
 		},
 	}
 	return blk, initialize(blk)
@@ -67,7 +71,9 @@ func NewBanffProposalBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
-	accumulatedFee map[ids.ID][]byte,
+	accumulatedFee *big.Int,
+	feeFromXChain *big.Int,
+	feeFromCChain *big.Int,
 ) (*BanffProposalBlock, error) {
 	blk := &BanffProposalBlock{
 		Time: uint64(timestamp.Unix()),
@@ -76,17 +82,21 @@ func NewBanffProposalBlockWithFee(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			AccumulatedFee: accumulatedFee,
-			Tx:             tx,
+			AccFee:    accumulatedFee.Bytes(),
+			FeeXChain: feeFromXChain.Bytes(),
+			FeeCChain: feeFromCChain.Bytes(),
+			Tx:        tx,
 		},
 	}
 	return blk, initialize(blk)
 }
 
 type ApricotProposalBlock struct {
-	CommonBlock    `serialize:"true"`
-	Tx             *txs.Tx           `serialize:"true" json:"tx"`
-	AccumulatedFee map[ids.ID][]byte `serialize:"true" json:"accumulatedFee"`
+	CommonBlock `serialize:"true"`
+	Tx          *txs.Tx `serialize:"true" json:"tx"`
+	AccFee      []byte  `serialize:"true" json:"accumulatedFee"`
+	FeeXChain   []byte  `serialize:"true" json:"feeFromXChain"`
+	FeeCChain   []byte  `serialize:"true" json:"feeFromCChain"`
 }
 
 func (b *ApricotProposalBlock) initialize(bytes []byte) error {
@@ -109,6 +119,18 @@ func (b *ApricotProposalBlock) Visit(v Visitor) error {
 	return v.ApricotProposalBlock(b)
 }
 
+func (b *ApricotProposalBlock) FeeFromXChain() *big.Int {
+	return new(big.Int).SetBytes(b.FeeXChain)
+}
+
+func (b *ApricotProposalBlock) FeeFromCChain() *big.Int {
+	return new(big.Int).SetBytes(b.FeeCChain)
+}
+
+func (b *ApricotProposalBlock) AccumulatedFee() *big.Int {
+	return new(big.Int).SetBytes(b.AccFee)
+}
+
 // NewApricotProposalBlock is kept for testing purposes only.
 // Following Banff activation and subsequent code cleanup, Apricot Proposal blocks
 // should be only verified (upon bootstrap), never created anymore
@@ -122,7 +144,10 @@ func NewApricotProposalBlock(
 			PrntID: parentID,
 			Hght:   height,
 		},
-		Tx: tx,
+		AccFee:    []byte{},
+		FeeXChain: []byte{},
+		FeeCChain: []byte{},
+		Tx:        tx,
 	}
 	return blk, initialize(blk)
 }

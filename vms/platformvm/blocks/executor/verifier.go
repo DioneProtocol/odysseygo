@@ -6,7 +6,6 @@ package executor
 import (
 	"errors"
 	"fmt"
-	"math/big"
 
 	"github.com/ava-labs/avalanchego/chains/atomic"
 	"github.com/ava-labs/avalanchego/ids"
@@ -20,8 +19,6 @@ import (
 
 var (
 	_ blocks.Visitor = (*verifier)(nil)
-
-	feeKey = []byte("fee")
 
 	errApricotBlockIssuedAfterFork                = errors.New("apricot block issued after fork")
 	errBanffProposalBlockWithMultipleTransactions = errors.New("BanffProposalBlock contains multiple transactions")
@@ -37,26 +34,6 @@ var (
 type verifier struct {
 	*backend
 	txExecutorBackend *executor.Backend
-}
-
-func (v *verifier) addAccumulatedFeeToState(accumulatedFee map[ids.ID][]byte, states ...state.Chain) map[ids.ID]*atomic.Requests {
-	var atomicRequests map[ids.ID]*atomic.Requests
-	for chain, accumulatedFeeBytes := range accumulatedFee {
-		accumulatedFee := new(big.Int).SetBytes(accumulatedFeeBytes)
-		for _, state := range states {
-			state.AddAccumulatedFee(accumulatedFee)
-		}
-		atomicRequests = make(map[ids.ID]*atomic.Requests)
-		atomicRequests[chain] = &atomic.Requests{
-			UpdateIntRequests: []*atomic.UpdateIntRequest{
-				{
-					Key:   feeKey,
-					Delta: new(big.Int).Neg(accumulatedFee),
-				},
-			},
-		}
-	}
-	return atomicRequests
 }
 
 func (v *verifier) BanffAbortBlock(b *blocks.BanffAbortBlock) error {
@@ -91,12 +68,6 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	if err != nil {
 		return err
 	}
-	atomicRequests := v.addAccumulatedFeeToState(b.AccumulatedFee, onCommitState, onAbortState)
-	if len(atomicRequests) != 0 {
-		if err = v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
-			return err
-		}
-	}
 
 	// Apply the changes, if any, from advancing the chain time.
 	nextChainTime := b.Timestamp()
@@ -124,8 +95,7 @@ func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	}
 
 	parentID := b.Parent()
-	feeTxAsset := v.ctx.AVAXAssetID
-	onAcceptState, err := state.NewDiffWithFee(parentID, v.backend, feeTxAsset)
+	onAcceptState, err := state.NewDiff(parentID, v.backend)
 	if err != nil {
 		return err
 	}
@@ -191,8 +161,7 @@ func (v *verifier) ApricotStandardBlock(b *blocks.ApricotStandardBlock) error {
 	}
 
 	parentID := b.Parent()
-	feeTxAsset := v.ctx.AVAXAssetID
-	onAcceptState, err := state.NewDiffWithFee(parentID, v, feeTxAsset)
+	onAcceptState, err := state.NewDiff(parentID, v)
 	if err != nil {
 		return err
 	}
@@ -432,13 +401,6 @@ func (v *verifier) standardBlock(
 		onAcceptState:  onAcceptState,
 		timestamp:      onAcceptState.GetTimestamp(),
 		atomicRequests: make(map[ids.ID]*atomic.Requests),
-	}
-
-	if len(b.AccumulatedFee) != 0 {
-		atomicRequests := v.addAccumulatedFeeToState(b.AccumulatedFee, onAcceptState)
-		if err := v.ctx.SharedMemory.Apply(atomicRequests); err != nil {
-			return err
-		}
 	}
 
 	// Finally we process the transactions

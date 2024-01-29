@@ -6,7 +6,6 @@ package state
 import (
 	"errors"
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/database"
@@ -59,47 +58,21 @@ type diff struct {
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	modifiedUTXOs map[ids.ID]*avax.UTXO
-
-	txFeeAsset        ids.ID
-	addAccumulatedFee *big.Int
-	subAccumulatedFee *big.Int
-}
-
-func newDiff(
-	parentID ids.ID,
-	stateVersions Versions,
-) (*diff, error) {
-	parentState, ok := stateVersions.GetState(parentID)
-	if !ok {
-		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
-	}
-	return &diff{
-		parentID:          parentID,
-		stateVersions:     stateVersions,
-		timestamp:         parentState.GetTimestamp(),
-		addAccumulatedFee: big.NewInt(0),
-		subAccumulatedFee: big.NewInt(0),
-	}, nil
 }
 
 func NewDiff(
 	parentID ids.ID,
 	stateVersions Versions,
 ) (Diff, error) {
-	return newDiff(parentID, stateVersions)
-}
-
-func NewDiffWithFee(
-	parentID ids.ID,
-	stateVersions Versions,
-	txFeeAsset ids.ID,
-) (Diff, error) {
-	diff, err := newDiff(parentID, stateVersions)
-	if err != nil {
-		return nil, err
+	parentState, ok := stateVersions.GetState(parentID)
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
-	diff.txFeeAsset = txFeeAsset
-	return diff, nil
+	return &diff{
+		parentID:      parentID,
+		stateVersions: stateVersions,
+		timestamp:     parentState.GetTimestamp(),
+	}, nil
 }
 
 func (d *diff) GetTimestamp() time.Time {
@@ -442,15 +415,11 @@ func (d *diff) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 	return parentState.GetTx(txID)
 }
 
-func (d *diff) AddTx(tx *txs.Tx, s status.Status) {
+func (d *diff) AddTx(tx *txs.Tx, status status.Status) {
 	txID := tx.ID()
 	txStatus := &txAndStatus{
 		tx:     tx,
-		status: s,
-	}
-	if s == status.Committed && d.txFeeAsset != ids.Empty {
-		burned := new(big.Int).SetUint64(tx.Burned(d.txFeeAsset))
-		d.AddAccumulatedFee(burned)
+		status: status,
 	}
 	if d.addedTxs == nil {
 		d.addedTxs = map[ids.ID]*txAndStatus{
@@ -459,23 +428,6 @@ func (d *diff) AddTx(tx *txs.Tx, s status.Status) {
 	} else {
 		d.addedTxs[txID] = txStatus
 	}
-}
-
-func (d *diff) SetAccumulatedFee(f *big.Int) {
-	d.subAccumulatedFee = big.NewInt(0)
-	d.addAccumulatedFee.Set(f)
-}
-
-func (d *diff) AddAccumulatedFee(f *big.Int) {
-	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
-}
-
-func (d *diff) SubAccumulatedFee(f *big.Int) {
-	d.subAccumulatedFee.Add(d.subAccumulatedFee, f)
-}
-
-func (d *diff) GetAccumulatedFee() *big.Int {
-	return new(big.Int).Set(d.addAccumulatedFee)
 }
 
 func (d *diff) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
@@ -534,13 +486,6 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
-	if d.addAccumulatedFee.Sign() > 0 {
-		baseState.AddAccumulatedFee(d.addAccumulatedFee)
-	}
-	if d.subAccumulatedFee.Sign() > 0 {
-		baseState.SubAccumulatedFee(d.subAccumulatedFee)
-	}
-
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}

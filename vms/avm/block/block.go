@@ -4,6 +4,7 @@
 package block
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/codec"
@@ -23,6 +24,7 @@ type Block interface {
 	Timestamp() time.Time
 	MerkleRoot() ids.ID
 	Bytes() []byte
+	AccumulatedFee() *big.Int
 
 	// Txs returns the transactions contained in the block
 	Txs() []*txs.Tx

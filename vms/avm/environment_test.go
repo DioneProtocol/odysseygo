@@ -35,6 +35,7 @@ import (
 	"github.com/ava-labs/avalanchego/vms/avm/fxs"
 	"github.com/ava-labs/avalanchego/vms/avm/txs"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/nftfx"
 	"github.com/ava-labs/avalanchego/vms/secp256k1fx"
 
@@ -139,6 +140,10 @@ func setup(tb testing.TB, c *envConfig) *environment {
 
 	m := atomic.NewMemory(prefixdb.New([]byte{0}, baseDBManager.Current().Database))
 	ctx.SharedMemory = m.NewSharedMemory(ctx.ChainID)
+
+	f, err := feecollector.New(prefixdb.New([]byte{1}, baseDBManager.Current().Database))
+	require.NoError(err)
+	ctx.FeeCollector = f
 
 	// NB: this lock is intentionally left locked when this function returns.
 	// The caller of this function is responsible for unlocking.

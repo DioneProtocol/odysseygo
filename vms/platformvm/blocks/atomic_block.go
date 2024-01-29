@@ -5,6 +5,7 @@ package blocks
 
 import (
 	"fmt"
+	"math/big"
 
 	"github.com/ava-labs/avalanchego/ids"
 	"github.com/ava-labs/avalanchego/snow"
@@ -38,6 +39,18 @@ func (b *ApricotAtomicBlock) Txs() []*txs.Tx {
 
 func (b *ApricotAtomicBlock) Visit(v Visitor) error {
 	return v.ApricotAtomicBlock(b)
+}
+
+func (b *ApricotAtomicBlock) FeeFromXChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotAtomicBlock) FeeFromCChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotAtomicBlock) AccumulatedFee() *big.Int {
+	return new(big.Int)
 }
 
 func NewApricotAtomicBlock(
