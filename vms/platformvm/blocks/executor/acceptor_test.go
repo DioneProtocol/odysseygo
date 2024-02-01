@@ -304,7 +304,7 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 
 		parentStatelessBlk.EXPECT().FeeFromXChain().Return(new(big.Int)).Times(1),
 		parentStatelessBlk.EXPECT().FeeFromCChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().AccumulatedFee().Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().AccumulatedFee(ids.ID{}).Return(new(big.Int)).Times(1),
 
 		s.EXPECT().SetLastAccepted(blkID).Times(1),
 		s.EXPECT().SetHeight(blk.Height()).Times(1),
@@ -312,7 +312,7 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 
 		parentStatelessBlk.EXPECT().FeeFromXChain().Return(new(big.Int)).Times(1),
 		parentStatelessBlk.EXPECT().FeeFromCChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().AccumulatedFee().Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().AccumulatedFee(ids.ID{}).Return(new(big.Int)).Times(1),
 	)
 
 	err = acceptor.ApricotCommitBlock(blk)
@@ -403,7 +403,7 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 
 		parentStatelessBlk.EXPECT().FeeFromXChain().Return(new(big.Int)).Times(1),
 		parentStatelessBlk.EXPECT().FeeFromCChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().AccumulatedFee().Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().AccumulatedFee(ids.ID{}).Return(new(big.Int)).Times(1),
 
 		s.EXPECT().SetLastAccepted(blkID).Times(1),
 		s.EXPECT().SetHeight(blk.Height()).Times(1),
@@ -411,7 +411,7 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 
 		parentStatelessBlk.EXPECT().FeeFromXChain().Return(new(big.Int)).Times(1),
 		parentStatelessBlk.EXPECT().FeeFromCChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().AccumulatedFee().Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().AccumulatedFee(ids.ID{}).Return(new(big.Int)).Times(1),
 	)
 
 	err = acceptor.ApricotAbortBlock(blk)

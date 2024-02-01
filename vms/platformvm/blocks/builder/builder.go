@@ -392,19 +392,15 @@ func buildBlock(
 		return nil, ErrNoPendingBlocks
 	}
 
-	accumulatedFees := new(big.Int)
 	feeFromXChain := new(big.Int)
 	feeFromCChain := new(big.Int)
-	synced := false
 
 	txs := builder.Mempool.PeekTxs(targetBlockSize)
 	for _, tx := range txs {
-		burned := tx.Burned(builder.txExecutorBackend.Ctx.AVAXAssetID)
-		accumulatedFees.Add(accumulatedFees, new(big.Int).SetUint64(burned))
-		if !synced && isFeeSyncNeeded(tx) {
-			synced = true
+		if isFeeSyncNeeded(tx) {
 			feeFromXChain = builder.txExecutorBackend.Ctx.FeeCollector.GetXChainValue()
 			feeFromCChain = builder.txExecutorBackend.Ctx.FeeCollector.GetCChainValue()
+			break
 		}
 	}
 
@@ -414,7 +410,6 @@ func buildBlock(
 		parentID,
 		height,
 		txs,
-		accumulatedFees,
 		feeFromXChain,
 		feeFromCChain,
 	)

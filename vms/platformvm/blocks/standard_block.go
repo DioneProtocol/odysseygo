@@ -44,7 +44,6 @@ func NewBanffStandardBlock(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			AccFee:       []byte{},
 			FeeXChain:    []byte{},
 			FeeCChain:    []byte{},
 			Transactions: txs,
@@ -58,7 +57,6 @@ func NewBanffStandardBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	txs []*txs.Tx,
-	accumulatedFee *big.Int,
 	feeFromXChain *big.Int,
 	feeFromCChain *big.Int,
 ) (*BanffStandardBlock, error) {
@@ -69,7 +67,6 @@ func NewBanffStandardBlockWithFee(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			AccFee:       accumulatedFee.Bytes(),
 			FeeXChain:    feeFromXChain.Bytes(),
 			FeeCChain:    feeFromCChain.Bytes(),
 			Transactions: txs,
@@ -81,7 +78,6 @@ func NewBanffStandardBlockWithFee(
 type ApricotStandardBlock struct {
 	CommonBlock  `serialize:"true"`
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
-	AccFee       []byte    `serialize:"true" json:"accumulatedFee"`
 	FeeXChain    []byte    `serialize:"true" json:"feeFromXChain"`
 	FeeCChain    []byte    `serialize:"true" json:"feeFromCChain"`
 }
@@ -118,8 +114,13 @@ func (b *ApricotStandardBlock) FeeFromCChain() *big.Int {
 	return new(big.Int).SetBytes(b.FeeCChain)
 }
 
-func (b *ApricotStandardBlock) AccumulatedFee() *big.Int {
-	return new(big.Int).SetBytes(b.AccFee)
+func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+	accumulatedFees := new(big.Int)
+	for _, tx := range b.Transactions {
+		burned := tx.Burned(assetID)
+		accumulatedFees.Add(accumulatedFees, new(big.Int).SetUint64(burned))
+	}
+	return accumulatedFees
 }
 
 // NewApricotStandardBlock is kept for testing purposes only.
@@ -135,7 +136,6 @@ func NewApricotStandardBlock(
 			PrntID: parentID,
 			Hght:   height,
 		},
-		AccFee:       []byte{},
 		FeeXChain:    []byte{},
 		FeeCChain:    []byte{},
 		Transactions: txs,

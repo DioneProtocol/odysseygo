@@ -27,7 +27,7 @@ type Block interface {
 	// Visit calls [visitor] with this block's concrete type
 	Visit(visitor Visitor) error
 
-	AccumulatedFee() *big.Int
+	AccumulatedFee(ids.ID) *big.Int
 	FeeFromXChain() *big.Int
 	FeeFromCChain() *big.Int
 
