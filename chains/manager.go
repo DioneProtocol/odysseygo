@@ -467,6 +467,13 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 		return nil, fmt.Errorf("error while registering vm's metrics %w", err)
 	}
 
+	var feeCollector feecollector.FeeCollector
+	if chainParams.SubnetID == constants.PlatformChainID {
+		feeCollector = m.FeeCollector
+	} else {
+		feeCollector = feecollector.NewDummyCollector()
+	}
+
 	ctx := &snow.ConsensusContext{
 		Context: &snow.Context{
 			NetworkID: m.NetworkID,
@@ -482,7 +489,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			Log:          chainLog,
 			Keystore:     m.Keystore.NewBlockchainKeyStore(chainParams.ID),
 			SharedMemory: m.AtomicMemory.NewSharedMemory(chainParams.ID),
-			FeeCollector: m.FeeCollector,
+			FeeCollector: feeCollector,
 			BCLookup:     m,
 			Metrics:      vmMetrics,
 
