@@ -27,8 +27,6 @@ type StandardBlock struct {
 	// List of transactions contained in this block.
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
 
-	AccFee []byte `serialize:"true" json:"accumulatedFee"`
-
 	BlockID ids.ID `json:"id"`
 	bytes   []byte
 }
@@ -78,8 +76,13 @@ func (b *StandardBlock) Bytes() []byte {
 	return b.bytes
 }
 
-func (b *StandardBlock) AccumulatedFee() *big.Int {
-	return new(big.Int).SetBytes(b.AccFee)
+func (b *StandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+	accumulatedFee := big.NewInt(0)
+	for _, tx := range b.Transactions {
+		burned := tx.Burned(assetID)
+		accumulatedFee.Add(accumulatedFee, new(big.Int).SetUint64(burned))
+	}
+	return accumulatedFee
 }
 
 func NewStandardBlock(
@@ -94,24 +97,6 @@ func NewStandardBlock(
 		Hght:         height,
 		Time:         uint64(timestamp.Unix()),
 		Transactions: txs,
-	}
-	return blk, initialize(blk, cm)
-}
-
-func NewStandardBlockWithFee(
-	parentID ids.ID,
-	height uint64,
-	timestamp time.Time,
-	txs []*txs.Tx,
-	accumulatedFee *big.Int,
-	cm codec.Manager,
-) (*StandardBlock, error) {
-	blk := &StandardBlock{
-		PrntID:       parentID,
-		Hght:         height,
-		Time:         uint64(timestamp.Unix()),
-		Transactions: txs,
-		AccFee:       accumulatedFee.Bytes(),
 	}
 	return blk, initialize(blk, cm)
 }

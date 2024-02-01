@@ -49,7 +49,7 @@ func (b *ApricotAtomicBlock) FeeFromCChain() *big.Int {
 	return new(big.Int)
 }
 
-func (b *ApricotAtomicBlock) AccumulatedFee() *big.Int {
+func (b *ApricotAtomicBlock) AccumulatedFee(ids.ID) *big.Int {
 	return new(big.Int)
 }
 
