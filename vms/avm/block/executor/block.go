@@ -240,7 +240,8 @@ func (b *Block) Accept(context.Context) error {
 		)
 	}
 
-	_, err = b.manager.backend.Ctx.FeeCollector.AddXChainValue(b.AccumulatedFee())
+	accumulatedFee := b.AccumulatedFee(b.manager.backend.Ctx.AVAXAssetID)
+	_, err = b.manager.backend.Ctx.FeeCollector.AddXChainValue(accumulatedFee)
 	if err != nil {
 		return fmt.Errorf("failed to collect fee: %w", err)
 	}

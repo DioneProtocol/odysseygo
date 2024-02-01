@@ -679,7 +679,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -728,7 +728,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -783,7 +783,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock.EXPECT().Height().Return(uint64(0)).AnyTimes()
 				mockBlock.EXPECT().Parent().Return(ids.GenerateTestID()).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee().Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
