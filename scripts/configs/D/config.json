@@ -1,0 +1,17 @@
+{
+    "eth-apis": [
+      "eth",
+      "eth-filter",
+      "net",
+      "web3",
+      "internal-eth",
+      "internal-blockchain",
+      "internal-personal",
+      "internal-transaction",
+      "internal-account",
+      "debug",
+      "internal-debug",
+      "debug-tracer"
+    ]
+  }
+  
