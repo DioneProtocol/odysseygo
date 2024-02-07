@@ -217,6 +217,8 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		EndTime:   chainTime,
 	}, nil)
 	onParentAccept.EXPECT().GetTx(nextStakerTxID).Return(nextStakerTx, status.Processing, nil)
+	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Unix(1, 0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(uint64(1), nil).AnyTimes()
 
 	currentStakersIt := state.NewMockStakerIterator(ctrl)
 	currentStakersIt.EXPECT().Next().Return(true).AnyTimes()

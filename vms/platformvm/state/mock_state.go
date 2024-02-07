@@ -468,6 +468,36 @@ func (mr *MockStateMockRecorder) GetRewardUTXOs(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRewardUTXOs", reflect.TypeOf((*MockState)(nil).GetRewardUTXOs), arg0)
 }
 
+// GetStakeSyncTimestamp mocks base method.
+func (m *MockState) GetStakeSyncTimestamp() (time.Time, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStakeSyncTimestamp")
+	ret0, _ := ret[0].(time.Time)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStakeSyncTimestamp indicates an expected call of GetStakeSyncTimestamp.
+func (mr *MockStateMockRecorder) GetStakeSyncTimestamp() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStakeSyncTimestamp", reflect.TypeOf((*MockState)(nil).GetStakeSyncTimestamp))
+}
+
+// GetStakerAccumulatedMintRate mocks base method.
+func (m *MockState) GetStakerAccumulatedMintRate() (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStakerAccumulatedMintRate")
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStakerAccumulatedMintRate indicates an expected call of GetStakerAccumulatedMintRate.
+func (mr *MockStateMockRecorder) GetStakerAccumulatedMintRate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStakerAccumulatedMintRate", reflect.TypeOf((*MockState)(nil).GetStakerAccumulatedMintRate))
+}
+
 // GetStartTime mocks base method.
 func (m *MockState) GetStartTime(arg0 ids.NodeID, arg1 ids.ID) (time.Time, error) {
 	m.ctrl.T.Helper()
@@ -714,6 +744,30 @@ func (m *MockState) SetLastAccepted(arg0 ids.ID) {
 func (mr *MockStateMockRecorder) SetLastAccepted(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastAccepted", reflect.TypeOf((*MockState)(nil).SetLastAccepted), arg0)
+}
+
+// SetStakeSyncTimestamp mocks base method.
+func (m *MockState) SetStakeSyncTimestamp(arg0 time.Time) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetStakeSyncTimestamp", arg0)
+}
+
+// SetStakeSyncTimestamp indicates an expected call of SetStakeSyncTimestamp.
+func (mr *MockStateMockRecorder) SetStakeSyncTimestamp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStakeSyncTimestamp", reflect.TypeOf((*MockState)(nil).SetStakeSyncTimestamp), arg0)
+}
+
+// SetStakerAccumulatedMintRate mocks base method.
+func (m *MockState) SetStakerAccumulatedMintRate(arg0 uint64) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetStakerAccumulatedMintRate", arg0)
+}
+
+// SetStakerAccumulatedMintRate indicates an expected call of SetStakerAccumulatedMintRate.
+func (mr *MockStateMockRecorder) SetStakerAccumulatedMintRate(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStakerAccumulatedMintRate", reflect.TypeOf((*MockState)(nil).SetStakerAccumulatedMintRate), arg0)
 }
 
 // SetTimestamp mocks base method.

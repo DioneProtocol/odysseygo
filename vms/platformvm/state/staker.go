@@ -43,6 +43,7 @@ type Staker struct {
 	StartTime       time.Time
 	EndTime         time.Time
 	PotentialReward uint64
+	MintRate        uint64
 
 	// NextTime is the next time this staker will be moved from a validator set.
 	// If the staker is in the pending validator set, NextTime will equal
@@ -101,6 +102,15 @@ func NewCurrentStaker(txID ids.ID, staker txs.Staker, potentialReward uint64) (*
 		NextTime:        endTime,
 		Priority:        staker.CurrentPriority(),
 	}, nil
+}
+
+func NewCurrentStakerWithMintRate(txID ids.ID, staker txs.Staker, potentialReward, mintRate uint64) (*Staker, error) {
+	newStaker, err := NewCurrentStaker(txID, staker, potentialReward)
+	if err != nil {
+		return nil, err
+	}
+	newStaker.MintRate = mintRate
+	return newStaker, nil
 }
 
 func NewPendingStaker(txID ids.ID, staker txs.Staker) (*Staker, error) {
