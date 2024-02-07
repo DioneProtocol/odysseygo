@@ -238,12 +238,15 @@ func TestParseValidatorMetadata(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x86, 0xA0,
 				// potential delegatee reward
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
+				// mint rate
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0xDC,
 			},
 			expected: &validatorMetadata{
 				UpDuration:               6000000,
 				LastUpdated:              900000,
 				PotentialReward:          100000,
 				PotentialDelegateeReward: 20000,
+				MintRate:                 1500,
 				lastUpdated:              time.Unix(900000, 0),
 			},
 			expectedErr: nil,

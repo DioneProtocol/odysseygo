@@ -134,6 +134,8 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	).AnyTimes()
 	currentStakerIt.EXPECT().Release().Return().AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakerIterator().Return(currentStakerIt, nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Time{}, nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(uint64(1), nil).AnyTimes()
 
 	// no pending stakers
 	pendingIt := state.NewMockStakerIterator(ctrl)

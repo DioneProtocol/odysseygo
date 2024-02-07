@@ -87,12 +87,14 @@ var (
 	chainPrefix                         = []byte("chain")
 	singletonPrefix                     = []byte("singleton")
 
-	timestampKey      = []byte("timestamp")
-	currentSupplyKey  = []byte("current supply")
-	lastAcceptedKey   = []byte("last accepted")
-	heightsIndexedKey = []byte("heights indexed")
-	initializedKey    = []byte("initialized")
-	prunedKey         = []byte("pruned")
+	timestampKey          = []byte("timestamp")
+	stakeSyncTimestampKey = []byte("stake sync timestamp")
+	stakerMintRateKey     = []byte("staker mint rate")
+	currentSupplyKey      = []byte("current supply")
+	lastAcceptedKey       = []byte("last accepted")
+	heightsIndexedKey     = []byte("heights indexed")
+	initializedKey        = []byte("initialized")
+	prunedKey             = []byte("pruned")
 )
 
 // Chain collects all methods to manage the state of the chain for block
@@ -105,6 +107,12 @@ type Chain interface {
 
 	GetTimestamp() time.Time
 	SetTimestamp(tm time.Time)
+
+	SetStakeSyncTimestamp(tm time.Time)
+	GetStakeSyncTimestamp() (time.Time, error)
+
+	SetStakerAccumulatedMintRate(mr uint64)
+	GetStakerAccumulatedMintRate() (uint64, error)
 
 	GetCurrentSupply(subnetID ids.ID) (uint64, error)
 	SetCurrentSupply(subnetID ids.ID, cs uint64)
@@ -367,8 +375,10 @@ type state struct {
 	chainDB      database.Database
 
 	// The persisted fields represent the current database value
-	timestamp, persistedTimestamp         time.Time
-	currentSupply, persistedCurrentSupply uint64
+	timestamp, persistedTimestamp                                 time.Time
+	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
+	currentSupply, persistedCurrentSupply                         uint64
+	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate uint64
 	// [lastAccepted] is the most recently accepted block.
 	lastAccepted, persistedLastAccepted ids.ID
 	indexedHeights                      *heightRange
@@ -1036,6 +1046,22 @@ func (s *state) SetTimestamp(tm time.Time) {
 	s.timestamp = tm
 }
 
+func (s *state) GetStakeSyncTimestamp() (time.Time, error) {
+	return s.stakeSyncTimestamp, nil
+}
+
+func (s *state) SetStakeSyncTimestamp(tm time.Time) {
+	s.stakeSyncTimestamp = tm
+}
+
+func (s *state) GetStakerAccumulatedMintRate() (uint64, error) {
+	return s.stakerAccumulatedMintRate, nil
+}
+
+func (s *state) SetStakerAccumulatedMintRate(mr uint64) {
+	s.stakerAccumulatedMintRate = mr
+}
+
 func (s *state) GetLastAccepted() ids.ID {
 	return s.lastAccepted
 }
@@ -1281,6 +1307,7 @@ func (s *state) syncGenesis(genesisBlk blocks.Block, genesis *genesis.State) err
 	genesisBlkID := genesisBlk.ID()
 	s.SetLastAccepted(genesisBlkID)
 	s.SetTimestamp(time.Unix(int64(genesis.Timestamp), 0))
+	s.SetStakeSyncTimestamp(s.GetTimestamp())
 	s.SetCurrentSupply(constants.PrimaryNetworkID, genesis.InitialSupply)
 	s.AddStatelessBlock(genesisBlk)
 
@@ -1365,6 +1392,20 @@ func (s *state) loadMetadata() error {
 	s.persistedTimestamp = timestamp
 	s.SetTimestamp(timestamp)
 
+	stakeSyncTimestamp, err := database.GetTimestamp(s.singletonDB, stakeSyncTimestampKey)
+	if err != nil {
+		return err
+	}
+	s.persistedStakeSyncTimestamp = stakeSyncTimestamp
+	s.SetStakeSyncTimestamp(stakeSyncTimestamp)
+
+	stakerMintRate, err := database.GetUInt64(s.singletonDB, stakerMintRateKey)
+	if err != nil && err != database.ErrNotFound {
+		return err
+	}
+	s.persistedStakerAccumulatedMintRate = stakerMintRate
+	s.SetStakerAccumulatedMintRate(stakerMintRate)
+
 	currentSupply, err := database.GetUInt64(s.singletonDB, currentSupplyKey)
 	if err != nil {
 		return err
@@ -1439,7 +1480,7 @@ func (s *state) loadCurrentValidators() error {
 			return fmt.Errorf("expected tx type txs.Staker but got %T", tx.Unsigned)
 		}
 
-		staker, err := NewCurrentStaker(txID, stakerTx, metadata.PotentialReward)
+		staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, metadata.MintRate)
 		if err != nil {
 			return err
 		}
@@ -1971,6 +2012,7 @@ func (s *state) writeCurrentStakers(updateValidators bool, height uint64) error 
 
 					UpDuration:               0,
 					LastUpdated:              uint64(staker.StartTime.Unix()),
+					MintRate:                 staker.MintRate,
 					PotentialReward:          staker.PotentialReward,
 					PotentialDelegateeReward: 0,
 				}
@@ -2322,6 +2364,18 @@ func (s *state) writeMetadata() error {
 			return fmt.Errorf("failed to write timestamp: %w", err)
 		}
 		s.persistedTimestamp = s.timestamp
+	}
+	if !s.persistedStakeSyncTimestamp.Equal(s.stakeSyncTimestamp) {
+		if err := database.PutTimestamp(s.singletonDB, stakeSyncTimestampKey, s.stakeSyncTimestamp); err != nil {
+			return fmt.Errorf("failed to write timestamp: %w", err)
+		}
+		s.persistedStakeSyncTimestamp = s.stakeSyncTimestamp
+	}
+	if s.persistedStakerAccumulatedMintRate != s.stakerAccumulatedMintRate {
+		if err := database.PutUInt64(s.singletonDB, stakerMintRateKey, s.stakerAccumulatedMintRate); err != nil {
+			return fmt.Errorf("failed to write staker mint rate: %w", err)
+		}
+		s.persistedStakerAccumulatedMintRate = s.stakerAccumulatedMintRate
 	}
 	if s.persistedCurrentSupply != s.currentSupply {
 		if err := database.PutUInt64(s.singletonDB, currentSupplyKey, s.currentSupply); err != nil {

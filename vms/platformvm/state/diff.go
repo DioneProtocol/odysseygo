@@ -32,7 +32,8 @@ type diff struct {
 	parentID      ids.ID
 	stateVersions Versions
 
-	timestamp time.Time
+	timestamp          time.Time
+	stakeSyncTimestamp time.Time
 
 	// Subnet ID --> supply of native asset of the subnet
 	currentSupply map[ids.ID]uint64
@@ -41,6 +42,7 @@ type diff struct {
 	// map of subnetID -> nodeID -> total accrued delegatee rewards
 	modifiedDelegateeRewards map[ids.ID]map[ids.NodeID]uint64
 	pendingStakerDiffs       diffStakers
+	stakerMintRate           uint64
 
 	addedSubnets []*txs.Tx
 	// Subnet ID --> Owner of the subnet
@@ -81,6 +83,45 @@ func (d *diff) GetTimestamp() time.Time {
 
 func (d *diff) SetTimestamp(timestamp time.Time) {
 	d.timestamp = timestamp
+}
+
+func (d *diff) GetStakeSyncTimestamp() (time.Time, error) {
+	if d.stakeSyncTimestamp.Compare(time.Time{}) == 0 {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return time.Time{}, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		stakeSyncTimestamp, err := parentState.GetStakeSyncTimestamp()
+		if err != nil {
+			return time.Time{}, nil
+		}
+
+		d.stakeSyncTimestamp = stakeSyncTimestamp
+	}
+	return d.stakeSyncTimestamp, nil
+}
+
+func (d *diff) SetStakeSyncTimestamp(timestamp time.Time) {
+	d.stakeSyncTimestamp = timestamp
+}
+
+func (d *diff) GetStakerAccumulatedMintRate() (uint64, error) {
+	if d.stakerMintRate == 0 {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		stakerMintRate, err := parentState.GetStakerAccumulatedMintRate()
+		if err != nil {
+			return 0, nil
+		}
+		d.stakerMintRate = stakerMintRate
+	}
+	return d.stakerMintRate, nil
+}
+
+func (d *diff) SetStakerAccumulatedMintRate(mr uint64) {
+	d.stakerMintRate = mr
 }
 
 func (d *diff) GetCurrentSupply(subnetID ids.ID) (uint64, error) {
@@ -486,6 +527,8 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
+	baseState.SetStakeSyncTimestamp(d.stakeSyncTimestamp)
+	baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}
