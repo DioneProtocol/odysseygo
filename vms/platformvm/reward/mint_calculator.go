@@ -8,18 +8,20 @@ import (
 	"time"
 )
 
+var epochTime = time.Unix(0, 0)
+
 type mintCalculator struct {
-	mintFrom   uint64
-	mintUntil  uint64
+	mintFrom   time.Time
+	mintUntil  time.Time
 	mintPeriod *big.Int
 	mintAmount *big.Int
 }
 
 func NewMintCalculator(config MintConfig) *mintCalculator {
 	return &mintCalculator{
-		mintFrom:   config.MintSince,
-		mintUntil:  config.MintUntil,
-		mintPeriod: new(big.Int).SetUint64(config.MintUntil - config.MintSince),
+		mintFrom:   time.Unix(config.MintSince, 0),
+		mintUntil:  time.Unix(config.MintUntil, 0),
+		mintPeriod: new(big.Int).SetInt64(config.MintUntil - config.MintSince),
 		mintAmount: new(big.Int).SetUint64(config.MintAmount),
 	}
 }
@@ -29,25 +31,21 @@ func (c *mintCalculator) CalculateMintRate(validatorsAmount uint64, lastSyncTime
 		return 0
 	}
 
-	lastSyncTimeUnix := uint64(lastSyncTime.Unix())
-	if lastSyncTimeUnix < c.mintFrom {
-		lastSyncTimeUnix = c.mintFrom
+	if lastSyncTime.Compare(c.mintFrom) < 0 {
+		lastSyncTime = c.mintFrom
 	}
 
-	newChainTimeUnix := uint64(newChainTime.Unix())
-	if newChainTimeUnix > c.mintUntil {
-		newChainTimeUnix = c.mintUntil
+	if newChainTime.Compare(c.mintUntil) > 0 {
+		newChainTime = c.mintUntil
 	}
 
+	lastSyncTimeUnix := lastSyncTime.Unix()
+	newChainTimeUnix := newChainTime.Unix()
 	if newChainTimeUnix <= lastSyncTimeUnix {
 		return 0
 	}
 
-	if lastSyncTimeUnix >= c.mintUntil {
-		return 0
-	}
-
-	elapsed := new(big.Int).SetUint64(newChainTimeUnix - lastSyncTimeUnix)
+	elapsed := new(big.Int).SetInt64(newChainTimeUnix - lastSyncTimeUnix)
 	validatorsAmountBigInt := new(big.Int).SetUint64(validatorsAmount)
 
 	result := elapsed
