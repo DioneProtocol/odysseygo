@@ -17,9 +17,9 @@ var defaultMintConfig = MintConfig{
 func TestMint(t *testing.T) {
 	c := NewMintCalculator(defaultMintConfig)
 	tests := []struct {
+		lastSyncTime       int64
+		newChainTime       int64
 		validatorsAmount   uint64
-		lastSyncTime       uint64
-		newChainTime       uint64
 		expectedMintAmount uint64
 	}{
 		{

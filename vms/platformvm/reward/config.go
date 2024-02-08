@@ -36,11 +36,11 @@ type Config struct {
 type MintConfig struct {
 	// MintSince is the Unix Epoch timestamp since which the reward will be
 	// minted
-	MintSince uint64 `json:"mintSince"`
+	MintSince int64 `json:"mintSince"`
 
 	// MintUntil is the Unix Epoch timestamp until which the reward will be
 	// minted
-	MintUntil uint64 `json:"mintUntil"`
+	MintUntil int64 `json:"mintUntil"`
 
 	// SupplyCap is the target value that the reward calculation should be
 	// asymptotic to.
