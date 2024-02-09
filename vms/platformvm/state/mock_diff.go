@@ -233,6 +233,21 @@ func (mr *MockDiffMockRecorder) GetCurrentStakerIterator() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakerIterator", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakerIterator))
 }
 
+// GetCurrentStakersLen mocks base method.
+func (m *MockDiff) GetCurrentStakersLen() (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentStakerLen")
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentStakerLen indicates an expected call of GetCurrentStakerLen.
+func (mr *MockDiffMockRecorder) GetCurrentStakerLen() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakerLen", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakersLen))
+}
+
 // GetCurrentSupply mocks base method.
 func (m *MockDiff) GetCurrentSupply(arg0 ids.ID) (uint64, error) {
 	m.ctrl.T.Helper()
@@ -306,6 +321,21 @@ func (m *MockDiff) GetPendingStakerIterator() (StakerIterator, error) {
 func (mr *MockDiffMockRecorder) GetPendingStakerIterator() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakerIterator", reflect.TypeOf((*MockDiff)(nil).GetPendingStakerIterator))
+}
+
+// GetPendingStakersLen mocks base method.
+func (m *MockDiff) GetPendingStakersLen() (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPendingStakerLen")
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPendingStakerLen indicates an expected call of GetPendingStakerLen.
+func (mr *MockDiffMockRecorder) GetPendingStakerLen() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakerLen", reflect.TypeOf((*MockDiff)(nil).GetPendingStakersLen))
 }
 
 // GetPendingValidator mocks base method.

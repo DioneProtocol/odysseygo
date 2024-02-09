@@ -236,6 +236,14 @@ func (d *diff) GetCurrentStakerIterator() (StakerIterator, error) {
 	return d.currentStakerDiffs.GetStakerIterator(parentIterator), nil
 }
 
+func (d *diff) GetCurrentStakersLen() (uint64, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+	return parentState.GetCurrentStakersLen()
+}
+
 func (d *diff) GetPendingValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker, error) {
 	// If the validator was modified in this diff, return the modified
 	// validator.
@@ -297,6 +305,14 @@ func (d *diff) GetPendingStakerIterator() (StakerIterator, error) {
 	}
 
 	return d.pendingStakerDiffs.GetStakerIterator(parentIterator), nil
+}
+
+func (d *diff) GetPendingStakersLen() (uint64, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+	return parentState.GetPendingStakersLen()
 }
 
 func (d *diff) GetSubnets() ([]*txs.Tx, error) {
