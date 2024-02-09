@@ -725,6 +725,10 @@ func (s *state) GetCurrentStakerIterator() (StakerIterator, error) {
 	return s.currentStakers.GetStakerIterator(), nil
 }
 
+func (s *state) GetCurrentStakersLen() (uint64, error) {
+	return uint64(s.currentStakers.stakers.Len()), nil
+}
+
 func (s *state) GetPendingValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker, error) {
 	return s.pendingStakers.GetValidator(subnetID, nodeID)
 }
@@ -751,6 +755,10 @@ func (s *state) DeletePendingDelegator(staker *Staker) {
 
 func (s *state) GetPendingStakerIterator() (StakerIterator, error) {
 	return s.pendingStakers.GetStakerIterator(), nil
+}
+
+func (s *state) GetPendingStakersLen() (uint64, error) {
+	return uint64(s.pendingStakers.stakers.Len()), nil
 }
 
 func (s *state) shouldInit() (bool, error) {
