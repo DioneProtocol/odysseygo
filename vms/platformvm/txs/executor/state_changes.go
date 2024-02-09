@@ -69,6 +69,8 @@ type stateChanges struct {
 	pendingValidatorsToRemove []*state.Staker
 	pendingDelegatorsToRemove []*state.Staker
 	currentValidatorsToRemove []*state.Staker
+	accumulatedMintRate       uint64
+	stakeSyncTimestamp        time.Time
 }
 
 func (s *stateChanges) Apply(stateDiff state.Diff) {
@@ -91,12 +93,47 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	for _, currentValidatorToRemove := range s.currentValidatorsToRemove {
 		stateDiff.DeleteCurrentValidator(currentValidatorToRemove)
 	}
+	if s.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
+		stateDiff.SetStakeSyncTimestamp(s.stakeSyncTimestamp)
+	}
+	if s.accumulatedMintRate != 0 {
+		stateDiff.SetStakerAccumulatedMintRate(s.accumulatedMintRate)
+	}
 }
 
 func (s *stateChanges) Len() int {
 	return len(s.currentValidatorsToAdd) + len(s.currentDelegatorsToAdd) +
 		len(s.pendingValidatorsToRemove) + len(s.pendingDelegatorsToRemove) +
 		len(s.currentValidatorsToRemove)
+}
+
+func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState state.Chain, newChainTime time.Time) error {
+	if s.stakeSyncTimestamp.Compare(newChainTime) == 0 {
+		return nil
+	}
+
+	stakersAmount, err := parentState.GetCurrentStakersLen()
+	if err != nil {
+		return err
+	}
+
+	mintRate, err := parentState.GetStakerAccumulatedMintRate()
+	if err != nil {
+		return err
+	}
+
+	lastSyncTime, err := parentState.GetStakeSyncTimestamp()
+	if err != nil {
+		return err
+	}
+
+	mintCalculator := reward.NewMintCalculator(backend.Config.MintConfig)
+	newMintRate := mintCalculator.CalculateMintRate(stakersAmount, lastSyncTime, newChainTime)
+
+	s.stakeSyncTimestamp = newChainTime
+	s.accumulatedMintRate = mintRate + newMintRate
+
+	return nil
 }
 
 // AdvanceTimeTo does not modify [parentState].
@@ -145,29 +182,11 @@ func AdvanceTimeTo(
 			continue
 		}
 
-		supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
-		if !ok {
-			supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		rewards, err := GetRewardsCalculator(backend, parentState, stakerToRemove.SubnetID)
-		if err != nil {
+		if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 			return nil, err
 		}
 
-		potentialReward := rewards.Calculate(
-			stakerToRemove.EndTime.Sub(stakerToRemove.StartTime),
-			stakerToRemove.Weight,
-			supply,
-		)
-		stakerToAdd.PotentialReward = potentialReward
-
-		// Invariant: [rewards.Calculate] can never return a [potentialReward]
-		//            such that [supply + potentialReward > maximumSupply].
-		changes.updatedSupplies[stakerToRemove.SubnetID] = supply + potentialReward
+		stakerToAdd.MintRate = changes.accumulatedMintRate
 
 		switch stakerToRemove.Priority {
 		case txs.PrimaryNetworkValidatorPendingPriority, txs.SubnetPermissionlessValidatorPendingPriority:
@@ -193,6 +212,20 @@ func AdvanceTimeTo(
 		stakerToRemove := currentStakerIterator.Value()
 		if stakerToRemove.EndTime.After(newChainTime) {
 			break
+		}
+		if stakerToRemove.Priority != txs.SubnetPermissionedValidatorCurrentPriority {
+			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
+			if !ok {
+				supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
+				return nil, err
+			}
+			stakerToRemove.PotentialReward = changes.accumulatedMintRate - stakerToRemove.MintRate
+			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + stakerToRemove.PotentialReward
 		}
 
 		// Invariant: Permissioned stakers are encountered first for a given

@@ -543,8 +543,12 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
-	baseState.SetStakeSyncTimestamp(d.stakeSyncTimestamp)
-	baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
+	if d.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
+		baseState.SetStakeSyncTimestamp(d.stakeSyncTimestamp)
+	}
+	if d.stakerMintRate != 0 {
+		baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
+	}
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}
