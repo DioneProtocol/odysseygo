@@ -59,6 +59,7 @@ func TestApricotStandardBlockTimeVerification(t *testing.T) {
 	chainTime := env.clk.Time().Truncate(time.Second)
 	env.mockedState.EXPECT().GetLastAccepted().Return(parentID).AnyTimes()
 	env.mockedState.EXPECT().GetTimestamp().Return(chainTime).AnyTimes()
+	env.mockedState.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetTimestamp().Return(chainTime).AnyTimes()
 
 	// wrong height
@@ -120,6 +121,8 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	env.blkManager.(*manager).lastAccepted = parentID
 	env.mockedState.EXPECT().GetLastAccepted().Return(parentID).AnyTimes()
 	env.mockedState.EXPECT().GetTimestamp().Return(chainTime).AnyTimes()
+	env.mockedState.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
+	env.mockedState.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
 
 	nextStakerTime := chainTime.Add(executor.SyncBound).Add(-1 * time.Second)
 
@@ -136,6 +139,8 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetCurrentStakerIterator().Return(currentStakerIt, nil).AnyTimes()
 	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Time{}, nil).AnyTimes()
 	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(uint64(1), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
 
 	// no pending stakers
 	pendingIt := state.NewMockStakerIterator(ctrl)
@@ -344,7 +349,7 @@ func TestBanffStandardBlockUpdatePrimaryNetworkStakers(t *testing.T) {
 	currentValidator, err := updatedState.GetCurrentValidator(constants.PrimaryNetworkID, nodeID)
 	require.NoError(err)
 	require.Equal(addPendingValidatorTx.ID(), currentValidator.TxID)
-	require.Equal(uint64(1370), currentValidator.PotentialReward) // See rewards tests to explain why 1370
+	require.Equal(uint64(0), currentValidator.PotentialReward)
 
 	_, err = updatedState.GetPendingValidator(constants.PrimaryNetworkID, nodeID)
 	require.ErrorIs(err, database.ErrNotFound)

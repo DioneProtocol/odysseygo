@@ -236,16 +236,16 @@ func (mr *MockDiffMockRecorder) GetCurrentStakerIterator() *gomock.Call {
 // GetCurrentStakersLen mocks base method.
 func (m *MockDiff) GetCurrentStakersLen() (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentStakerLen")
+	ret := m.ctrl.Call(m, "GetCurrentStakersLen")
 	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetCurrentStakerLen indicates an expected call of GetCurrentStakerLen.
-func (mr *MockDiffMockRecorder) GetCurrentStakerLen() *gomock.Call {
+// GetCurrentStakersLen indicates an expected call of GetCurrentStakersLen.
+func (mr *MockDiffMockRecorder) GetCurrentStakersLen() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakerLen", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakersLen))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakersLen", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakersLen))
 }
 
 // GetCurrentSupply mocks base method.
@@ -326,16 +326,16 @@ func (mr *MockDiffMockRecorder) GetPendingStakerIterator() *gomock.Call {
 // GetPendingStakersLen mocks base method.
 func (m *MockDiff) GetPendingStakersLen() (uint64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPendingStakerLen")
+	ret := m.ctrl.Call(m, "GetPendingStakersLen")
 	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetPendingStakerLen indicates an expected call of GetPendingStakerLen.
-func (mr *MockDiffMockRecorder) GetPendingStakerLen() *gomock.Call {
+// GetPendingStakersLen indicates an expected call of GetPendingStakersLen.
+func (mr *MockDiffMockRecorder) GetPendingStakersLen() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakerLen", reflect.TypeOf((*MockDiff)(nil).GetPendingStakersLen))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakersLen", reflect.TypeOf((*MockDiff)(nil).GetPendingStakersLen))
 }
 
 // GetPendingValidator mocks base method.
