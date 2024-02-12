@@ -182,11 +182,37 @@ func AdvanceTimeTo(
 			continue
 		}
 
-		if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
-			return nil, err
-		}
+		switch stakerToRemove.Priority {
+		case txs.PrimaryNetworkValidatorPendingPriority, txs.PrimaryNetworkDelegatorApricotPendingPriority, txs.PrimaryNetworkDelegatorBanffPendingPriority:
+			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
+				return nil, err
+			}
+			stakerToAdd.MintRate = changes.accumulatedMintRate
+		default:
+			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
+			if !ok {
+				supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-		stakerToAdd.MintRate = changes.accumulatedMintRate
+			rewards, err := GetRewardsCalculator(backend, parentState, stakerToRemove.SubnetID)
+			if err != nil {
+				return nil, err
+			}
+
+			potentialReward := rewards.Calculate(
+				stakerToRemove.EndTime.Sub(stakerToRemove.StartTime),
+				stakerToRemove.Weight,
+				supply,
+			)
+			stakerToAdd.PotentialReward = potentialReward
+
+			// Invariant: [rewards.Calculate] can never return a [potentialReward]
+			//            such that [supply + potentialReward > maximumSupply].
+			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + potentialReward
+		}
 
 		switch stakerToRemove.Priority {
 		case txs.PrimaryNetworkValidatorPendingPriority, txs.SubnetPermissionlessValidatorPendingPriority:
@@ -213,7 +239,9 @@ func AdvanceTimeTo(
 		if stakerToRemove.EndTime.After(newChainTime) {
 			break
 		}
-		if stakerToRemove.Priority != txs.SubnetPermissionedValidatorCurrentPriority {
+
+		switch stakerToRemove.Priority {
+		case txs.PrimaryNetworkValidatorCurrentPriority, txs.PrimaryNetworkDelegatorCurrentPriority:
 			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
 			if !ok {
 				supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
