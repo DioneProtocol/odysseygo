@@ -4,6 +4,7 @@
 package state
 
 import (
+	"math/big"
 	"testing"
 	"time"
 
@@ -239,14 +240,14 @@ func TestParseValidatorMetadata(t *testing.T) {
 				// potential delegatee reward
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
 				// mint rate
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0xDC,
+				0x00, 0x00, 0x00, 0x02, 0x05, 0xDC,
 			},
 			expected: &validatorMetadata{
 				UpDuration:               6000000,
 				LastUpdated:              900000,
 				PotentialReward:          100000,
 				PotentialDelegateeReward: 20000,
-				MintRate:                 1500,
+				MintRateBytes:            big.NewInt(1500).Bytes(),
 				lastUpdated:              time.Unix(900000, 0),
 			},
 			expectedErr: nil,

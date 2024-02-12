@@ -6,6 +6,7 @@ package executor
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"testing"
 	"time"
 
@@ -219,7 +220,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	}, nil)
 	onParentAccept.EXPECT().GetTx(nextStakerTxID).Return(nextStakerTx, status.Processing, nil)
 	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Unix(1, 0), nil).AnyTimes()
-	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(uint64(1), nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(new(big.Int), nil).AnyTimes()
 
 	currentStakersIt := state.NewMockStakerIterator(ctrl)
 	currentStakersIt.EXPECT().Next().Return(true).AnyTimes()
@@ -228,6 +229,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 		EndTime:  nextStakerTime,
 		NextTime: nextStakerTime,
 		Priority: txs.PrimaryNetworkValidatorCurrentPriority,
+		MintRate: new(big.Int),
 	}).AnyTimes()
 	currentStakersIt.EXPECT().Release().AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakerIterator().Return(currentStakersIt, nil).AnyTimes()

@@ -6,6 +6,7 @@ package state
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/database"
@@ -42,7 +43,7 @@ type diff struct {
 	// map of subnetID -> nodeID -> total accrued delegatee rewards
 	modifiedDelegateeRewards map[ids.ID]map[ids.NodeID]uint64
 	pendingStakerDiffs       diffStakers
-	stakerMintRate           uint64
+	stakerMintRate           *big.Int
 
 	addedSubnets []*txs.Tx
 	// Subnet ID --> Owner of the subnet
@@ -105,23 +106,26 @@ func (d *diff) SetStakeSyncTimestamp(timestamp time.Time) {
 	d.stakeSyncTimestamp = timestamp
 }
 
-func (d *diff) GetStakerAccumulatedMintRate() (uint64, error) {
-	if d.stakerMintRate == 0 {
+func (d *diff) GetStakerAccumulatedMintRate() (*big.Int, error) {
+	if d.stakerMintRate == nil {
 		parentState, ok := d.stateVersions.GetState(d.parentID)
 		if !ok {
-			return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
 		}
 		stakerMintRate, err := parentState.GetStakerAccumulatedMintRate()
 		if err != nil {
-			return 0, nil
+			return new(big.Int), nil
 		}
-		d.stakerMintRate = stakerMintRate
+		d.stakerMintRate = new(big.Int).Set(stakerMintRate)
 	}
-	return d.stakerMintRate, nil
+	return new(big.Int).Set(d.stakerMintRate), nil
 }
 
-func (d *diff) SetStakerAccumulatedMintRate(mr uint64) {
-	d.stakerMintRate = mr
+func (d *diff) SetStakerAccumulatedMintRate(mr *big.Int) {
+	if d.stakerMintRate == nil {
+		d.stakerMintRate = new(big.Int)
+	}
+	d.stakerMintRate.Set(mr)
 }
 
 func (d *diff) GetCurrentSupply(subnetID ids.ID) (uint64, error) {
@@ -546,7 +550,7 @@ func (d *diff) Apply(baseState State) error {
 	if d.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
 		baseState.SetStakeSyncTimestamp(d.stakeSyncTimestamp)
 	}
-	if d.stakerMintRate != 0 {
+	if d.stakerMintRate != nil {
 		baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
 	}
 	for subnetID, supply := range d.currentSupply {
