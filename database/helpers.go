@@ -24,9 +24,8 @@ const (
 )
 
 var (
-	boolFalseKey  = []byte{BoolFalse}
-	boolTrueKey   = []byte{BoolTrue}
-	intSignPrefix = []byte("sign")
+	boolFalseKey = []byte{BoolFalse}
+	boolTrueKey  = []byte{BoolTrue}
 
 	errWrongSize = errors.New("value has unexpected size")
 )
@@ -100,31 +99,26 @@ func ParseUInt32(b []byte) (uint32, error) {
 }
 
 func PutBigInt(db KeyValueReaderWriter, key []byte, val *big.Int) error {
-	valBytes := val.Bytes()
-	err := db.Put(key, valBytes)
-	if err != nil {
-		return err
+	var valBytes []byte
+	if val.Sign() >= 0 {
+		valBytes = []byte{0}
+	} else {
+		valBytes = []byte{1}
 	}
-
-	signKey := []byte{}
-	signKey = append(signKey, intSignPrefix...)
-	signKey = append(signKey, key...)
-	return PutBool(db, signKey, val.Sign() < 0)
+	valBytes = append(valBytes, val.Bytes()...)
+	return db.Put(key, valBytes)
 }
 
 func GetBigInt(db KeyValueReader, key []byte) (*big.Int, error) {
-	b, err := db.Get(key)
+	valBytes, err := db.Get(key)
 	if err != nil {
-		return big.NewInt(0), err
+		return new(big.Int), err
 	}
-	signKey := []byte{}
-	signKey = append(signKey, intSignPrefix...)
-	signKey = append(signKey, key...)
-	negative, err := GetBool(db, signKey)
-	if err != nil {
-		return big.NewInt(0), err
+	if len(valBytes) < 2 {
+		return new(big.Int), errWrongSize
 	}
-	value := new(big.Int).SetBytes(b)
+	value := new(big.Int).SetBytes(valBytes[1:])
+	negative := valBytes[0] != 0
 	if negative {
 		value.Neg(value)
 	}

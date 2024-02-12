@@ -6,6 +6,7 @@ package executor
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/ids"
@@ -69,7 +70,7 @@ type stateChanges struct {
 	pendingValidatorsToRemove []*state.Staker
 	pendingDelegatorsToRemove []*state.Staker
 	currentValidatorsToRemove []*state.Staker
-	accumulatedMintRate       uint64
+	accumulatedMintRate       *big.Int
 	stakeSyncTimestamp        time.Time
 }
 
@@ -96,7 +97,7 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	if s.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
 		stateDiff.SetStakeSyncTimestamp(s.stakeSyncTimestamp)
 	}
-	if s.accumulatedMintRate != 0 {
+	if s.accumulatedMintRate != nil {
 		stateDiff.SetStakerAccumulatedMintRate(s.accumulatedMintRate)
 	}
 }
@@ -112,11 +113,12 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 		return nil
 	}
 
-	stakersAmount, err := parentState.GetCurrentStakersLen()
-	if err != nil {
-		return err
+	validators, ok := backend.Config.Validators.Get(constants.PrimaryNetworkID)
+	if !ok {
+		return fmt.Errorf("couldn't get primary validators")
 	}
 
+	totalWeight := validators.Weight()
 	mintRate, err := parentState.GetStakerAccumulatedMintRate()
 	if err != nil {
 		return err
@@ -127,11 +129,26 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 		return err
 	}
 
-	mintCalculator := reward.NewMintCalculator(backend.Config.MintConfig)
-	newMintRate := mintCalculator.CalculateMintRate(stakersAmount, lastSyncTime, newChainTime)
+	mintConfig := backend.Config.MintConfig
 
+	// Config is not set
+	if mintConfig.MintUntil == 0 && mintConfig.MintSince == 0 {
+		s.accumulatedMintRate = new(big.Int).SetUint64(1)
+		return nil
+	}
+
+	mintCalculator, err := reward.NewMintCalculator(mintConfig)
+	if err != nil {
+		return err
+	}
+
+	if totalWeight != 0 {
+		s.accumulatedMintRate = mintCalculator.CalculateMintRate(totalWeight, lastSyncTime, newChainTime)
+		s.accumulatedMintRate.Add(s.accumulatedMintRate, mintRate)
+	} else {
+		s.accumulatedMintRate = new(big.Int).SetUint64(1)
+	}
 	s.stakeSyncTimestamp = newChainTime
-	s.accumulatedMintRate = mintRate + newMintRate
 
 	return nil
 }
@@ -187,7 +204,10 @@ func AdvanceTimeTo(
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
-			stakerToAdd.MintRate = changes.accumulatedMintRate
+			if stakerToAdd.MintRate == nil {
+				stakerToAdd.MintRate = new(big.Int)
+			}
+			stakerToAdd.MintRate.Set(changes.accumulatedMintRate)
 		default:
 			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
 			if !ok {
@@ -252,7 +272,7 @@ func AdvanceTimeTo(
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
-			stakerToRemove.PotentialReward = changes.accumulatedMintRate - stakerToRemove.MintRate
+			stakerToRemove.PotentialReward = reward.CalculateMintReward(stakerToRemove.Weight, stakerToRemove.MintRate, changes.accumulatedMintRate)
 			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + stakerToRemove.PotentialReward
 		}
 

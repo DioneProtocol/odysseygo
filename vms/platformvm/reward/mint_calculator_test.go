@@ -2,6 +2,7 @@ package reward
 
 import (
 	"fmt"
+	"math/big"
 	"testing"
 	"time"
 
@@ -15,113 +16,69 @@ var defaultMintConfig = MintConfig{
 }
 
 func TestMint(t *testing.T) {
-	c := NewMintCalculator(defaultMintConfig)
+	c, _ := NewMintCalculator(defaultMintConfig)
 	tests := []struct {
 		lastSyncTime       int64
 		newChainTime       int64
-		validatorsAmount   uint64
+		stakerWeight       uint64
+		totalWeight        uint64
 		expectedMintAmount uint64
 	}{
 		{
-			validatorsAmount:   1,
 			lastSyncTime:       0,
 			newChainTime:       defaultMintConfig.MintUntil,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
-			validatorsAmount:   1,
 			lastSyncTime:       0,
 			newChainTime:       defaultMintConfig.MintUntil * 2,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
-			validatorsAmount:   1,
 			lastSyncTime:       defaultMintConfig.MintSince,
 			newChainTime:       defaultMintConfig.MintUntil,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
-			validatorsAmount:   2,
-			lastSyncTime:       0,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: defaultMintConfig.MintAmount / 2,
-		},
-		{
-			validatorsAmount:   2,
-			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: defaultMintConfig.MintAmount / 2,
-		},
-		{
-			validatorsAmount:   1,
 			lastSyncTime:       0,
 			newChainTime:       defaultMintConfig.MintSince,
 			expectedMintAmount: 0,
 		},
 		{
-			validatorsAmount:   0,
-			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: 0,
-		},
-		{
-			validatorsAmount:   1,
 			lastSyncTime:       defaultMintConfig.MintSince,
 			newChainTime:       (defaultMintConfig.MintSince + defaultMintConfig.MintUntil) / 2,
 			expectedMintAmount: defaultMintConfig.MintAmount / 2,
 		},
 		{
-			validatorsAmount:   1,
-			lastSyncTime:       (defaultMintConfig.MintSince + defaultMintConfig.MintUntil) / 2,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: defaultMintConfig.MintAmount / 2,
-		},
-		{
-			validatorsAmount:   1,
 			lastSyncTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)/4,
 			newChainTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)*3/4,
 			expectedMintAmount: defaultMintConfig.MintAmount / 2,
 		},
-		{
-			validatorsAmount:   2,
-			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       (defaultMintConfig.MintSince + defaultMintConfig.MintUntil) / 2,
-			expectedMintAmount: defaultMintConfig.MintAmount / 4,
-		},
-		{
-			validatorsAmount:   2,
-			lastSyncTime:       (defaultMintConfig.MintSince + defaultMintConfig.MintUntil) / 2,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: defaultMintConfig.MintAmount / 4,
-		},
-		{
-			validatorsAmount:   1,
-			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)/4,
-			expectedMintAmount: defaultMintConfig.MintAmount / 4,
-		},
-		{
-			validatorsAmount:   1,
-			lastSyncTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)*3/4,
-			newChainTime:       defaultMintConfig.MintUntil,
-			expectedMintAmount: defaultMintConfig.MintAmount / 4,
-		},
 	}
 
-	for _, test := range tests {
-		name := fmt.Sprintf("mint(%d,%d,%d)==%d",
-			test.validatorsAmount,
-			test.lastSyncTime,
-			test.newChainTime,
-			test.expectedMintAmount,
-		)
-		t.Run(name, func(t *testing.T) {
-			reward := c.CalculateMintRate(
-				test.validatorsAmount,
-				time.Unix(int64(test.lastSyncTime), 0),
-				time.Unix(int64(test.newChainTime), 0),
-			)
-			require.Equal(t, test.expectedMintAmount, reward)
-		})
+	for totalWeight := uint64(1); totalWeight < 10; totalWeight++ {
+		for weight := uint64(0); weight <= totalWeight; weight++ {
+			for _, test := range tests {
+				expectedReward := test.expectedMintAmount * weight / totalWeight
+				name := fmt.Sprintf("mint(%d,%d,%d,%d)==%d",
+					weight,
+					totalWeight,
+					test.lastSyncTime,
+					test.newChainTime,
+					expectedReward,
+				)
+				t.Run(name, func(t *testing.T) {
+					mintRate := c.CalculateMintRate(
+						totalWeight,
+						time.Unix(int64(test.lastSyncTime), 0),
+						time.Unix(int64(test.newChainTime), 0),
+					)
+					reward := CalculateMintReward(weight, new(big.Int), mintRate)
+
+					// might happen roundoff error
+					require.True(t, expectedReward-reward <= 1)
+				})
+			}
+		}
 	}
 }

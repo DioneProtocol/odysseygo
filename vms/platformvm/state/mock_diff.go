@@ -8,6 +8,7 @@
 package state
 
 import (
+	big "math/big"
 	reflect "reflect"
 	time "time"
 
@@ -384,10 +385,10 @@ func (mr *MockDiffMockRecorder) GetStakeSyncTimestamp() *gomock.Call {
 }
 
 // GetStakerAccumulatedMintRate mocks base method.
-func (m *MockDiff) GetStakerAccumulatedMintRate() (uint64, error) {
+func (m *MockDiff) GetStakerAccumulatedMintRate() (*big.Int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetStakerAccumulatedMintRate")
-	ret0, _ := ret[0].(uint64)
+	ret0, _ := ret[0].(*big.Int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -575,7 +576,7 @@ func (mr *MockDiffMockRecorder) SetStakeSyncTimestamp(arg0 interface{}) *gomock.
 }
 
 // SetStakerAccumulatedMintRate mocks base method.
-func (m *MockDiff) SetStakerAccumulatedMintRate(arg0 uint64) {
+func (m *MockDiff) SetStakerAccumulatedMintRate(arg0 *big.Int) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetStakerAccumulatedMintRate", arg0)
 }

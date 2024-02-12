@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"sync"
 	"time"
 
@@ -111,8 +112,8 @@ type Chain interface {
 	SetStakeSyncTimestamp(tm time.Time)
 	GetStakeSyncTimestamp() (time.Time, error)
 
-	SetStakerAccumulatedMintRate(mr uint64)
-	GetStakerAccumulatedMintRate() (uint64, error)
+	SetStakerAccumulatedMintRate(mr *big.Int)
+	GetStakerAccumulatedMintRate() (*big.Int, error)
 
 	GetCurrentSupply(subnetID ids.ID) (uint64, error)
 	SetCurrentSupply(subnetID ids.ID, cs uint64)
@@ -378,7 +379,7 @@ type state struct {
 	timestamp, persistedTimestamp                                 time.Time
 	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
 	currentSupply, persistedCurrentSupply                         uint64
-	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate uint64
+	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
 	// [lastAccepted] is the most recently accepted block.
 	lastAccepted, persistedLastAccepted ids.ID
 	indexedHeights                      *heightRange
@@ -694,6 +695,9 @@ func newState(
 		chainDBCache: chainDBCache,
 
 		singletonDB: prefixdb.New(singletonPrefix, baseDB),
+
+		stakerAccumulatedMintRate:          new(big.Int),
+		persistedStakerAccumulatedMintRate: new(big.Int),
 	}, nil
 }
 
@@ -1062,12 +1066,12 @@ func (s *state) SetStakeSyncTimestamp(tm time.Time) {
 	s.stakeSyncTimestamp = tm
 }
 
-func (s *state) GetStakerAccumulatedMintRate() (uint64, error) {
+func (s *state) GetStakerAccumulatedMintRate() (*big.Int, error) {
 	return s.stakerAccumulatedMintRate, nil
 }
 
-func (s *state) SetStakerAccumulatedMintRate(mr uint64) {
-	s.stakerAccumulatedMintRate = mr
+func (s *state) SetStakerAccumulatedMintRate(mr *big.Int) {
+	s.stakerAccumulatedMintRate.Set(mr)
 }
 
 func (s *state) GetLastAccepted() ids.ID {
@@ -1407,11 +1411,11 @@ func (s *state) loadMetadata() error {
 	s.persistedStakeSyncTimestamp = stakeSyncTimestamp
 	s.SetStakeSyncTimestamp(stakeSyncTimestamp)
 
-	stakerMintRate, err := database.GetUInt64(s.singletonDB, stakerMintRateKey)
+	stakerMintRate, err := database.GetBigInt(s.singletonDB, stakerMintRateKey)
 	if err != nil && err != database.ErrNotFound {
 		return err
 	}
-	s.persistedStakerAccumulatedMintRate = stakerMintRate
+	s.persistedStakerAccumulatedMintRate.Set(stakerMintRate)
 	s.SetStakerAccumulatedMintRate(stakerMintRate)
 
 	currentSupply, err := database.GetUInt64(s.singletonDB, currentSupplyKey)
@@ -1488,7 +1492,8 @@ func (s *state) loadCurrentValidators() error {
 			return fmt.Errorf("expected tx type txs.Staker but got %T", tx.Unsigned)
 		}
 
-		staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, metadata.MintRate)
+		mintRate := new(big.Int).SetBytes(metadata.MintRateBytes)
+		staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, mintRate)
 		if err != nil {
 			return err
 		}
@@ -2010,6 +2015,11 @@ func (s *state) writeCurrentStakers(updateValidators bool, height uint64) error 
 					}
 				}
 
+				mintRate := staker.MintRate
+				if mintRate == nil {
+					mintRate = new(big.Int)
+				}
+
 				// The validator is being added.
 				//
 				// Invariant: It's impossible for a delegator to have been
@@ -2020,7 +2030,7 @@ func (s *state) writeCurrentStakers(updateValidators bool, height uint64) error 
 
 					UpDuration:               0,
 					LastUpdated:              uint64(staker.StartTime.Unix()),
-					MintRate:                 staker.MintRate,
+					MintRateBytes:            mintRate.Bytes(),
 					PotentialReward:          staker.PotentialReward,
 					PotentialDelegateeReward: 0,
 				}
@@ -2379,8 +2389,8 @@ func (s *state) writeMetadata() error {
 		}
 		s.persistedStakeSyncTimestamp = s.stakeSyncTimestamp
 	}
-	if s.persistedStakerAccumulatedMintRate != s.stakerAccumulatedMintRate {
-		if err := database.PutUInt64(s.singletonDB, stakerMintRateKey, s.stakerAccumulatedMintRate); err != nil {
+	if s.persistedStakerAccumulatedMintRate.Cmp(s.stakerAccumulatedMintRate) != 0 {
+		if err := database.PutBigInt(s.singletonDB, stakerMintRateKey, s.stakerAccumulatedMintRate); err != nil {
 			return fmt.Errorf("failed to write staker mint rate: %w", err)
 		}
 		s.persistedStakerAccumulatedMintRate = s.stakerAccumulatedMintRate
