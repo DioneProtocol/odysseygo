@@ -10,8 +10,10 @@ import (
 )
 
 var (
-	epochTime      = time.Unix(0, 0)
-	mintShift uint = 64
+	epochTime = time.Unix(0, 0)
+
+	// 32 bits for unix time + 64 bits for a weight
+	mintShift uint = 96
 
 	errInvalidMintPeriod = fmt.Errorf("mintFrom must be less than mintUntil")
 )
