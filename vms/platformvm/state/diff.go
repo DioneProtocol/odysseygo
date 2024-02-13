@@ -6,6 +6,7 @@ package state
 import (
 	"errors"
 	"fmt"
+	big "math/big"
 	"time"
 
 	"github.com/ava-labs/avalanchego/database"
@@ -58,6 +59,9 @@ type diff struct {
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	modifiedUTXOs map[ids.ID]*avax.UTXO
+
+	feePerWeightStored *big.Int
+	lastAccumulatedFee *big.Int
 }
 
 func NewDiff(
@@ -69,9 +73,11 @@ func NewDiff(
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:      parentID,
-		stateVersions: stateVersions,
-		timestamp:     parentState.GetTimestamp(),
+		parentID:           parentID,
+		stateVersions:      stateVersions,
+		timestamp:          parentState.GetTimestamp(),
+		feePerWeightStored: big.NewInt(0),
+		lastAccumulatedFee: big.NewInt(0),
 	}, nil
 }
 
@@ -484,8 +490,54 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 	}
 }
 
+func (d *diff) GetFeePerWeightStored() (*big.Int, error) {
+	if d.feePerWeightStored.Cmp(big.NewInt(0)) == 0 {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		feePerWeightStored, err := parentState.GetFeePerWeightStored()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.feePerWeightStored.Set(feePerWeightStored)
+
+	}
+	return new(big.Int).Set(d.feePerWeightStored), nil
+}
+
+func (d *diff) SetFeePerWeightStored(f *big.Int) {
+	d.feePerWeightStored.Set(f)
+}
+
+func (d *diff) GetLastAccumulatedFee() (*big.Int, error) {
+	if d.lastAccumulatedFee.Cmp(big.NewInt(0)) == 0 {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.lastAccumulatedFee.Set(lastAccumulatedFee)
+
+	}
+	return new(big.Int).Set(d.lastAccumulatedFee), nil
+}
+
+func (d *diff) SetLastAccumulatedFee(f *big.Int) {
+	d.lastAccumulatedFee.Set(f)
+}
+
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
+	if d.lastAccumulatedFee.Cmp(big.NewInt(0)) != 0 {
+		baseState.SetLastAccumulatedFee(d.lastAccumulatedFee)
+	}
+	if d.feePerWeightStored.Cmp(big.NewInt(0)) != 0 {
+		baseState.SetFeePerWeightStored(d.feePerWeightStored)
+	}
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}

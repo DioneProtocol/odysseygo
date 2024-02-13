@@ -5,6 +5,7 @@ package state
 
 import (
 	"bytes"
+	"math/big"
 	"time"
 
 	"github.com/google/btree"
@@ -35,14 +36,15 @@ type StakerIterator interface {
 // delegator in the current and pending validator sets.
 // Invariant: Staker's size is bounded to prevent OOM DoS attacks.
 type Staker struct {
-	TxID            ids.ID
-	NodeID          ids.NodeID
-	PublicKey       *bls.PublicKey
-	SubnetID        ids.ID
-	Weight          uint64
-	StartTime       time.Time
-	EndTime         time.Time
-	PotentialReward uint64
+	TxID             ids.ID
+	NodeID           ids.NodeID
+	PublicKey        *bls.PublicKey
+	SubnetID         ids.ID
+	Weight           uint64
+	StartTime        time.Time
+	EndTime          time.Time
+	PotentialReward  uint64
+	FeePerWeightPaid *big.Int
 
 	// NextTime is the next time this staker will be moved from a validator set.
 	// If the staker is in the pending validator set, NextTime will equal
@@ -83,23 +85,24 @@ func (s *Staker) Less(than *Staker) bool {
 	return bytes.Compare(s.TxID[:], than.TxID[:]) == -1
 }
 
-func NewCurrentStaker(txID ids.ID, staker txs.Staker, potentialReward uint64) (*Staker, error) {
+func NewCurrentStaker(txID ids.ID, staker txs.Staker, potentialReward uint64, feePerWeightPaid *big.Int) (*Staker, error) {
 	publicKey, _, err := staker.PublicKey()
 	if err != nil {
 		return nil, err
 	}
 	endTime := staker.EndTime()
 	return &Staker{
-		TxID:            txID,
-		NodeID:          staker.NodeID(),
-		PublicKey:       publicKey,
-		SubnetID:        staker.SubnetID(),
-		Weight:          staker.Weight(),
-		StartTime:       staker.StartTime(),
-		EndTime:         endTime,
-		PotentialReward: potentialReward,
-		NextTime:        endTime,
-		Priority:        staker.CurrentPriority(),
+		TxID:             txID,
+		NodeID:           staker.NodeID(),
+		PublicKey:        publicKey,
+		SubnetID:         staker.SubnetID(),
+		Weight:           staker.Weight(),
+		StartTime:        staker.StartTime(),
+		EndTime:          endTime,
+		PotentialReward:  potentialReward,
+		FeePerWeightPaid: feePerWeightPaid,
+		NextTime:         endTime,
+		Priority:         staker.CurrentPriority(),
 	}, nil
 }
 

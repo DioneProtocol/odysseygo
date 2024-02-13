@@ -34,6 +34,7 @@ type validatorMetadata struct {
 	LastUpdated              uint64        `serialize:"true"` // Unix time in seconds
 	PotentialReward          uint64        `serialize:"true"`
 	PotentialDelegateeReward uint64        `serialize:"true"`
+	FeePerWeightPaid         []byte        `serialize:"true"`
 
 	txID        ids.ID
 	lastUpdated time.Time
