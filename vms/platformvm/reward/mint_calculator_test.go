@@ -10,13 +10,14 @@ import (
 )
 
 var defaultMintConfig = MintConfig{
-	MintSince:  100,
-	MintUntil:  200,
-	MintAmount: 1_000_000,
+	MintSince:     100,
+	MintingPeriod: 100 * time.Second,
+	MintAmount:    1_000_000,
 }
 
 func TestMint(t *testing.T) {
-	c, _ := NewMintCalculator(defaultMintConfig)
+	c := NewMintCalculator(defaultMintConfig)
+	mintUntil := defaultMintConfig.MintSince + int64(defaultMintConfig.MintingPeriod.Seconds())
 	tests := []struct {
 		lastSyncTime       int64
 		newChainTime       int64
@@ -26,17 +27,17 @@ func TestMint(t *testing.T) {
 	}{
 		{
 			lastSyncTime:       0,
-			newChainTime:       defaultMintConfig.MintUntil,
+			newChainTime:       mintUntil,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
 			lastSyncTime:       0,
-			newChainTime:       defaultMintConfig.MintUntil * 2,
+			newChainTime:       mintUntil * 2,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
 			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       defaultMintConfig.MintUntil,
+			newChainTime:       mintUntil,
 			expectedMintAmount: defaultMintConfig.MintAmount,
 		},
 		{
@@ -46,12 +47,12 @@ func TestMint(t *testing.T) {
 		},
 		{
 			lastSyncTime:       defaultMintConfig.MintSince,
-			newChainTime:       (defaultMintConfig.MintSince + defaultMintConfig.MintUntil) / 2,
+			newChainTime:       (defaultMintConfig.MintSince + mintUntil) / 2,
 			expectedMintAmount: defaultMintConfig.MintAmount / 2,
 		},
 		{
-			lastSyncTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)/4,
-			newChainTime:       defaultMintConfig.MintSince + (defaultMintConfig.MintUntil-defaultMintConfig.MintSince)*3/4,
+			lastSyncTime:       defaultMintConfig.MintSince + (mintUntil-defaultMintConfig.MintSince)/4,
+			newChainTime:       defaultMintConfig.MintSince + (mintUntil-defaultMintConfig.MintSince)*3/4,
 			expectedMintAmount: defaultMintConfig.MintAmount / 2,
 		},
 	}

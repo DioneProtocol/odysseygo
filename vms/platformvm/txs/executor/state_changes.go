@@ -132,18 +132,13 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 	mintConfig := backend.Config.MintConfig
 
 	// Config is not set
-	if mintConfig.MintUntil == 0 && mintConfig.MintSince == 0 {
+	if mintConfig.MintingPeriod == 0 {
 		s.accumulatedMintRate = new(big.Int).SetUint64(0)
 		return nil
 	}
 
-	mintCalculator, err := reward.NewMintCalculator(mintConfig)
-	if err != nil {
-		return err
-	}
-
 	if totalWeight != 0 {
-		s.accumulatedMintRate = mintCalculator.CalculateMintRate(totalWeight, lastSyncTime, newChainTime)
+		s.accumulatedMintRate = backend.Mint.CalculateMintRate(totalWeight, lastSyncTime, newChainTime)
 		s.accumulatedMintRate.Add(s.accumulatedMintRate, mintRate)
 	} else {
 		s.accumulatedMintRate = new(big.Int).SetUint64(0)

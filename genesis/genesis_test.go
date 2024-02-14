@@ -241,7 +241,7 @@ func TestGenesisFromFile(t *testing.T) {
 				customFile = test.missingFilepath
 			}
 
-			genesisBytes, _, err := FromFile(test.networkID, customFile, genesisStakingCfg)
+			genesisBytes, _, _, err := FromFile(test.networkID, customFile, genesisStakingCfg)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr == nil {
 				genesisHash := fmt.Sprintf("%x", hashing.ComputeHash256(genesisBytes))
@@ -327,7 +327,7 @@ func TestGenesisFromFlag(t *testing.T) {
 			}
 			content := base64.StdEncoding.EncodeToString(genBytes)
 
-			genesisBytes, _, err := FromFlag(test.networkID, content, genesisStakingCfg)
+			genesisBytes, _, _, err := FromFlag(test.networkID, content, genesisStakingCfg)
 			require.ErrorIs(err, test.expectedErr)
 			if test.expectedErr == nil {
 				genesisHash := fmt.Sprintf("%x", hashing.ComputeHash256(genesisBytes))
@@ -363,7 +363,7 @@ func TestGenesis(t *testing.T) {
 			require := require.New(t)
 
 			config := GetConfig(test.networkID)
-			genesisBytes, _, err := FromConfig(config)
+			genesisBytes, _, _, err := FromConfig(config)
 			require.NoError(err)
 
 			var genesisID ids.ID = hashing.ComputeHash256Array(genesisBytes)
@@ -432,7 +432,7 @@ func TestVMGenesis(t *testing.T) {
 				require := require.New(t)
 
 				config := GetConfig(test.networkID)
-				genesisBytes, _, err := FromConfig(config)
+				genesisBytes, _, _, err := FromConfig(config)
 				require.NoError(err)
 
 				genesisTx, err := VMGenesis(genesisBytes, vmTest.vmID)
@@ -474,7 +474,7 @@ func TestAVAXAssetID(t *testing.T) {
 			require := require.New(t)
 
 			config := GetConfig(test.networkID)
-			_, avaxAssetID, err := FromConfig(config)
+			_, avaxAssetID, _, err := FromConfig(config)
 			require.NoError(err)
 
 			require.Equal(
