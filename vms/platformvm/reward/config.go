@@ -15,6 +15,8 @@ const PercentDenominator = 1_000_000
 // floating point fractions.
 var consumptionRateDenominator = new(big.Int).SetUint64(PercentDenominator)
 
+const BitShift uint = 96
+
 type Config struct {
 	// MaxConsumptionRate is the rate to allocate funds if the validator's stake
 	// duration is equal to [MintingPeriod]

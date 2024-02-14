@@ -88,14 +88,17 @@ var (
 	chainPrefix                         = []byte("chain")
 	singletonPrefix                     = []byte("singleton")
 
-	timestampKey          = []byte("timestamp")
+	timestampKey      = []byte("timestamp")
+	currentSupplyKey  = []byte("current supply")
+	lastAcceptedKey   = []byte("last accepted")
+	heightsIndexedKey = []byte("heights indexed")
+	initializedKey    = []byte("initialized")
+	prunedKey         = []byte("pruned")
+
 	stakeSyncTimestampKey = []byte("stake sync timestamp")
 	stakerMintRateKey     = []byte("staker mint rate")
-	currentSupplyKey      = []byte("current supply")
-	lastAcceptedKey       = []byte("last accepted")
-	heightsIndexedKey     = []byte("heights indexed")
-	initializedKey        = []byte("initialized")
-	prunedKey             = []byte("pruned")
+	feePerWeightStoredKey = []byte("fee per staker stored")
+	lastAccumulatedFeeKey = []byte("las accumulated fee")
 )
 
 // Chain collects all methods to manage the state of the chain for block
@@ -134,6 +137,12 @@ type Chain interface {
 
 	GetTx(txID ids.ID) (*txs.Tx, status.Status, error)
 	AddTx(tx *txs.Tx, status status.Status)
+
+	GetFeePerWeightStored() (*big.Int, error)
+	SetFeePerWeightStored(*big.Int)
+
+	GetLastAccumulatedFee() (*big.Int, error)
+	SetLastAccumulatedFee(*big.Int)
 }
 
 type State interface {
@@ -376,14 +385,17 @@ type state struct {
 	chainDB      database.Database
 
 	// The persisted fields represent the current database value
-	timestamp, persistedTimestamp                                 time.Time
-	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
-	currentSupply, persistedCurrentSupply                         uint64
-	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
+	timestamp, persistedTimestamp         time.Time
+	currentSupply, persistedCurrentSupply uint64
 	// [lastAccepted] is the most recently accepted block.
 	lastAccepted, persistedLastAccepted ids.ID
 	indexedHeights                      *heightRange
 	singletonDB                         database.Database
+
+	feePerWeightStored, persistedFeePerWeightStored               *big.Int
+	lastAccumulatedFee, persistedLastAccumulatedFee               *big.Int
+	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
+	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
 }
 
 // heightRange is used to track which heights are safe to use the native DB
@@ -698,6 +710,10 @@ func newState(
 
 		stakerAccumulatedMintRate:          new(big.Int),
 		persistedStakerAccumulatedMintRate: new(big.Int),
+		feePerWeightStored:                 new(big.Int),
+		persistedFeePerWeightStored:        new(big.Int),
+		lastAccumulatedFee:                 new(big.Int),
+		persistedLastAccumulatedFee:        new(big.Int),
 	}, nil
 }
 
@@ -1067,7 +1083,7 @@ func (s *state) SetStakeSyncTimestamp(tm time.Time) {
 }
 
 func (s *state) GetStakerAccumulatedMintRate() (*big.Int, error) {
-	return s.stakerAccumulatedMintRate, nil
+	return new(big.Int).Set(s.stakerAccumulatedMintRate), nil
 }
 
 func (s *state) SetStakerAccumulatedMintRate(mr *big.Int) {
@@ -1335,31 +1351,13 @@ func (s *state) syncGenesis(genesisBlk blocks.Block, genesis *genesis.State) err
 			return fmt.Errorf("expected tx type *txs.AddValidatorTx but got %T", vdrTx.Unsigned)
 		}
 
-		stakeAmount := tx.Validator.Wght
-		stakeDuration := tx.Validator.Duration()
-		currentSupply, err := s.GetCurrentSupply(constants.PrimaryNetworkID)
-		if err != nil {
-			return err
-		}
-
-		potentialReward := s.rewards.Calculate(
-			stakeDuration,
-			stakeAmount,
-			currentSupply,
-		)
-		newCurrentSupply, err := math.Add64(currentSupply, potentialReward)
-		if err != nil {
-			return err
-		}
-
-		staker, err := NewCurrentStaker(vdrTx.ID(), tx, potentialReward)
+		staker, err := NewCurrentStaker(vdrTx.ID(), tx, 0)
 		if err != nil {
 			return err
 		}
 
 		s.PutCurrentValidator(staker)
 		s.AddTx(vdrTx, status.Committed)
-		s.SetCurrentSupply(constants.PrimaryNetworkID, newCurrentSupply)
 	}
 
 	for _, chain := range genesis.Chains {
@@ -1458,6 +1456,21 @@ func (s *state) loadMetadata() error {
 		return nil
 	}
 	s.indexedHeights = indexedHeights
+
+	feePerStakerBytes, err := s.singletonDB.Get(feePerWeightStoredKey)
+	if err != nil && err != database.ErrNotFound {
+		return err
+	}
+	s.feePerWeightStored = new(big.Int).SetBytes(feePerStakerBytes)
+	s.persistedFeePerWeightStored = new(big.Int).Set(s.feePerWeightStored)
+
+	lastAccumBytes, err := s.singletonDB.Get(lastAccumulatedFeeKey)
+	if err != nil && err != database.ErrNotFound {
+		return err
+	}
+	s.lastAccumulatedFee = new(big.Int).SetBytes(lastAccumBytes)
+	s.persistedLastAccumulatedFee = new(big.Int).Set(s.lastAccumulatedFee)
+
 	return nil
 }
 
@@ -1493,7 +1506,8 @@ func (s *state) loadCurrentValidators() error {
 		}
 
 		mintRate := new(big.Int).SetBytes(metadata.MintRateBytes)
-		staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, mintRate)
+		feePerWeightPaid := new(big.Int).SetBytes(metadata.FeePerWeightPaidBytes)
+		staker, err := NewCurrentStakerWithRewardRate(txID, stakerTx, metadata.PotentialReward, mintRate, feePerWeightPaid)
 		if err != nil {
 			return err
 		}
@@ -1535,7 +1549,9 @@ func (s *state) loadCurrentValidators() error {
 			return err
 		}
 
-		staker, err := NewCurrentStaker(txID, stakerTx, metadata.PotentialReward)
+		mintRate := new(big.Int).SetBytes(metadata.MintRateBytes)
+		feePerWeightPaid := new(big.Int).SetBytes(metadata.FeePerWeightPaidBytes)
+		staker, err := NewCurrentStakerWithRewardRate(txID, stakerTx, metadata.PotentialReward, mintRate, feePerWeightPaid)
 		if err != nil {
 			return err
 		}
@@ -1577,7 +1593,8 @@ func (s *state) loadCurrentValidators() error {
 			}
 
 			mintRate := new(big.Int).SetBytes(metadata.MintRateBytes)
-			staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, mintRate)
+			feePerWeightPaid := new(big.Int).SetBytes(metadata.FeePerWeightPaidBytes)
+			staker, err := NewCurrentStakerWithRewardRate(txID, stakerTx, metadata.PotentialReward, mintRate, feePerWeightPaid)
 			if err != nil {
 				return err
 			}
@@ -1848,6 +1865,22 @@ func (s *state) SetHeight(height uint64) {
 	s.currentHeight = height
 }
 
+func (s *state) GetFeePerWeightStored() (*big.Int, error) {
+	return new(big.Int).Set(s.feePerWeightStored), nil
+}
+
+func (s *state) SetFeePerWeightStored(f *big.Int) {
+	s.feePerWeightStored.Set(f)
+}
+
+func (s *state) GetLastAccumulatedFee() (*big.Int, error) {
+	return new(big.Int).Set(s.lastAccumulatedFee), nil
+}
+
+func (s *state) SetLastAccumulatedFee(f *big.Int) {
+	s.lastAccumulatedFee.Set(f)
+}
+
 func (s *state) Commit() error {
 	defer s.Abort()
 	batch, err := s.CommitBatch()
@@ -2021,6 +2054,11 @@ func (s *state) writeCurrentStakers(updateValidators bool, height uint64) error 
 					mintRate = new(big.Int)
 				}
 
+				feePerWeightPaid := staker.FeePerWeightPaid
+				if feePerWeightPaid == nil {
+					feePerWeightPaid = new(big.Int)
+				}
+
 				// The validator is being added.
 				//
 				// Invariant: It's impossible for a delegator to have been
@@ -2031,9 +2069,10 @@ func (s *state) writeCurrentStakers(updateValidators bool, height uint64) error 
 
 					UpDuration:               0,
 					LastUpdated:              uint64(staker.StartTime.Unix()),
-					MintRateBytes:            mintRate.Bytes(),
 					PotentialReward:          staker.PotentialReward,
 					PotentialDelegateeReward: 0,
+					MintRateBytes:            mintRate.Bytes(),
+					FeePerWeightPaidBytes:    feePerWeightPaid.Bytes(),
 				}
 
 				metadataBytes, err := blocks.GenesisCodec.Marshal(blocks.Version, metadata)
@@ -2179,8 +2218,9 @@ func writeCurrentDelegatorDiff(
 		}
 
 		metadata := delegatorMetadata{
-			PotentialReward: staker.PotentialReward,
-			MintRateBytes:   staker.MintRate.Bytes(),
+			PotentialReward:       staker.PotentialReward,
+			MintRateBytes:         staker.MintRate.Bytes(),
+			FeePerWeightPaidBytes: staker.FeePerWeightPaid.Bytes(),
 		}
 
 		metadataBytes, err := blocks.GenesisCodec.Marshal(blocks.Version, &metadata)
@@ -2427,6 +2467,20 @@ func (s *state) writeMetadata() error {
 		if err := s.singletonDB.Put(heightsIndexedKey, indexedHeightsBytes); err != nil {
 			return fmt.Errorf("failed to write indexed range: %w", err)
 		}
+	}
+
+	if s.persistedFeePerWeightStored.Cmp(s.feePerWeightStored) != 0 {
+		if err := s.singletonDB.Put(feePerWeightStoredKey, s.feePerWeightStored.Bytes()); err != nil {
+			return fmt.Errorf("failed to write fee per token stored: %w", err)
+		}
+		s.persistedFeePerWeightStored.Set(s.feePerWeightStored)
+	}
+
+	if s.persistedLastAccumulatedFee.Cmp(s.lastAccumulatedFee) != 0 {
+		if err := s.singletonDB.Put(lastAccumulatedFeeKey, s.lastAccumulatedFee.Bytes()); err != nil {
+			return fmt.Errorf("failed to write last accumulated fee: %w", err)
+		}
+		s.persistedLastAccumulatedFee.Set(s.lastAccumulatedFee)
 	}
 
 	return nil

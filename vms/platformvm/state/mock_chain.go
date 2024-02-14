@@ -280,6 +280,36 @@ func (mr *MockChainMockRecorder) GetDelegateeReward(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDelegateeReward", reflect.TypeOf((*MockChain)(nil).GetDelegateeReward), arg0, arg1)
 }
 
+// GetFeePerWeightStored mocks base method.
+func (m *MockChain) GetFeePerWeightStored() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFeePerWeightStored")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFeePerWeightStored indicates an expected call of GetFeePerWeightStored.
+func (mr *MockChainMockRecorder) GetFeePerWeightStored() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeePerWeightStored", reflect.TypeOf((*MockChain)(nil).GetFeePerWeightStored))
+}
+
+// GetLastAccumulatedFee mocks base method.
+func (m *MockChain) GetLastAccumulatedFee() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastAccumulatedFee")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastAccumulatedFee indicates an expected call of GetLastAccumulatedFee.
+func (mr *MockChainMockRecorder) GetLastAccumulatedFee() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastAccumulatedFee", reflect.TypeOf((*MockChain)(nil).GetLastAccumulatedFee))
+}
+
 // GetPendingDelegatorIterator mocks base method.
 func (m *MockChain) GetPendingDelegatorIterator(arg0 ids.ID, arg1 ids.NodeID) (StakerIterator, error) {
 	m.ctrl.T.Helper()
@@ -547,6 +577,30 @@ func (m *MockChain) SetDelegateeReward(arg0 ids.ID, arg1 ids.NodeID, arg2 uint64
 func (mr *MockChainMockRecorder) SetDelegateeReward(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDelegateeReward", reflect.TypeOf((*MockChain)(nil).SetDelegateeReward), arg0, arg1, arg2)
+}
+
+// SetFeePerWeightStored mocks base method.
+func (m *MockChain) SetFeePerWeightStored(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetFeePerWeightStored", arg0)
+}
+
+// SetFeePerWeightStored indicates an expected call of SetFeePerWeightStored.
+func (mr *MockChainMockRecorder) SetFeePerWeightStored(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFeePerWeightStored", reflect.TypeOf((*MockChain)(nil).SetFeePerWeightStored), arg0)
+}
+
+// SetLastAccumulatedFee mocks base method.
+func (m *MockChain) SetLastAccumulatedFee(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetLastAccumulatedFee", arg0)
+}
+
+// SetLastAccumulatedFee indicates an expected call of SetLastAccumulatedFee.
+func (mr *MockChainMockRecorder) SetLastAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastAccumulatedFee", reflect.TypeOf((*MockChain)(nil).SetLastAccumulatedFee), arg0)
 }
 
 // SetStakeSyncTimestamp mocks base method.

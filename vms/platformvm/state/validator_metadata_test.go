@@ -241,6 +241,8 @@ func TestParseValidatorMetadata(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x20,
 				// mint rate
 				0x00, 0x00, 0x00, 0x02, 0x05, 0xDC,
+				// fee per weight paid
+				0x00, 0x00, 0x00, 0x02, 0x07, 0xD0,
 			},
 			expected: &validatorMetadata{
 				UpDuration:               6000000,
@@ -248,6 +250,7 @@ func TestParseValidatorMetadata(t *testing.T) {
 				PotentialReward:          100000,
 				PotentialDelegateeReward: 20000,
 				MintRateBytes:            big.NewInt(1500).Bytes(),
+				FeePerWeightPaidBytes:    big.NewInt(2000).Bytes(),
 				lastUpdated:              time.Unix(900000, 0),
 			},
 			expectedErr: nil,

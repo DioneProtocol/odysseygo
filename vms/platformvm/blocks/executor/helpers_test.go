@@ -38,6 +38,7 @@ import (
 	"github.com/ava-labs/avalanchego/utils/wrappers"
 	"github.com/ava-labs/avalanchego/version"
 	"github.com/ava-labs/avalanchego/vms/components/avax"
+	"github.com/ava-labs/avalanchego/vms/components/feecollector"
 	"github.com/ava-labs/avalanchego/vms/platformvm/api"
 	"github.com/ava-labs/avalanchego/vms/platformvm/config"
 	"github.com/ava-labs/avalanchego/vms/platformvm/fx"
@@ -304,6 +305,9 @@ func defaultCtx(db database.Database) *snow.Context {
 	m := atomic.NewMemory(atomicDB)
 
 	ctx.SharedMemory = m.NewSharedMemory(ctx.ChainID)
+
+	feeDb := prefixdb.New([]byte{2}, db)
+	ctx.FeeCollector, _ = feecollector.New(feeDb)
 
 	ctx.ValidatorState = &validators.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {

@@ -30,8 +30,9 @@ type preDelegateeRewardMetadata struct {
 }
 
 type delegatorMetadata struct {
-	PotentialReward uint64 `serialize:"true"`
-	MintRateBytes   []byte `serialize:"true"`
+	PotentialReward       uint64 `serialize:"true"`
+	MintRateBytes         []byte `serialize:"true"`
+	FeePerWeightPaidBytes []byte `serialize:"true"`
 }
 
 type validatorMetadata struct {
@@ -40,6 +41,7 @@ type validatorMetadata struct {
 	PotentialReward          uint64        `serialize:"true"`
 	PotentialDelegateeReward uint64        `serialize:"true"`
 	MintRateBytes            []byte        `serialize:"true"`
+	FeePerWeightPaidBytes    []byte        `serialize:"true"`
 
 	txID        ids.ID
 	lastUpdated time.Time
