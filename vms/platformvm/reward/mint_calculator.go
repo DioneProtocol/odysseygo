@@ -4,37 +4,38 @@
 package reward
 
 import (
-	"fmt"
 	"math/big"
 	"time"
 )
 
 var (
-	epochTime = time.Unix(0, 0)
+	_ MintCalculator = (*mintCalculator)(nil)
 
 	// 32 bits for unix time + 64 bits for a weight
 	mintShift uint = 96
-
-	errInvalidMintPeriod = fmt.Errorf("mintFrom must be less than mintUntil")
 )
 
+type MintCalculator interface {
+	CalculateMintRate(totalWeight uint64, lastSyncTime, newChainTime time.Time) *big.Int
+}
+
 type mintCalculator struct {
-	mintFrom   time.Time
+	mintSince  time.Time
 	mintUntil  time.Time
 	mintPeriod *big.Int
 	mintAmount *big.Int
 }
 
-func NewMintCalculator(config MintConfig) (*mintCalculator, error) {
-	if config.MintUntil <= config.MintSince {
-		return nil, errInvalidMintPeriod
-	}
+func NewMintCalculator(config MintConfig) *mintCalculator {
+	mintSince := time.Unix(config.MintSince, 0)
+	mintUntil := mintSince.Add(config.MintingPeriod)
+	mintPeriod := uint64(config.MintingPeriod.Seconds())
 	return &mintCalculator{
-		mintFrom:   time.Unix(config.MintSince, 0),
-		mintUntil:  time.Unix(config.MintUntil, 0),
-		mintPeriod: new(big.Int).SetInt64(config.MintUntil - config.MintSince),
+		mintSince:  mintSince,
+		mintUntil:  mintUntil,
+		mintPeriod: new(big.Int).SetUint64(mintPeriod),
 		mintAmount: new(big.Int).SetUint64(config.MintAmount),
-	}, nil
+	}
 }
 
 func CalculateMintReward(weight uint64, stakerMintRate, accumulatedMintRate *big.Int) uint64 {
@@ -47,8 +48,8 @@ func CalculateMintReward(weight uint64, stakerMintRate, accumulatedMintRate *big
 }
 
 func (c *mintCalculator) CalculateMintRate(totalWeight uint64, lastSyncTime, newChainTime time.Time) *big.Int {
-	if lastSyncTime.Compare(c.mintFrom) < 0 {
-		lastSyncTime = c.mintFrom
+	if lastSyncTime.Compare(c.mintSince) < 0 {
+		lastSyncTime = c.mintSince
 	}
 
 	if newChainTime.Compare(c.mintUntil) > 0 {

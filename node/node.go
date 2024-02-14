@@ -912,6 +912,7 @@ func (n *Node) initVMs() error {
 				MinStakeDuration:              n.Config.MinStakeDuration,
 				MaxStakeDuration:              n.Config.MaxStakeDuration,
 				RewardConfig:                  n.Config.RewardConfig,
+				MintConfig:                    n.Config.MintConfig,
 				ApricotPhase3Time:             version.GetApricotPhase3Time(n.Config.NetworkID),
 				ApricotPhase5Time:             version.GetApricotPhase5Time(n.Config.NetworkID),
 				BanffTime:                     version.GetBanffTime(n.Config.NetworkID),

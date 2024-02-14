@@ -38,11 +38,9 @@ type MintConfig struct {
 	// minted
 	MintSince int64 `json:"mintSince"`
 
-	// MintUntil is the Unix Epoch timestamp until which the reward will be
-	// minted
-	MintUntil int64 `json:"mintUntil"`
+	// MintingPeriod is period of minting
+	MintingPeriod time.Duration `json:"mintingPeriod"`
 
-	// SupplyCap is the target value that the reward calculation should be
-	// asymptotic to.
+	// MintAmount is the amount of tokens to mint
 	MintAmount uint64 `json:"mintAmount"`
 }
