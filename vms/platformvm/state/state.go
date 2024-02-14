@@ -1565,9 +1565,9 @@ func (s *state) loadCurrentValidators() error {
 				return err
 			}
 
-			potentialRewardBytes := delegatorIt.Value()
-			potentialReward, err := database.ParseUInt64(potentialRewardBytes)
-			if err != nil {
+			metadataBytes := delegatorIt.Value()
+			metadata := delegatorMetadata{}
+			if err := parseDelegatorMetadata(metadataBytes, &metadata); err != nil {
 				return err
 			}
 
@@ -1576,7 +1576,8 @@ func (s *state) loadCurrentValidators() error {
 				return fmt.Errorf("expected tx type txs.Staker but got %T", tx.Unsigned)
 			}
 
-			staker, err := NewCurrentStaker(txID, stakerTx, potentialReward)
+			mintRate := new(big.Int).SetBytes(metadata.MintRateBytes)
+			staker, err := NewCurrentStakerWithMintRate(txID, stakerTx, metadata.PotentialReward, mintRate)
 			if err != nil {
 				return err
 			}
@@ -2177,7 +2178,17 @@ func writeCurrentDelegatorDiff(
 			return fmt.Errorf("failed to increase node weight diff: %w", err)
 		}
 
-		if err := database.PutUInt64(currentDelegatorList, staker.TxID[:], staker.PotentialReward); err != nil {
+		metadata := delegatorMetadata{
+			PotentialReward: staker.PotentialReward,
+			MintRateBytes:   staker.MintRate.Bytes(),
+		}
+
+		metadataBytes, err := blocks.GenesisCodec.Marshal(blocks.Version, &metadata)
+		if err != nil {
+			return fmt.Errorf("failed to serialize current delegator: %w", err)
+		}
+
+		if err := currentDelegatorList.Put(staker.TxID[:], metadataBytes); err != nil {
 			return fmt.Errorf("failed to write current delegator to list: %w", err)
 		}
 	}
