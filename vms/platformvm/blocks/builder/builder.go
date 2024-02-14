@@ -377,7 +377,6 @@ func buildBlock(
 			parentID,
 			height,
 			rewardValidatorTx,
-			new(big.Int),
 			feeFromXChain,
 			feeFromCChain,
 		)
@@ -392,16 +391,25 @@ func buildBlock(
 		return nil, ErrNoPendingBlocks
 	}
 
+	txs := builder.Mempool.PeekTxs(targetBlockSize)
+
+	feeSync := false
+	if forceAdvanceTime {
+		feeSync = true
+	} else {
+		for _, tx := range txs {
+			if isFeeSyncNeeded(tx) {
+				feeSync = true
+				break
+			}
+		}
+	}
+
 	feeFromXChain := new(big.Int)
 	feeFromCChain := new(big.Int)
-
-	txs := builder.Mempool.PeekTxs(targetBlockSize)
-	for _, tx := range txs {
-		if isFeeSyncNeeded(tx) {
-			feeFromXChain = builder.txExecutorBackend.Ctx.FeeCollector.GetXChainValue()
-			feeFromCChain = builder.txExecutorBackend.Ctx.FeeCollector.GetCChainValue()
-			break
-		}
+	if feeSync {
+		feeFromXChain = builder.txExecutorBackend.Ctx.FeeCollector.GetXChainValue()
+		feeFromCChain = builder.txExecutorBackend.Ctx.FeeCollector.GetCChainValue()
 	}
 
 	// Issue a block with as many transactions as possible.

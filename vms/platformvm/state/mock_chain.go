@@ -55,6 +55,18 @@ func (mr *MockChainMockRecorder) AddChain(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddChain", reflect.TypeOf((*MockChain)(nil).AddChain), arg0)
 }
 
+// AddCurrentAccumulatedFee mocks base method.
+func (m *MockChain) AddCurrentAccumulatedFee(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddCurrentAccumulatedFee", arg0)
+}
+
+// AddCurrentAccumulatedFee indicates an expected call of AddCurrentAccumulatedFee.
+func (mr *MockChainMockRecorder) AddCurrentAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddCurrentAccumulatedFee", reflect.TypeOf((*MockChain)(nil).AddCurrentAccumulatedFee), arg0)
+}
+
 // AddRewardUTXO mocks base method.
 func (m *MockChain) AddRewardUTXO(arg0 ids.ID, arg1 *avax.UTXO) {
 	m.ctrl.T.Helper()
@@ -188,6 +200,21 @@ func (m *MockChain) GetChains(arg0 ids.ID) ([]*txs.Tx, error) {
 func (mr *MockChainMockRecorder) GetChains(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockChain)(nil).GetChains), arg0)
+}
+
+// GetCurrentAccumulatedFee mocks base method.
+func (m *MockChain) GetCurrentAccumulatedFee() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentAccumulatedFee")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentAccumulatedFee indicates an expected call of GetCurrentAccumulatedFee.
+func (mr *MockChainMockRecorder) GetCurrentAccumulatedFee() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentAccumulatedFee", reflect.TypeOf((*MockChain)(nil).GetCurrentAccumulatedFee))
 }
 
 // GetCurrentDelegatorIterator mocks base method.

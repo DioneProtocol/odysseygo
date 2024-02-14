@@ -150,6 +150,20 @@ func (mr *MockBlockMockRecorder) Parent() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Parent", reflect.TypeOf((*MockBlock)(nil).Parent))
 }
 
+// TotalAccumulatedFee mocks base method.
+func (m *MockBlock) TotalAccumulatedFee(arg0 ids.ID) *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TotalAccumulatedFee", arg0)
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// TotalAccumulatedFee indicates an expected call of TotalAccumulatedFee.
+func (mr *MockBlockMockRecorder) TotalAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TotalAccumulatedFee", reflect.TypeOf((*MockBlock)(nil).TotalAccumulatedFee), arg0)
+}
+
 // Txs mocks base method.
 func (m *MockBlock) Txs() []*txs.Tx {
 	m.ctrl.T.Helper()

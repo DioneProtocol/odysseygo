@@ -44,13 +44,13 @@ func (b *BanffProposalBlock) Visit(v Visitor) error {
 	return v.BanffProposalBlock(b)
 }
 
-func (b *BanffProposalBlock) AccumulatedFee(assetID ids.ID) *big.Int {
-	accumulatedFee := b.ApricotProposalBlock.AccumulatedFee(assetID)
+func (b *BanffProposalBlock) FeeFromPChain(assetID ids.ID) *big.Int {
+	feePChain := b.ApricotProposalBlock.FeeFromPChain(assetID)
 	for _, tx := range b.Transactions {
 		burned := tx.Burned(assetID)
-		accumulatedFee.Add(accumulatedFee, new(big.Int).SetUint64(burned))
+		feePChain.Add(feePChain, new(big.Int).SetUint64(burned))
 	}
-	return accumulatedFee
+	return feePChain
 }
 
 func NewBanffProposalBlock(
@@ -79,7 +79,6 @@ func NewBanffProposalBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
-	accumulatedFee *big.Int,
 	feeFromXChain *big.Int,
 	feeFromCChain *big.Int,
 ) (*BanffProposalBlock, error) {
@@ -133,9 +132,16 @@ func (b *ApricotProposalBlock) FeeFromCChain() *big.Int {
 	return new(big.Int).SetBytes(b.FeeCChain)
 }
 
-func (b *ApricotProposalBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+func (b *ApricotProposalBlock) FeeFromPChain(assetID ids.ID) *big.Int {
 	burned := b.Tx.Burned(assetID)
 	return new(big.Int).SetUint64(burned)
+}
+
+func (b *ApricotProposalBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+	accumulatedFee := b.FeeFromPChain(assetID)
+	accumulatedFee.Add(accumulatedFee, b.FeeFromXChain())
+	accumulatedFee.Add(accumulatedFee, b.FeeFromCChain())
+	return accumulatedFee
 }
 
 // NewApricotProposalBlock is kept for testing purposes only.
