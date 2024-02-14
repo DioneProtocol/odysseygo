@@ -15,9 +15,7 @@ const PercentDenominator = 1_000_000
 // floating point fractions.
 var consumptionRateDenominator = new(big.Int).SetUint64(PercentDenominator)
 
-const FeePerWeightDenominator = 1_000_000_000_000_000_000
-
-var BigFeePerWeightDenominator = new(big.Int).SetUint64(FeePerWeightDenominator)
+const BitShift uint = 96
 
 type Config struct {
 	// MaxConsumptionRate is the rate to allocate funds if the validator's stake

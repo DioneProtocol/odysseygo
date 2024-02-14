@@ -137,7 +137,7 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 	accumFeeDiff := new(big.Int).Sub(curAccumFee, lastAccumulatedFee)
 
 	feePerWeightIncrement := new(big.Int).Set(accumFeeDiff)
-	feePerWeightIncrement.Mul(feePerWeightIncrement, reward.BigFeePerWeightDenominator)
+	feePerWeightIncrement.Lsh(feePerWeightIncrement, reward.BitShift)
 	feePerWeightIncrement.Div(feePerWeightIncrement, bigTotalWeight)
 
 	s.lastAccumulatedFee = curAccumFee
