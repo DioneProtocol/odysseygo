@@ -74,6 +74,10 @@ func (b *ApricotCommitBlock) FeeFromCChain() *big.Int {
 	return new(big.Int)
 }
 
+func (b *ApricotCommitBlock) FeeFromPChain(ids.ID) *big.Int {
+	return new(big.Int)
+}
+
 func (b *ApricotCommitBlock) AccumulatedFee(ids.ID) *big.Int {
 	return new(big.Int)
 }

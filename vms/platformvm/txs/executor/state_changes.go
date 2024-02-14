@@ -156,9 +156,10 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 }
 
 func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Chain) error {
-	curAccumFee := new(big.Int).Set(backend.Ctx.FeeCollector.GetPChainValue())
-	curAccumFee.Add(curAccumFee, backend.Ctx.FeeCollector.GetCChainValue())
-	curAccumFee.Add(curAccumFee, backend.Ctx.FeeCollector.GetXChainValue())
+	curAccumFee, err := parentState.GetCurrentAccumulatedFee()
+	if err != nil {
+		return err
+	}
 
 	if s.feePerWeightStored == nil {
 		s.feePerWeightStored = new(big.Int)

@@ -64,6 +64,9 @@ type diff struct {
 	stakerMintRate     *big.Int
 	feePerWeightStored *big.Int
 	lastAccumulatedFee *big.Int
+
+	addAccumulatedFee          *big.Int
+	currentAccumulatedFeeCache *big.Int
 }
 
 func NewDiff(
@@ -75,9 +78,10 @@ func NewDiff(
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:      parentID,
-		stateVersions: stateVersions,
-		timestamp:     parentState.GetTimestamp(),
+		parentID:          parentID,
+		stateVersions:     stateVersions,
+		timestamp:         parentState.GetTimestamp(),
+		addAccumulatedFee: new(big.Int),
 	}, nil
 }
 
@@ -571,6 +575,26 @@ func (d *diff) SetFeePerWeightStored(f *big.Int) {
 	d.feePerWeightStored.Set(f)
 }
 
+func (d *diff) AddCurrentAccumulatedFee(f *big.Int) {
+	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
+}
+
+func (d *diff) GetCurrentAccumulatedFee() (*big.Int, error) {
+	if d.currentAccumulatedFeeCache == nil {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		lastAccumulatedFee, err := parentState.GetCurrentAccumulatedFee()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.currentAccumulatedFeeCache = lastAccumulatedFee
+
+	}
+	return new(big.Int).Add(d.currentAccumulatedFeeCache, d.addAccumulatedFee), nil
+}
+
 func (d *diff) GetLastAccumulatedFee() (*big.Int, error) {
 	if d.lastAccumulatedFee == nil {
 		parentState, ok := d.stateVersions.GetState(d.parentID)
@@ -607,6 +631,9 @@ func (d *diff) Apply(baseState State) error {
 	}
 	if d.feePerWeightStored != nil {
 		baseState.SetFeePerWeightStored(d.feePerWeightStored)
+	}
+	if d.addAccumulatedFee.Sign() > 0 {
+		baseState.AddCurrentAccumulatedFee(d.addAccumulatedFee)
 	}
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)

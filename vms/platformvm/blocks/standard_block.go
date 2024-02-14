@@ -114,13 +114,20 @@ func (b *ApricotStandardBlock) FeeFromCChain() *big.Int {
 	return new(big.Int).SetBytes(b.FeeCChain)
 }
 
-func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
-	accumulatedFees := new(big.Int)
+func (b *ApricotStandardBlock) FeeFromPChain(assetID ids.ID) *big.Int {
+	feePChain := new(big.Int)
 	for _, tx := range b.Transactions {
 		burned := tx.Burned(assetID)
-		accumulatedFees.Add(accumulatedFees, new(big.Int).SetUint64(burned))
+		feePChain.Add(feePChain, new(big.Int).SetUint64(burned))
 	}
-	return accumulatedFees
+	return feePChain
+}
+
+func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+	accumulatedFee := b.FeeFromPChain(assetID)
+	accumulatedFee.Add(accumulatedFee, b.FeeFromXChain())
+	accumulatedFee.Add(accumulatedFee, b.FeeFromCChain())
+	return accumulatedFee
 }
 
 // NewApricotStandardBlock is kept for testing purposes only.

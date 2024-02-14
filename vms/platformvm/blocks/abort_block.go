@@ -74,6 +74,10 @@ func (b *ApricotAbortBlock) FeeFromCChain() *big.Int {
 	return new(big.Int)
 }
 
+func (b *ApricotAbortBlock) FeeFromPChain(ids.ID) *big.Int {
+	return new(big.Int)
+}
+
 func (b *ApricotAbortBlock) AccumulatedFee(ids.ID) *big.Int {
 	return new(big.Int)
 }

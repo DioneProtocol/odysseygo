@@ -304,7 +304,7 @@ func (a *acceptor) commonAccept(b blocks.Block) error {
 		}
 	}
 
-	accumulatedFee := b.AccumulatedFee(a.ctx.AVAXAssetID)
+	accumulatedFee := b.FeeFromPChain(a.ctx.AVAXAssetID)
 	accumulatedFee.Add(accumulatedFee, feeFromXChain)
 	accumulatedFee.Add(accumulatedFee, feeFromCChain)
 	if accumulatedFee.Sign() > 0 {

@@ -95,10 +95,11 @@ var (
 	initializedKey    = []byte("initialized")
 	prunedKey         = []byte("pruned")
 
-	stakeSyncTimestampKey = []byte("stake sync timestamp")
-	stakerMintRateKey     = []byte("staker mint rate")
-	feePerWeightStoredKey = []byte("fee per staker stored")
-	lastAccumulatedFeeKey = []byte("las accumulated fee")
+	stakeSyncTimestampKey    = []byte("stake sync timestamp")
+	stakerMintRateKey        = []byte("staker mint rate")
+	feePerWeightStoredKey    = []byte("fee per staker stored")
+	lastAccumulatedFeeKey    = []byte("last accumulated fee")
+	currentAccumulatedFeeKey = []byte("current accumulated fee")
 )
 
 // Chain collects all methods to manage the state of the chain for block
@@ -140,6 +141,9 @@ type Chain interface {
 
 	GetFeePerWeightStored() (*big.Int, error)
 	SetFeePerWeightStored(*big.Int)
+
+	GetCurrentAccumulatedFee() (*big.Int, error)
+	AddCurrentAccumulatedFee(*big.Int)
 
 	GetLastAccumulatedFee() (*big.Int, error)
 	SetLastAccumulatedFee(*big.Int)
@@ -394,8 +398,9 @@ type state struct {
 
 	feePerWeightStored, persistedFeePerWeightStored               *big.Int
 	lastAccumulatedFee, persistedLastAccumulatedFee               *big.Int
-	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
+	currentAccumulatedFee, persistedCurrentAccumulatedFee         *big.Int
 	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
+	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
 }
 
 // heightRange is used to track which heights are safe to use the native DB
@@ -714,6 +719,8 @@ func newState(
 		persistedFeePerWeightStored:        new(big.Int),
 		lastAccumulatedFee:                 new(big.Int),
 		persistedLastAccumulatedFee:        new(big.Int),
+		currentAccumulatedFee:              new(big.Int),
+		persistedCurrentAccumulatedFee:     new(big.Int),
 	}, nil
 }
 
@@ -1464,12 +1471,19 @@ func (s *state) loadMetadata() error {
 	s.feePerWeightStored = new(big.Int).SetBytes(feePerStakerBytes)
 	s.persistedFeePerWeightStored = new(big.Int).Set(s.feePerWeightStored)
 
-	lastAccumBytes, err := s.singletonDB.Get(lastAccumulatedFeeKey)
+	lastAccumulatedFeeBytes, err := s.singletonDB.Get(lastAccumulatedFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return err
 	}
-	s.lastAccumulatedFee = new(big.Int).SetBytes(lastAccumBytes)
+	s.lastAccumulatedFee = new(big.Int).SetBytes(lastAccumulatedFeeBytes)
 	s.persistedLastAccumulatedFee = new(big.Int).Set(s.lastAccumulatedFee)
+
+	currentAccumulatedFeeBytes, err := s.singletonDB.Get(currentAccumulatedFeeKey)
+	if err != nil && err != database.ErrNotFound {
+		return err
+	}
+	s.currentAccumulatedFee = new(big.Int).SetBytes(currentAccumulatedFeeBytes)
+	s.persistedCurrentAccumulatedFee = new(big.Int).Set(s.currentAccumulatedFee)
 
 	return nil
 }
@@ -1871,6 +1885,14 @@ func (s *state) GetFeePerWeightStored() (*big.Int, error) {
 
 func (s *state) SetFeePerWeightStored(f *big.Int) {
 	s.feePerWeightStored.Set(f)
+}
+
+func (s *state) GetCurrentAccumulatedFee() (*big.Int, error) {
+	return new(big.Int).Set(s.currentAccumulatedFee), nil
+}
+
+func (s *state) AddCurrentAccumulatedFee(f *big.Int) {
+	s.currentAccumulatedFee.Add(s.currentAccumulatedFee, f)
 }
 
 func (s *state) GetLastAccumulatedFee() (*big.Int, error) {
@@ -2481,6 +2503,14 @@ func (s *state) writeMetadata() error {
 			return fmt.Errorf("failed to write last accumulated fee: %w", err)
 		}
 		s.persistedLastAccumulatedFee.Set(s.lastAccumulatedFee)
+	}
+
+	if s.persistedCurrentAccumulatedFee.Cmp(s.currentAccumulatedFee) != 0 {
+		if err := s.singletonDB.Put(currentAccumulatedFeeKey, s.currentAccumulatedFee.Bytes()); err != nil {
+			return fmt.Errorf("failed to write current accumulated fee: %w", err)
+		}
+		s.persistedCurrentAccumulatedFee.Set(s.currentAccumulatedFee)
+		fmt.Println("WRITE", s.persistedCurrentAccumulatedFee)
 	}
 
 	return nil
