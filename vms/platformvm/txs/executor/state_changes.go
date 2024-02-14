@@ -70,15 +70,16 @@ type stateChanges struct {
 	pendingValidatorsToRemove []*state.Staker
 	pendingDelegatorsToRemove []*state.Staker
 	currentValidatorsToRemove []*state.Staker
-	accumulatedMintRate       *big.Int
 	stakeSyncTimestamp        time.Time
+	accumulatedMintRate       *big.Int
+	lastAccumulatedFee        *big.Int
+	feePerWeightStored        *big.Int
 }
 
 func (s *stateChanges) Apply(stateDiff state.Diff) {
 	for subnetID, supply := range s.updatedSupplies {
 		stateDiff.SetCurrentSupply(subnetID, supply)
 	}
-
 	for _, currentValidatorToAdd := range s.currentValidatorsToAdd {
 		stateDiff.PutCurrentValidator(currentValidatorToAdd)
 	}
@@ -99,6 +100,12 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	}
 	if s.accumulatedMintRate != nil {
 		stateDiff.SetStakerAccumulatedMintRate(s.accumulatedMintRate)
+	}
+	if s.lastAccumulatedFee != nil {
+		stateDiff.SetLastAccumulatedFee(s.lastAccumulatedFee)
+	}
+	if s.feePerWeightStored != nil {
+		stateDiff.SetFeePerWeightStored(s.feePerWeightStored)
 	}
 }
 
@@ -144,6 +151,48 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 		s.accumulatedMintRate = new(big.Int).SetUint64(0)
 	}
 	s.stakeSyncTimestamp = newChainTime
+
+	return nil
+}
+
+func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Chain) error {
+	curAccumFee := new(big.Int).Set(backend.Ctx.FeeCollector.GetPChainValue())
+	curAccumFee.Add(curAccumFee, backend.Ctx.FeeCollector.GetCChainValue())
+	curAccumFee.Add(curAccumFee, backend.Ctx.FeeCollector.GetXChainValue())
+
+	if s.feePerWeightStored == nil {
+		s.feePerWeightStored = new(big.Int)
+	}
+
+	lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
+	if err != nil {
+		return err
+	}
+
+	feePerWeightStored, err := parentState.GetFeePerWeightStored()
+	if err != nil {
+		return err
+	}
+
+	if lastAccumulatedFee.Cmp(curAccumFee) == 0 {
+		return nil
+	}
+
+	vdrs, exists := backend.Config.Validators.Get(constants.PlatformChainID)
+	if !exists {
+		return fmt.Errorf("primary network vdrs not exists")
+	}
+	bigTotalWeight := new(big.Int).SetUint64(vdrs.Weight())
+
+	accumFeeDiff := new(big.Int).Sub(curAccumFee, lastAccumulatedFee)
+
+	feePerWeightIncrement := new(big.Int).Set(accumFeeDiff)
+	feePerWeightIncrement.Lsh(feePerWeightIncrement, reward.BitShift)
+	feePerWeightIncrement.Div(feePerWeightIncrement, bigTotalWeight)
+
+	s.lastAccumulatedFee = curAccumFee
+	s.feePerWeightStored.Set(feePerWeightStored)
+	s.feePerWeightStored.Add(s.feePerWeightStored, feePerWeightIncrement)
 
 	return nil
 }
@@ -196,13 +245,14 @@ func AdvanceTimeTo(
 
 		switch stakerToRemove.Priority {
 		case txs.PrimaryNetworkValidatorPendingPriority, txs.PrimaryNetworkDelegatorApricotPendingPriority, txs.PrimaryNetworkDelegatorBanffPendingPriority:
+			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+				return nil, err
+			}
+			stakerToAdd.FeePerWeightPaid = changes.feePerWeightStored
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
-			if stakerToAdd.MintRate == nil {
-				stakerToAdd.MintRate = new(big.Int)
-			}
-			stakerToAdd.MintRate.Set(changes.accumulatedMintRate)
+			stakerToAdd.MintRate = changes.accumulatedMintRate
 		default:
 			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
 			if !ok {
@@ -267,7 +317,20 @@ func AdvanceTimeTo(
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
-			stakerToRemove.PotentialReward = reward.CalculateMintReward(stakerToRemove.Weight, stakerToRemove.MintRate, changes.accumulatedMintRate)
+			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+				return nil, err
+			}
+
+			feePerWeightStored, err := parentState.GetFeePerWeightStored()
+			if err != nil {
+				return nil, err
+			}
+
+			feeCalculator := reward.NewDistributeCalculator(feePerWeightStored)
+			mint := reward.CalculateMintReward(stakerToRemove.Weight, stakerToRemove.MintRate, changes.accumulatedMintRate)
+			fee := feeCalculator.Calculate(stakerToRemove.Weight, stakerToRemove.FeePerWeightPaid)
+
+			stakerToRemove.PotentialReward = mint + fee
 			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + stakerToRemove.PotentialReward
 		}
 
