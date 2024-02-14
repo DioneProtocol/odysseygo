@@ -28,7 +28,7 @@ func (dc *distrubuteCalculator) Calculate(weight uint64, feePerWeightPaid *big.I
 	feePerWeightDiff.Sub(feePerWeightDiff, feePerWeightPaid)
 	potentialReward := new(big.Int).SetUint64(weight)
 	potentialReward.Mul(potentialReward, feePerWeightDiff)
-	potentialReward.Div(potentialReward, BigFeePerWeightDenominator)
+	potentialReward.Rsh(potentialReward, BitShift)
 
 	return potentialReward.Uint64()
 }
