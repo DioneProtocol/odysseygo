@@ -1,7 +1,6 @@
 package feecollector
 
 import (
-	"fmt"
 	"math/big"
 	"sync"
 
