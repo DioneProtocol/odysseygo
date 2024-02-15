@@ -17,6 +17,10 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	"github.com/DioneProtocol/odysseygo/vms/alpha/txs/executor"
+)
+
+var (
+	_ snowstorm.Tx = (*Tx)(nil)
 
 	errTxNotProcessing  = errors.New("transaction is not processing")
 	errUnexpectedReject = errors.New("attempting to reject transaction")

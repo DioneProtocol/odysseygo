@@ -66,15 +66,15 @@ func (b *ApricotAbortBlock) Visit(v Visitor) error {
 	return v.ApricotAbortBlock(b)
 }
 
-func (b *ApricotAbortBlock) FeeFromXChain() *big.Int {
+func (b *ApricotAbortBlock) FeeFromAChain() *big.Int {
 	return new(big.Int)
 }
 
-func (b *ApricotAbortBlock) FeeFromCChain() *big.Int {
+func (b *ApricotAbortBlock) FeeFromDChain() *big.Int {
 	return new(big.Int)
 }
 
-func (b *ApricotAbortBlock) FeeFromPChain(ids.ID) *big.Int {
+func (b *ApricotAbortBlock) FeeFromOChain(ids.ID) *big.Int {
 	return new(big.Int)
 }
 

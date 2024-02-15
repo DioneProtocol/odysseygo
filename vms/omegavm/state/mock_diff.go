@@ -68,7 +68,7 @@ func (mr *MockDiffMockRecorder) AddCurrentAccumulatedFee(arg0 interface{}) *gomo
 }
 
 // AddRewardUTXO mocks base method.
-func (m *MockDiff) AddRewardUTXO(arg0 ids.ID, arg1 *avax.UTXO) {
+func (m *MockDiff) AddRewardUTXO(arg0 ids.ID, arg1 *dione.UTXO) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "AddRewardUTXO", arg0, arg1)
 }

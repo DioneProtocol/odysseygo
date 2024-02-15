@@ -11,7 +11,6 @@ import (
 
 	"github.com/DioneProtocol/odysseygo/database"
 	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/components/avax"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/fx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/status"
@@ -60,7 +59,7 @@ type diff struct {
 	addedTxs map[ids.ID]*txAndStatus
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
-	modifiedUTXOs map[ids.ID]*avax.UTXO
+	modifiedUTXOs map[ids.ID]*dione.UTXO
 
 	stakerMintRate     *big.Int
 	feePerWeightStored *big.Int

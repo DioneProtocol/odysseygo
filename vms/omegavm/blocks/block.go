@@ -27,9 +27,9 @@ type Block interface {
 	// Visit calls [visitor] with this block's concrete type
 	Visit(visitor Visitor) error
 
-	FeeFromPChain(ids.ID) *big.Int
-	FeeFromXChain() *big.Int
-	FeeFromCChain() *big.Int
+	FeeFromOChain(ids.ID) *big.Int
+	FeeFromAChain() *big.Int
+	FeeFromDChain() *big.Int
 	AccumulatedFee(ids.ID) *big.Int
 
 	// note: initialize does not assume that block transactions
