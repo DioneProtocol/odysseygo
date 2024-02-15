@@ -51,6 +51,7 @@ var (
 			UptimeRequirement: .8, // 80%
 			MinValidatorStake: 2 * units.KiloDione,
 			MinDelegatorStake: 25 * units.Dione,
+			MaxValidatorStake: 3 * units.MegaDione,
 			MinDelegationFee:  20000, // 2%
 			MinStakeDuration:  24 * time.Hour,
 			MaxStakeDuration:  365 * 24 * time.Hour,
