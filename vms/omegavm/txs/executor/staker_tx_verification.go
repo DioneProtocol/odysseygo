@@ -21,6 +21,7 @@ import (
 
 var (
 	ErrWeightTooSmall                  = errors.New("weight of this validator is too low")
+	ErrWeightTooLarge                  = errors.New("weight of this validator is too large")
 	ErrInsufficientDelegationFee       = errors.New("staker charges an insufficient delegation fee")
 	ErrStakeTooShort                   = errors.New("staking period is too short")
 	ErrStakeTooLong                    = errors.New("staking period is too long")
@@ -96,6 +97,10 @@ func verifyAddValidatorTx(
 	case tx.Validator.Wght < backend.Config.MinValidatorStake:
 		// Ensure validator is staking at least the minimum amount
 		return nil, ErrWeightTooSmall
+
+	case tx.Validator.Wght > backend.Config.MaxValidatorStake:
+		// Ensure validator isn't staking too much
+		return nil, ErrWeightTooLarge
 
 	case tx.DelegationShares < backend.Config.MinDelegationFee:
 		// Ensure the validator fee is at least the minimum amount
@@ -393,6 +398,10 @@ func verifyAddDelegatorTx(
 		return nil, ErrStakeOverflow
 	}
 
+	if backend.Config.IsApricotPhase3Activated(currentTimestamp) {
+		maximumWeight = math.Min(maximumWeight, backend.Config.MaxValidatorStake)
+	}
+
 	txID := sTx.ID()
 	newStaker, err := state.NewPendingStaker(txID, tx)
 	if err != nil {
@@ -480,6 +489,10 @@ func verifyAddPermissionlessValidatorTx(
 		// Ensure validator is staking at least the minimum amount
 		return ErrWeightTooSmall
 
+	case tx.Validator.Wght > validatorRules.maxValidatorStake:
+		// Ensure validator isn't staking too much
+		return ErrWeightTooLarge
+
 	case tx.DelegationShares < validatorRules.minDelegationFee:
 		// Ensure the validator fee is at least the minimum amount
 		return ErrInsufficientDelegationFee
@@ -562,6 +575,7 @@ func verifyAddPermissionlessValidatorTx(
 type addValidatorRules struct {
 	assetID           ids.ID
 	minValidatorStake uint64
+	maxValidatorStake uint64
 	minStakeDuration  time.Duration
 	maxStakeDuration  time.Duration
 	minDelegationFee  uint32
@@ -576,6 +590,7 @@ func getValidatorRules(
 		return &addValidatorRules{
 			assetID:           backend.Ctx.DIONEAssetID,
 			minValidatorStake: backend.Config.MinValidatorStake,
+			maxValidatorStake: backend.Config.MaxValidatorStake,
 			minStakeDuration:  backend.Config.MinStakeDuration,
 			maxStakeDuration:  backend.Config.MaxStakeDuration,
 			minDelegationFee:  backend.Config.MinDelegationFee,
@@ -594,6 +609,7 @@ func getValidatorRules(
 	return &addValidatorRules{
 		assetID:           transformSubnet.AssetID,
 		minValidatorStake: transformSubnet.MinValidatorStake,
+		maxValidatorStake: transformSubnet.MaxValidatorStake,
 		minStakeDuration:  time.Duration(transformSubnet.MinStakeDuration) * time.Second,
 		maxStakeDuration:  time.Duration(transformSubnet.MaxStakeDuration) * time.Second,
 		minDelegationFee:  transformSubnet.MinDelegationFee,
@@ -675,6 +691,7 @@ func verifyAddPermissionlessDelegatorTx(
 	if err != nil {
 		maximumWeight = stdmath.MaxUint64
 	}
+	maximumWeight = math.Min(maximumWeight, delegatorRules.maxValidatorStake)
 
 	txID := sTx.ID()
 	newStaker, err := state.NewPendingStaker(txID, tx)
@@ -746,6 +763,7 @@ func verifyAddPermissionlessDelegatorTx(
 type addDelegatorRules struct {
 	assetID                  ids.ID
 	minDelegatorStake        uint64
+	maxValidatorStake        uint64
 	minStakeDuration         time.Duration
 	maxStakeDuration         time.Duration
 	maxValidatorWeightFactor byte
@@ -760,6 +778,7 @@ func getDelegatorRules(
 		return &addDelegatorRules{
 			assetID:                  backend.Ctx.DIONEAssetID,
 			minDelegatorStake:        backend.Config.MinDelegatorStake,
+			maxValidatorStake:        backend.Config.MaxValidatorStake,
 			minStakeDuration:         backend.Config.MinStakeDuration,
 			maxStakeDuration:         backend.Config.MaxStakeDuration,
 			maxValidatorWeightFactor: MaxValidatorWeightFactor,
@@ -778,6 +797,7 @@ func getDelegatorRules(
 	return &addDelegatorRules{
 		assetID:                  transformSubnet.AssetID,
 		minDelegatorStake:        transformSubnet.MinDelegatorStake,
+		maxValidatorStake:        transformSubnet.MaxValidatorStake,
 		minStakeDuration:         time.Duration(transformSubnet.MinStakeDuration) * time.Second,
 		maxStakeDuration:         time.Duration(transformSubnet.MaxStakeDuration) * time.Second,
 		maxValidatorWeightFactor: transformSubnet.MaxValidatorWeightFactor,

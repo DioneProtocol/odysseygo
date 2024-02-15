@@ -32,6 +32,7 @@ var (
 		StakingConfig: StakingConfig{
 			UptimeRequirement: .8, // 80%
 			MinValidatorStake: 1 * units.Dione,
+			MaxValidatorStake: 3 * units.MegaDione,
 			MinDelegatorStake: 1 * units.Dione,
 			MinDelegationFee:  20000, // 2%
 			MinStakeDuration:  24 * time.Hour,
