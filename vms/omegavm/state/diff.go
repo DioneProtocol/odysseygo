@@ -6,10 +6,12 @@ package state
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/database"
 	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/vms/components/avax"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/fx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/status"
@@ -32,7 +34,8 @@ type diff struct {
 	parentID      ids.ID
 	stateVersions Versions
 
-	timestamp time.Time
+	timestamp          time.Time
+	stakeSyncTimestamp time.Time
 
 	// Subnet ID --> supply of native asset of the subnet
 	currentSupply map[ids.ID]uint64
@@ -57,7 +60,14 @@ type diff struct {
 	addedTxs map[ids.ID]*txAndStatus
 
 	// map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
-	modifiedUTXOs map[ids.ID]*dione.UTXO
+	modifiedUTXOs map[ids.ID]*avax.UTXO
+
+	stakerMintRate     *big.Int
+	feePerWeightStored *big.Int
+	lastAccumulatedFee *big.Int
+
+	addAccumulatedFee          *big.Int
+	currentAccumulatedFeeCache *big.Int
 }
 
 func NewDiff(
@@ -69,9 +79,10 @@ func NewDiff(
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:      parentID,
-		stateVersions: stateVersions,
-		timestamp:     parentState.GetTimestamp(),
+		parentID:          parentID,
+		stateVersions:     stateVersions,
+		timestamp:         parentState.GetTimestamp(),
+		addAccumulatedFee: new(big.Int),
 	}, nil
 }
 
@@ -81,6 +92,48 @@ func (d *diff) GetTimestamp() time.Time {
 
 func (d *diff) SetTimestamp(timestamp time.Time) {
 	d.timestamp = timestamp
+}
+
+func (d *diff) GetStakeSyncTimestamp() (time.Time, error) {
+	if d.stakeSyncTimestamp.Compare(time.Time{}) == 0 {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return time.Time{}, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		stakeSyncTimestamp, err := parentState.GetStakeSyncTimestamp()
+		if err != nil {
+			return time.Time{}, nil
+		}
+
+		d.stakeSyncTimestamp = stakeSyncTimestamp
+	}
+	return d.stakeSyncTimestamp, nil
+}
+
+func (d *diff) SetStakeSyncTimestamp(timestamp time.Time) {
+	d.stakeSyncTimestamp = timestamp
+}
+
+func (d *diff) GetStakerAccumulatedMintRate() (*big.Int, error) {
+	if d.stakerMintRate == nil {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		stakerMintRate, err := parentState.GetStakerAccumulatedMintRate()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.stakerMintRate = new(big.Int).Set(stakerMintRate)
+	}
+	return new(big.Int).Set(d.stakerMintRate), nil
+}
+
+func (d *diff) SetStakerAccumulatedMintRate(mr *big.Int) {
+	if d.stakerMintRate == nil {
+		d.stakerMintRate = new(big.Int)
+	}
+	d.stakerMintRate.Set(mr)
 }
 
 func (d *diff) GetCurrentSupply(subnetID ids.ID) (uint64, error) {
@@ -195,6 +248,14 @@ func (d *diff) GetCurrentStakerIterator() (StakerIterator, error) {
 	return d.currentStakerDiffs.GetStakerIterator(parentIterator), nil
 }
 
+func (d *diff) GetCurrentStakersLen() (uint64, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+	return parentState.GetCurrentStakersLen()
+}
+
 func (d *diff) GetPendingValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker, error) {
 	// If the validator was modified in this diff, return the modified
 	// validator.
@@ -256,6 +317,14 @@ func (d *diff) GetPendingStakerIterator() (StakerIterator, error) {
 	}
 
 	return d.pendingStakerDiffs.GetStakerIterator(parentIterator), nil
+}
+
+func (d *diff) GetPendingStakersLen() (uint64, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+	return parentState.GetPendingStakersLen()
 }
 
 func (d *diff) GetSubnets() ([]*txs.Tx, error) {
@@ -484,8 +553,89 @@ func (d *diff) DeleteUTXO(utxoID ids.ID) {
 	}
 }
 
+func (d *diff) GetFeePerWeightStored() (*big.Int, error) {
+	if d.feePerWeightStored == nil {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		feePerWeightStored, err := parentState.GetFeePerWeightStored()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.feePerWeightStored = new(big.Int).Set(feePerWeightStored)
+
+	}
+	return new(big.Int).Set(d.feePerWeightStored), nil
+}
+
+func (d *diff) SetFeePerWeightStored(f *big.Int) {
+	if d.feePerWeightStored == nil {
+		d.feePerWeightStored = new(big.Int)
+	}
+	d.feePerWeightStored.Set(f)
+}
+
+func (d *diff) AddCurrentAccumulatedFee(f *big.Int) {
+	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
+}
+
+func (d *diff) GetCurrentAccumulatedFee() (*big.Int, error) {
+	if d.currentAccumulatedFeeCache == nil {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		lastAccumulatedFee, err := parentState.GetCurrentAccumulatedFee()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.currentAccumulatedFeeCache = lastAccumulatedFee
+
+	}
+	return new(big.Int).Add(d.currentAccumulatedFeeCache, d.addAccumulatedFee), nil
+}
+
+func (d *diff) GetLastAccumulatedFee() (*big.Int, error) {
+	if d.lastAccumulatedFee == nil {
+		parentState, ok := d.stateVersions.GetState(d.parentID)
+		if !ok {
+			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+		}
+		lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
+		if err != nil {
+			return new(big.Int), nil
+		}
+		d.lastAccumulatedFee = new(big.Int).Set(lastAccumulatedFee)
+
+	}
+	return new(big.Int).Set(d.lastAccumulatedFee), nil
+}
+
+func (d *diff) SetLastAccumulatedFee(f *big.Int) {
+	if d.lastAccumulatedFee == nil {
+		d.lastAccumulatedFee = new(big.Int)
+	}
+	d.lastAccumulatedFee.Set(f)
+}
+
 func (d *diff) Apply(baseState State) error {
 	baseState.SetTimestamp(d.timestamp)
+	if d.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
+		baseState.SetStakeSyncTimestamp(d.stakeSyncTimestamp)
+	}
+	if d.stakerMintRate != nil {
+		baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
+	}
+	if d.lastAccumulatedFee != nil {
+		baseState.SetLastAccumulatedFee(d.lastAccumulatedFee)
+	}
+	if d.feePerWeightStored != nil {
+		baseState.SetFeePerWeightStored(d.feePerWeightStored)
+	}
+	if d.addAccumulatedFee.Sign() > 0 {
+		baseState.AddCurrentAccumulatedFee(d.addAccumulatedFee)
+	}
 	for subnetID, supply := range d.currentSupply {
 		baseState.SetCurrentSupply(subnetID, supply)
 	}

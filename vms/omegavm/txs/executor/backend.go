@@ -22,5 +22,6 @@ type Backend struct {
 	FlowChecker  utxo.Verifier
 	Uptimes      uptime.Manager
 	Rewards      reward.Calculator
+	Mint         reward.MintCalculator
 	Bootstrapped *utils.Atomic[bool]
 }

@@ -5,6 +5,7 @@ package gsharedmemory
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/DioneProtocol/odysseygo/chains/atomic"
 	"github.com/DioneProtocol/odysseygo/database"
@@ -34,6 +35,23 @@ func (c *Client) Get(peerChainID ids.ID, keys [][]byte) ([][]byte, error) {
 		return nil, err
 	}
 	return resp.Values, nil
+}
+
+func (c *Client) GetBigInt(peerChainID ids.ID, key []byte) (*big.Int, error) {
+	values, err := c.Get(peerChainID, [][]byte{key})
+	result := big.NewInt(0)
+	if err == database.ErrNotFound {
+		return result, nil
+	} else if err != nil {
+		return result, err
+	}
+	value := values[0]
+	neg := value[0]
+	result.SetBytes(value[1:])
+	if neg != 0 {
+		result.Neg(result)
+	}
+	return result, nil
 }
 
 func (c *Client) Indexed(

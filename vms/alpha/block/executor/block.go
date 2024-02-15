@@ -240,6 +240,12 @@ func (b *Block) Accept(context.Context) error {
 		)
 	}
 
+	accumulatedFee := b.AccumulatedFee(b.manager.backend.Ctx.DIONEAssetID)
+	_, err = b.manager.backend.Ctx.FeeCollector.AddAChainValue(accumulatedFee)
+	if err != nil {
+		return fmt.Errorf("failed to collect fee: %w", err)
+	}
+
 	// Note that this method writes [batch] to the database.
 	if err := b.manager.backend.Ctx.SharedMemory.Apply(blkState.atomicRequests, batch); err != nil {
 		return fmt.Errorf("failed to apply state diff to shared memory: %w", err)

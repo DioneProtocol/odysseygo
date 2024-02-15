@@ -110,6 +110,15 @@ func (tx *Tx) UTXOs() []*dione.UTXO {
 	return utxos
 }
 
+// Burned returns the amount of asset that will be burned
+func (t *Tx) Burned(assetId ids.ID) uint64 {
+	b := BurnedAssetCalculator{tx: t, assetId: assetId}
+	// The visit error is explicitly dropped here because no error is ever
+	// returned
+	_ = t.Unsigned.Visit(&b)
+	return b.burned
+}
+
 func (tx *Tx) SyntacticVerify(ctx *snow.Context) error {
 	switch {
 	case tx == nil:

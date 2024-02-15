@@ -35,6 +35,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/api"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/config"
@@ -743,6 +744,13 @@ func buildVM(t *testing.T) (*VM, ids.ID, error) {
 
 	m := atomic.NewMemory(atomicDB)
 	ctx.SharedMemory = m.NewSharedMemory(ctx.ChainID)
+
+	feeDb := prefixdb.New([]byte{2}, baseDBManager.Current().Database)
+	f, err := feecollector.New(feeDb)
+	if err != nil {
+		return nil, ids.Empty, err
+	}
+	ctx.FeeCollector = f
 
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()

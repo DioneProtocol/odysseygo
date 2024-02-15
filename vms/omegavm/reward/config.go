@@ -15,6 +15,8 @@ const PercentDenominator = 1_000_000
 // floating point fractions.
 var consumptionRateDenominator = new(big.Int).SetUint64(PercentDenominator)
 
+const BitShift uint = 96
+
 type Config struct {
 	// MaxConsumptionRate is the rate to allocate funds if the validator's stake
 	// duration is equal to [MintingPeriod]
@@ -31,4 +33,16 @@ type Config struct {
 	// SupplyCap is the target value that the reward calculation should be
 	// asymptotic to.
 	SupplyCap uint64 `json:"supplyCap"`
+}
+
+type MintConfig struct {
+	// MintSince is the Unix Epoch timestamp since which the reward will be
+	// minted
+	MintSince int64 `json:"mintSince"`
+
+	// MintingPeriod is period of minting
+	MintingPeriod time.Duration `json:"mintingPeriod"`
+
+	// MintAmount is the amount of tokens to mint
+	MintAmount uint64 `json:"mintAmount"`
 }

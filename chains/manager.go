@@ -52,6 +52,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/set"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/metervm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp"
 	"github.com/DioneProtocol/odysseygo/vms/proposervm"
@@ -191,6 +192,7 @@ type ManagerConfig struct {
 	Server                      server.Server // Handles HTTP API calls
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
+	FeeCollector                feecollector.FeeCollector
 	DIONEAssetID                ids.ID
 	AChainID                    ids.ID          // ID of the A-Chain,
 	DChainID                    ids.ID          // ID of the D-Chain,
@@ -465,6 +467,13 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 		return nil, fmt.Errorf("error while registering vm's metrics %w", err)
 	}
 
+	var feeCollector feecollector.FeeCollector
+	if chainParams.SubnetID == constants.OmegaChainID {
+		feeCollector = m.FeeCollector
+	} else {
+		feeCollector = feecollector.NewDummyCollector()
+	}
+
 	ctx := &snow.ConsensusContext{
 		Context: &snow.Context{
 			NetworkID: m.NetworkID,
@@ -480,6 +489,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb subnets.Subnet) (*c
 			Log:          chainLog,
 			Keystore:     m.Keystore.NewBlockchainKeyStore(chainParams.ID),
 			SharedMemory: m.AtomicMemory.NewSharedMemory(chainParams.ID),
+			FeeCollector: feeCollector,
 			BCLookup:     m,
 			Metrics:      vmMetrics,
 

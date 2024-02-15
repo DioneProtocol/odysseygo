@@ -5,6 +5,7 @@ package state
 
 import (
 	"bytes"
+	"math/big"
 	"time"
 
 	"github.com/google/btree"
@@ -35,14 +36,16 @@ type StakerIterator interface {
 // delegator in the current and pending validator sets.
 // Invariant: Staker's size is bounded to prevent OOM DoS attacks.
 type Staker struct {
-	TxID            ids.ID
-	NodeID          ids.NodeID
-	PublicKey       *bls.PublicKey
-	SubnetID        ids.ID
-	Weight          uint64
-	StartTime       time.Time
-	EndTime         time.Time
-	PotentialReward uint64
+	TxID             ids.ID
+	NodeID           ids.NodeID
+	PublicKey        *bls.PublicKey
+	SubnetID         ids.ID
+	Weight           uint64
+	StartTime        time.Time
+	EndTime          time.Time
+	PotentialReward  uint64
+	MintRate         *big.Int
+	FeePerWeightPaid *big.Int
 
 	// NextTime is the next time this staker will be moved from a validator set.
 	// If the staker is in the pending validator set, NextTime will equal
@@ -90,17 +93,29 @@ func NewCurrentStaker(txID ids.ID, staker txs.Staker, potentialReward uint64) (*
 	}
 	endTime := staker.EndTime()
 	return &Staker{
-		TxID:            txID,
-		NodeID:          staker.NodeID(),
-		PublicKey:       publicKey,
-		SubnetID:        staker.SubnetID(),
-		Weight:          staker.Weight(),
-		StartTime:       staker.StartTime(),
-		EndTime:         endTime,
-		PotentialReward: potentialReward,
-		NextTime:        endTime,
-		Priority:        staker.CurrentPriority(),
+		TxID:             txID,
+		NodeID:           staker.NodeID(),
+		PublicKey:        publicKey,
+		SubnetID:         staker.SubnetID(),
+		Weight:           staker.Weight(),
+		StartTime:        staker.StartTime(),
+		EndTime:          endTime,
+		PotentialReward:  potentialReward,
+		NextTime:         endTime,
+		Priority:         staker.CurrentPriority(),
+		MintRate:         new(big.Int),
+		FeePerWeightPaid: new(big.Int),
 	}, nil
+}
+
+func NewCurrentStakerWithRewardRate(txID ids.ID, staker txs.Staker, potentialReward uint64, mintRate *big.Int, feePerWeightPaid *big.Int) (*Staker, error) {
+	newStaker, err := NewCurrentStaker(txID, staker, potentialReward)
+	if err != nil {
+		return nil, err
+	}
+	newStaker.MintRate.Set(mintRate)
+	newStaker.FeePerWeightPaid.Set(feePerWeightPaid)
+	return newStaker, nil
 }
 
 func NewPendingStaker(txID ids.ID, staker txs.Staker) (*Staker, error) {
@@ -110,14 +125,16 @@ func NewPendingStaker(txID ids.ID, staker txs.Staker) (*Staker, error) {
 	}
 	startTime := staker.StartTime()
 	return &Staker{
-		TxID:      txID,
-		NodeID:    staker.NodeID(),
-		PublicKey: publicKey,
-		SubnetID:  staker.SubnetID(),
-		Weight:    staker.Weight(),
-		StartTime: startTime,
-		EndTime:   staker.EndTime(),
-		NextTime:  startTime,
-		Priority:  staker.PendingPriority(),
+		TxID:             txID,
+		NodeID:           staker.NodeID(),
+		PublicKey:        publicKey,
+		SubnetID:         staker.SubnetID(),
+		Weight:           staker.Weight(),
+		StartTime:        startTime,
+		EndTime:          staker.EndTime(),
+		NextTime:         startTime,
+		Priority:         staker.PendingPriority(),
+		MintRate:         new(big.Int),
+		FeePerWeightPaid: new(big.Int),
 	}, nil
 }

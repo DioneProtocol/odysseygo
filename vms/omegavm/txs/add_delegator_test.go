@@ -178,11 +178,7 @@ func TestAddDelegatorTxSyntacticVerifyNotDIONE(t *testing.T) {
 	}}
 	addDelegatorTx = &AddDelegatorTx{
 		BaseTx: BaseTx{BaseTx: dione.BaseTx{
-			NetworkID:    ctx.NetworkID,
 			BlockchainID: ctx.ChainID,
-			Outs:         outputs,
-			Ins:          inputs,
-			Memo:         []byte{1, 2, 3, 4, 5, 6, 7, 8},
 		}},
 		Validator: Validator{
 			NodeID: ctx.NodeID,

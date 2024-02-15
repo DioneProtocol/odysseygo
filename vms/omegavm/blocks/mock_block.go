@@ -8,6 +8,7 @@
 package blocks
 
 import (
+	big "math/big"
 	reflect "reflect"
 
 	ids "github.com/DioneProtocol/odysseygo/ids"
@@ -39,6 +40,20 @@ func (m *MockBlock) EXPECT() *MockBlockMockRecorder {
 	return m.recorder
 }
 
+// AccumulatedFee mocks base method.
+func (m *MockBlock) AccumulatedFee(arg0 ids.ID) *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccumulatedFee", arg0)
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// AccumulatedFee indicates an expected call of AccumulatedFee.
+func (mr *MockBlockMockRecorder) AccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccumulatedFee", reflect.TypeOf((*MockBlock)(nil).AccumulatedFee), arg0)
+}
+
 // Bytes mocks base method.
 func (m *MockBlock) Bytes() []byte {
 	m.ctrl.T.Helper()
@@ -51,6 +66,34 @@ func (m *MockBlock) Bytes() []byte {
 func (mr *MockBlockMockRecorder) Bytes() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bytes", reflect.TypeOf((*MockBlock)(nil).Bytes))
+}
+
+// FeeFromCChain mocks base method.
+func (m *MockBlock) FeeFromCChain() *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeFromCChain")
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// FeeFromCChain indicates an expected call of FeeFromCChain.
+func (mr *MockBlockMockRecorder) FeeFromCChain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromCChain", reflect.TypeOf((*MockBlock)(nil).FeeFromCChain))
+}
+
+// FeeFromXChain mocks base method.
+func (m *MockBlock) FeeFromXChain() *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeFromXChain")
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// FeeFromXChain indicates an expected call of FeeFromXChain.
+func (mr *MockBlockMockRecorder) FeeFromXChain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromXChain", reflect.TypeOf((*MockBlock)(nil).FeeFromXChain))
 }
 
 // Height mocks base method.
@@ -105,6 +148,20 @@ func (m *MockBlock) Parent() ids.ID {
 func (mr *MockBlockMockRecorder) Parent() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Parent", reflect.TypeOf((*MockBlock)(nil).Parent))
+}
+
+// TotalAccumulatedFee mocks base method.
+func (m *MockBlock) TotalAccumulatedFee(arg0 ids.ID) *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "TotalAccumulatedFee", arg0)
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// TotalAccumulatedFee indicates an expected call of TotalAccumulatedFee.
+func (mr *MockBlockMockRecorder) TotalAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TotalAccumulatedFee", reflect.TypeOf((*MockBlock)(nil).TotalAccumulatedFee), arg0)
 }
 
 // Txs mocks base method.

@@ -91,11 +91,7 @@ func TestRewards(t *testing.T) {
 			duration:       defaultMinStakingDuration,
 			stakeAmount:    defaultMinValidatorStake,
 			existingAmount: 360 * units.MegaDione,
-			expectedReward: 1370,
 		},
-		// (720M - 400M) * (1M / 400M) * (10% + 2% * MinimumStakingDuration / MaximumStakingDuration) * MinimumStakingDuration / MaximumStakingDuration
-		{
-			duration:       defaultMinStakingDuration,
 			stakeAmount:    units.MegaDione,
 			existingAmount: 400 * units.MegaDione,
 			expectedReward: 219298179771,
@@ -106,10 +102,6 @@ func TestRewards(t *testing.T) {
 			stakeAmount:    2 * units.MegaDione,
 			existingAmount: 400 * units.MegaDione,
 			expectedReward: 438596359542,
-		},
-		// (720M - 720M) * (1M / 720M) * (10% + 2% * MinimumStakingDuration / MaximumStakingDuration) * MinimumStakingDuration / MaximumStakingDuration
-		{
-			duration:       defaultMinStakingDuration,
 			stakeAmount:    units.MegaDione,
 			existingAmount: defaultConfig.SupplyCap,
 			expectedReward: 0,

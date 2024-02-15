@@ -39,6 +39,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/api"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/config"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/fx"
@@ -260,12 +261,15 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 	}
 	ctx.SharedMemory = msm
 
+	feeDb := prefixdb.New([]byte{2}, db)
+	ctx.FeeCollector, _ = feecollector.New(feeDb)
+
 	ctx.ValidatorState = &validators.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
-				constants.OmegaChainID: constants.PrimaryNetworkID,
-				aChainID:               constants.PrimaryNetworkID,
-				dChainID:               constants.PrimaryNetworkID,
+				constants.PlatformChainID: constants.PrimaryNetworkID,
+				aChainID:                  constants.PrimaryNetworkID,
+				dChainID:                  constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errMissing

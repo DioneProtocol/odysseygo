@@ -6,6 +6,7 @@ package builder
 import (
 	"context"
 	"errors"
+	"math/big"
 	"testing"
 	"time"
 
@@ -19,6 +20,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/logging"
 	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/state"
@@ -359,9 +361,18 @@ func TestBuildBlock(t *testing.T) {
 				txBuilder := txbuilder.NewMockBuilder(ctrl)
 				txBuilder.EXPECT().NewRewardValidatorTx(stakerTxID).Return(transactions[0], nil)
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+
 				return &builder{
 					Mempool:   mempool,
 					txBuilder: txBuilder,
+					txExecutorBackend: &txexecutor.Backend{
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
+					},
 				}
 			},
 			timestamp:        parentTimestamp,
@@ -404,8 +415,18 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasStakerTx().Return(false)
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(transactions)
+
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+
 				return &builder{
 					Mempool: mempool,
+					txExecutorBackend: &txexecutor.Backend{
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
+					},
 				}
 			},
 			timestamp:        parentTimestamp,
@@ -555,12 +576,19 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+
 				clk := &mockable.Clock{}
 				clk.Set(now)
 				return &builder{
 					Mempool: mempool,
 					txExecutorBackend: &txexecutor.Backend{
 						Clk: clk,
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
 					},
 				}
 			},
@@ -609,12 +637,19 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(true)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+
 				clk := &mockable.Clock{}
 				clk.Set(now)
 				return &builder{
 					Mempool: mempool,
 					txExecutorBackend: &txexecutor.Backend{
 						Clk: clk,
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
 					},
 				}
 			},

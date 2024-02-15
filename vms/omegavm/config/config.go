@@ -92,6 +92,9 @@ type Config struct {
 	// Config for the minting function
 	RewardConfig reward.Config
 
+	// Config for the minting function
+	MintConfig reward.MintConfig
+
 	// Time of the AP3 network upgrade
 	ApricotPhase3Time time.Time
 

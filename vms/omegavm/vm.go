@@ -135,6 +135,7 @@ func (vm *VM) Initialize(
 	}
 
 	rewards := reward.NewCalculator(vm.RewardConfig)
+	mintCalculator := reward.NewMintCalculator(vm.MintConfig)
 
 	vm.state, err = state.New(
 		vm.dbManager.Current().Database,
@@ -176,6 +177,7 @@ func (vm *VM) Initialize(
 		FlowChecker:  utxoHandler,
 		Uptimes:      vm.uptimeManager,
 		Rewards:      rewards,
+		Mint:         mintCalculator,
 		Bootstrapped: &vm.bootstrapped,
 	}
 

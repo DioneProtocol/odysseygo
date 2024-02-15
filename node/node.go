@@ -76,6 +76,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
 	"github.com/DioneProtocol/odysseygo/vms/alpha"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
@@ -122,6 +123,9 @@ type Node struct {
 
 	// Manages shared memory
 	sharedMemory *atomic.Memory
+
+	// Storage for collection
+	feeCollector feecollector.FeeCollector
 
 	// Monitors node health and runs health checks
 	health health.Health
@@ -825,6 +829,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		Server:                                  n.APIServer,
 		Keystore:                                n.keystore,
 		AtomicMemory:                            n.sharedMemory,
+		FeeCollector:                            n.feeCollector,
 		DIONEAssetID:                            dioneAssetID,
 		AChainID:                                aChainID,
 		DChainID:                                dChainID,
@@ -907,6 +912,7 @@ func (n *Node) initVMs() error {
 				MinStakeDuration:              n.Config.MinStakeDuration,
 				MaxStakeDuration:              n.Config.MaxStakeDuration,
 				RewardConfig:                  n.Config.RewardConfig,
+				MintConfig:                    n.Config.MintConfig,
 				ApricotPhase3Time:             version.GetApricotPhase3Time(n.Config.NetworkID),
 				ApricotPhase5Time:             version.GetApricotPhase5Time(n.Config.NetworkID),
 				BanffTime:                     version.GetBanffTime(n.Config.NetworkID),
@@ -952,6 +958,15 @@ func (n *Node) initVMs() error {
 			zap.Error(err),
 		)
 	}
+	return err
+}
+
+// initSharedMemory initializes the fee collector
+func (n *Node) initFeeCollector() error {
+	n.Log.Info("initializing FeeCollector")
+	feeCollectorDB := prefixdb.New([]byte("fee collector"), n.DB)
+	feeCollector, err := feecollector.New(feeCollectorDB)
+	n.feeCollector = feeCollector
 	return err
 }
 
@@ -1405,6 +1420,10 @@ func (n *Node) Initialize(
 
 	if err := n.initKeystoreAPI(); err != nil { // Start the Keystore API
 		return fmt.Errorf("couldn't initialize keystore API: %w", err)
+	}
+
+	if err := n.initFeeCollector(); err != nil { // Initialize fee collector
+		return fmt.Errorf("couldn't initialize fee collector: %w", err)
 	}
 
 	n.initSharedMemory() // Initialize shared memory

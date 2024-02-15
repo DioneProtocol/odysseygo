@@ -8,6 +8,7 @@
 package state
 
 import (
+	big "math/big"
 	reflect "reflect"
 	time "time"
 
@@ -54,8 +55,20 @@ func (mr *MockDiffMockRecorder) AddChain(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddChain", reflect.TypeOf((*MockDiff)(nil).AddChain), arg0)
 }
 
+// AddCurrentAccumulatedFee mocks base method.
+func (m *MockDiff) AddCurrentAccumulatedFee(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddCurrentAccumulatedFee", arg0)
+}
+
+// AddCurrentAccumulatedFee indicates an expected call of AddCurrentAccumulatedFee.
+func (mr *MockDiffMockRecorder) AddCurrentAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddCurrentAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).AddCurrentAccumulatedFee), arg0)
+}
+
 // AddRewardUTXO mocks base method.
-func (m *MockDiff) AddRewardUTXO(arg0 ids.ID, arg1 *dione.UTXO) {
+func (m *MockDiff) AddRewardUTXO(arg0 ids.ID, arg1 *avax.UTXO) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "AddRewardUTXO", arg0, arg1)
 }
@@ -203,6 +216,21 @@ func (mr *MockDiffMockRecorder) GetChains(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChains", reflect.TypeOf((*MockDiff)(nil).GetChains), arg0)
 }
 
+// GetCurrentAccumulatedFee mocks base method.
+func (m *MockDiff) GetCurrentAccumulatedFee() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentAccumulatedFee")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentAccumulatedFee indicates an expected call of GetCurrentAccumulatedFee.
+func (mr *MockDiffMockRecorder) GetCurrentAccumulatedFee() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).GetCurrentAccumulatedFee))
+}
+
 // GetCurrentDelegatorIterator mocks base method.
 func (m *MockDiff) GetCurrentDelegatorIterator(arg0 ids.ID, arg1 ids.NodeID) (StakerIterator, error) {
 	m.ctrl.T.Helper()
@@ -231,6 +259,21 @@ func (m *MockDiff) GetCurrentStakerIterator() (StakerIterator, error) {
 func (mr *MockDiffMockRecorder) GetCurrentStakerIterator() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakerIterator", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakerIterator))
+}
+
+// GetCurrentStakersLen mocks base method.
+func (m *MockDiff) GetCurrentStakersLen() (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentStakersLen")
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentStakersLen indicates an expected call of GetCurrentStakersLen.
+func (mr *MockDiffMockRecorder) GetCurrentStakersLen() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentStakersLen", reflect.TypeOf((*MockDiff)(nil).GetCurrentStakersLen))
 }
 
 // GetCurrentSupply mocks base method.
@@ -278,6 +321,36 @@ func (mr *MockDiffMockRecorder) GetDelegateeReward(arg0, arg1 interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDelegateeReward", reflect.TypeOf((*MockDiff)(nil).GetDelegateeReward), arg0, arg1)
 }
 
+// GetFeePerWeightStored mocks base method.
+func (m *MockDiff) GetFeePerWeightStored() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetFeePerWeightStored")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFeePerWeightStored indicates an expected call of GetFeePerWeightStored.
+func (mr *MockDiffMockRecorder) GetFeePerWeightStored() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFeePerWeightStored", reflect.TypeOf((*MockDiff)(nil).GetFeePerWeightStored))
+}
+
+// GetLastAccumulatedFee mocks base method.
+func (m *MockDiff) GetLastAccumulatedFee() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetLastAccumulatedFee")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetLastAccumulatedFee indicates an expected call of GetLastAccumulatedFee.
+func (mr *MockDiffMockRecorder) GetLastAccumulatedFee() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLastAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).GetLastAccumulatedFee))
+}
+
 // GetPendingDelegatorIterator mocks base method.
 func (m *MockDiff) GetPendingDelegatorIterator(arg0 ids.ID, arg1 ids.NodeID) (StakerIterator, error) {
 	m.ctrl.T.Helper()
@@ -308,6 +381,21 @@ func (mr *MockDiffMockRecorder) GetPendingStakerIterator() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakerIterator", reflect.TypeOf((*MockDiff)(nil).GetPendingStakerIterator))
 }
 
+// GetPendingStakersLen mocks base method.
+func (m *MockDiff) GetPendingStakersLen() (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPendingStakersLen")
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetPendingStakersLen indicates an expected call of GetPendingStakersLen.
+func (mr *MockDiffMockRecorder) GetPendingStakersLen() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPendingStakersLen", reflect.TypeOf((*MockDiff)(nil).GetPendingStakersLen))
+}
+
 // GetPendingValidator mocks base method.
 func (m *MockDiff) GetPendingValidator(arg0 ids.ID, arg1 ids.NodeID) (*Staker, error) {
 	m.ctrl.T.Helper()
@@ -336,6 +424,36 @@ func (m *MockDiff) GetRewardUTXOs(arg0 ids.ID) ([]*dione.UTXO, error) {
 func (mr *MockDiffMockRecorder) GetRewardUTXOs(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRewardUTXOs", reflect.TypeOf((*MockDiff)(nil).GetRewardUTXOs), arg0)
+}
+
+// GetStakeSyncTimestamp mocks base method.
+func (m *MockDiff) GetStakeSyncTimestamp() (time.Time, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStakeSyncTimestamp")
+	ret0, _ := ret[0].(time.Time)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStakeSyncTimestamp indicates an expected call of GetStakeSyncTimestamp.
+func (mr *MockDiffMockRecorder) GetStakeSyncTimestamp() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStakeSyncTimestamp", reflect.TypeOf((*MockDiff)(nil).GetStakeSyncTimestamp))
+}
+
+// GetStakerAccumulatedMintRate mocks base method.
+func (m *MockDiff) GetStakerAccumulatedMintRate() (*big.Int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetStakerAccumulatedMintRate")
+	ret0, _ := ret[0].(*big.Int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetStakerAccumulatedMintRate indicates an expected call of GetStakerAccumulatedMintRate.
+func (mr *MockDiffMockRecorder) GetStakerAccumulatedMintRate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStakerAccumulatedMintRate", reflect.TypeOf((*MockDiff)(nil).GetStakerAccumulatedMintRate))
 }
 
 // GetSubnetOwner mocks base method.
@@ -500,6 +618,54 @@ func (m *MockDiff) SetDelegateeReward(arg0 ids.ID, arg1 ids.NodeID, arg2 uint64)
 func (mr *MockDiffMockRecorder) SetDelegateeReward(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDelegateeReward", reflect.TypeOf((*MockDiff)(nil).SetDelegateeReward), arg0, arg1, arg2)
+}
+
+// SetFeePerWeightStored mocks base method.
+func (m *MockDiff) SetFeePerWeightStored(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetFeePerWeightStored", arg0)
+}
+
+// SetFeePerWeightStored indicates an expected call of SetFeePerWeightStored.
+func (mr *MockDiffMockRecorder) SetFeePerWeightStored(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetFeePerWeightStored", reflect.TypeOf((*MockDiff)(nil).SetFeePerWeightStored), arg0)
+}
+
+// SetLastAccumulatedFee mocks base method.
+func (m *MockDiff) SetLastAccumulatedFee(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetLastAccumulatedFee", arg0)
+}
+
+// SetLastAccumulatedFee indicates an expected call of SetLastAccumulatedFee.
+func (mr *MockDiffMockRecorder) SetLastAccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetLastAccumulatedFee", reflect.TypeOf((*MockDiff)(nil).SetLastAccumulatedFee), arg0)
+}
+
+// SetStakeSyncTimestamp mocks base method.
+func (m *MockDiff) SetStakeSyncTimestamp(arg0 time.Time) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetStakeSyncTimestamp", arg0)
+}
+
+// SetStakeSyncTimestamp indicates an expected call of SetStakeSyncTimestamp.
+func (mr *MockDiffMockRecorder) SetStakeSyncTimestamp(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStakeSyncTimestamp", reflect.TypeOf((*MockDiff)(nil).SetStakeSyncTimestamp), arg0)
+}
+
+// SetStakerAccumulatedMintRate mocks base method.
+func (m *MockDiff) SetStakerAccumulatedMintRate(arg0 *big.Int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetStakerAccumulatedMintRate", arg0)
+}
+
+// SetStakerAccumulatedMintRate indicates an expected call of SetStakerAccumulatedMintRate.
+func (mr *MockDiffMockRecorder) SetStakerAccumulatedMintRate(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStakerAccumulatedMintRate", reflect.TypeOf((*MockDiff)(nil).SetStakerAccumulatedMintRate), arg0)
 }
 
 // SetTimestamp mocks base method.

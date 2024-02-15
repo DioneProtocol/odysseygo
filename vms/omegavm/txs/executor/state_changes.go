@@ -6,6 +6,7 @@ package executor
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -69,13 +70,16 @@ type stateChanges struct {
 	pendingValidatorsToRemove []*state.Staker
 	pendingDelegatorsToRemove []*state.Staker
 	currentValidatorsToRemove []*state.Staker
+	stakeSyncTimestamp        time.Time
+	accumulatedMintRate       *big.Int
+	lastAccumulatedFee        *big.Int
+	feePerWeightStored        *big.Int
 }
 
 func (s *stateChanges) Apply(stateDiff state.Diff) {
 	for subnetID, supply := range s.updatedSupplies {
 		stateDiff.SetCurrentSupply(subnetID, supply)
 	}
-
 	for _, currentValidatorToAdd := range s.currentValidatorsToAdd {
 		stateDiff.PutCurrentValidator(currentValidatorToAdd)
 	}
@@ -91,12 +95,107 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	for _, currentValidatorToRemove := range s.currentValidatorsToRemove {
 		stateDiff.DeleteCurrentValidator(currentValidatorToRemove)
 	}
+	if s.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
+		stateDiff.SetStakeSyncTimestamp(s.stakeSyncTimestamp)
+	}
+	if s.accumulatedMintRate != nil {
+		stateDiff.SetStakerAccumulatedMintRate(s.accumulatedMintRate)
+	}
+	if s.lastAccumulatedFee != nil {
+		stateDiff.SetLastAccumulatedFee(s.lastAccumulatedFee)
+	}
+	if s.feePerWeightStored != nil {
+		stateDiff.SetFeePerWeightStored(s.feePerWeightStored)
+	}
 }
 
 func (s *stateChanges) Len() int {
 	return len(s.currentValidatorsToAdd) + len(s.currentDelegatorsToAdd) +
 		len(s.pendingValidatorsToRemove) + len(s.pendingDelegatorsToRemove) +
 		len(s.currentValidatorsToRemove)
+}
+
+func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState state.Chain, newChainTime time.Time) error {
+	if s.stakeSyncTimestamp.Compare(newChainTime) == 0 {
+		return nil
+	}
+
+	validators, ok := backend.Config.Validators.Get(constants.PrimaryNetworkID)
+	if !ok {
+		return fmt.Errorf("couldn't get primary validators")
+	}
+
+	totalWeight := validators.Weight()
+	mintRate, err := parentState.GetStakerAccumulatedMintRate()
+	if err != nil {
+		return err
+	}
+
+	lastSyncTime, err := parentState.GetStakeSyncTimestamp()
+	if err != nil {
+		return err
+	}
+
+	mintConfig := backend.Config.MintConfig
+
+	// Config is not set
+	if mintConfig.MintingPeriod == 0 {
+		s.accumulatedMintRate = new(big.Int).SetUint64(0)
+		return nil
+	}
+
+	if totalWeight != 0 {
+		s.accumulatedMintRate = backend.Mint.CalculateMintRate(totalWeight, lastSyncTime, newChainTime)
+		s.accumulatedMintRate.Add(s.accumulatedMintRate, mintRate)
+	} else {
+		s.accumulatedMintRate = new(big.Int).SetUint64(0)
+	}
+	s.stakeSyncTimestamp = newChainTime
+
+	return nil
+}
+
+func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Chain) error {
+	curAccumFee, err := parentState.GetCurrentAccumulatedFee()
+	if err != nil {
+		return err
+	}
+
+	if s.feePerWeightStored == nil {
+		s.feePerWeightStored = new(big.Int)
+	}
+
+	lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
+	if err != nil {
+		return err
+	}
+
+	feePerWeightStored, err := parentState.GetFeePerWeightStored()
+	if err != nil {
+		return err
+	}
+
+	if lastAccumulatedFee.Cmp(curAccumFee) == 0 {
+		return nil
+	}
+
+	vdrs, exists := backend.Config.Validators.Get(constants.PlatformChainID)
+	if !exists {
+		return fmt.Errorf("primary network vdrs not exists")
+	}
+	bigTotalWeight := new(big.Int).SetUint64(vdrs.Weight())
+
+	accumFeeDiff := new(big.Int).Sub(curAccumFee, lastAccumulatedFee)
+
+	feePerWeightIncrement := new(big.Int).Set(accumFeeDiff)
+	feePerWeightIncrement.Lsh(feePerWeightIncrement, reward.BitShift)
+	feePerWeightIncrement.Div(feePerWeightIncrement, bigTotalWeight)
+
+	s.lastAccumulatedFee = curAccumFee
+	s.feePerWeightStored.Set(feePerWeightStored)
+	s.feePerWeightStored.Add(s.feePerWeightStored, feePerWeightIncrement)
+
+	return nil
 }
 
 // AdvanceTimeTo does not modify [parentState].
@@ -145,29 +244,41 @@ func AdvanceTimeTo(
 			continue
 		}
 
-		supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
-		if !ok {
-			supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
+		switch stakerToRemove.Priority {
+		case txs.PrimaryNetworkValidatorPendingPriority, txs.PrimaryNetworkDelegatorApricotPendingPriority, txs.PrimaryNetworkDelegatorBanffPendingPriority:
+			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+				return nil, err
+			}
+			stakerToAdd.FeePerWeightPaid = changes.feePerWeightStored
+			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
+				return nil, err
+			}
+			stakerToAdd.MintRate = changes.accumulatedMintRate
+		default:
+			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
+			if !ok {
+				supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			rewards, err := GetRewardsCalculator(backend, parentState, stakerToRemove.SubnetID)
 			if err != nil {
 				return nil, err
 			}
+
+			potentialReward := rewards.Calculate(
+				stakerToRemove.EndTime.Sub(stakerToRemove.StartTime),
+				stakerToRemove.Weight,
+				supply,
+			)
+			stakerToAdd.PotentialReward = potentialReward
+
+			// Invariant: [rewards.Calculate] can never return a [potentialReward]
+			//            such that [supply + potentialReward > maximumSupply].
+			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + potentialReward
 		}
-
-		rewards, err := GetRewardsCalculator(backend, parentState, stakerToRemove.SubnetID)
-		if err != nil {
-			return nil, err
-		}
-
-		potentialReward := rewards.Calculate(
-			stakerToRemove.EndTime.Sub(stakerToRemove.StartTime),
-			stakerToRemove.Weight,
-			supply,
-		)
-		stakerToAdd.PotentialReward = potentialReward
-
-		// Invariant: [rewards.Calculate] can never return a [potentialReward]
-		//            such that [supply + potentialReward > maximumSupply].
-		changes.updatedSupplies[stakerToRemove.SubnetID] = supply + potentialReward
 
 		switch stakerToRemove.Priority {
 		case txs.PrimaryNetworkValidatorPendingPriority, txs.SubnetPermissionlessValidatorPendingPriority:
@@ -193,6 +304,35 @@ func AdvanceTimeTo(
 		stakerToRemove := currentStakerIterator.Value()
 		if stakerToRemove.EndTime.After(newChainTime) {
 			break
+		}
+
+		switch stakerToRemove.Priority {
+		case txs.PrimaryNetworkValidatorCurrentPriority, txs.PrimaryNetworkDelegatorCurrentPriority:
+			supply, ok := changes.updatedSupplies[stakerToRemove.SubnetID]
+			if !ok {
+				supply, err = parentState.GetCurrentSupply(stakerToRemove.SubnetID)
+				if err != nil {
+					return nil, err
+				}
+			}
+			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
+				return nil, err
+			}
+			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+				return nil, err
+			}
+
+			feePerWeightStored, err := parentState.GetFeePerWeightStored()
+			if err != nil {
+				return nil, err
+			}
+
+			feeCalculator := reward.NewDistributeCalculator(feePerWeightStored)
+			mint := reward.CalculateMintReward(stakerToRemove.Weight, stakerToRemove.MintRate, changes.accumulatedMintRate)
+			fee := feeCalculator.Calculate(stakerToRemove.Weight, stakerToRemove.FeePerWeightPaid)
+
+			stakerToRemove.PotentialReward = mint + fee
+			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + stakerToRemove.PotentialReward
 		}
 
 		// Invariant: Permissioned stakers are encountered first for a given

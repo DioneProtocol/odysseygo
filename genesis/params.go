@@ -31,6 +31,8 @@ type StakingConfig struct {
 	MaxStakeDuration time.Duration `json:"maxStakeDuration"`
 	// RewardConfig is the config for the reward function.
 	RewardConfig reward.Config `json:"rewardConfig"`
+	// Config for the minting function
+	MintConfig reward.MintConfig `json:"mintConfig"`
 }
 
 type TxFeeConfig struct {

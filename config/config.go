@@ -811,6 +811,9 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
 		config.RewardConfig.SupplyCap = v.GetUint64(StakeSupplyCapKey)
 		config.MinDelegationFee = v.GetUint32(MinDelegatorFeeKey)
+		config.MintConfig.MintAmount = v.GetUint64(MintAmountKey)
+		config.MintConfig.MintSince = v.GetInt64(MintSinceKey)
+		config.MintConfig.MintingPeriod = v.GetDuration(MintingPeriod)
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:
 			return node.StakingConfig{}, errInvalidUptimeRequirement
@@ -852,7 +855,7 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 	return genesis.GetTxFeeConfig(networkID)
 }
 
-func getGenesisData(v *viper.Viper, networkID uint32, stakingCfg *genesis.StakingConfig) ([]byte, ids.ID, error) {
+func getGenesisData(v *viper.Viper, networkID uint32, stakingCfg *genesis.StakingConfig) ([]byte, ids.ID, time.Time, error) {
 	// try first loading genesis content directly from flag/env-var
 	if v.IsSet(GenesisFileContentKey) {
 		genesisData := v.GetString(GenesisFileContentKey)
@@ -1412,9 +1415,16 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 
 	// Genesis Data
 	genesisStakingCfg := nodeConfig.StakingConfig.StakingConfig
-	nodeConfig.GenesisBytes, nodeConfig.DioneAssetID, err = getGenesisData(v, nodeConfig.NetworkID, &genesisStakingCfg)
+
+	var genesisTime time.Time
+	nodeConfig.GenesisBytes, nodeConfig.AvaxAssetID, genesisTime, err = getGenesisData(v, nodeConfig.NetworkID, &genesisStakingCfg)
 	if err != nil {
 		return node.Config{}, fmt.Errorf("unable to load genesis file: %w", err)
+	}
+
+	genesisTimeUnix := genesisTime.Unix()
+	if nodeConfig.MintConfig.MintSince < genesisTimeUnix {
+		nodeConfig.MintConfig.MintSince = genesisTimeUnix
 	}
 
 	// StateSync Configs

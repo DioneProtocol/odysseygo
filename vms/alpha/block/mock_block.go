@@ -8,6 +8,7 @@
 package block
 
 import (
+	big "math/big"
 	reflect "reflect"
 	time "time"
 
@@ -39,6 +40,20 @@ func NewMockBlock(ctrl *gomock.Controller) *MockBlock {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockBlock) EXPECT() *MockBlockMockRecorder {
 	return m.recorder
+}
+
+// AccumulatedFee mocks base method.
+func (m *MockBlock) AccumulatedFee(arg0 ids.ID) *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccumulatedFee", arg0)
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// AccumulatedFee indicates an expected call of AccumulatedFee.
+func (mr *MockBlockMockRecorder) AccumulatedFee(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccumulatedFee", reflect.TypeOf((*MockBlock)(nil).AccumulatedFee), arg0)
 }
 
 // Bytes mocks base method.
