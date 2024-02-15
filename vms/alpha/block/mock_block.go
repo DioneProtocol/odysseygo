@@ -8,7 +8,6 @@
 package block
 
 import (
-	big "math/big"
 	reflect "reflect"
 	time "time"
 
@@ -43,10 +42,10 @@ func (m *MockBlock) EXPECT() *MockBlockMockRecorder {
 }
 
 // AccumulatedFee mocks base method.
-func (m *MockBlock) AccumulatedFee(arg0 ids.ID) *big.Int {
+func (m *MockBlock) AccumulatedFee(arg0 ids.ID) uint64 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AccumulatedFee", arg0)
-	ret0, _ := ret[0].(*big.Int)
+	ret0, _ := ret[0].(uint64)
 	return ret0
 }
 

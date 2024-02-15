@@ -6,7 +6,6 @@ package builder
 import (
 	"context"
 	"errors"
-	"math/big"
 	"testing"
 	"time"
 
@@ -362,8 +361,8 @@ func TestBuildBlock(t *testing.T) {
 				txBuilder.EXPECT().NewRewardValidatorTx(stakerTxID).Return(transactions[0], nil)
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
-				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
-				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
 				return &builder{
 					Mempool:   mempool,
@@ -417,8 +416,8 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(transactions)
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
-				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
-				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
 				return &builder{
 					Mempool: mempool,
@@ -522,8 +521,8 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(nil)
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
-				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
-				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
 				clk := &mockable.Clock{}
 				clk.Set(now)
@@ -584,8 +583,8 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
-				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
-				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
 				clk := &mockable.Clock{}
 				clk.Set(now)
@@ -645,8 +644,8 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return([]*txs.Tx{transactions[0]})
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
-				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
-				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
 				clk := &mockable.Clock{}
 				clk.Set(now)

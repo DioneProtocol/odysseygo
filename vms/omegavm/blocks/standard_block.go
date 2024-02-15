@@ -5,7 +5,6 @@ package blocks
 
 import (
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -44,8 +43,6 @@ func NewBanffStandardBlock(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			FeeAChain:    []byte{},
-			FeeDChain:    []byte{},
 			Transactions: txs,
 		},
 	}
@@ -57,8 +54,8 @@ func NewBanffStandardBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	txs []*txs.Tx,
-	feeFromAChain *big.Int,
-	feeFromDChain *big.Int,
+	feeFromAChain uint64,
+	feeFromDChain uint64,
 ) (*BanffStandardBlock, error) {
 	blk := &BanffStandardBlock{
 		Time: uint64(timestamp.Unix()),
@@ -67,8 +64,8 @@ func NewBanffStandardBlockWithFee(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			FeeAChain:    feeFromAChain.Bytes(),
-			FeeDChain:    feeFromDChain.Bytes(),
+			FeeAChain:    feeFromAChain,
+			FeeDChain:    feeFromDChain,
 			Transactions: txs,
 		},
 	}
@@ -78,8 +75,8 @@ func NewBanffStandardBlockWithFee(
 type ApricotStandardBlock struct {
 	CommonBlock  `serialize:"true"`
 	Transactions []*txs.Tx `serialize:"true" json:"txs"`
-	FeeAChain    []byte    `serialize:"true" json:"feeFromAChain"`
-	FeeDChain    []byte    `serialize:"true" json:"feeFromDChain"`
+	FeeAChain    uint64    `serialize:"true" json:"feeFromAChain"`
+	FeeDChain    uint64    `serialize:"true" json:"feeFromDChain"`
 }
 
 func (b *ApricotStandardBlock) initialize(bytes []byte) error {
@@ -106,27 +103,26 @@ func (b *ApricotStandardBlock) Visit(v Visitor) error {
 	return v.ApricotStandardBlock(b)
 }
 
-func (b *ApricotStandardBlock) FeeFromAChain() *big.Int {
-	return new(big.Int).SetBytes(b.FeeAChain)
+func (b *ApricotStandardBlock) FeeFromAChain() uint64 {
+	return b.FeeAChain
 }
 
-func (b *ApricotStandardBlock) FeeFromDChain() *big.Int {
-	return new(big.Int).SetBytes(b.FeeDChain)
+func (b *ApricotStandardBlock) FeeFromDChain() uint64 {
+	return b.FeeDChain
 }
 
-func (b *ApricotStandardBlock) FeeFromOChain(assetID ids.ID) *big.Int {
-	feeOChain := new(big.Int)
+func (b *ApricotStandardBlock) FeeFromOChain(assetID ids.ID) uint64 {
+	feeOChain := uint64(0)
 	for _, tx := range b.Transactions {
-		burned := tx.Burned(assetID)
-		feeOChain.Add(feeOChain, new(big.Int).SetUint64(burned))
+		feeOChain += tx.Burned(assetID)
 	}
 	return feeOChain
 }
 
-func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) uint64 {
 	accumulatedFee := b.FeeFromOChain(assetID)
-	accumulatedFee.Add(accumulatedFee, b.FeeFromAChain())
-	accumulatedFee.Add(accumulatedFee, b.FeeFromDChain())
+	accumulatedFee += b.FeeFromAChain()
+	accumulatedFee += b.FeeFromDChain()
 	return accumulatedFee
 }
 
@@ -143,8 +139,6 @@ func NewApricotStandardBlock(
 			PrntID: parentID,
 			Hght:   height,
 		},
-		FeeAChain:    []byte{},
-		FeeDChain:    []byte{},
 		Transactions: txs,
 	}
 	return blk, initialize(blk)

@@ -56,7 +56,7 @@ func (mr *MockChainMockRecorder) AddChain(arg0 interface{}) *gomock.Call {
 }
 
 // AddCurrentAccumulatedFee mocks base method.
-func (m *MockChain) AddCurrentAccumulatedFee(arg0 *big.Int) {
+func (m *MockChain) AddCurrentAccumulatedFee(arg0 uint64) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "AddCurrentAccumulatedFee", arg0)
 }
@@ -203,10 +203,10 @@ func (mr *MockChainMockRecorder) GetChains(arg0 interface{}) *gomock.Call {
 }
 
 // GetCurrentAccumulatedFee mocks base method.
-func (m *MockChain) GetCurrentAccumulatedFee() (*big.Int, error) {
+func (m *MockChain) GetCurrentAccumulatedFee() (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCurrentAccumulatedFee")
-	ret0, _ := ret[0].(*big.Int)
+	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -323,10 +323,10 @@ func (mr *MockChainMockRecorder) GetFeePerWeightStored() *gomock.Call {
 }
 
 // GetLastAccumulatedFee mocks base method.
-func (m *MockChain) GetLastAccumulatedFee() (*big.Int, error) {
+func (m *MockChain) GetLastAccumulatedFee() (uint64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetLastAccumulatedFee")
-	ret0, _ := ret[0].(*big.Int)
+	ret0, _ := ret[0].(uint64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -619,7 +619,7 @@ func (mr *MockChainMockRecorder) SetFeePerWeightStored(arg0 interface{}) *gomock
 }
 
 // SetLastAccumulatedFee mocks base method.
-func (m *MockChain) SetLastAccumulatedFee(arg0 *big.Int) {
+func (m *MockChain) SetLastAccumulatedFee(arg0 uint64) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetLastAccumulatedFee", arg0)
 }

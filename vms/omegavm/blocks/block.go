@@ -5,7 +5,6 @@ package blocks
 
 import (
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -27,10 +26,10 @@ type Block interface {
 	// Visit calls [visitor] with this block's concrete type
 	Visit(visitor Visitor) error
 
-	FeeFromOChain(ids.ID) *big.Int
-	FeeFromAChain() *big.Int
-	FeeFromDChain() *big.Int
-	AccumulatedFee(ids.ID) *big.Int
+	FeeFromOChain(ids.ID) uint64
+	FeeFromAChain() uint64
+	FeeFromDChain() uint64
+	AccumulatedFee(ids.ID) uint64
 
 	// note: initialize does not assume that block transactions
 	// are initialized, and initializes them itself if they aren't.

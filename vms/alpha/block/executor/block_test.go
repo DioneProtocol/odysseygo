@@ -6,7 +6,6 @@ package executor
 import (
 	"context"
 	"errors"
-	"math/big"
 	"testing"
 	"time"
 
@@ -678,7 +677,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(uint64(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -696,7 +695,7 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
 				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
-				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+				mockFeeCollector.EXPECT().AddAChainValue(uint64(100)).Times(1)
 
 				return &Block{
 					Block: mockBlock,
@@ -727,7 +726,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(uint64(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -745,7 +744,7 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
 				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
-				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+				mockFeeCollector.EXPECT().AddAChainValue(uint64(100)).Times(1)
 
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(errTest)
@@ -782,7 +781,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock.EXPECT().Height().Return(uint64(0)).AnyTimes()
 				mockBlock.EXPECT().Parent().Return(ids.GenerateTestID()).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
-				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(uint64(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -801,7 +800,7 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
 				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
-				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+				mockFeeCollector.EXPECT().AddAChainValue(uint64(100)).Times(1)
 
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(nil)
