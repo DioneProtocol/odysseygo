@@ -68,32 +68,32 @@ func (mr *MockBlockMockRecorder) Bytes() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bytes", reflect.TypeOf((*MockBlock)(nil).Bytes))
 }
 
-// FeeFromCChain mocks base method.
-func (m *MockBlock) FeeFromCChain() *big.Int {
+// FeeFromDChain mocks base method.
+func (m *MockBlock) FeeFromDChain() *big.Int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FeeFromCChain")
+	ret := m.ctrl.Call(m, "FeeFromDChain")
 	ret0, _ := ret[0].(*big.Int)
 	return ret0
 }
 
-// FeeFromCChain indicates an expected call of FeeFromCChain.
-func (mr *MockBlockMockRecorder) FeeFromCChain() *gomock.Call {
+// FeeFromDChain indicates an expected call of FeeFromDChain.
+func (mr *MockBlockMockRecorder) FeeFromDChain() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromCChain", reflect.TypeOf((*MockBlock)(nil).FeeFromCChain))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromDChain", reflect.TypeOf((*MockBlock)(nil).FeeFromDChain))
 }
 
-// FeeFromXChain mocks base method.
-func (m *MockBlock) FeeFromXChain() *big.Int {
+// FeeFromAChain mocks base method.
+func (m *MockBlock) FeeFromAChain() *big.Int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FeeFromXChain")
+	ret := m.ctrl.Call(m, "FeeFromAChain")
 	ret0, _ := ret[0].(*big.Int)
 	return ret0
 }
 
-// FeeFromXChain indicates an expected call of FeeFromXChain.
-func (mr *MockBlockMockRecorder) FeeFromXChain() *gomock.Call {
+// FeeFromAChain indicates an expected call of FeeFromAChain.
+func (mr *MockBlockMockRecorder) FeeFromAChain() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromXChain", reflect.TypeOf((*MockBlock)(nil).FeeFromXChain))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromAChain", reflect.TypeOf((*MockBlock)(nil).FeeFromAChain))
 }
 
 // Height mocks base method.

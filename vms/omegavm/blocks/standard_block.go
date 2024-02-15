@@ -124,9 +124,9 @@ func (b *ApricotStandardBlock) FeeFromOChain(assetID ids.ID) *big.Int {
 }
 
 func (b *ApricotStandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
-	accumulatedFee := b.FeeFromPChain(assetID)
-	accumulatedFee.Add(accumulatedFee, b.FeeFromXChain())
-	accumulatedFee.Add(accumulatedFee, b.FeeFromCChain())
+	accumulatedFee := b.FeeFromOChain(assetID)
+	accumulatedFee.Add(accumulatedFee, b.FeeFromAChain())
+	accumulatedFee.Add(accumulatedFee, b.FeeFromDChain())
 	return accumulatedFee
 }
 

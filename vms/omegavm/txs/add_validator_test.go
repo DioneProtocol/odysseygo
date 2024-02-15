@@ -183,6 +183,10 @@ func TestAddValidatorTxSyntacticVerifyNotDIONE(t *testing.T) {
 	stakes := []*dione.TransferableOutput{{
 		Asset: dione.Asset{ID: assetID},
 		Out: &stakeable.LockOut{
+			Locktime: uint64(clk.Time().Add(time.Second).Unix()),
+			TransferableOut: &secp256k1fx.TransferOutput{
+				Amt: validatorWeight,
+				OutputOwners: secp256k1fx.OutputOwners{
 					Threshold: 1,
 					Addrs:     []ids.ShortID{preFundedKeys[0].PublicKey().Address()},
 				},

@@ -5,7 +5,7 @@ package txs
 
 import (
 	"github.com/DioneProtocol/odysseygo/ids"
-	"github.com/DioneProtocol/odysseygo/vms/components/avax"
+	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 )
 
 var (
@@ -18,7 +18,7 @@ type BurnedFeeCalculator struct {
 	burned  uint64
 }
 
-func calculateInputs(ins []*avax.TransferableInput, assetId ids.ID) uint64 {
+func calculateInputs(ins []*dione.TransferableInput, assetId ids.ID) uint64 {
 	var totalInputs uint64
 	for _, i := range ins {
 		if i.AssetID() == assetId {
@@ -28,7 +28,7 @@ func calculateInputs(ins []*avax.TransferableInput, assetId ids.ID) uint64 {
 	return totalInputs
 }
 
-func calculateOutputs(outs []*avax.TransferableOutput, assetId ids.ID) uint64 {
+func calculateOutputs(outs []*dione.TransferableOutput, assetId ids.ID) uint64 {
 	var totalOutputs uint64
 	for _, o := range outs {
 		if o.AssetID() == assetId {
@@ -38,7 +38,7 @@ func calculateOutputs(outs []*avax.TransferableOutput, assetId ids.ID) uint64 {
 	return totalOutputs
 }
 
-func (b *BurnedFeeCalculator) setDifference(tx *avax.BaseTx) error {
+func (b *BurnedFeeCalculator) setDifference(tx *dione.BaseTx) error {
 	ins := calculateInputs(tx.Ins, b.assetId)
 	outs := calculateOutputs(tx.Outs, b.assetId)
 	if ins > outs {

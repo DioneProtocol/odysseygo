@@ -139,6 +139,7 @@ var _ = e2e.DescribeOChain("[Permissionless Subnets]", func() {
 					reward.PercentDenominator,
 					reward.PercentDenominator,
 					1,
+					100*units.MegaDione,
 					time.Second,
 					365*24*time.Hour,
 					0,

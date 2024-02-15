@@ -68,7 +68,7 @@ func (mr *MockChainMockRecorder) AddCurrentAccumulatedFee(arg0 interface{}) *gom
 }
 
 // AddRewardUTXO mocks base method.
-func (m *MockChain) AddRewardUTXO(arg0 ids.ID, arg1 *avax.UTXO) {
+func (m *MockChain) AddRewardUTXO(arg0 ids.ID, arg1 *dione.UTXO) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "AddRewardUTXO", arg0, arg1)
 }

@@ -80,10 +80,10 @@ func newConfig(t *testing.T) (Config, ids.NodeID, *common.SenderTest, *vertex.Te
 	peer := ids.GenerateTestNodeID()
 	require.NoError(peers.Add(peer, nil, ids.Empty, 1))
 
-	vtxBlocker, err := queue.NewWithMissing(prefixdb.New([]byte("vtx"), db), "vtx", ctx.AvalancheRegisterer)
+	vtxBlocker, err := queue.NewWithMissing(prefixdb.New([]byte("vtx"), db), "vtx", ctx.OdysseyRegisterer)
 	require.NoError(err)
 
-	txBlocker, err := queue.New(prefixdb.New([]byte("tx"), db), "tx", ctx.AvalancheRegisterer)
+	txBlocker, err := queue.New(prefixdb.New([]byte("tx"), db), "tx", ctx.OdysseyRegisterer)
 	require.NoError(err)
 
 	peerTracker := tracker.NewPeers()
@@ -161,7 +161,7 @@ func TestBootstrapperSingleFrontier(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -270,7 +270,7 @@ func TestBootstrapperByzantineResponses(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -438,7 +438,7 @@ func TestBootstrapperTxDependencies(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -564,7 +564,7 @@ func TestBootstrapperIncompleteAncestors(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -675,7 +675,7 @@ func TestBootstrapperFinalized(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -802,7 +802,7 @@ func TestBootstrapperAcceptsAncestorsParents(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil
@@ -966,7 +966,7 @@ func TestRestartBootstrapping(t *testing.T) {
 		config,
 		func(context.Context, uint32) error {
 			config.Ctx.State.Set(snow.EngineState{
-				Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+				Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 				State: snow.NormalOp,
 			})
 			return nil

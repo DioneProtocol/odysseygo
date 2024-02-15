@@ -53,7 +53,7 @@ func New(
 		},
 	}
 
-	if err := b.metrics.Initialize("bs", config.Ctx.AvalancheRegisterer); err != nil {
+	if err := b.metrics.Initialize("bs", config.Ctx.OdysseyRegisterer); err != nil {
 		return nil, err
 	}
 
@@ -294,7 +294,7 @@ func (b *bootstrapper) Start(ctx context.Context, startReqID uint32) error {
 	b.Ctx.Log.Info("starting bootstrap")
 
 	b.Ctx.State.Set(snow.EngineState{
-		Type:  p2p.EngineType_ENGINE_TYPE_AVALANCHE,
+		Type:  p2p.EngineType_ENGINE_TYPE_ODYSSEY,
 		State: snow.Bootstrapping,
 	})
 	if err := b.VM.SetState(ctx, snow.Bootstrapping); err != nil {

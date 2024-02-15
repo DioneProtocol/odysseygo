@@ -43,6 +43,10 @@ var (
 				MintingPeriod:      365 * 24 * time.Hour,
 				SupplyCap:          720 * units.MegaDione,
 			},
+			MintConfig: reward.MintConfig{
+				MintingPeriod: 2 * 365 * 24 * time.Hour,
+				MintAmount:    500 * units.MegaDione,
+			},
 		},
 	}
 )

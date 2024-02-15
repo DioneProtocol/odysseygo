@@ -267,9 +267,9 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 	ctx.ValidatorState = &validators.TestState{
 		GetSubnetIDF: func(_ context.Context, chainID ids.ID) (ids.ID, error) {
 			subnetID, ok := map[ids.ID]ids.ID{
-				constants.PlatformChainID: constants.PrimaryNetworkID,
-				aChainID:                  constants.PrimaryNetworkID,
-				dChainID:                  constants.PrimaryNetworkID,
+				constants.OmegaChainID: constants.PrimaryNetworkID,
+				aChainID:               constants.PrimaryNetworkID,
+				dChainID:               constants.PrimaryNetworkID,
 			}[chainID]
 			if !ok {
 				return ids.Empty, errMissing

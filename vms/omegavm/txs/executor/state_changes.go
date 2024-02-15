@@ -179,7 +179,7 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 		return nil
 	}
 
-	vdrs, exists := backend.Config.Validators.Get(constants.PlatformChainID)
+	vdrs, exists := backend.Config.Validators.Get(constants.OmegaChainID)
 	if !exists {
 		return fmt.Errorf("primary network vdrs not exists")
 	}

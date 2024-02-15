@@ -12,38 +12,38 @@ func NewDummyCollector() FeeCollector {
 	return &dummyFeeCollector{}
 }
 
-func (*dummyFeeCollector) AddCChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) AddDChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (*dummyFeeCollector) AddPChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) AddOChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (*dummyFeeCollector) AddXChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) AddAChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (*dummyFeeCollector) GetCChainValue() *big.Int {
+func (*dummyFeeCollector) GetDChainValue() *big.Int {
 	return new(big.Int)
 }
 
-func (*dummyFeeCollector) GetPChainValue() *big.Int {
+func (*dummyFeeCollector) GetOChainValue() *big.Int {
 	return new(big.Int)
 }
 
-func (*dummyFeeCollector) GetXChainValue() *big.Int {
+func (*dummyFeeCollector) GetAChainValue() *big.Int {
 	return new(big.Int)
 }
 
-func (*dummyFeeCollector) SubCChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) SubDChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (*dummyFeeCollector) SubPChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) SubOChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
 
-func (*dummyFeeCollector) SubXChainValue(amount *big.Int) (*big.Int, error) {
+func (*dummyFeeCollector) SubAChainValue(amount *big.Int) (*big.Int, error) {
 	return new(big.Int), nil
 }
