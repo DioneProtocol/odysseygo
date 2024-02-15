@@ -17,7 +17,7 @@ import (
 
 	runner_sdk "github.com/ava-labs/avalanche-network-runner-sdk"
 
-	"github.com/ava-labs/avalanchego/tests"
+	"github.com/DioneProtocol/odysseygo/tests"
 )
 
 const DefaultTimeout = 2 * time.Minute

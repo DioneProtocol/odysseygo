@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/utils/bag"
+	"github.com/DioneProtocol/odysseygo/utils/bag"
 )
 
 func TestNoEarlyTermResults(t *testing.T) {

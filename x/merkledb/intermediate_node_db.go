@@ -6,7 +6,7 @@ package merkledb
 import (
 	"sync"
 
-	"github.com/ava-labs/avalanchego/database"
+	"github.com/DioneProtocol/odysseygo/database"
 )
 
 const defaultBufferLength = 256

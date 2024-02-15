@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/api"
+	"github.com/DioneProtocol/odysseygo/api"
 )
 
 func TestWalletService_SendMultiple(t *testing.T) {

@@ -6,7 +6,7 @@ package avm
 import (
 	"context"
 
-	"github.com/ava-labs/avalanchego/utils/rpc"
+	"github.com/DioneProtocol/odysseygo/utils/rpc"
 )
 
 var _ StaticClient = (*staticClient)(nil)
