@@ -143,6 +143,7 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
 	onParentAccept.EXPECT().GetFeePerWeightStored().Return(new(big.Int), nil).AnyTimes()
 
 	// no pending stakers
@@ -352,7 +353,7 @@ func TestBanffStandardBlockUpdatePrimaryNetworkStakers(t *testing.T) {
 	currentValidator, err := updatedState.GetCurrentValidator(constants.PrimaryNetworkID, nodeID)
 	require.NoError(err)
 	require.Equal(addPendingValidatorTx.ID(), currentValidator.TxID)
-	require.Equal(uint64(1370), currentValidator.PotentialReward) // See rewards tests to explain why 1370
+	require.Equal(uint64(0), currentValidator.PotentialReward)
 
 	_, err = updatedState.GetPendingValidator(constants.PrimaryNetworkID, nodeID)
 	require.ErrorIs(err, database.ErrNotFound)
