@@ -38,7 +38,6 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/math"
 	"github.com/DioneProtocol/odysseygo/utils/timer"
 	"github.com/DioneProtocol/odysseygo/utils/wrappers"
-	"github.com/DioneProtocol/odysseygo/vms/components/avax"
 	"github.com/DioneProtocol/odysseygo/vms/components/dione"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/config"
@@ -123,8 +122,8 @@ type Chain interface {
 	GetCurrentSupply(subnetID ids.ID) (uint64, error)
 	SetCurrentSupply(subnetID ids.ID, cs uint64)
 
-	GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error)
-	AddRewardUTXO(txID ids.ID, utxo *avax.UTXO)
+	GetRewardUTXOs(txID ids.ID) ([]*dione.UTXO, error)
+	AddRewardUTXO(txID ids.ID, utxo *dione.UTXO)
 
 	GetSubnets() ([]*txs.Tx, error)
 	AddSubnet(createSubnetTx *txs.Tx)

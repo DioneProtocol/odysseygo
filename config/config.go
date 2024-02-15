@@ -1417,7 +1417,7 @@ func GetNodeConfig(v *viper.Viper) (node.Config, error) {
 	genesisStakingCfg := nodeConfig.StakingConfig.StakingConfig
 
 	var genesisTime time.Time
-	nodeConfig.GenesisBytes, nodeConfig.AvaxAssetID, genesisTime, err = getGenesisData(v, nodeConfig.NetworkID, &genesisStakingCfg)
+	nodeConfig.GenesisBytes, nodeConfig.DioneAssetID, genesisTime, err = getGenesisData(v, nodeConfig.NetworkID, &genesisStakingCfg)
 	if err != nil {
 		return node.Config{}, fmt.Errorf("unable to load genesis file: %w", err)
 	}

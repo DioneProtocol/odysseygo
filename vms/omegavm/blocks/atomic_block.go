@@ -41,15 +41,15 @@ func (b *ApricotAtomicBlock) Visit(v Visitor) error {
 	return v.ApricotAtomicBlock(b)
 }
 
-func (b *ApricotAtomicBlock) FeeFromXChain() *big.Int {
+func (b *ApricotAtomicBlock) FeeFromAChain() *big.Int {
 	return new(big.Int)
 }
 
-func (b *ApricotAtomicBlock) FeeFromCChain() *big.Int {
+func (b *ApricotAtomicBlock) FeeFromDChain() *big.Int {
 	return new(big.Int)
 }
 
-func (b *ApricotAtomicBlock) FeeFromPChain(ids.ID) *big.Int {
+func (b *ApricotAtomicBlock) FeeFromOChain(ids.ID) *big.Int {
 	return new(big.Int)
 }
 
