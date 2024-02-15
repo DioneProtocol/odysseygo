@@ -16,6 +16,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/warp"
 )
 
@@ -45,6 +46,7 @@ type Context struct {
 	Lock         sync.RWMutex
 	Keystore     keystore.BlockchainKeystore
 	SharedMemory atomic.SharedMemory
+	FeeCollector feecollector.FeeCollector
 	BCLookup     ids.AliaserReader
 	Metrics      metrics.OptionalGatherer
 

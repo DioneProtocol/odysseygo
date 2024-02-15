@@ -224,7 +224,8 @@ func TestVerifierVisitStandardBlock(t *testing.T) {
 		Mempool: mempool,
 		state:   s,
 		ctx: &snow.Context{
-			Log: logging.NoLog{},
+			Log:          logging.NoLog{},
+			DIONEAssetID: ids.ID{1},
 		},
 	}
 	verifier := &verifier{
@@ -700,7 +701,8 @@ func TestVerifierVisitStandardBlockWithDuplicateInputs(t *testing.T) {
 		Mempool: mempool,
 		state:   s,
 		ctx: &snow.Context{
-			Log: logging.NoLog{},
+			Log:          logging.NoLog{},
+			DIONEAssetID: ids.ID{1},
 		},
 	}
 	verifier := &verifier{

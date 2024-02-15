@@ -69,6 +69,12 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 		return err
 	}
 
+	accumulatedFee := b.AccumulatedFee(v.ctx.DIONEAssetID)
+	if accumulatedFee.Sign() > 0 {
+		onCommitState.AddCurrentAccumulatedFee(accumulatedFee)
+		onAbortState.AddCurrentAccumulatedFee(accumulatedFee)
+	}
+
 	// Apply the changes, if any, from advancing the chain time.
 	nextChainTime := b.Timestamp()
 	changes, err := executor.AdvanceTimeTo(
@@ -98,6 +104,11 @@ func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	onAcceptState, err := state.NewDiff(parentID, v.backend)
 	if err != nil {
 		return err
+	}
+
+	accumulatedFee := b.AccumulatedFee(v.ctx.DIONEAssetID)
+	if accumulatedFee.Sign() > 0 {
+		onAcceptState.AddCurrentAccumulatedFee(accumulatedFee)
 	}
 
 	// Apply the changes, if any, from advancing the chain time.

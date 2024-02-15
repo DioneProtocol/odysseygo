@@ -61,6 +61,9 @@ type CurrentStakers interface {
 	// GetCurrentStakerIterator returns stakers in order of their removal from
 	// the current staker set.
 	GetCurrentStakerIterator() (StakerIterator, error)
+
+	// GetCurrentStakersLen returns current stakers amount
+	GetCurrentStakersLen() (uint64, error)
 }
 
 type PendingStakers interface {
@@ -93,6 +96,9 @@ type PendingStakers interface {
 	// GetPendingStakerIterator returns stakers in order of their removal from
 	// the pending staker set.
 	GetPendingStakerIterator() (StakerIterator, error)
+
+	// GetPendingStakersLen returns pending stakers amount
+	GetPendingStakersLen() (uint64, error)
 }
 
 type baseStakers struct {

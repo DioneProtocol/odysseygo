@@ -6,6 +6,7 @@ package executor
 import (
 	"context"
 	"errors"
+	"math/big"
 	"testing"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/alpha/txs"
 	"github.com/DioneProtocol/odysseygo/vms/alpha/txs/executor"
 	"github.com/DioneProtocol/odysseygo/vms/alpha/txs/mempool"
+	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
 )
 
 func TestBlockVerify(t *testing.T) {
@@ -241,6 +243,11 @@ func TestBlockVerify(t *testing.T) {
 						},
 						clk:          &mockable.Clock{},
 						lastAccepted: parentID,
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 					},
 				}
 			},
@@ -290,6 +297,11 @@ func TestBlockVerify(t *testing.T) {
 						},
 						clk:          &mockable.Clock{},
 						lastAccepted: parentID,
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 					},
 				}
 			},
@@ -332,7 +344,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -410,7 +426,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -468,7 +488,11 @@ func TestBlockVerify(t *testing.T) {
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -496,7 +520,7 @@ func TestBlockVerify(t *testing.T) {
 
 				mockUnsignedTx := txs.NewMockUnsignedTx(ctrl)
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Syntactic verification passes
-				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Semantic verification fails
+				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Pass burned fee calculation
 				mockUnsignedTx.EXPECT().Visit(gomock.Any()).Return(nil).Times(1) // Execution passes
 				tx := &txs.Tx{
 					Unsigned: mockUnsignedTx,
@@ -520,7 +544,11 @@ func TestBlockVerify(t *testing.T) {
 					manager: &manager{
 						mempool: mockMempool,
 						metrics: metrics.NewMockMetrics(ctrl),
-						backend: &executor.Backend{},
+						backend: &executor.Backend{
+							Ctx: &snow.Context{
+								DIONEAssetID: ids.ID{},
+							},
+						},
 						blkIDToState: map[ids.ID]*blockState{
 							parentID: {
 								onAcceptState:  mockParentState,
@@ -650,6 +678,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -666,6 +695,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
@@ -674,6 +706,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},
@@ -694,6 +727,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock := block.NewMockBlock(ctrl)
 				mockBlock.EXPECT().ID().Return(blockID).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -710,6 +744,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(errTest)
 
@@ -722,6 +759,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},
@@ -744,6 +782,7 @@ func TestBlockAccept(t *testing.T) {
 				mockBlock.EXPECT().Height().Return(uint64(0)).AnyTimes()
 				mockBlock.EXPECT().Parent().Return(ids.GenerateTestID()).AnyTimes()
 				mockBlock.EXPECT().Txs().Return([]*txs.Tx{}).AnyTimes()
+				mockBlock.EXPECT().AccumulatedFee(ids.ID{}).Return(big.NewInt(100)).Times(1)
 
 				mempool := mempool.NewMockMempool(ctrl)
 				mempool.EXPECT().Remove(gomock.Any()).AnyTimes()
@@ -761,6 +800,9 @@ func TestBlockAccept(t *testing.T) {
 				mockOnAcceptState := states.NewMockDiff(ctrl)
 				mockOnAcceptState.EXPECT().Apply(mockManagerState)
 
+				mockFeeCollector := feecollector.NewMockFeeCollector(ctrl)
+				mockFeeCollector.EXPECT().AddAChainValue(big.NewInt(100)).Times(1)
+
 				metrics := metrics.NewMockMetrics(ctrl)
 				metrics.EXPECT().MarkBlockAccepted(gomock.Any()).Return(nil)
 
@@ -773,6 +815,7 @@ func TestBlockAccept(t *testing.T) {
 						backend: &executor.Backend{
 							Ctx: &snow.Context{
 								SharedMemory: mockSharedMemory,
+								FeeCollector: mockFeeCollector,
 								Log:          logging.NoLog{},
 							},
 						},

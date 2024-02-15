@@ -5,6 +5,7 @@ package state
 
 import (
 	"context"
+	"math/big"
 	"testing"
 	"time"
 
@@ -339,12 +340,14 @@ func TestStateAddRemoveValidator(t *testing.T) {
 	)
 	for i := 0; i < numNodes; i++ {
 		stakers[i] = Staker{
-			TxID:            ids.GenerateTestID(),
-			NodeID:          ids.GenerateTestNodeID(),
-			Weight:          uint64(i + 1),
-			StartTime:       startTime.Add(time.Duration(i) * time.Second),
-			EndTime:         endTime.Add(time.Duration(i) * time.Second),
-			PotentialReward: uint64(i + 1),
+			TxID:             ids.GenerateTestID(),
+			NodeID:           ids.GenerateTestNodeID(),
+			Weight:           uint64(i + 1),
+			StartTime:        startTime.Add(time.Duration(i) * time.Second),
+			EndTime:          endTime.Add(time.Duration(i) * time.Second),
+			PotentialReward:  uint64(i + 1),
+			MintRate:         new(big.Int),
+			FeePerWeightPaid: new(big.Int),
 		}
 		if i%2 == 0 {
 			stakers[i].SubnetID = subnetID

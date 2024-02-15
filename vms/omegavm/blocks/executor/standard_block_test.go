@@ -6,6 +6,7 @@ package executor
 import (
 	"context"
 	"fmt"
+	"math/big"
 	"testing"
 	"time"
 
@@ -120,6 +121,7 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	env.blkManager.(*manager).lastAccepted = parentID
 	env.mockedState.EXPECT().GetLastAccepted().Return(parentID).AnyTimes()
 	env.mockedState.EXPECT().GetTimestamp().Return(chainTime).AnyTimes()
+	env.mockedState.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
 
 	nextStakerTime := chainTime.Add(executor.SyncBound).Add(-1 * time.Second)
 
@@ -128,12 +130,20 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	currentStakerIt.EXPECT().Next().Return(true).AnyTimes()
 	currentStakerIt.EXPECT().Value().Return(
 		&state.Staker{
-			NextTime: nextStakerTime,
-			Priority: txs.PrimaryNetworkValidatorCurrentPriority,
+			NextTime:         nextStakerTime,
+			Priority:         txs.PrimaryNetworkValidatorCurrentPriority,
+			MintRate:         new(big.Int),
+			FeePerWeightPaid: new(big.Int),
 		},
 	).AnyTimes()
 	currentStakerIt.EXPECT().Release().Return().AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakerIterator().Return(currentStakerIt, nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Time{}, nil).AnyTimes()
+	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(new(big.Int).SetUint64(1), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
+	onParentAccept.EXPECT().GetFeePerWeightStored().Return(new(big.Int), nil).AnyTimes()
 
 	// no pending stakers
 	pendingIt := state.NewMockStakerIterator(ctrl)

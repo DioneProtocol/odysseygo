@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"go.uber.org/zap"
@@ -337,6 +338,14 @@ func (b *builder) notifyBlockReady() {
 	}
 }
 
+func isFeeSyncNeeded(tx *txs.Tx) bool {
+	switch tx.Unsigned.(type) {
+	case *txs.AddDelegatorTx, *txs.AddValidatorTx, *txs.AddPermissionlessDelegatorTx, *txs.AddPermissionlessValidatorTx:
+		return true
+	}
+	return false
+}
+
 // [timestamp] is min(max(now, parent timestamp), next staker change time)
 func buildBlock(
 	builder *builder,
@@ -359,11 +368,16 @@ func buildBlock(
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
 
-		return blocks.NewBanffProposalBlock(
+		feeFromAChain := builder.txExecutorBackend.Ctx.FeeCollector.GetAChainValue()
+		feeFromDChain := builder.txExecutorBackend.Ctx.FeeCollector.GetDChainValue()
+
+		return blocks.NewBanffProposalBlockWithFee(
 			timestamp,
 			parentID,
 			height,
 			rewardValidatorTx,
+			feeFromAChain,
+			feeFromDChain,
 		)
 	}
 
@@ -376,12 +390,35 @@ func buildBlock(
 		return nil, ErrNoPendingBlocks
 	}
 
+	txs := builder.Mempool.PeekTxs(targetBlockSize)
+
+	feeSync := false
+	if forceAdvanceTime {
+		feeSync = true
+	} else {
+		for _, tx := range txs {
+			if isFeeSyncNeeded(tx) {
+				feeSync = true
+				break
+			}
+		}
+	}
+
+	feeFromAChain := new(big.Int)
+	feeFromDChain := new(big.Int)
+	if feeSync {
+		feeFromAChain = builder.txExecutorBackend.Ctx.FeeCollector.GetAChainValue()
+		feeFromDChain = builder.txExecutorBackend.Ctx.FeeCollector.GetDChainValue()
+	}
+
 	// Issue a block with as many transactions as possible.
-	return blocks.NewBanffStandardBlock(
+	return blocks.NewBanffStandardBlockWithFee(
 		timestamp,
 		parentID,
 		height,
-		builder.Mempool.PeekTxs(targetBlockSize),
+		txs,
+		feeFromAChain,
+		feeFromDChain,
 	)
 }
 
