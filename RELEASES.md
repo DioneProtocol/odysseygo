@@ -1,8 +1,8 @@
 # Release Notes
 
-## [v1.10.10](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.10)
+## [v1.10.10](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.10)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged.
 
 The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 
@@ -21,78 +21,78 @@ The plugin version is unchanged at `28` and compatible with version `v1.10.9`.
 
 ### What's Changed
 
-- e2e: Save network data for each test run as an uploaded artifact by @marun in https://github.com/ava-labs/avalanchego/pull/1856
-- e2e: Ensure interchain workflow coverage for X-Chain and C-Chain by @marun in https://github.com/ava-labs/avalanchego/pull/1871
-- MerkleDB Adjust New View function(s) by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1927
-- e2e: Migrate duplicate node id test from kurtosis by @marun in https://github.com/ava-labs/avalanchego/pull/1573
-- Add tracing levels to merkledb by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1933
-- [x/merkledb] Add Configuration for `RootGenConcurrency` by @patrick-ogrady in https://github.com/ava-labs/avalanchego/pull/1936
-- e2e: Ensure testnet network dir is archived on failed test run by @marun in https://github.com/ava-labs/avalanchego/pull/1930
-- Merkle db cleanup view creation by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1934
-- Add async DB deletion helper by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1931
-- Implement SDK handler to drop messages from non-validators by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1917
-- Support proposervm historical block deletion by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1929
-- Remove thread pool by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1940
-- Merkledb split node storage into value and intermediate by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1918
-- `merkledb` -- remove unneeded codec test helper by @danlaine in https://github.com/ava-labs/avalanchego/pull/1943
-- `merkledb` -- add codec test and move helper by @danlaine in https://github.com/ava-labs/avalanchego/pull/1944
-- Add throttler implementation to SDK by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1905
-- Add Throttled Handler implementation to SDK by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1906
-- Change merkledb caches to be size based by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1947
-- Rename `node.marshal` to `node.bytes` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1951
-- e2e: Switch to a default network node count of 2 by @marun in https://github.com/ava-labs/avalanchego/pull/1928
-- MerkleDB Improve Node Size Calculation by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1950
-- `merkledb` -- remove unneeded return values by @danlaine in https://github.com/ava-labs/avalanchego/pull/1959
-- `sync` -- reduce test sizes by @danlaine in https://github.com/ava-labs/avalanchego/pull/1962
-- `merkledb` -- limit number of goroutines calculating node IDs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1960
-- Add gossip package to p2p SDK by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1958
-- Improve state sync logging by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1955
-- Update golang to 1.20.8 by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1826
-- Use odd-numbered request ids for SDK by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1975
-- update iterator invariant by @danlaine in https://github.com/ava-labs/avalanchego/pull/1978
-- Document common usage of requestIDs for snow senders by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1981
-- e2e: Diagnose and fix flakes by @marun in https://github.com/ava-labs/avalanchego/pull/1941
-- `merkledb` -- `db_test.go` cleanup by @danlaine in https://github.com/ava-labs/avalanchego/pull/1954
-- `merkledb` -- make config fields uints by @danlaine in https://github.com/ava-labs/avalanchego/pull/1963
-- Only gracefully exit rpcchainvm server after Shutdown by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1988
-- Add contexts to SDK callbacks by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1977
-- Change max response size to target response size by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1995
-- Add sdk gossip handler metrics by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1997
-- Add p2p SDK Router metrics by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/2000
-- Merkledb Attempt to reduce test runtime by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1990
-- longer timeout on windows UT by @danlaine in https://github.com/ava-labs/avalanchego/pull/2001
-- `sync` -- log tweaks by @danlaine in https://github.com/ava-labs/avalanchego/pull/2008
-- Add Validator Gossiper by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/2015
-- database: comment that Get returns ErrNotFound if key is not present by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/2018
-- Return `height` from `GetCurrentSupply` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2022
-- simplify platformvm `GetHeight` function by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2023
-- Merkle db fix range proof commit bug by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/2019
-- Add `bag.Of` helper by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/2027
-- Cleanup early poll termination logic by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/2029
-- fix typo by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2030
-- Merkle db intermediate node key compression by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1987
-- Improve RPC Chain version mismatch error message by @martineckardt in https://github.com/ava-labs/avalanchego/pull/2021
-- Move subnet owner lookup to platformvm state by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2024
-- Fix fuzz tests; add iterator fuzz test by @danlaine in https://github.com/ava-labs/avalanchego/pull/1991
-- Refactor subnet validator primary network requirements by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2014
-- Rename events to event by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1973
-- Add function to initialize SampleableSet by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/2017
-- add `IsCortinaActivated` helper by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/2013
-- Fix P-chain Import by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/2035
-- Rename avm/blocks package to avm/block by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1970
-- Merkledb Update rangeproof proto to be consistent with changeproof proto by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/2040
-- `merkledb` -- encode lengths as uvarints by @danlaine in https://github.com/ava-labs/avalanchego/pull/2039
-- MerkleDB Remove GetNodeFromParent by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/2041
+- e2e: Save network data for each test run as an uploaded artifact by @marun in https://github.com/DioneProtocol/odysseygo/pull/1856
+- e2e: Ensure interchain workflow coverage for X-Chain and C-Chain by @marun in https://github.com/DioneProtocol/odysseygo/pull/1871
+- MerkleDB Adjust New View function(s) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1927
+- e2e: Migrate duplicate node id test from kurtosis by @marun in https://github.com/DioneProtocol/odysseygo/pull/1573
+- Add tracing levels to merkledb by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1933
+- [x/merkledb] Add Configuration for `RootGenConcurrency` by @patrick-ogrady in https://github.com/DioneProtocol/odysseygo/pull/1936
+- e2e: Ensure testnet network dir is archived on failed test run by @marun in https://github.com/DioneProtocol/odysseygo/pull/1930
+- Merkle db cleanup view creation by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1934
+- Add async DB deletion helper by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1931
+- Implement SDK handler to drop messages from non-validators by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1917
+- Support proposervm historical block deletion by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1929
+- Remove thread pool by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1940
+- Merkledb split node storage into value and intermediate by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1918
+- `merkledb` -- remove unneeded codec test helper by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1943
+- `merkledb` -- add codec test and move helper by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1944
+- Add throttler implementation to SDK by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1905
+- Add Throttled Handler implementation to SDK by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1906
+- Change merkledb caches to be size based by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1947
+- Rename `node.marshal` to `node.bytes` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1951
+- e2e: Switch to a default network node count of 2 by @marun in https://github.com/DioneProtocol/odysseygo/pull/1928
+- MerkleDB Improve Node Size Calculation by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1950
+- `merkledb` -- remove unneeded return values by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1959
+- `sync` -- reduce test sizes by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1962
+- `merkledb` -- limit number of goroutines calculating node IDs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1960
+- Add gossip package to p2p SDK by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1958
+- Improve state sync logging by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1955
+- Update golang to 1.20.8 by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1826
+- Use odd-numbered request ids for SDK by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1975
+- update iterator invariant by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1978
+- Document common usage of requestIDs for snow senders by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1981
+- e2e: Diagnose and fix flakes by @marun in https://github.com/DioneProtocol/odysseygo/pull/1941
+- `merkledb` -- `db_test.go` cleanup by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1954
+- `merkledb` -- make config fields uints by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1963
+- Only gracefully exit rpcchainvm server after Shutdown by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1988
+- Add contexts to SDK callbacks by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1977
+- Change max response size to target response size by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1995
+- Add sdk gossip handler metrics by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1997
+- Add p2p SDK Router metrics by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2000
+- Merkledb Attempt to reduce test runtime by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1990
+- longer timeout on windows UT by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/2001
+- `sync` -- log tweaks by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/2008
+- Add Validator Gossiper by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2015
+- database: comment that Get returns ErrNotFound if key is not present by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/2018
+- Return `height` from `GetCurrentSupply` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2022
+- simplify platformvm `GetHeight` function by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2023
+- Merkle db fix range proof commit bug by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2019
+- Add `bag.Of` helper by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2027
+- Cleanup early poll termination logic by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2029
+- fix typo by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2030
+- Merkle db intermediate node key compression by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1987
+- Improve RPC Chain version mismatch error message by @martineckardt in https://github.com/DioneProtocol/odysseygo/pull/2021
+- Move subnet owner lookup to platformvm state by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2024
+- Fix fuzz tests; add iterator fuzz test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1991
+- Refactor subnet validator primary network requirements by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2014
+- Rename events to event by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1973
+- Add function to initialize SampleableSet by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/2017
+- add `IsCortinaActivated` helper by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/2013
+- Fix P-chain Import by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/2035
+- Rename avm/blocks package to avm/block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1970
+- Merkledb Update rangeproof proto to be consistent with changeproof proto by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2040
+- `merkledb` -- encode lengths as uvarints by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/2039
+- MerkleDB Remove GetNodeFromParent by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/2041
 
 ### New Contributors
 
-- @martineckardt made their first contribution in https://github.com/ava-labs/avalanchego/pull/2021
+- @martineckardt made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/2021
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.9...v1.10.10
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.9...v1.10.10
 
-## [v1.10.9](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.9)
+## [v1.10.9](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.9)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged.
 
 The plugin version is updated to `28` all plugins must update to be compatible.
 
@@ -107,67 +107,67 @@ The plugin version is updated to `28` all plugins must update to be compatible.
 
 ### What's Changed
 
-- `merkledb` -- verify range proof in fuzz test; fix bound error by @danlaine in https://github.com/ava-labs/avalanchego/pull/1789
-- Update default compression type to zstd by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1839
-- Migrate to `uber-go/mock` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1840
-- `corruptabledb` -- corrupt on iterator error by @danlaine in https://github.com/ava-labs/avalanchego/pull/1829
-- Add support for Maps to the reflect_codec by @nytzuga in https://github.com/ava-labs/avalanchego/pull/1790
-- Make linter fail if `github.com/golang/mock/gomock` is used by @danlaine in https://github.com/ava-labs/avalanchego/pull/1843
-- Firewoodize merkle db Part 1: Make Views ReadOnly by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1816
-- E2E tests -- use appropriate timeouts by @danlaine in https://github.com/ava-labs/avalanchego/pull/1851
-- e2e: Switch to testnet fixture by @marun in https://github.com/ava-labs/avalanchego/pull/1709
-- `secp256k1` -- add fuzz tests by @danlaine in https://github.com/ava-labs/avalanchego/pull/1809
-- Add fuzz test for complex codec unmarshalling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1846
-- Simplify exported interface of the primary wallet by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1849
-- Regenerate mocks by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1860
-- Remove history btree by @danlaine in https://github.com/ava-labs/avalanchego/pull/1861
-- `merkledb` -- Remove `CommitToParent` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1854
-- `merkledb` -- remove other history btree by @danlaine in https://github.com/ava-labs/avalanchego/pull/1862
-- `merkledb` -- add path fuzz test by @danlaine in https://github.com/ava-labs/avalanchego/pull/1852
-- fix range proof verification case by @danlaine in https://github.com/ava-labs/avalanchego/pull/1834
-- `merkledb` -- add change proof fuzz test; fix change proof verification by @danlaine in https://github.com/ava-labs/avalanchego/pull/1802
-- Warp readme by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1780
-- CODEOWNERS: add marun to tests by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1863
-- Add CI check that auto-generated code is up to date by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1828
-- `sync` -- change proof request can return range proof by @danlaine in https://github.com/ava-labs/avalanchego/pull/1772
-- Ensure consistent use of best-practice `set -o` in all scripts by @marun in https://github.com/ava-labs/avalanchego/pull/1864
-- GetCanonicalValidatorSet minimal ValidatorState iface by @darioush in https://github.com/ava-labs/avalanchego/pull/1875
-- `sync` -- handle fatal error by @danlaine in https://github.com/ava-labs/avalanchego/pull/1874
-- `merkledb` -- use `Maybe` for start bounds by @danlaine in https://github.com/ava-labs/avalanchego/pull/1872
-- Add C-chain wallet to the primary network by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1850
-- e2e: Refactor keychain and wallet creation to test helpers by @marun in https://github.com/ava-labs/avalanchego/pull/1870
-- Update account nonce on exportTx accept by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1881
-- `sync` -- add workheap test by @danlaine in https://github.com/ava-labs/avalanchego/pull/1879
-- `merkledb` -- commit to db only by @danlaine in https://github.com/ava-labs/avalanchego/pull/1885
-- Remove node/value lock from trieview by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1865
-- remove old todo by @danlaine in https://github.com/ava-labs/avalanchego/pull/1892
-- Fix race in TestHandlerDispatchInternal by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1895
-- Remove duplicate code from proposervm block acceptance by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1894
-- e2e: Bump permissionless subnets timeouts by @marun in https://github.com/ava-labs/avalanchego/pull/1897
-- `merkledb` -- codec remove err checks by @danlaine in https://github.com/ava-labs/avalanchego/pull/1899
-- Merkle db fix new return type by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1898
-- Add SDK Sampling interface by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1877
-- Add NoOpHandler implementation to SDK by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1903
-- Remove unused scripts by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1908
-- `merkledb` -- codec nits/cleanup by @danlaine in https://github.com/ava-labs/avalanchego/pull/1904
-- `merkledb` -- preallocate `bytes.Buffer` in codec by @danlaine in https://github.com/ava-labs/avalanchego/pull/1900
-- Proposervm height index repair fix by @abi87 in https://github.com/ava-labs/avalanchego/pull/1915
-- `merkledb` -- move and rename methods by @danlaine in https://github.com/ava-labs/avalanchego/pull/1919
-- Remove optional height indexing interface by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1896
-- `merkledb` -- nits by @danlaine in https://github.com/ava-labs/avalanchego/pull/1916
-- Fix code owners file by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1922
-- Drop invalid TLS certs during initial handshake by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1923
-- Restricted tls metrics by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1924
+- `merkledb` -- verify range proof in fuzz test; fix bound error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1789
+- Update default compression type to zstd by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1839
+- Migrate to `uber-go/mock` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1840
+- `corruptabledb` -- corrupt on iterator error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1829
+- Add support for Maps to the reflect_codec by @nytzuga in https://github.com/DioneProtocol/odysseygo/pull/1790
+- Make linter fail if `github.com/golang/mock/gomock` is used by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1843
+- Firewoodize merkle db Part 1: Make Views ReadOnly by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1816
+- E2E tests -- use appropriate timeouts by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1851
+- e2e: Switch to testnet fixture by @marun in https://github.com/DioneProtocol/odysseygo/pull/1709
+- `secp256k1` -- add fuzz tests by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1809
+- Add fuzz test for complex codec unmarshalling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1846
+- Simplify exported interface of the primary wallet by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1849
+- Regenerate mocks by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1860
+- Remove history btree by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1861
+- `merkledb` -- Remove `CommitToParent` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1854
+- `merkledb` -- remove other history btree by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1862
+- `merkledb` -- add path fuzz test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1852
+- fix range proof verification case by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1834
+- `merkledb` -- add change proof fuzz test; fix change proof verification by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1802
+- Warp readme by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1780
+- CODEOWNERS: add marun to tests by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1863
+- Add CI check that auto-generated code is up to date by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1828
+- `sync` -- change proof request can return range proof by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1772
+- Ensure consistent use of best-practice `set -o` in all scripts by @marun in https://github.com/DioneProtocol/odysseygo/pull/1864
+- GetCanonicalValidatorSet minimal ValidatorState iface by @darioush in https://github.com/DioneProtocol/odysseygo/pull/1875
+- `sync` -- handle fatal error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1874
+- `merkledb` -- use `Maybe` for start bounds by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1872
+- Add C-chain wallet to the primary network by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1850
+- e2e: Refactor keychain and wallet creation to test helpers by @marun in https://github.com/DioneProtocol/odysseygo/pull/1870
+- Update account nonce on exportTx accept by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1881
+- `sync` -- add workheap test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1879
+- `merkledb` -- commit to db only by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1885
+- Remove node/value lock from trieview by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1865
+- remove old todo by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1892
+- Fix race in TestHandlerDispatchInternal by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1895
+- Remove duplicate code from proposervm block acceptance by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1894
+- e2e: Bump permissionless subnets timeouts by @marun in https://github.com/DioneProtocol/odysseygo/pull/1897
+- `merkledb` -- codec remove err checks by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1899
+- Merkle db fix new return type by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1898
+- Add SDK Sampling interface by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1877
+- Add NoOpHandler implementation to SDK by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1903
+- Remove unused scripts by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1908
+- `merkledb` -- codec nits/cleanup by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1904
+- `merkledb` -- preallocate `bytes.Buffer` in codec by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1900
+- Proposervm height index repair fix by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1915
+- `merkledb` -- move and rename methods by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1919
+- Remove optional height indexing interface by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1896
+- `merkledb` -- nits by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1916
+- Fix code owners file by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1922
+- Drop invalid TLS certs during initial handshake by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1923
+- Restricted tls metrics by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1924
 
 ### New Contributors
 
-- @nytzuga made their first contribution in https://github.com/ava-labs/avalanchego/pull/1790
+- @nytzuga made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1790
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.8...v1.10.9
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.8...v1.10.9
 
-## [v1.10.8](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.8)
+## [v1.10.8](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.8)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged.
 
 The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - v1.10.7`.
 
@@ -192,44 +192,44 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 ### What's Changed
 
-- Removes calls to ctrl.Finish by @darioush in https://github.com/ava-labs/avalanchego/pull/1803
-- e2e: Remove unnecessary transaction status checking by @marun in https://github.com/ava-labs/avalanchego/pull/1786
-- fix p2p mockgen location by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1806
-- fix end proof verification by @danlaine in https://github.com/ava-labs/avalanchego/pull/1801
-- `merkledb` -- add proof fuzz test by @danlaine in https://github.com/ava-labs/avalanchego/pull/1804
-- `sync` -- re-add network client metrics by @danlaine in https://github.com/ava-labs/avalanchego/pull/1787
-- Add function to initialize set from elements by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1808
-- Add Maybe to the end bound of proofs (Part 1) by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1793
-- add go version to --version by @amirhasanzadehpy in https://github.com/ava-labs/avalanchego/pull/1819
-- e2e: Add local network fixture by @marun in https://github.com/ava-labs/avalanchego/pull/1700
-- Fix test flake in TestProposalTxsInMempool by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1822
-- `sync` -- remove todo by @danlaine in https://github.com/ava-labs/avalanchego/pull/1788
-- Add Maybe to the end bound of proofs (Part 2) by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1813
-- Move Maybe to its own package by @danlaine in https://github.com/ava-labs/avalanchego/pull/1817
-- `merkledb` -- clarify/improve change proof invariants by @danlaine in https://github.com/ava-labs/avalanchego/pull/1810
-- P-chain state prune + height index by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1719
-- Update maintainer of the debian packages by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1825
-- Make platformvm implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1746
-- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1747
-- Update local genesis startTime by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1811
-- `sync` -- add handling for fatal error by @danlaine in https://github.com/ava-labs/avalanchego/pull/1690
-- Add error logs for unexpected proposervm BuildBlock failures by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1832
-- Fix subnet validator set public key initialization by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1833
-- Document PendingTxs + BuildBlock consensus engine requirement by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1835
-- Bump github.com/supranational/blst from 0.3.11-0.20230406105308-e9dfc5ee724b to 0.3.11 by @dependabot in https://github.com/ava-labs/avalanchego/pull/1831
-- Add Primary Network Lite Sync Option by @abi87 in https://github.com/ava-labs/avalanchego/pull/1769
-- Check P-chain ShouldPrune during Initialize by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1836
+- Removes calls to ctrl.Finish by @darioush in https://github.com/DioneProtocol/odysseygo/pull/1803
+- e2e: Remove unnecessary transaction status checking by @marun in https://github.com/DioneProtocol/odysseygo/pull/1786
+- fix p2p mockgen location by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1806
+- fix end proof verification by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1801
+- `merkledb` -- add proof fuzz test by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1804
+- `sync` -- re-add network client metrics by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1787
+- Add function to initialize set from elements by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1808
+- Add Maybe to the end bound of proofs (Part 1) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1793
+- add go version to --version by @amirhasanzadehpy in https://github.com/DioneProtocol/odysseygo/pull/1819
+- e2e: Add local network fixture by @marun in https://github.com/DioneProtocol/odysseygo/pull/1700
+- Fix test flake in TestProposalTxsInMempool by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1822
+- `sync` -- remove todo by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1788
+- Add Maybe to the end bound of proofs (Part 2) by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1813
+- Move Maybe to its own package by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1817
+- `merkledb` -- clarify/improve change proof invariants by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1810
+- P-chain state prune + height index by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1719
+- Update maintainer of the debian packages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1825
+- Make platformvm implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1746
+- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1747
+- Update local genesis startTime by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1811
+- `sync` -- add handling for fatal error by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1690
+- Add error logs for unexpected proposervm BuildBlock failures by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1832
+- Fix subnet validator set public key initialization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1833
+- Document PendingTxs + BuildBlock consensus engine requirement by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1835
+- Bump github.com/supranational/blst from 0.3.11-0.20230406105308-e9dfc5ee724b to 0.3.11 by @dependabot in https://github.com/DioneProtocol/odysseygo/pull/1831
+- Add Primary Network Lite Sync Option by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1769
+- Check P-chain ShouldPrune during Initialize by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1836
 
 ### New Contributors
 
-- @amirhasanzadehpy made their first contribution in https://github.com/ava-labs/avalanchego/pull/1819
-- @dependabot made their first contribution in https://github.com/ava-labs/avalanchego/pull/1831
+- @amirhasanzadehpy made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1819
+- @dependabot made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1831
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.7...v1.10.8
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.7...v1.10.8
 
-## [v1.10.7](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.7)
+## [v1.10.7](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.7)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). This release contains meaningful performance improvements and we recommend updating as soon as possible.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). This release contains meaningful performance improvements and we recommend updating as soon as possible.
 
 The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - v1.10.6`.
 
@@ -267,40 +267,40 @@ The plugin version is unchanged at `27` and compatible with versions `v1.10.5 - 
 
 ### What's Changed
 
-- Remove deprecated configs by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1712
-- upgrade: Increase all ANR timeouts to 2m to ensure CI reliability by @marun in https://github.com/ava-labs/avalanchego/pull/1737
-- fix sync panic by @danlaine in https://github.com/ava-labs/avalanchego/pull/1736
-- remove `vm.state` re-assignment in tests by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1739
-- Expose BLS public keys from platform.getValidatorsAt by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1740
-- Fix validator set diff tests by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1744
-- Replace List() with Map() on validators.Set by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1745
-- vms/platformvm: configure state cache sizes #1522 by @najeal in https://github.com/ava-labs/avalanchego/pull/1677
-- Support both `stateBlk`s and `Block`s in `blockDB` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1748
-- Add `DefaultExecutionConfig` var to `platformvm` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1749
-- Remove hanging TODO from prior change by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1758
-- Write process context on node start to simplify test orchestration by @marun in https://github.com/ava-labs/avalanchego/pull/1729
-- x/sync: add locks for peerTracker by @darioush in https://github.com/ava-labs/avalanchego/pull/1756
-- Add ids length constants by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1759
-- [x/sync] Update target locking by @patrick-ogrady in https://github.com/ava-labs/avalanchego/pull/1763
-- Export warp errors for external use by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1771
-- Remove unused networking constant by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1774
-- Change the default value of `--network-allow-private-ips` to `false` for `mainnet` and `fuji` by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1773
-- Remove context.TODO from tests by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1778
-- Replace linkeddb iterator with native DB range queries by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1752
-- Add support for measuring key size in caches by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1781
-- Bump coreth to v0.12.5-rc.0 by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1775
-- Add metric for the number of elements in a cache by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1782
-- Evict blocks based on size by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1766
-- Add proposervm state metrics by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1785
-- Register metercacher `len` metric by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1791
-- Reduce block cache sizes to 64 MiB by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1794
-- Add p2p sdk by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1799
+- Remove deprecated configs by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1712
+- upgrade: Increase all ANR timeouts to 2m to ensure CI reliability by @marun in https://github.com/DioneProtocol/odysseygo/pull/1737
+- fix sync panic by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1736
+- remove `vm.state` re-assignment in tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1739
+- Expose BLS public keys from platform.getValidatorsAt by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1740
+- Fix validator set diff tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1744
+- Replace List() with Map() on validators.Set by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1745
+- vms/platformvm: configure state cache sizes #1522 by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1677
+- Support both `stateBlk`s and `Block`s in `blockDB` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1748
+- Add `DefaultExecutionConfig` var to `platformvm` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1749
+- Remove hanging TODO from prior change by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1758
+- Write process context on node start to simplify test orchestration by @marun in https://github.com/DioneProtocol/odysseygo/pull/1729
+- x/sync: add locks for peerTracker by @darioush in https://github.com/DioneProtocol/odysseygo/pull/1756
+- Add ids length constants by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1759
+- [x/sync] Update target locking by @patrick-ogrady in https://github.com/DioneProtocol/odysseygo/pull/1763
+- Export warp errors for external use by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1771
+- Remove unused networking constant by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1774
+- Change the default value of `--network-allow-private-ips` to `false` for `mainnet` and `fuji` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1773
+- Remove context.TODO from tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1778
+- Replace linkeddb iterator with native DB range queries by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1752
+- Add support for measuring key size in caches by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1781
+- Bump coreth to v0.12.5-rc.0 by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1775
+- Add metric for the number of elements in a cache by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1782
+- Evict blocks based on size by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1766
+- Add proposervm state metrics by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1785
+- Register metercacher `len` metric by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1791
+- Reduce block cache sizes to 64 MiB by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1794
+- Add p2p sdk by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1799
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.5...v1.10.7
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.5...v1.10.7
 
-## [v1.10.5](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.5)
+## [v1.10.5](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.5)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged.
 
 The plugin version is updated to `27` all plugins must update to be compatible.
 
@@ -322,36 +322,36 @@ The plugin version is updated to `27` all plugins must update to be compatible.
 
 ### What's Changed
 
-- stop persisting rejected blocks on P-chain by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1696
-- Ensure scripts/lint.sh failure when used with incompatible grep by @marun in https://github.com/ava-labs/avalanchego/pull/1711
-- sum peers clock skew into metric by @najeal in https://github.com/ava-labs/avalanchego/pull/1695
-- Make AVM implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1699
-- ProposerVM nits by @abi87 in https://github.com/ava-labs/avalanchego/pull/1688
-- Sorting -- Remove old `IsSortedAndUnique`, rename `IsSortedAndUniqueSortable` to `IsSortedAndUnique` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1666
-- Update snow consensus doc post X-chain linearization by @exdx in https://github.com/ava-labs/avalanchego/pull/1703
-- `merkledb` / `sync` -- remove TODOs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1718
-- remove cache TODOs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1721
-- Adjust `NewSizedCache` to take in a size function by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1725
-- Wallet issuance to return tx instead of tx id by @felipemadero in https://github.com/ava-labs/avalanchego/pull/1704
-- Add support for providing tracing headers by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1727
-- Only return accepted blocks in `GetStatelessBlock` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1724
-- Proposermv fix goroutine leaks by @abi87 in https://github.com/ava-labs/avalanchego/pull/1713
-- Update warp msg format by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1686
-- Cleanup anr scripts by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1714
-- remove TrackBandwidth from NetworkClient by @danlaine in https://github.com/ava-labs/avalanchego/pull/1716
-- Bump network start timeout by @marun in https://github.com/ava-labs/avalanchego/pull/1730
-- e2e: Ensure e2e.test is built with portable BLST by @marun in https://github.com/ava-labs/avalanchego/pull/1734
-- e2e: Increase all ANR timeouts to 2m to ensure CI reliability. by @marun in https://github.com/ava-labs/avalanchego/pull/1733
+- stop persisting rejected blocks on P-chain by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1696
+- Ensure scripts/lint.sh failure when used with incompatible grep by @marun in https://github.com/DioneProtocol/odysseygo/pull/1711
+- sum peers clock skew into metric by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1695
+- Make AVM implement `block.HeightIndexedChainVM` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1699
+- ProposerVM nits by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1688
+- Sorting -- Remove old `IsSortedAndUnique`, rename `IsSortedAndUniqueSortable` to `IsSortedAndUnique` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1666
+- Update snow consensus doc post X-chain linearization by @exdx in https://github.com/DioneProtocol/odysseygo/pull/1703
+- `merkledb` / `sync` -- remove TODOs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1718
+- remove cache TODOs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1721
+- Adjust `NewSizedCache` to take in a size function by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1725
+- Wallet issuance to return tx instead of tx id by @felipemadero in https://github.com/DioneProtocol/odysseygo/pull/1704
+- Add support for providing tracing headers by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1727
+- Only return accepted blocks in `GetStatelessBlock` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1724
+- Proposermv fix goroutine leaks by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1713
+- Update warp msg format by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1686
+- Cleanup anr scripts by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1714
+- remove TrackBandwidth from NetworkClient by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1716
+- Bump network start timeout by @marun in https://github.com/DioneProtocol/odysseygo/pull/1730
+- e2e: Ensure e2e.test is built with portable BLST by @marun in https://github.com/DioneProtocol/odysseygo/pull/1734
+- e2e: Increase all ANR timeouts to 2m to ensure CI reliability. by @marun in https://github.com/DioneProtocol/odysseygo/pull/1733
 
 ### New Contributors
 
-- @exdx made their first contribution in https://github.com/ava-labs/avalanchego/pull/1703
+- @exdx made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1703
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.4...v1.10.5
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.4...v1.10.5
 
-## [v1.10.4](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.4)
+## [v1.10.4](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.4)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged.
 
 The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - v1.10.3`.
 
@@ -381,65 +381,65 @@ The plugin version is unchanged at `26` and compatible with versions `v1.10.1 - 
 
 ### What's Changed
 
-- e2e: Support testing on MacOS without requiring firewall exceptions by @marun in https://github.com/ava-labs/avalanchego/pull/1613
-- Reduce resource log level by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1622
-- Improve `snow/` tests with `require` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1503
-- Improve `x/` tests with `require` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1454
-- `sync` -- fix `TestFindNextKeyRandom` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1624
-- Improve `vms/` tests with `require` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1505
-- Improve `database/` tests with `require` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1506
-- Ban usage of `t.Fatal` and `t.Error` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1453
-- chore: fix typo in binary_snowflake.go by @eltociear in https://github.com/ava-labs/avalanchego/pull/1630
-- Discriminate window fit err msg from overdelegated error msg by @felipemadero in https://github.com/ava-labs/avalanchego/pull/1606
-- Remove MaxConnectionAge gRPC StreamID overflow mitigation by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1388
-- add fuzzing action by @danlaine in https://github.com/ava-labs/avalanchego/pull/1635
-- Remove dagState and GetUTXOFromID by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1632
-- Update all AVM tests for post-linearization by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1631
-- Remove PendingTxs from the DAGVM interface by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1641
-- Remove GetTx from the DAGVM interface by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1642
-- Bump coreth v0.12.4 by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1646
-- [x/merkledb] Remove useless `err` check by @patrick-ogrady in https://github.com/ava-labs/avalanchego/pull/1650
-- [x/merkledb] Trailing whitespace removal on README by @patrick-ogrady in https://github.com/ava-labs/avalanchego/pull/1649
-- Remove unneeded functions from UniqueTx by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1643
-- Simplify tx verification by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1654
-- `merkledb` --  fix `findNextKey` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1653
-- Cleanup X-chain UniqueTx Dependencies by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1656
-- Prune X-chain State by @coffeeavax in https://github.com/ava-labs/avalanchego/pull/1427
-- Support building docker image on ARM64 by @dshiell in https://github.com/ava-labs/avalanchego/pull/1103
-- remove goreleaser by @danlaine in https://github.com/ava-labs/avalanchego/pull/1660
-- Fix Dockerfile on non amd64 platforms by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1661
-- Improve metrics error message by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1663
-- Remove X-chain UniqueTx by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1662
-- Add state checksums by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1658
-- Modify proposervm window by @najeal in https://github.com/ava-labs/avalanchego/pull/1638
-- sorting nit by @danlaine in https://github.com/ava-labs/avalanchego/pull/1665
-- `merkledb` -- rewrite and test range proof invariants; fix proof generation/veriifcation bugs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1629
-- Add minimum proposer window length by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1667
-- CI -- only run fuzz tests on ubuntu by @danlaine in https://github.com/ava-labs/avalanchego/pull/1636
-- `MerkleDB` -- remove codec version by @danlaine in https://github.com/ava-labs/avalanchego/pull/1671
-- `MerkleDB` -- use default config in all tests by @danlaine in https://github.com/ava-labs/avalanchego/pull/1590
-- `sync` -- reduce stuttering by @danlaine in https://github.com/ava-labs/avalanchego/pull/1672
-- `Sync` -- unexport field by @danlaine in https://github.com/ava-labs/avalanchego/pull/1673
-- `sync` -- nits and cleanup by @danlaine in https://github.com/ava-labs/avalanchego/pull/1674
-- `sync` -- remove unused code by @danlaine in https://github.com/ava-labs/avalanchego/pull/1676
-- Mark preForkBlocks after the fork as Rejected by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1683
-- `merkledb` -- fix comment by @danlaine in https://github.com/ava-labs/avalanchego/pull/1675
-- `MerkleDB` -- document codec by @danlaine in https://github.com/ava-labs/avalanchego/pull/1670
-- `sync` -- client cleanup by @danlaine in https://github.com/ava-labs/avalanchego/pull/1680
-- Update buf version to v1.23.1 by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1685
+- e2e: Support testing on MacOS without requiring firewall exceptions by @marun in https://github.com/DioneProtocol/odysseygo/pull/1613
+- Reduce resource log level by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1622
+- Improve `snow/` tests with `require` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1503
+- Improve `x/` tests with `require` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1454
+- `sync` -- fix `TestFindNextKeyRandom` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1624
+- Improve `vms/` tests with `require` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1505
+- Improve `database/` tests with `require` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1506
+- Ban usage of `t.Fatal` and `t.Error` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1453
+- chore: fix typo in binary_snowflake.go by @eltociear in https://github.com/DioneProtocol/odysseygo/pull/1630
+- Discriminate window fit err msg from overdelegated error msg by @felipemadero in https://github.com/DioneProtocol/odysseygo/pull/1606
+- Remove MaxConnectionAge gRPC StreamID overflow mitigation by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1388
+- add fuzzing action by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1635
+- Remove dagState and GetUTXOFromID by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1632
+- Update all AVM tests for post-linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1631
+- Remove PendingTxs from the DAGVM interface by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1641
+- Remove GetTx from the DAGVM interface by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1642
+- Bump coreth v0.12.4 by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1646
+- [x/merkledb] Remove useless `err` check by @patrick-ogrady in https://github.com/DioneProtocol/odysseygo/pull/1650
+- [x/merkledb] Trailing whitespace removal on README by @patrick-ogrady in https://github.com/DioneProtocol/odysseygo/pull/1649
+- Remove unneeded functions from UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1643
+- Simplify tx verification by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1654
+- `merkledb` --  fix `findNextKey` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1653
+- Cleanup X-chain UniqueTx Dependencies by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1656
+- Prune X-chain State by @coffeeavax in https://github.com/DioneProtocol/odysseygo/pull/1427
+- Support building docker image on ARM64 by @dshiell in https://github.com/DioneProtocol/odysseygo/pull/1103
+- remove goreleaser by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1660
+- Fix Dockerfile on non amd64 platforms by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1661
+- Improve metrics error message by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1663
+- Remove X-chain UniqueTx by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1662
+- Add state checksums by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1658
+- Modify proposervm window by @najeal in https://github.com/DioneProtocol/odysseygo/pull/1638
+- sorting nit by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1665
+- `merkledb` -- rewrite and test range proof invariants; fix proof generation/veriifcation bugs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1629
+- Add minimum proposer window length by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1667
+- CI -- only run fuzz tests on ubuntu by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1636
+- `MerkleDB` -- remove codec version by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1671
+- `MerkleDB` -- use default config in all tests by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1590
+- `sync` -- reduce stuttering by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1672
+- `Sync` -- unexport field by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1673
+- `sync` -- nits and cleanup by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1674
+- `sync` -- remove unused code by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1676
+- Mark preForkBlocks after the fork as Rejected by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1683
+- `merkledb` -- fix comment by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1675
+- `MerkleDB` -- document codec by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1670
+- `sync` -- client cleanup by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1680
+- Update buf version to v1.23.1 by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1685
 
 ### New Contributors
 
-- @eltociear made their first contribution in https://github.com/ava-labs/avalanchego/pull/1630
-- @felipemadero made their first contribution in https://github.com/ava-labs/avalanchego/pull/1606
-- @dshiell made their first contribution in https://github.com/ava-labs/avalanchego/pull/1103
-- @najeal made their first contribution in https://github.com/ava-labs/avalanchego/pull/1638
+- @eltociear made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1630
+- @felipemadero made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1606
+- @dshiell made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1103
+- @najeal made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1638
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.3...v1.10.4
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.3...v1.10.4
 
-## [v1.10.3](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.3)
+## [v1.10.3](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.3)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
 
 **Users must specify the `--allowed-hosts-flag` to receive inbound API traffic from non-local hosts.**
 
@@ -471,70 +471,70 @@ This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/av
 
 ### What's Changed
 
-- `x/sync` -- Add proto for P2P messages  by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1472
-- Bump Protobuf and tooling and add section to proto docs outlining buf publishing by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1552
-- Minor pchain UTs cleanup by @abi87 in https://github.com/ava-labs/avalanchego/pull/1554
-- Add ping uptimes test by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1550
-- Add workflow to mark stale issues and PRs by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1443
-- Enforce inlining functions with a single error return in `require.NoError` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1500
-- `x/sync` / `x/merkledb` -- add `SyncableDB` interface by @danlaine in https://github.com/ava-labs/avalanchego/pull/1555
-- Rename beacon to boostrapper, define bootstrappers in JSON file for cross-language compatiblity by @gyuho in https://github.com/ava-labs/avalanchego/pull/1439
-- add P-chain height indexing by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1447
-- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1448
-- `x/sync` -- use for sending Range Proofs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1537
-- Add test to ensure that database packing produces sorted values by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1560
-- Randomize unit test execution order to identify unwanted dependency by @marun in https://github.com/ava-labs/avalanchego/pull/1565
-- use `http.Error` instead of separately writing error code and message by @danlaine in https://github.com/ava-labs/avalanchego/pull/1564
-- Adding allowed http hosts flag by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1566
-- `x/sync` -- Use proto for sending Change Proofs by @danlaine in https://github.com/ava-labs/avalanchego/pull/1541
-- Only send `PushQuery` messages after building the block by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1428
-- Rename APIAllowedOrigins to HTTPAllowedOrigins by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1567
-- Add GetBalance examples for the P-chain and X-chain wallets by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1569
-- Reduce number of test iterations by @danlaine in https://github.com/ava-labs/avalanchego/pull/1568
-- Re-add upgrade tests by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1410
-- Remove lists from Chits messages by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1412
-- Add more X-chain tests by @coffeeavax in https://github.com/ava-labs/avalanchego/pull/1487
-- fix typo by @meaghanfitzgerald in https://github.com/ava-labs/avalanchego/pull/1570
-- Reduce the number of test health checks by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1571
-- Fix proposervm.GetAncestors test flake by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1572
-- Remove list from AcceptedFrontier message by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1578
-- Remove version db from merkle db by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1534
-- `MerkleDB` -- add eviction batch size config by @danlaine in https://github.com/ava-labs/avalanchego/pull/1586
-- `MerkleDB` -- fix `onEvictCache.Flush` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1589
-- Revert P-Chain height index by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1591
-- `x/sync` -- Add `SyncableDB` proto by @danlaine in https://github.com/ava-labs/avalanchego/pull/1559
-- Clarify break on error during ancestors lookup by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1580
-- Add buf-push github workflow by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1556
-- Pchain bls key diff fix by @abi87 in https://github.com/ava-labs/avalanchego/pull/1584
-- Cleanup fx interface compliance by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1599
-- Improve metrics error msging by @anusha-ctrl in https://github.com/ava-labs/avalanchego/pull/1598
-- Separate health checks by tags by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1579
-- Separate subnet stake connected health and metrics from P-chain by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1358
-- Merkle db iterator by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1533
-- Fix unreadable message errors by @morrisettjohn in https://github.com/ava-labs/avalanchego/pull/1585
-- Log unexpected errors during GetValidatorSet by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1592
-- `merkleDB` -- add inner heap type to syncWorkHeap by @danlaine in https://github.com/ava-labs/avalanchego/pull/1582
-- `sync` -- explain algorithm in readme by @danlaine in https://github.com/ava-labs/avalanchego/pull/1600
-- Rename license header file to avoid unintended license indexing by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1608
-- `merkledb` and `sync` -- use time based rand seed by @danlaine in https://github.com/ava-labs/avalanchego/pull/1607
-- add `local-prefixes` setting for `goimports` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1612
-- snow/engine/snowman: instantiate voter after issuer by @gyuho in https://github.com/ava-labs/avalanchego/pull/1610
-- Update CodeQL to v2 by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1616
-- Remove old networking metric by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1619
-- Fix --http-host flag to support IPv6 by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1620
+- `x/sync` -- Add proto for P2P messages  by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1472
+- Bump Protobuf and tooling and add section to proto docs outlining buf publishing by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1552
+- Minor pchain UTs cleanup by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1554
+- Add ping uptimes test by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1550
+- Add workflow to mark stale issues and PRs by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1443
+- Enforce inlining functions with a single error return in `require.NoError` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1500
+- `x/sync` / `x/merkledb` -- add `SyncableDB` interface by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1555
+- Rename beacon to boostrapper, define bootstrappers in JSON file for cross-language compatiblity by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1439
+- add P-chain height indexing by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1447
+- Add P-chain `GetBlockByHeight` API method by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1448
+- `x/sync` -- use for sending Range Proofs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1537
+- Add test to ensure that database packing produces sorted values by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1560
+- Randomize unit test execution order to identify unwanted dependency by @marun in https://github.com/DioneProtocol/odysseygo/pull/1565
+- use `http.Error` instead of separately writing error code and message by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1564
+- Adding allowed http hosts flag by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1566
+- `x/sync` -- Use proto for sending Change Proofs by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1541
+- Only send `PushQuery` messages after building the block by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1428
+- Rename APIAllowedOrigins to HTTPAllowedOrigins by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1567
+- Add GetBalance examples for the P-chain and X-chain wallets by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1569
+- Reduce number of test iterations by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1568
+- Re-add upgrade tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1410
+- Remove lists from Chits messages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1412
+- Add more X-chain tests by @coffeeavax in https://github.com/DioneProtocol/odysseygo/pull/1487
+- fix typo by @meaghanfitzgerald in https://github.com/DioneProtocol/odysseygo/pull/1570
+- Reduce the number of test health checks by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1571
+- Fix proposervm.GetAncestors test flake by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1572
+- Remove list from AcceptedFrontier message by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1578
+- Remove version db from merkle db by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1534
+- `MerkleDB` -- add eviction batch size config by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1586
+- `MerkleDB` -- fix `onEvictCache.Flush` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1589
+- Revert P-Chain height index by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1591
+- `x/sync` -- Add `SyncableDB` proto by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1559
+- Clarify break on error during ancestors lookup by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1580
+- Add buf-push github workflow by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1556
+- Pchain bls key diff fix by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1584
+- Cleanup fx interface compliance by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1599
+- Improve metrics error msging by @anusha-ctrl in https://github.com/DioneProtocol/odysseygo/pull/1598
+- Separate health checks by tags by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1579
+- Separate subnet stake connected health and metrics from P-chain by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1358
+- Merkle db iterator by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1533
+- Fix unreadable message errors by @morrisettjohn in https://github.com/DioneProtocol/odysseygo/pull/1585
+- Log unexpected errors during GetValidatorSet by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1592
+- `merkleDB` -- add inner heap type to syncWorkHeap by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1582
+- `sync` -- explain algorithm in readme by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1600
+- Rename license header file to avoid unintended license indexing by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1608
+- `merkledb` and `sync` -- use time based rand seed by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1607
+- add `local-prefixes` setting for `goimports` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1612
+- snow/engine/snowman: instantiate voter after issuer by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1610
+- Update CodeQL to v2 by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1616
+- Remove old networking metric by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1619
+- Fix --http-host flag to support IPv6 by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1620
 
 ### New Contributors
 
-- @marun made their first contribution in https://github.com/ava-labs/avalanchego/pull/1565
-- @meaghanfitzgerald made their first contribution in https://github.com/ava-labs/avalanchego/pull/1570
-- @anusha-ctrl made their first contribution in https://github.com/ava-labs/avalanchego/pull/1598
-- @morrisettjohn made their first contribution in https://github.com/ava-labs/avalanchego/pull/1585
+- @marun made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1565
+- @meaghanfitzgerald made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1570
+- @anusha-ctrl made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1598
+- @morrisettjohn made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1585
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.2...v1.10.3
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.2...v1.10.3
 
-## [v1.10.2](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.2)
+## [v1.10.2](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.2)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
 
 ### APIs
 
@@ -566,58 +566,58 @@ This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/av
 
 ### What's Changed
 
-- use `require` library functions in tests by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1451
-- style nits in vm clients by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1449
-- utils/logging: add "Enabled" method to remove redundant verbo logs by @gyuho in https://github.com/ava-labs/avalanchego/pull/1461
-- ban `require.EqualValues` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1457
-- chains: do not hold write subnetsLock in health checks by @gyuho in https://github.com/ava-labs/avalanchego/pull/1460
-- remove zstd check by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1459
-- use `require.IsType` for type assertions in tests by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1458
-- vms/platformvm/service: nits (preallocate address slice, error msg) by @gyuho in https://github.com/ava-labs/avalanchego/pull/1477
-- ban `require.NotEqualValues` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1470
-- use `require` in `api` and `utils/password` packages by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1471
-- use "golang.org/x/term" as "golang.org/x/crypto/ssh/terminal" is deprecated by @gyuho in https://github.com/ava-labs/avalanchego/pull/1464
-- chains: move "msgChan" closer to the first use (readability) by @gyuho in https://github.com/ava-labs/avalanchego/pull/1484
-- ban function params for `require.ErrorIs` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1486
-- standardize imports by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1466
-- fix license header test by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1492
-- use blank identifier for interface compliance by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1493
-- codec: remove "SetMaxSize" from "Manager", remove unnecessary lock by @gyuho in https://github.com/ava-labs/avalanchego/pull/1481
-- config: disallow "ThrottlerConfig.MaxRecheckDelay" < 1 ms by @gyuho in https://github.com/ava-labs/avalanchego/pull/1435
-- ban `require.Equal` when testing for `0` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1495
-- Clean up MerkleDVB Sync Close lock by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1469
-- MerkleDB Cleanup by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1465
-- Remove comment referencing old IP based tracking by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1509
-- ban usage of `require.Len` when testing for length `0` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1496
-- ban usage of `require.Equal` when testing for length by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1497
-- ban usage of `nil` in require functions by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1498
-- Sized LRU cache by @abi87 in https://github.com/ava-labs/avalanchego/pull/1517
-- engine/snowman: clean up some comments in "bubbleVotes" unit tests by @gyuho in https://github.com/ava-labs/avalanchego/pull/1444
-- snow/networking/sender: add missing verbo check by @gyuho in https://github.com/ava-labs/avalanchego/pull/1504
-- Delete duplicate test var definitions by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1518
-- utils/bag: print generic type for bag elements by @gyuho in https://github.com/ava-labs/avalanchego/pull/1507
-- Fix incorrect test refactor by @abi87 in https://github.com/ava-labs/avalanchego/pull/1526
-- Pchain validators repackaging by @abi87 in https://github.com/ava-labs/avalanchego/pull/1284
-- Config overhaul by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1370
-- rename enabled staking to sybil protection enabled by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1441
-- Fix network compression type flag usage by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1532
-- Deprecate uptimes in pong message by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1362
-- Add CPU cycles and number of disk read/write metrics by pid by @coffeeavax in https://github.com/ava-labs/avalanchego/pull/1334
-- Fetch process resource stats as best-effort by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1543
-- Add serialization tests for transactions added in Banff by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1513
-- Log chain shutdown duration by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1545
-- add interface for MerkleDB by @danlaine in https://github.com/ava-labs/avalanchego/pull/1519
+- use `require` library functions in tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1451
+- style nits in vm clients by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1449
+- utils/logging: add "Enabled" method to remove redundant verbo logs by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1461
+- ban `require.EqualValues` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1457
+- chains: do not hold write subnetsLock in health checks by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1460
+- remove zstd check by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1459
+- use `require.IsType` for type assertions in tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1458
+- vms/platformvm/service: nits (preallocate address slice, error msg) by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1477
+- ban `require.NotEqualValues` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1470
+- use `require` in `api` and `utils/password` packages by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1471
+- use "golang.org/x/term" as "golang.org/x/crypto/ssh/terminal" is deprecated by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1464
+- chains: move "msgChan" closer to the first use (readability) by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1484
+- ban function params for `require.ErrorIs` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1486
+- standardize imports by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1466
+- fix license header test by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1492
+- use blank identifier for interface compliance by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1493
+- codec: remove "SetMaxSize" from "Manager", remove unnecessary lock by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1481
+- config: disallow "ThrottlerConfig.MaxRecheckDelay" < 1 ms by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1435
+- ban `require.Equal` when testing for `0` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1495
+- Clean up MerkleDVB Sync Close lock by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1469
+- MerkleDB Cleanup by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1465
+- Remove comment referencing old IP based tracking by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1509
+- ban usage of `require.Len` when testing for length `0` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1496
+- ban usage of `require.Equal` when testing for length by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1497
+- ban usage of `nil` in require functions by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1498
+- Sized LRU cache by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1517
+- engine/snowman: clean up some comments in "bubbleVotes" unit tests by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1444
+- snow/networking/sender: add missing verbo check by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1504
+- Delete duplicate test var definitions by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1518
+- utils/bag: print generic type for bag elements by @gyuho in https://github.com/DioneProtocol/odysseygo/pull/1507
+- Fix incorrect test refactor by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1526
+- Pchain validators repackaging by @abi87 in https://github.com/DioneProtocol/odysseygo/pull/1284
+- Config overhaul by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1370
+- rename enabled staking to sybil protection enabled by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1441
+- Fix network compression type flag usage by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1532
+- Deprecate uptimes in pong message by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1362
+- Add CPU cycles and number of disk read/write metrics by pid by @coffeeavax in https://github.com/DioneProtocol/odysseygo/pull/1334
+- Fetch process resource stats as best-effort by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1543
+- Add serialization tests for transactions added in Banff by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1513
+- Log chain shutdown duration by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1545
+- add interface for MerkleDB by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1519
 
 ### New Contributors
 
-- @gyuho made their first contribution in https://github.com/ava-labs/avalanchego/pull/1461
-- @coffeeavax made their first contribution in https://github.com/ava-labs/avalanchego/pull/1334
+- @gyuho made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1461
+- @coffeeavax made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1334
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.1...v1.10.2
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.1...v1.10.2
 
-## [v1.10.1](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.1)
+## [v1.10.1](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.1)
 
-This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
+This version is backwards compatible to [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0). It is optional, but encouraged. The supported plugin version is `26`.
 
 ### APIs
 
@@ -648,69 +648,69 @@ This version is backwards compatible to [v1.10.0](https://github.com/ava-labs/av
 
 ### What's Changed
 
-- Add benchmark for gRPC GetValidatorSet by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1326
-- Add checks for database being closed in merkledb; other nits by @danlaine in https://github.com/ava-labs/avalanchego/pull/1333
-- Update linkedhashmap to only Rlock when possible by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1329
-- Remove no-op changes from history results by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1335
-- Cleanup type assertions in the linkedHashmap by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1341
-- Fix racy avm tx access by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1349
-- Update Fuji beacon ips by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1354
-- Remove duplicate TLS verification by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1364
-- Adjust Merkledb Trie invalidation locking by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1355
-- Use require in Avalanche bootstrapping tests by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1344
-- Add Proof size limit to sync client by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1269
-- Add stake priority helpers by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1375
-- add contribution file by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1373
-- Remove max sample value by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1374
-- Prefetch rpcdb iterator batches by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1323
-- Temp fix for flaky Sync Test by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1378
-- Update merkle cache to be FIFO instead of LRU by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1353
-- Improve cost of BLS key serialization for gRPC by @hexfusion in https://github.com/ava-labs/avalanchego/pull/1343
-- [Issue-1368]: Panic in serializedPath.HasPrefix by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1371
-- Add ValidatorsOnly flag to GetStake by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1377
-- Use proto in `x/sync` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1336
-- Update incorrect fuji beacon IPs by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1392
-- Update `api/` error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1393
-- refactor concurrent work limiting in sync in `x/sync` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1347
-- Remove check for impossible condition in `x/sync` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1348
-- Improve `codec/` error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1396
-- Improve `config/` error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1397
-- Improve `genesis/` error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1398
-- Improve various error handling locations by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1399
-- Improve `utils/` error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1400
-- Improve consensus error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1401
-- Improve secp256k1fx + merkledb error handling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1402
-- Ban usage of require.Error by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1346
-- Remove slice capacity hint in `x/sync` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1350
-- Simplify `syncWorkHeap` less function in `x/sync` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1351
-- Replace `switch` with `txs.Visitor` in X chain signer by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1404
-- Include IDs in json marshalling by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1408
-- Adjust find next key logic in x/Sync by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1331
-- Remove bitmask from writeMsgLen by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1342
-- Require `txID`s in PeerList messages by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1411
-- Allow dependent tx issuance over the wallet API by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1413
-- Add support for proto `message.Tx` decoding by @danlaine in https://github.com/ava-labs/avalanchego/pull/1332
-- Remove avalanche bootstrapping -> avalanche consensus transition by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1345
-- Benchmark get canonical validator set by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1417
-- Simplify IP status calculation by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1421
-- Honor AllowPrivateIPs config by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1422
-- Update BLS signature ordering to avoid public key compression by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1416
-- Remove DAG based consensus by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1359
-- Remove IssueStopVertex message by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1419
-- Fix msgHandlingTime by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1432
-- Change ChangeProofs to only have one list of key/value change instead of key/values and deleted by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1385
-- Update AMI generation workflow by @charlie-ava in https://github.com/ava-labs/avalanchego/pull/1289
-- Support `height` as a string in `avm.getBlockByHeight` by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1437
-- Defer Snowman Bootstrapper parser initialization to Start by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1442
-- Cleanup proposervm ancestors packing @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1446
+- Add benchmark for gRPC GetValidatorSet by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1326
+- Add checks for database being closed in merkledb; other nits by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1333
+- Update linkedhashmap to only Rlock when possible by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1329
+- Remove no-op changes from history results by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1335
+- Cleanup type assertions in the linkedHashmap by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1341
+- Fix racy avm tx access by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1349
+- Update Fuji beacon ips by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1354
+- Remove duplicate TLS verification by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1364
+- Adjust Merkledb Trie invalidation locking by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1355
+- Use require in Avalanche bootstrapping tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1344
+- Add Proof size limit to sync client by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1269
+- Add stake priority helpers by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1375
+- add contribution file by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1373
+- Remove max sample value by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1374
+- Prefetch rpcdb iterator batches by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1323
+- Temp fix for flaky Sync Test by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1378
+- Update merkle cache to be FIFO instead of LRU by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1353
+- Improve cost of BLS key serialization for gRPC by @hexfusion in https://github.com/DioneProtocol/odysseygo/pull/1343
+- [Issue-1368]: Panic in serializedPath.HasPrefix by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1371
+- Add ValidatorsOnly flag to GetStake by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1377
+- Use proto in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1336
+- Update incorrect fuji beacon IPs by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1392
+- Update `api/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1393
+- refactor concurrent work limiting in sync in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1347
+- Remove check for impossible condition in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1348
+- Improve `codec/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1396
+- Improve `config/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1397
+- Improve `genesis/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1398
+- Improve various error handling locations by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1399
+- Improve `utils/` error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1400
+- Improve consensus error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1401
+- Improve secp256k1fx + merkledb error handling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1402
+- Ban usage of require.Error by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1346
+- Remove slice capacity hint in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1350
+- Simplify `syncWorkHeap` less function in `x/sync` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1351
+- Replace `switch` with `txs.Visitor` in X chain signer by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1404
+- Include IDs in json marshalling by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1408
+- Adjust find next key logic in x/Sync by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1331
+- Remove bitmask from writeMsgLen by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1342
+- Require `txID`s in PeerList messages by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1411
+- Allow dependent tx issuance over the wallet API by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1413
+- Add support for proto `message.Tx` decoding by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1332
+- Remove avalanche bootstrapping -> avalanche consensus transition by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1345
+- Benchmark get canonical validator set by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1417
+- Simplify IP status calculation by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1421
+- Honor AllowPrivateIPs config by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1422
+- Update BLS signature ordering to avoid public key compression by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1416
+- Remove DAG based consensus by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1359
+- Remove IssueStopVertex message by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1419
+- Fix msgHandlingTime by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1432
+- Change ChangeProofs to only have one list of key/value change instead of key/values and deleted by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1385
+- Update AMI generation workflow by @charlie-ava in https://github.com/DioneProtocol/odysseygo/pull/1289
+- Support `height` as a string in `avm.getBlockByHeight` by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1437
+- Defer Snowman Bootstrapper parser initialization to Start by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1442
+- Cleanup proposervm ancestors packing @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1446
 
 ### New Contributors
 
-- @hexfusion made their first contribution in https://github.com/ava-labs/avalanchego/pull/1326
+- @hexfusion made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1326
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.10.0...v1.10.1
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.10.0...v1.10.1
 
-## [v1.10.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.10.0)
+## [v1.10.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.10.0)
 
 [This upgrade](https://medium.com/avalancheavax/cortina-x-chain-linearization-a1d9305553f6) linearizes the X-chain, introduces delegation batching to the P-chain, and increases the maximum block size on the C-chain.
 
@@ -722,66 +722,66 @@ The supported plugin version is `25`.
 
 ### What's Changed
 
-- Add CODEOWNERS for the x/ package by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1260
-- Feature Spec Template by @richardpringle in https://github.com/ava-labs/avalanchego/pull/1258
-- Standardize CI triggers by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1265
-- special case no sent/received message in network health check by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1263
-- Fix bug template by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1268
-- Replace `flags` usage with `pflags` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1270
-- Fixed grammatical errors in `README.md` by @krakxn in https://github.com/ava-labs/avalanchego/pull/1102
-- Add tests for race conditions in merkledb by @kyl27 in https://github.com/ava-labs/avalanchego/pull/1256
-- Add P-chain indexer API example by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1271
-- use `require` in `snow/choices` tests by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1279
-- use `require` in `utils/wrappers` tests by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1280
-- add support for tracking delegatee rewards to validator metadata by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1273
-- defer delegatee rewards until end of validator staking period by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1262
-- Initialize UptimeCalculator in TestPeer by @joshua-kim in https://github.com/ava-labs/avalanchego/pull/1283
-- Add Avalanche liveness health checks by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1287
-- Skip AMI generation with Fuji tags by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1288
-- Use `maps.Equal` in `set.Equals` by @danlaine in https://github.com/ava-labs/avalanchego/pull/1290
-- return accrued delegator rewards in `GetCurrentValidators` by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1291
-- Add zstd compression by @danlaine in https://github.com/ava-labs/avalanchego/pull/1278
-- implement `txs.Visitor` in X chain wallet by @dhrubabasu in https://github.com/ava-labs/avalanchego/pull/1299
-- Parallelize gzip compression by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1293
-- Add zip bomb tests by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1300
-- Gossip Avalanche frontier after the linearization by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1303
-- Add fine grained metrics+logging for handling, processing, and grab l… by @aaronbuchwald in https://github.com/ava-labs/avalanchego/pull/1301
-- Persist stateless block in AVM state by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1305
-- Initialize FxID fields in GetBlock and GetBlockByHeight by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1306
-- Filterable Health Tags by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1304
-- increase health await timeout by @ceyonur in https://github.com/ava-labs/avalanchego/pull/1317
-- Expose GetEngineManager from the chain Handler by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1316
-- Add BLS benchmarks by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1318
-- Encode codec version in merkledb by @danlaine in https://github.com/ava-labs/avalanchego/pull/1313
-- Expose consensus-app-concurrency by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1322
-- Adjust Logic In Merkle DB History by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1310
-- Fix Concurrency Bug In CommitToParent by @dboehm-avalabs in https://github.com/ava-labs/avalanchego/pull/1320
-- Cleanup goroutines on health.Stop by @StephenButtolph in https://github.com/ava-labs/avalanchego/pull/1325
+- Add CODEOWNERS for the x/ package by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1260
+- Feature Spec Template by @richardpringle in https://github.com/DioneProtocol/odysseygo/pull/1258
+- Standardize CI triggers by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1265
+- special case no sent/received message in network health check by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1263
+- Fix bug template by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1268
+- Replace `flags` usage with `pflags` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1270
+- Fixed grammatical errors in `README.md` by @krakxn in https://github.com/DioneProtocol/odysseygo/pull/1102
+- Add tests for race conditions in merkledb by @kyl27 in https://github.com/DioneProtocol/odysseygo/pull/1256
+- Add P-chain indexer API example by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1271
+- use `require` in `snow/choices` tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1279
+- use `require` in `utils/wrappers` tests by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1280
+- add support for tracking delegatee rewards to validator metadata by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1273
+- defer delegatee rewards until end of validator staking period by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1262
+- Initialize UptimeCalculator in TestPeer by @joshua-kim in https://github.com/DioneProtocol/odysseygo/pull/1283
+- Add Avalanche liveness health checks by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1287
+- Skip AMI generation with Fuji tags by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1288
+- Use `maps.Equal` in `set.Equals` by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1290
+- return accrued delegator rewards in `GetCurrentValidators` by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1291
+- Add zstd compression by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1278
+- implement `txs.Visitor` in X chain wallet by @dhrubabasu in https://github.com/DioneProtocol/odysseygo/pull/1299
+- Parallelize gzip compression by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1293
+- Add zip bomb tests by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1300
+- Gossip Avalanche frontier after the linearization by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1303
+- Add fine grained metrics+logging for handling, processing, and grab l… by @aaronbuchwald in https://github.com/DioneProtocol/odysseygo/pull/1301
+- Persist stateless block in AVM state by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1305
+- Initialize FxID fields in GetBlock and GetBlockByHeight by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1306
+- Filterable Health Tags by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1304
+- increase health await timeout by @ceyonur in https://github.com/DioneProtocol/odysseygo/pull/1317
+- Expose GetEngineManager from the chain Handler by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1316
+- Add BLS benchmarks by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1318
+- Encode codec version in merkledb by @danlaine in https://github.com/DioneProtocol/odysseygo/pull/1313
+- Expose consensus-app-concurrency by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1322
+- Adjust Logic In Merkle DB History by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1310
+- Fix Concurrency Bug In CommitToParent by @dboehm-avalabs in https://github.com/DioneProtocol/odysseygo/pull/1320
+- Cleanup goroutines on health.Stop by @StephenButtolph in https://github.com/DioneProtocol/odysseygo/pull/1325
 
 ### New Contributors
 
-- @richardpringle made their first contribution in https://github.com/ava-labs/avalanchego/pull/1258
-- @ceyonur made their first contribution in https://github.com/ava-labs/avalanchego/pull/1263
-- @krakxn made their first contribution in https://github.com/ava-labs/avalanchego/pull/1102
-- @kyl27 made their first contribution in https://github.com/ava-labs/avalanchego/pull/1256
-- @dhrubabasu made their first contribution in https://github.com/ava-labs/avalanchego/pull/1279
-- @joshua-kim made their first contribution in https://github.com/ava-labs/avalanchego/pull/1283
-- @dboehm-avalabs made their first contribution in https://github.com/ava-labs/avalanchego/pull/1310
+- @richardpringle made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1258
+- @ceyonur made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1263
+- @krakxn made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1102
+- @kyl27 made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1256
+- @dhrubabasu made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1279
+- @joshua-kim made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1283
+- @dboehm-avalabs made their first contribution in https://github.com/DioneProtocol/odysseygo/pull/1310
 
-**Full Changelog**: https://github.com/ava-labs/avalanchego/compare/v1.9.16...v1.10.0
+**Full Changelog**: https://github.com/DioneProtocol/odysseygo/compare/v1.9.16...v1.10.0
 
-## [v1.9.16](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.16)
+## [v1.9.16](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.16)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 - Removed unnecessary repoll after rejecting vertices
 - Improved snowstorm lookup error handling
 - Removed rejected vertices from the Avalanche frontier more aggressively
 - Reduced default health check values for processing decisions
 
-## [v1.9.15](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.15)
+## [v1.9.15](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.15)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 - Fixed `x/merkledb.ChangeProof#getLargestKey` to correctly handle no changes
 - Added test for `avm/txs/executor.SemanticVerifier#verifyFxUsage` with multiple valid fxs
@@ -790,17 +790,17 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Reduced the default value of `--snow-optimal-processing` from `50` to `10`
 - Updated the year in the license header
 
-## [v1.9.14](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.14)
+## [v1.9.14](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.14)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
-## [v1.9.13](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.13)
+## [v1.9.13](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.13)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
-## [v1.9.12](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.12)
+## [v1.9.12](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.12)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 ### Networking
 
@@ -937,9 +937,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
   - `platform.getRewardUTXOs`
 - Deprecated the `stake` field in the `platform.getTotalStake` response in favor of `weight`
 
-## [v1.9.11](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.11)
+## [v1.9.11](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.11)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 ### Plugins
 
@@ -957,9 +957,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Removed reliance on premature root calculations for `merkledb.trieView` validity tracking
 - Updated `x/merkledb/README.md`
 
-## [v1.9.10](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.10)
+## [v1.9.10](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.10)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `24`.
 
 ### MerkleDB
 
@@ -994,9 +994,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Replaced `snow.Context` in `Factory.New` with `logging.Logger`
 - Renamed `set.Bits#Len` to `BitLen` and `set.Bits#HammingWeight` to `Len` to align with `set.Bits64`
 
-## [v1.9.9](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.9)
+## [v1.9.9](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.9)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `23`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `23`.
 
 **Note: The `--whitelisted-subnets` flag was deprecated in `v1.9.6`. This is the last release in which it will be supported. Use `--track-subnets` instead.**
 
@@ -1059,9 +1059,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Simplified the `utxo.Spender` interface
 - Removed unused field `common.Config#Validators`
 
-## [v1.9.8](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.8)
+## [v1.9.8](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.8)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
 
 ### Networking
 
@@ -1114,17 +1114,17 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Converted cache implementations to use generics
 - Added optional cache eviction callback
 
-## [v1.9.7](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.7)
+## [v1.9.7](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.7)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
 
 ### Fixes
 
 - Fixed subnet validator lookup regression
 
-## [v1.9.6](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.6)
+## [v1.9.6](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.6)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `22`.
 
 ### Consensus
 
@@ -1175,9 +1175,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Added `SetLevel` to the `Logger` interface
 - Updated `auth` API to use the new `jwt` standard
 
-## [v1.9.5](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.5)
+## [v1.9.5](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.5)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `21`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `21`.
 
 ### Subnet Messaging
 
@@ -1213,9 +1213,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Moved bit sets from the `ids` package to the `set` package
 - Added more wallet examples
 
-## [v1.9.4](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.4)
+## [v1.9.4](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.4)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `20`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `20`.
 
 **This version modifies the db format. The db format is compatible with v1.9.3, but not v1.9.2 or earlier. After running a node with v1.9.4 attempting to run a node with a version earlier than v1.9.3 may report a fatal error on startup.**
 
@@ -1286,9 +1286,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Converted all sorting to utilize generics
 - Converted all set management to utilize generics
 
-## [v1.9.3](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.3)
+## [v1.9.3](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.3)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `19`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `19`.
 
 ### Tracing
 
@@ -1361,9 +1361,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Increased validator set cache size
 - Added `avax.UTXOIDFromString` helper for managing `UTXOID`s more easily
 
-## [v1.9.2](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.2)
+## [v1.9.2](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.2)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `19`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `19`.
 
 ### Coreth
 
@@ -1398,9 +1398,9 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Simplified the `validators.Set` implementation
 - Added a warning if synchronous consensus messages take too long
 
-## [v1.9.1](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.1)
+## [v1.9.1](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.1)
 
-This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `18`.
+This version is backwards compatible to [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0). It is optional, but encouraged. The supported plugin version is `18`.
 
 ### Features
 
@@ -1436,7 +1436,7 @@ This version is backwards compatible to [v1.9.0](https://github.com/ava-labs/ava
 - Converted empty struct usage to `nil` for interface compliance checks
 - Added CODEOWNERs to own first rounds of PR review
 
-## [v1.9.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.9.0)
+## [v1.9.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.9.0)
 
 This upgrade adds support for creating Proof-of-Stake Subnets.
 
@@ -1473,9 +1473,9 @@ The supported plugin version is `17`.
 - Improved isolation and execution of the E2E tests
 - Updated the linked hashmap implementation to use generics
 
-## [v1.8.6](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.6)
+## [v1.8.6](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.6)
 
-This version is backwards compatible to [v1.8.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.0). It is optional, but encouraged. The supported plugin version is `16`.
+This version is backwards compatible to [v1.8.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.0). It is optional, but encouraged. The supported plugin version is `16`.
 
 ### BLS
 
@@ -1505,7 +1505,7 @@ The default value of `--staking-signer-key-file` is `~/.avalanchego/staking/sign
 
 - Added failure reason to bad block API
 
-## [v1.8.5](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.5)
+## [v1.8.5](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.5)
 
 Please upgrade your node as soon as possible.
 
@@ -1519,7 +1519,7 @@ The supported plugin version is `16`.
 
 - Removed check for Apricot Phase6 incompatible fork to unblock nodes that did not upgrade ahead of the activation time
 
-## [v1.8.4](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.4)
+## [v1.8.4](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.4)
 
 Please upgrade your node as soon as possible.
 
@@ -1535,7 +1535,7 @@ The supported plugin version is `16`.
 - Reduced the log level of `BAD BLOCK`s from `ERROR` to `DEBUG`
 - Deprecated Native Asset Call
 
-## [v1.8.2](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.2)
+## [v1.8.2](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.2)
 
 Please upgrade your node as soon as possible.
 
@@ -1549,7 +1549,7 @@ The supported plugin version is `16`.
 - Increased the log level of `BAD BLOCK`s from `DEBUG` to `ERROR`
 - Fixed typo in Chain Config `String` function
 
-## [v1.8.1](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.1)
+## [v1.8.1](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.1)
 
 Please upgrade your node as soon as possible.
 
@@ -1566,7 +1566,7 @@ The supported plugin version is `16`.
 - Reduced the log level of `BAD BLOCK`s from `ERROR` to `DEBUG`
 - Added Apricot Phase6 to Chain Config `String` function
 
-## [v1.8.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.8.0)
+## [v1.8.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.8.0)
 
 This is a mandatory security upgrade. Please upgrade your node **as soon as possible.**
 
@@ -1664,9 +1664,9 @@ The supported plugin version is `16`.
 - Migrated to go-ethereum v1.10.23
 - Added API to fetch Chain Config
 
-## [v1.7.18](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.18)
+## [v1.7.18](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.18)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
 
 ### Fixes
 
@@ -1702,9 +1702,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Added retries to windows CI installations
 - Removed useless ID aliasing during chain creation
 
-## [v1.7.17](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.17)
+## [v1.7.17](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.17)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
 
 ### VMs
 
@@ -1738,17 +1738,17 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Improved Snowman++ oracle block verification error messages
 - Removed deprecated or unused scripts
 
-## [v1.7.16](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.16)
+## [v1.7.16](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.16)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
 
 ### LevelDB
 
 - Fix rapid disk growth by manually specifying the maximum manifest file size
 
-## [v1.7.15](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.15)
+## [v1.7.15](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.15)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged. The supported plugin version is `15`.
 
 ### PlatformVM
 
@@ -1783,9 +1783,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Cleaned up various dead parameters
 - Improved various tests
 
-## [v1.7.14](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.14)
+## [v1.7.14](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.14)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### APIs
 
@@ -1827,9 +1827,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Improved various comments and documentation
 - Standardized primary network handling across subnet maps
 
-## [v1.7.13](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.13)
+## [v1.7.13](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.13)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### State Sync
 
@@ -1853,9 +1853,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Deprecated `--dynamic-update-duration` and `--dynamic-public-ip` CLI flags
 - Added `--public-ip-resolution-frequency` and `--public-ip-resolution-service` to replace `--dynamic-update-duration` and `--dynamic-public-ip`, respectively
 
-## [v1.7.12](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.12)
+## [v1.7.12](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.12)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### State Sync
 
@@ -1896,9 +1896,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Standardized json imports
 - Added vm factory interface checks
 
-## [v1.7.11](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.11)
+## [v1.7.11](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.11)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 **The first startup of the C-Chain will cause an increase in CPU and IO usage due to an index update. This index update runs in the background and does not impact restart time.**
 
@@ -1983,9 +1983,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Updated issue template
 - Documented additional `snowman.Block` invariants
 
-## [v1.7.10](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.10)
+## [v1.7.10](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.10)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Networking
 
@@ -2036,9 +2036,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Simplified consensus engine `Shutdown` notification dispatching.
 - Removed `Sleep` call in the inbound connection throttler.
 
-## [v1.7.9](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.9)
+## [v1.7.9](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.9)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Updates
 
@@ -2048,9 +2048,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Removed dead code from network packer.
 - Improved logging of invalid hash length errors.
 
-## [v1.7.8](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.8)
+## [v1.7.8](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.8)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Networking
 
@@ -2079,9 +2079,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Optimized various queue removals for improved memory freeing.
 - Added a basic X-chain E2E usage test to the new testing framework.
 
-## [v1.7.7](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.7)
+## [v1.7.7](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.7)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Networking
 
@@ -2128,9 +2128,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Resolved the default log directory on initialization to avoid additional error handling.
 - Added support to the chain state module to specify an arbitrary new accepted block.
 
-## [v1.7.6](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.6)
+## [v1.7.6](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.6)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Consensus
 
@@ -2163,9 +2163,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Extended chain shutdown timeout.
 - Performed various cleanup passes.
 
-## [v1.7.5](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.5)
+## [v1.7.5](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.5)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Consensus
 
@@ -2194,9 +2194,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Fixed bug in BLOCKHASH opcode during traceBlock.
 - Fixed bug in handling updated chain config on startup.
 
-## [v1.7.4](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.4)
+## [v1.7.4](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.4)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 **The first startup of the C-Chain will take a few minutes longer due to an index update.**
 
@@ -2248,9 +2248,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Separated health checks into `readiness`, `healthiness`, and `liveness` checks to support more fine-grained monitoring.
 - Refactored API client utilities to use a `Context` rather than an explicit timeout.
 
-## [v1.7.3](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.3)
+## [v1.7.3](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.3)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Consensus
 
@@ -2278,9 +2278,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 - Fixed acceptance broadcasting over IPC.
 - Fixed 32-bit architecture builds for AvalancheGo (not Coreth).
 
-## [v1.7.2](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.2)
+## [v1.7.2](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.2)
 
-This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). It is optional, but encouraged.
 
 ### Coreth
 
@@ -2310,9 +2310,9 @@ This version is backwards compatible to [v1.7.0](https://github.com/ava-labs/ava
 
 - Fixed panic bug in logging library when importing from external projects.
 
-## [v1.7.1](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.1)
+## [v1.7.1](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.1)
 
-This update is backwards compatible with [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0). Please see the expected update times in the v1.7.0 release.
+This update is backwards compatible with [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0). Please see the expected update times in the v1.7.0 release.
 
 ### Coreth
 
@@ -2322,7 +2322,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/ava-labs/av
 
 - Fixed vote bubbling for unverified block chits.
 
-## [v1.7.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.7.0)
+## [v1.7.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.7.0)
 
 This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the P-chain and the C-chain.
 
@@ -2358,9 +2358,9 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 
 - Removed `--snow-epoch-first-transition` and `snow-epoch-duration` as command line arguments.
 
-## [v1.6.5](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.5)
+## [v1.6.5](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.5)
 
-This version is backwards compatible to [v1.6.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.6.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.0). It is optional, but encouraged.
 
 ### Bootstrapping
 
@@ -2381,9 +2381,9 @@ This version is backwards compatible to [v1.6.0](https://github.com/ava-labs/ava
 - Added reported uptime to pong messages to be able to better track a local node's uptime as viewed by the network.
 - Refactored request timeout registry to avoid a potential race condition.
 
-## [v1.6.4](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.4)
+## [v1.6.4](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.4)
 
-This version is backwards compatible to [v1.6.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.6.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.0). It is optional, but encouraged.
 
 ### Config
 
@@ -2425,9 +2425,9 @@ This version is backwards compatible to [v1.6.0](https://github.com/ava-labs/ava
 
 ---
 
-## [v1.6.3](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.3)
+## [v1.6.3](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.3)
 
-This version is backwards compatible to [v1.6.0](https://github.com/ava-labs/avalanchego/releases/tag/v1.6.0). It is optional, but encouraged.
+This version is backwards compatible to [v1.6.0](https://github.com/DioneProtocol/odysseygo/releases/tag/v1.6.0). It is optional, but encouraged.
 
 ### Config Options
 

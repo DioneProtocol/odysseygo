@@ -2,7 +2,7 @@
 
 Avalanche Warp Messaging (AWM) provides a primitive for cross-subnet communication on the Avalanche Network.
 
-The Avalanche P-Chain provides an index of every Subnet's validator set on the Avalanche Network, including the BLS public key of each validator (as of the [Banff Upgrade](https://github.com/ava-labs/avalanchego/releases/v1.9.0)). AWM utilizes the weighted validator sets stored on the P-Chain to build a cross-subnet communication protocol between any two Subnets on the Avalanche Network.
+The Avalanche P-Chain provides an index of every Subnet's validator set on the Avalanche Network, including the BLS public key of each validator (as of the [Banff Upgrade](https://github.com/DioneProtocol/odysseygo/releases/v1.9.0)). AWM utilizes the weighted validator sets stored on the P-Chain to build a cross-subnet communication protocol between any two Subnets on the Avalanche Network.
 
 Any Virtual Machine (VM) on Avalanche can integrate Avalanche Warp Messaging to send and receive messages across Avalanche Subnets.
 

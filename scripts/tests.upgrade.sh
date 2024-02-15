@@ -26,13 +26,13 @@ fi
 
 #################################
 # download avalanchego
-# https://github.com/ava-labs/avalanchego/releases
+# https://github.com/DioneProtocol/odysseygo/releases
 GOARCH=$(go env GOARCH)
 GOOS=$(go env GOOS)
-DOWNLOAD_URL=https://github.com/ava-labs/avalanchego/releases/download/v${VERSION}/avalanchego-linux-${GOARCH}-v${VERSION}.tar.gz
+DOWNLOAD_URL=https://github.com/DioneProtocol/odysseygo/releases/download/v${VERSION}/avalanchego-linux-${GOARCH}-v${VERSION}.tar.gz
 DOWNLOAD_PATH=/tmp/avalanchego.tar.gz
 if [[ ${GOOS} == "darwin" ]]; then
-  DOWNLOAD_URL=https://github.com/ava-labs/avalanchego/releases/download/v${VERSION}/avalanchego-macos-v${VERSION}.zip
+  DOWNLOAD_URL=https://github.com/DioneProtocol/odysseygo/releases/download/v${VERSION}/avalanchego-macos-v${VERSION}.zip
   DOWNLOAD_PATH=/tmp/avalanchego.zip
 fi
 

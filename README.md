@@ -81,7 +81,7 @@ sudo apt install avalanchego
 
 ### Binary Install
 
-Download the [latest build](https://github.com/ava-labs/avalanchego/releases/latest) for your operating system and architecture.
+Download the [latest build](https://github.com/DioneProtocol/odysseygo/releases/latest) for your operating system and architecture.
 
 The Avalanche binary to be executed is named `avalanchego`.
 
@@ -245,4 +245,4 @@ To officially support a new platform, one must satisfy the following requirement
 
 **We and our community welcome responsible disclosures.**
 
-Please refer to our [Security Policy](SECURITY.md) and [Security Advisories](https://github.com/ava-labs/avalanchego/security/advisories).
+Please refer to our [Security Policy](SECURITY.md) and [Security Advisories](https://github.com/DioneProtocol/odysseygo/security/advisories).

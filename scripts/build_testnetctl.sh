@@ -9,6 +9,6 @@ source "$AVALANCHE_PATH"/scripts/constants.sh
 
 echo "Building testnetctl..."
 go build -ldflags\
-   "-X github.com/ava-labs/avalanchego/version.GitCommit=$git_commit $static_ld_flags"\
+   "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit $static_ld_flags"\
    -o "$AVALANCHE_PATH/build/testnetctl"\
    "$AVALANCHE_PATH/tests/fixture/testnet/cmd/"*.go
