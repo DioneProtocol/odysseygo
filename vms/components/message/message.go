@@ -9,9 +9,9 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/ava-labs/avalanchego/ids"
+	"github.com/DioneProtocol/odysseygo/ids"
 
-	pb "github.com/ava-labs/avalanchego/proto/pb/message"
+	pb "github.com/DioneProtocol/odysseygo/proto/pb/message"
 )
 
 var (

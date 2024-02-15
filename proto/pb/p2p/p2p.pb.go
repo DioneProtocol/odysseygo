@@ -674,7 +674,7 @@ func (x *Pong) GetSubnetUptimes() []*SubnetUptime {
 // For instance, the network ID must be matched and timestamp should be in-sync.
 // Otherwise, the remote peer closes the connection.
 // ref. "avalanchego/network/peer#handleVersion"
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/network#Network "Dispatch"
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/network#Network "Dispatch"
 type Version struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -778,7 +778,7 @@ func (x *Version) GetTrackedSubnets() [][]byte {
 	return nil
 }
 
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/utils/ips#ClaimedIPPort
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/utils/ips#ClaimedIPPort
 type ClaimedIpPort struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

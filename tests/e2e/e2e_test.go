@@ -17,20 +17,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ava-labs/avalanchego/tests"
-	"github.com/ava-labs/avalanchego/tests/e2e"
-	"github.com/ava-labs/avalanchego/tests/fixture"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet"
-	"github.com/ava-labs/avalanchego/tests/fixture/testnet/local"
+	"github.com/DioneProtocol/odysseygo/tests"
+	"github.com/DioneProtocol/odysseygo/tests/e2e"
+	"github.com/DioneProtocol/odysseygo/tests/fixture"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet"
+	"github.com/DioneProtocol/odysseygo/tests/fixture/testnet/local"
 
 	// ensure test packages are scanned by ginkgo
-	_ "github.com/ava-labs/avalanchego/tests/e2e/banff"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/c"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/faultinjection"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/p"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/static-handlers"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/x"
-	_ "github.com/ava-labs/avalanchego/tests/e2e/x/transfer"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/banff"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/c"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/faultinjection"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/p"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/static-handlers"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x"
+	_ "github.com/DioneProtocol/odysseygo/tests/e2e/x/transfer"
 )
 
 func TestE2E(t *testing.T) {

@@ -10,7 +10,8 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/ava-labs/avalanchego/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"go.uber.org/zap"
 )
 
 const DefaultFDLimit = 32 * 1024
