@@ -160,6 +160,8 @@ type Wallet interface {
 	//   consumed from the reward pool per year.
 	// - [minValidatorStake] is the minimum amount of funds required to become a
 	//   validator.
+	// - [maxValidatorStake] is the maximum amount of funds a single validator
+	//   can be allocated, including delegated funds.
 	// - [minStakeDuration] is the minimum number of seconds a staker can stake
 	//   for.
 	// - [maxStakeDuration] is the maximum number of seconds a staker can stake
@@ -179,6 +181,7 @@ type Wallet interface {
 		minConsumptionRate uint64,
 		maxConsumptionRate uint64,
 		minValidatorStake uint64,
+		maxValidatorStake uint64,
 		minStakeDuration time.Duration,
 		maxStakeDuration time.Duration,
 		minDelegationFee uint32,
@@ -387,6 +390,7 @@ func (w *wallet) IssueTransformSubnetTx(
 	minConsumptionRate uint64,
 	maxConsumptionRate uint64,
 	minValidatorStake uint64,
+	maxValidatorStake uint64,
 	minStakeDuration time.Duration,
 	maxStakeDuration time.Duration,
 	minDelegationFee uint32,
@@ -403,6 +407,7 @@ func (w *wallet) IssueTransformSubnetTx(
 		minConsumptionRate,
 		maxConsumptionRate,
 		minValidatorStake,
+		maxValidatorStake,
 		minStakeDuration,
 		maxStakeDuration,
 		minDelegationFee,

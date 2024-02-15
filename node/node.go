@@ -901,6 +901,7 @@ func (n *Node) initVMs() error {
 				AddSubnetDelegatorFee:         n.Config.AddSubnetDelegatorFee,
 				UptimePercentage:              n.Config.UptimeRequirement,
 				MinValidatorStake:             n.Config.MinValidatorStake,
+				MaxValidatorStake:             n.Config.MaxValidatorStake,
 				MinDelegatorStake:             n.Config.MinDelegatorStake,
 				MinDelegationFee:              n.Config.MinDelegationFee,
 				MinStakeDuration:              n.Config.MinStakeDuration,
