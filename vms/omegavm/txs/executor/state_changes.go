@@ -72,8 +72,8 @@ type stateChanges struct {
 	currentValidatorsToRemove []*state.Staker
 	stakeSyncTimestamp        time.Time
 	accumulatedMintRate       *big.Int
-	lastAccumulatedFee        *big.Int
 	feePerWeightStored        *big.Int
+	lastAccumulatedFee        uint64
 }
 
 func (s *stateChanges) Apply(stateDiff state.Diff) {
@@ -98,11 +98,11 @@ func (s *stateChanges) Apply(stateDiff state.Diff) {
 	if s.stakeSyncTimestamp.Compare(time.Time{}) != 0 {
 		stateDiff.SetStakeSyncTimestamp(s.stakeSyncTimestamp)
 	}
+	if s.lastAccumulatedFee != 0 {
+		stateDiff.SetLastAccumulatedFee(s.lastAccumulatedFee)
+	}
 	if s.accumulatedMintRate != nil {
 		stateDiff.SetStakerAccumulatedMintRate(s.accumulatedMintRate)
-	}
-	if s.lastAccumulatedFee != nil {
-		stateDiff.SetLastAccumulatedFee(s.lastAccumulatedFee)
 	}
 	if s.feePerWeightStored != nil {
 		stateDiff.SetFeePerWeightStored(s.feePerWeightStored)
@@ -175,7 +175,7 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 		return err
 	}
 
-	if lastAccumulatedFee.Cmp(curAccumFee) == 0 {
+	if lastAccumulatedFee == curAccumFee {
 		return nil
 	}
 
@@ -188,10 +188,10 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 		return nil
 	}
 
+	accumFeeDiff := curAccumFee - lastAccumulatedFee
 	bigTotalWeight := new(big.Int).SetUint64(totalWeight)
-	accumFeeDiff := new(big.Int).Sub(curAccumFee, lastAccumulatedFee)
 
-	feePerWeightIncrement := new(big.Int).Set(accumFeeDiff)
+	feePerWeightIncrement := new(big.Int).SetUint64(accumFeeDiff)
 	feePerWeightIncrement.Lsh(feePerWeightIncrement, reward.BitShift)
 	feePerWeightIncrement.Div(feePerWeightIncrement, bigTotalWeight)
 

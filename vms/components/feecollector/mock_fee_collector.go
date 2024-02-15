@@ -8,7 +8,6 @@
 package feecollector
 
 import (
-	big "math/big"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -37,43 +36,12 @@ func (m *MockFeeCollector) EXPECT() *MockFeeCollectorMockRecorder {
 	return m.recorder
 }
 
-// AddDChainValue mocks base method.
-func (m *MockFeeCollector) AddDChainValue(arg0 *big.Int) (*big.Int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddDChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AddDChainValue indicates an expected call of AddDChainValue.
-func (mr *MockFeeCollectorMockRecorder) AddDChainValue(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).AddDChainValue), arg0)
-}
-
-// AddOChainValue mocks base method.
-func (m *MockFeeCollector) AddOChainValue(arg0 *big.Int) (*big.Int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AddOChainValue indicates an expected call of AddOChainValue.
-func (mr *MockFeeCollectorMockRecorder) AddOChainValue(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOChainValue", reflect.TypeOf((*MockFeeCollector)(nil).AddOChainValue), arg0)
-}
-
 // AddAChainValue mocks base method.
-func (m *MockFeeCollector) AddAChainValue(arg0 *big.Int) (*big.Int, error) {
+func (m *MockFeeCollector) AddAChainValue(arg0 uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddAChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // AddAChainValue indicates an expected call of AddAChainValue.
@@ -82,39 +50,25 @@ func (mr *MockFeeCollectorMockRecorder) AddAChainValue(arg0 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddAChainValue", reflect.TypeOf((*MockFeeCollector)(nil).AddAChainValue), arg0)
 }
 
-// GetDChainValue mocks base method.
-func (m *MockFeeCollector) GetDChainValue() *big.Int {
+// AddDChainValue mocks base method.
+func (m *MockFeeCollector) AddDChainValue(arg0 uint64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDChainValue")
-	ret0, _ := ret[0].(*big.Int)
+	ret := m.ctrl.Call(m, "AddDChainValue", arg0)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// GetDChainValue indicates an expected call of GetDChainValue.
-func (mr *MockFeeCollectorMockRecorder) GetDChainValue() *gomock.Call {
+// AddDChainValue indicates an expected call of AddDChainValue.
+func (mr *MockFeeCollectorMockRecorder) AddDChainValue(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).GetDChainValue))
-}
-
-// GetOChainValue mocks base method.
-func (m *MockFeeCollector) GetOChainValue() *big.Int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOChainValue")
-	ret0, _ := ret[0].(*big.Int)
-	return ret0
-}
-
-// GetOChainValue indicates an expected call of GetOChainValue.
-func (mr *MockFeeCollectorMockRecorder) GetOChainValue() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOChainValue", reflect.TypeOf((*MockFeeCollector)(nil).GetOChainValue))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).AddDChainValue), arg0)
 }
 
 // GetAChainValue mocks base method.
-func (m *MockFeeCollector) GetAChainValue() *big.Int {
+func (m *MockFeeCollector) GetAChainValue() uint64 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAChainValue")
-	ret0, _ := ret[0].(*big.Int)
+	ret0, _ := ret[0].(uint64)
 	return ret0
 }
 
@@ -124,47 +78,44 @@ func (mr *MockFeeCollectorMockRecorder) GetAChainValue() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAChainValue", reflect.TypeOf((*MockFeeCollector)(nil).GetAChainValue))
 }
 
-// SubDChainValue mocks base method.
-func (m *MockFeeCollector) SubDChainValue(arg0 *big.Int) (*big.Int, error) {
+// GetDChainValue mocks base method.
+func (m *MockFeeCollector) GetDChainValue() uint64 {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SubDChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "GetDChainValue")
+	ret0, _ := ret[0].(uint64)
+	return ret0
 }
 
-// SubDChainValue indicates an expected call of SubDChainValue.
-func (mr *MockFeeCollectorMockRecorder) SubDChainValue(arg0 interface{}) *gomock.Call {
+// GetDChainValue indicates an expected call of GetDChainValue.
+func (mr *MockFeeCollectorMockRecorder) GetDChainValue() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).SubDChainValue), arg0)
-}
-
-// SubOChainValue mocks base method.
-func (m *MockFeeCollector) SubOChainValue(arg0 *big.Int) (*big.Int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SubOChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SubOChainValue indicates an expected call of SubOChainValue.
-func (mr *MockFeeCollectorMockRecorder) SubOChainValue(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubOChainValue", reflect.TypeOf((*MockFeeCollector)(nil).SubOChainValue), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).GetDChainValue))
 }
 
 // SubAChainValue mocks base method.
-func (m *MockFeeCollector) SubAChainValue(arg0 *big.Int) (*big.Int, error) {
+func (m *MockFeeCollector) SubAChainValue(arg0 uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SubAChainValue", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // SubAChainValue indicates an expected call of SubAChainValue.
 func (mr *MockFeeCollectorMockRecorder) SubAChainValue(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubAChainValue", reflect.TypeOf((*MockFeeCollector)(nil).SubAChainValue), arg0)
+}
+
+// SubDChainValue mocks base method.
+func (m *MockFeeCollector) SubDChainValue(arg0 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubDChainValue", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SubDChainValue indicates an expected call of SubDChainValue.
+func (mr *MockFeeCollectorMockRecorder) SubDChainValue(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).SubDChainValue), arg0)
 }

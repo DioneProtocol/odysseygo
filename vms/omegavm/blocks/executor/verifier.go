@@ -70,7 +70,7 @@ func (v *verifier) BanffProposalBlock(b *blocks.BanffProposalBlock) error {
 	}
 
 	accumulatedFee := b.AccumulatedFee(v.ctx.DIONEAssetID)
-	if accumulatedFee.Sign() > 0 {
+	if accumulatedFee > 0 {
 		onCommitState.AddCurrentAccumulatedFee(accumulatedFee)
 		onAbortState.AddCurrentAccumulatedFee(accumulatedFee)
 	}
@@ -107,7 +107,7 @@ func (v *verifier) BanffStandardBlock(b *blocks.BanffStandardBlock) error {
 	}
 
 	accumulatedFee := b.AccumulatedFee(v.ctx.DIONEAssetID)
-	if accumulatedFee.Sign() > 0 {
+	if accumulatedFee > 0 {
 		onAcceptState.AddCurrentAccumulatedFee(accumulatedFee)
 	}
 

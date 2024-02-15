@@ -1,8 +1,8 @@
 package feecollector
 
 import (
-	"math/big"
 	"sync"
+	"sync/atomic"
 
 	"github.com/DioneProtocol/odysseygo/database"
 )
@@ -10,121 +10,82 @@ import (
 var (
 	_ FeeCollector = &collector{}
 
-	signPrefix = []byte("sign")
-	oFeeKey    = []byte("ofee")
-	aFeeKey    = []byte("afee")
-	dFeeKey    = []byte("dfee")
+	aFeeKey = []byte("afee")
+	dFeeKey = []byte("dfee")
 )
 
 type FeeCollector interface {
-	AddOChainValue(amount *big.Int) (*big.Int, error)
-	AddDChainValue(amount *big.Int) (*big.Int, error)
-	AddAChainValue(amount *big.Int) (*big.Int, error)
+	AddDChainValue(amount uint64) error
+	AddAChainValue(amount uint64) error
 
-	SubOChainValue(amount *big.Int) (*big.Int, error)
-	SubDChainValue(amount *big.Int) (*big.Int, error)
-	SubAChainValue(amount *big.Int) (*big.Int, error)
+	SubDChainValue(amount uint64) error
+	SubAChainValue(amount uint64) error
 
-	GetOChainValue() *big.Int
-	GetDChainValue() *big.Int
-	GetAChainValue() *big.Int
+	GetDChainValue() uint64
+	GetAChainValue() uint64
 }
 
 type collector struct {
-	oChainLock sync.Mutex
-	dChainLock sync.Mutex
-	aChainLock sync.Mutex
-
-	oChainValue *big.Int
-	dChainValue *big.Int
-	aChainValue *big.Int
+	lock        sync.Mutex
+	dChainValue *atomic.Uint64
+	aChainValue *atomic.Uint64
 
 	db database.Database
 }
 
 func New(db database.Database) (FeeCollector, error) {
-	oChainValue, err := database.GetBigInt(db, oFeeKey)
+	aChainValueUint, err := database.GetUInt64(db, aFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return nil, err
 	}
-	aChainValue, err := database.GetBigInt(db, aFeeKey)
+	dChainValueUint, err := database.GetUInt64(db, dFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return nil, err
 	}
-	dChainValue, err := database.GetBigInt(db, dFeeKey)
-	if err != nil && err != database.ErrNotFound {
-		return nil, err
-	}
+
+	aChainValue := atomic.Uint64{}
+	dChainValue := atomic.Uint64{}
+
+	aChainValue.Store(aChainValueUint)
+	dChainValue.Store(dChainValueUint)
+
 	return &collector{
 		db:          db,
-		oChainValue: oChainValue,
-		aChainValue: aChainValue,
-		dChainValue: dChainValue,
+		aChainValue: &aChainValue,
+		dChainValue: &dChainValue,
 	}, nil
 }
 
-func (c *collector) updateChainValue(value *big.Int, diff *big.Int, key []byte) (*big.Int, error) {
-	newValue := new(big.Int).Add(value, diff)
-	err := database.PutBigInt(c.db, key, newValue)
-	if err == nil {
-		value.Set(newValue)
-	}
-	return value, err
+func (c *collector) updateChainValue(newValue uint64, key []byte) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	return database.PutUInt64(c.db, key, newValue)
 }
 
-func (c *collector) GetOChainValue() *big.Int {
-	c.oChainLock.Lock()
-	defer c.oChainLock.Unlock()
-	return new(big.Int).Set(c.oChainValue)
+func (c *collector) GetAChainValue() uint64 {
+	return c.aChainValue.Load()
 }
 
-func (c *collector) AddOChainValue(amount *big.Int) (*big.Int, error) {
-	c.oChainLock.Lock()
-	defer c.oChainLock.Unlock()
-	return c.updateChainValue(c.oChainValue, amount, oFeeKey)
+func (c *collector) AddAChainValue(amount uint64) error {
+	newValue := c.aChainValue.Add(amount)
+	return c.updateChainValue(newValue, aFeeKey)
 }
 
-func (c *collector) SubOChainValue(amount *big.Int) (*big.Int, error) {
-	c.oChainLock.Lock()
-	defer c.oChainLock.Unlock()
-	negAmount := new(big.Int).Neg(amount)
-	return c.updateChainValue(c.oChainValue, negAmount, oFeeKey)
+func (c *collector) SubAChainValue(amount uint64) error {
+	newValue := c.aChainValue.Add(^(amount - 1))
+	return c.updateChainValue(newValue, aFeeKey)
 }
 
-func (c *collector) GetAChainValue() *big.Int {
-	c.aChainLock.Lock()
-	defer c.aChainLock.Unlock()
-	return new(big.Int).Set(c.aChainValue)
+func (c *collector) GetDChainValue() uint64 {
+	return c.dChainValue.Load()
 }
 
-func (c *collector) AddAChainValue(amount *big.Int) (*big.Int, error) {
-	c.aChainLock.Lock()
-	defer c.aChainLock.Unlock()
-	return c.updateChainValue(c.aChainValue, amount, aFeeKey)
+func (c *collector) AddDChainValue(amount uint64) error {
+	newValue := c.dChainValue.Add(amount)
+	return c.updateChainValue(newValue, dFeeKey)
 }
 
-func (c *collector) SubAChainValue(amount *big.Int) (*big.Int, error) {
-	c.aChainLock.Lock()
-	defer c.aChainLock.Unlock()
-	negAmount := new(big.Int).Neg(amount)
-	return c.updateChainValue(c.aChainValue, negAmount, aFeeKey)
-}
-
-func (c *collector) GetDChainValue() *big.Int {
-	c.dChainLock.Lock()
-	defer c.dChainLock.Unlock()
-	return new(big.Int).Set(c.dChainValue)
-}
-
-func (c *collector) AddDChainValue(amount *big.Int) (*big.Int, error) {
-	c.dChainLock.Lock()
-	defer c.dChainLock.Unlock()
-	return c.updateChainValue(c.dChainValue, amount, dFeeKey)
-}
-
-func (c *collector) SubDChainValue(amount *big.Int) (*big.Int, error) {
-	c.dChainLock.Lock()
-	defer c.dChainLock.Unlock()
-	negAmount := new(big.Int).Neg(amount)
-	return c.updateChainValue(c.dChainValue, negAmount, dFeeKey)
+func (c *collector) SubDChainValue(amount uint64) error {
+	newValue := c.dChainValue.Add(^(amount - 1))
+	return c.updateChainValue(newValue, dFeeKey)
 }

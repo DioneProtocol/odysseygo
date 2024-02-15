@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"math/big"
 	"time"
 
 	"go.uber.org/zap"
@@ -404,8 +403,7 @@ func buildBlock(
 		}
 	}
 
-	feeFromAChain := new(big.Int)
-	feeFromDChain := new(big.Int)
+	var feeFromAChain, feeFromDChain uint64
 	if feeSync {
 		feeFromAChain = builder.txExecutorBackend.Ctx.FeeCollector.GetAChainValue()
 		feeFromDChain = builder.txExecutorBackend.Ctx.FeeCollector.GetDChainValue()

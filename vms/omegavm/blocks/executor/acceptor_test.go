@@ -4,7 +4,6 @@
 package executor
 
 import (
-	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -302,17 +301,15 @@ func TestAcceptorVisitCommitBlock(t *testing.T) {
 		s.EXPECT().SetHeight(blk.Height()-1).Times(1),
 		s.EXPECT().AddStatelessBlock(parentState.statelessBlock).Times(1),
 
-		parentStatelessBlk.EXPECT().FeeFromAChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromDChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromOChain(ids.ID{}).Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromAChain().Return(uint64(0)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromDChain().Return(uint64(0)).Times(1),
 
 		s.EXPECT().SetLastAccepted(blkID).Times(1),
 		s.EXPECT().SetHeight(blk.Height()).Times(1),
 		s.EXPECT().AddStatelessBlock(blk).Times(1),
 
-		parentStatelessBlk.EXPECT().FeeFromAChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromDChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromOChain(ids.ID{}).Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromAChain().Return(uint64(0)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromDChain().Return(uint64(0)).Times(1),
 	)
 
 	err = acceptor.ApricotCommitBlock(blk)
@@ -401,17 +398,15 @@ func TestAcceptorVisitAbortBlock(t *testing.T) {
 		s.EXPECT().SetHeight(blk.Height()-1).Times(1),
 		s.EXPECT().AddStatelessBlock(parentState.statelessBlock).Times(1),
 
-		parentStatelessBlk.EXPECT().FeeFromAChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromDChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromOChain(ids.ID{}).Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromAChain().Return(uint64(0)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromDChain().Return(uint64(0)).Times(1),
 
 		s.EXPECT().SetLastAccepted(blkID).Times(1),
 		s.EXPECT().SetHeight(blk.Height()).Times(1),
 		s.EXPECT().AddStatelessBlock(blk).Times(1),
 
-		parentStatelessBlk.EXPECT().FeeFromAChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromDChain().Return(new(big.Int)).Times(1),
-		parentStatelessBlk.EXPECT().FeeFromOChain(ids.ID{}).Return(new(big.Int)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromAChain().Return(uint64(0)).Times(1),
+		parentStatelessBlk.EXPECT().FeeFromDChain().Return(uint64(0)).Times(1),
 	)
 
 	err = acceptor.ApricotAbortBlock(blk)

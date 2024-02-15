@@ -4,7 +4,6 @@
 package blocks
 
 import (
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -66,20 +65,20 @@ func (b *ApricotCommitBlock) Visit(v Visitor) error {
 	return v.ApricotCommitBlock(b)
 }
 
-func (b *ApricotCommitBlock) FeeFromAChain() *big.Int {
-	return new(big.Int)
+func (b *ApricotCommitBlock) FeeFromAChain() uint64 {
+	return 0
 }
 
-func (b *ApricotCommitBlock) FeeFromDChain() *big.Int {
-	return new(big.Int)
+func (b *ApricotCommitBlock) FeeFromDChain() uint64 {
+	return 0
 }
 
-func (b *ApricotCommitBlock) FeeFromOChain(ids.ID) *big.Int {
-	return new(big.Int)
+func (b *ApricotCommitBlock) FeeFromOChain(ids.ID) uint64 {
+	return 0
 }
 
-func (b *ApricotCommitBlock) AccumulatedFee(ids.ID) *big.Int {
-	return new(big.Int)
+func (b *ApricotCommitBlock) AccumulatedFee(ids.ID) uint64 {
+	return 0
 }
 
 func NewApricotCommitBlock(

@@ -142,11 +142,11 @@ type Chain interface {
 	GetFeePerWeightStored() (*big.Int, error)
 	SetFeePerWeightStored(*big.Int)
 
-	GetCurrentAccumulatedFee() (*big.Int, error)
-	AddCurrentAccumulatedFee(*big.Int)
+	GetCurrentAccumulatedFee() (uint64, error)
+	AddCurrentAccumulatedFee(uint64)
 
-	GetLastAccumulatedFee() (*big.Int, error)
-	SetLastAccumulatedFee(*big.Int)
+	GetLastAccumulatedFee() (uint64, error)
+	SetLastAccumulatedFee(uint64)
 }
 
 type State interface {
@@ -396,9 +396,9 @@ type state struct {
 	indexedHeights                      *heightRange
 	singletonDB                         database.Database
 
+	lastAccumulatedFee, persistedLastAccumulatedFee               uint64
+	currentAccumulatedFee, persistedCurrentAccumulatedFee         uint64
 	feePerWeightStored, persistedFeePerWeightStored               *big.Int
-	lastAccumulatedFee, persistedLastAccumulatedFee               *big.Int
-	currentAccumulatedFee, persistedCurrentAccumulatedFee         *big.Int
 	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
 	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
 }
@@ -717,10 +717,6 @@ func newState(
 		persistedStakerAccumulatedMintRate: new(big.Int),
 		feePerWeightStored:                 new(big.Int),
 		persistedFeePerWeightStored:        new(big.Int),
-		lastAccumulatedFee:                 new(big.Int),
-		persistedLastAccumulatedFee:        new(big.Int),
-		currentAccumulatedFee:              new(big.Int),
-		persistedCurrentAccumulatedFee:     new(big.Int),
 	}, nil
 }
 
@@ -1471,19 +1467,19 @@ func (s *state) loadMetadata() error {
 	s.feePerWeightStored = new(big.Int).SetBytes(feePerStakerBytes)
 	s.persistedFeePerWeightStored = new(big.Int).Set(s.feePerWeightStored)
 
-	lastAccumulatedFeeBytes, err := s.singletonDB.Get(lastAccumulatedFeeKey)
+	lastAccumulatedFee, err := database.GetUInt64(s.singletonDB, lastAccumulatedFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return err
 	}
-	s.lastAccumulatedFee = new(big.Int).SetBytes(lastAccumulatedFeeBytes)
-	s.persistedLastAccumulatedFee = new(big.Int).Set(s.lastAccumulatedFee)
+	s.lastAccumulatedFee = lastAccumulatedFee
+	s.persistedLastAccumulatedFee = lastAccumulatedFee
 
-	currentAccumulatedFeeBytes, err := s.singletonDB.Get(currentAccumulatedFeeKey)
+	currentAccumulatedFee, err := database.GetUInt64(s.singletonDB, currentAccumulatedFeeKey)
 	if err != nil && err != database.ErrNotFound {
 		return err
 	}
-	s.currentAccumulatedFee = new(big.Int).SetBytes(currentAccumulatedFeeBytes)
-	s.persistedCurrentAccumulatedFee = new(big.Int).Set(s.currentAccumulatedFee)
+	s.currentAccumulatedFee = currentAccumulatedFee
+	s.persistedCurrentAccumulatedFee = currentAccumulatedFee
 
 	return nil
 }
@@ -1887,20 +1883,20 @@ func (s *state) SetFeePerWeightStored(f *big.Int) {
 	s.feePerWeightStored.Set(f)
 }
 
-func (s *state) GetCurrentAccumulatedFee() (*big.Int, error) {
-	return new(big.Int).Set(s.currentAccumulatedFee), nil
+func (s *state) GetCurrentAccumulatedFee() (uint64, error) {
+	return s.currentAccumulatedFee, nil
 }
 
-func (s *state) AddCurrentAccumulatedFee(f *big.Int) {
-	s.currentAccumulatedFee.Add(s.currentAccumulatedFee, f)
+func (s *state) AddCurrentAccumulatedFee(f uint64) {
+	s.currentAccumulatedFee += f
 }
 
-func (s *state) GetLastAccumulatedFee() (*big.Int, error) {
-	return new(big.Int).Set(s.lastAccumulatedFee), nil
+func (s *state) GetLastAccumulatedFee() (uint64, error) {
+	return s.lastAccumulatedFee, nil
 }
 
-func (s *state) SetLastAccumulatedFee(f *big.Int) {
-	s.lastAccumulatedFee.Set(f)
+func (s *state) SetLastAccumulatedFee(f uint64) {
+	s.lastAccumulatedFee = f
 }
 
 func (s *state) Commit() error {
@@ -2498,18 +2494,18 @@ func (s *state) writeMetadata() error {
 		s.persistedFeePerWeightStored.Set(s.feePerWeightStored)
 	}
 
-	if s.persistedLastAccumulatedFee.Cmp(s.lastAccumulatedFee) != 0 {
-		if err := s.singletonDB.Put(lastAccumulatedFeeKey, s.lastAccumulatedFee.Bytes()); err != nil {
+	if s.persistedLastAccumulatedFee != s.lastAccumulatedFee {
+		if err := database.PutUInt64(s.singletonDB, lastAccumulatedFeeKey, s.lastAccumulatedFee); err != nil {
 			return fmt.Errorf("failed to write last accumulated fee: %w", err)
 		}
-		s.persistedLastAccumulatedFee.Set(s.lastAccumulatedFee)
+		s.persistedLastAccumulatedFee = s.lastAccumulatedFee
 	}
 
-	if s.persistedCurrentAccumulatedFee.Cmp(s.currentAccumulatedFee) != 0 {
-		if err := s.singletonDB.Put(currentAccumulatedFeeKey, s.currentAccumulatedFee.Bytes()); err != nil {
+	if s.persistedCurrentAccumulatedFee != s.currentAccumulatedFee {
+		if err := database.PutUInt64(s.singletonDB, currentAccumulatedFeeKey, s.currentAccumulatedFee); err != nil {
 			return fmt.Errorf("failed to write current accumulated fee: %w", err)
 		}
-		s.persistedCurrentAccumulatedFee.Set(s.currentAccumulatedFee)
+		s.persistedCurrentAccumulatedFee = s.currentAccumulatedFee
 	}
 
 	return nil

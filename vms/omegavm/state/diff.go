@@ -63,10 +63,10 @@ type diff struct {
 
 	stakerMintRate     *big.Int
 	feePerWeightStored *big.Int
-	lastAccumulatedFee *big.Int
 
-	addAccumulatedFee          *big.Int
-	currentAccumulatedFeeCache *big.Int
+	addAccumulatedFee          uint64
+	currentAccumulatedFeeCache *uint64
+	lastAccumulatedFee         *uint64
 }
 
 func NewDiff(
@@ -78,10 +78,9 @@ func NewDiff(
 		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, parentID)
 	}
 	return &diff{
-		parentID:          parentID,
-		stateVersions:     stateVersions,
-		timestamp:         parentState.GetTimestamp(),
-		addAccumulatedFee: new(big.Int),
+		parentID:      parentID,
+		stateVersions: stateVersions,
+		timestamp:     parentState.GetTimestamp(),
 	}, nil
 }
 
@@ -575,47 +574,44 @@ func (d *diff) SetFeePerWeightStored(f *big.Int) {
 	d.feePerWeightStored.Set(f)
 }
 
-func (d *diff) AddCurrentAccumulatedFee(f *big.Int) {
-	d.addAccumulatedFee.Add(d.addAccumulatedFee, f)
+func (d *diff) AddCurrentAccumulatedFee(f uint64) {
+	d.addAccumulatedFee += f
 }
 
-func (d *diff) GetCurrentAccumulatedFee() (*big.Int, error) {
+func (d *diff) GetCurrentAccumulatedFee() (uint64, error) {
 	if d.currentAccumulatedFeeCache == nil {
 		parentState, ok := d.stateVersions.GetState(d.parentID)
 		if !ok {
-			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+			return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
 		}
 		lastAccumulatedFee, err := parentState.GetCurrentAccumulatedFee()
 		if err != nil {
-			return new(big.Int), nil
+			return 0, nil
 		}
-		d.currentAccumulatedFeeCache = lastAccumulatedFee
+		d.currentAccumulatedFeeCache = &lastAccumulatedFee
 
 	}
-	return new(big.Int).Add(d.currentAccumulatedFeeCache, d.addAccumulatedFee), nil
+	return *d.currentAccumulatedFeeCache + d.addAccumulatedFee, nil
 }
 
-func (d *diff) GetLastAccumulatedFee() (*big.Int, error) {
+func (d *diff) GetLastAccumulatedFee() (uint64, error) {
 	if d.lastAccumulatedFee == nil {
 		parentState, ok := d.stateVersions.GetState(d.parentID)
 		if !ok {
-			return new(big.Int), fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+			return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
 		}
 		lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
 		if err != nil {
-			return new(big.Int), nil
+			return 0, nil
 		}
-		d.lastAccumulatedFee = new(big.Int).Set(lastAccumulatedFee)
+		d.lastAccumulatedFee = &lastAccumulatedFee
 
 	}
-	return new(big.Int).Set(d.lastAccumulatedFee), nil
+	return *d.lastAccumulatedFee, nil
 }
 
-func (d *diff) SetLastAccumulatedFee(f *big.Int) {
-	if d.lastAccumulatedFee == nil {
-		d.lastAccumulatedFee = new(big.Int)
-	}
-	d.lastAccumulatedFee.Set(f)
+func (d *diff) SetLastAccumulatedFee(f uint64) {
+	d.lastAccumulatedFee = &f
 }
 
 func (d *diff) Apply(baseState State) error {
@@ -627,12 +623,12 @@ func (d *diff) Apply(baseState State) error {
 		baseState.SetStakerAccumulatedMintRate(d.stakerMintRate)
 	}
 	if d.lastAccumulatedFee != nil {
-		baseState.SetLastAccumulatedFee(d.lastAccumulatedFee)
+		baseState.SetLastAccumulatedFee(*d.lastAccumulatedFee)
 	}
 	if d.feePerWeightStored != nil {
 		baseState.SetFeePerWeightStored(d.feePerWeightStored)
 	}
-	if d.addAccumulatedFee.Sign() > 0 {
+	if d.addAccumulatedFee > 0 {
 		baseState.AddCurrentAccumulatedFee(d.addAccumulatedFee)
 	}
 	for subnetID, supply := range d.currentSupply {
