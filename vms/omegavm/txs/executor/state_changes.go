@@ -183,8 +183,12 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 	if !exists {
 		return fmt.Errorf("primary network vdrs not exists")
 	}
-	bigTotalWeight := new(big.Int).SetUint64(vdrs.Weight())
+	totalWeight := vdrs.Weight()
+	if totalWeight == 0 {
+		return nil
+	}
 
+	bigTotalWeight := new(big.Int).SetUint64(totalWeight)
 	accumFeeDiff := new(big.Int).Sub(curAccumFee, lastAccumulatedFee)
 
 	feePerWeightIncrement := new(big.Int).Set(accumFeeDiff)

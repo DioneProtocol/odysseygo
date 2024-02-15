@@ -167,7 +167,7 @@ func TestPackerUnpackLong(t *testing.T) {
 func TestPackerPackFixedBytes(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{MaxSize: 4}
+	p := Packer{MaxSize: 5}
 	p.PackFixedBytes([]byte("Dione"))
 	require.False(p.Errored())
 	require.NoError(p.Err)
@@ -182,12 +182,12 @@ func TestPackerUnpackFixedBytes(t *testing.T) {
 	require := require.New(t)
 
 	p := Packer{Bytes: []byte("Dione")}
-	require.Equal([]byte("Dione"), p.UnpackFixedBytes(4))
+	require.Equal([]byte("Dione"), p.UnpackFixedBytes(5))
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal(4, p.Offset)
+	require.Equal(5, p.Offset)
 
-	require.Nil(p.UnpackFixedBytes(4))
+	require.Nil(p.UnpackFixedBytes(5))
 	require.True(p.Errored())
 	require.ErrorIs(p.Err, ErrInsufficientLength)
 }
@@ -195,11 +195,11 @@ func TestPackerUnpackFixedBytes(t *testing.T) {
 func TestPackerPackBytes(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{MaxSize: 8}
+	p := Packer{MaxSize: 9}
 	p.PackBytes([]byte("Dione"))
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal([]byte("\x00\x00\x00\x04Dione"), p.Bytes)
+	require.Equal([]byte("\x00\x00\x00\x05Dione"), p.Bytes)
 
 	p.PackBytes([]byte("Dione"))
 	require.True(p.Errored())
@@ -209,11 +209,11 @@ func TestPackerPackBytes(t *testing.T) {
 func TestPackerUnpackBytes(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{Bytes: []byte("\x00\x00\x00\x04Dione")}
+	p := Packer{Bytes: []byte("\x00\x00\x00\x05Dione")}
 	require.Equal([]byte("Dione"), p.UnpackBytes())
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal(8, p.Offset)
+	require.Equal(9, p.Offset)
 
 	require.Nil(p.UnpackBytes())
 	require.True(p.Errored())
@@ -223,11 +223,11 @@ func TestPackerUnpackBytes(t *testing.T) {
 func TestPackerUnpackLimitedBytes(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{Bytes: []byte("\x00\x00\x00\x04Dione")}
+	p := Packer{Bytes: []byte("\x00\x00\x00\x05Dione")}
 	require.Equal([]byte("Dione"), p.UnpackLimitedBytes(10))
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal(8, p.Offset)
+	require.Equal(9, p.Offset)
 
 	require.Nil(p.UnpackLimitedBytes(10))
 	require.True(p.Errored())
@@ -243,23 +243,23 @@ func TestPackerUnpackLimitedBytes(t *testing.T) {
 func TestPackerString(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{MaxSize: 6}
+	p := Packer{MaxSize: 9}
 
 	p.PackStr("Dione")
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal([]byte{0x00, 0x04, 0x41, 0x76, 0x61, 0x78}, p.Bytes)
+	require.Equal([]byte{0x00, 0x05, 0x44, 0x69, 0x6f, 0x6e, 0x65}, p.Bytes)
 }
 
 func TestPackerUnpackString(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{Bytes: []byte("\x00\x04Dione")}
+	p := Packer{Bytes: []byte("\x00\x05Dione")}
 
 	require.Equal("Dione", p.UnpackStr())
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal(6, p.Offset)
+	require.Equal(7, p.Offset)
 
 	require.Equal("", p.UnpackStr())
 	require.True(p.Errored())
@@ -269,11 +269,11 @@ func TestPackerUnpackString(t *testing.T) {
 func TestPackerUnpackLimitedString(t *testing.T) {
 	require := require.New(t)
 
-	p := Packer{Bytes: []byte("\x00\x04Dione")}
+	p := Packer{Bytes: []byte("\x00\x05Dione")}
 	require.Equal("Dione", p.UnpackLimitedStr(10))
 	require.False(p.Errored())
 	require.NoError(p.Err)
-	require.Equal(6, p.Offset)
+	require.Equal(7, p.Offset)
 
 	require.Equal("", p.UnpackLimitedStr(10))
 	require.True(p.Errored())
