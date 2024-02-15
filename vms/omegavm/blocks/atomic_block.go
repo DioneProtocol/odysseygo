@@ -5,7 +5,6 @@ package blocks
 
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/snow"
@@ -41,20 +40,20 @@ func (b *ApricotAtomicBlock) Visit(v Visitor) error {
 	return v.ApricotAtomicBlock(b)
 }
 
-func (b *ApricotAtomicBlock) FeeFromAChain() *big.Int {
-	return new(big.Int)
+func (b *ApricotAtomicBlock) FeeFromAChain() uint64 {
+	return 0
 }
 
-func (b *ApricotAtomicBlock) FeeFromDChain() *big.Int {
-	return new(big.Int)
+func (b *ApricotAtomicBlock) FeeFromDChain() uint64 {
+	return 0
 }
 
-func (b *ApricotAtomicBlock) FeeFromOChain(ids.ID) *big.Int {
-	return new(big.Int)
+func (b *ApricotAtomicBlock) FeeFromOChain(ids.ID) uint64 {
+	return 0
 }
 
-func (b *ApricotAtomicBlock) AccumulatedFee(ids.ID) *big.Int {
-	return new(big.Int)
+func (b *ApricotAtomicBlock) AccumulatedFee(ids.ID) uint64 {
+	return 0
 }
 
 func NewApricotAtomicBlock(

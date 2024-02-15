@@ -289,28 +289,16 @@ func (a *acceptor) commonAccept(b blocks.Block) error {
 	a.validators.OnAcceptedBlockID(blkID)
 
 	feeFromAChain := b.FeeFromAChain()
-	if feeFromAChain.Sign() > 0 {
-		_, err := a.ctx.FeeCollector.SubAChainValue(feeFromAChain)
-		if err != nil {
-			return fmt.Errorf("failed to substract fee: %w", err)
+	if feeFromAChain > 0 {
+		if err := a.ctx.FeeCollector.SubAChainValue(feeFromAChain); err != nil {
+			return fmt.Errorf("failed to subtract fee: %w", err)
 		}
 	}
 
 	feeFromDChain := b.FeeFromDChain()
-	if feeFromDChain.Sign() > 0 {
-		_, err := a.ctx.FeeCollector.SubDChainValue(feeFromDChain)
-		if err != nil {
-			return fmt.Errorf("failed to substract fee: %w", err)
-		}
-	}
-
-	accumulatedFee := b.FeeFromOChain(a.ctx.DIONEAssetID)
-	accumulatedFee.Add(accumulatedFee, feeFromAChain)
-	accumulatedFee.Add(accumulatedFee, feeFromDChain)
-	if accumulatedFee.Sign() > 0 {
-		_, err := a.ctx.FeeCollector.AddOChainValue(accumulatedFee)
-		if err != nil {
-			return fmt.Errorf("failed to collect fee: %w", err)
+	if feeFromDChain > 0 {
+		if err := a.ctx.FeeCollector.SubDChainValue(feeFromDChain); err != nil {
+			return fmt.Errorf("failed to subtract fee: %w", err)
 		}
 	}
 

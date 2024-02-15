@@ -4,7 +4,6 @@
 package block
 
 import (
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/codec"
@@ -24,7 +23,7 @@ type Block interface {
 	Timestamp() time.Time
 	MerkleRoot() ids.ID
 	Bytes() []byte
-	AccumulatedFee(ids.ID) *big.Int
+	AccumulatedFee(ids.ID) uint64
 
 	// Txs returns the transactions contained in the block
 	Txs() []*txs.Tx

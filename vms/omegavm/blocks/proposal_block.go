@@ -5,7 +5,6 @@ package blocks
 
 import (
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -44,11 +43,10 @@ func (b *BanffProposalBlock) Visit(v Visitor) error {
 	return v.BanffProposalBlock(b)
 }
 
-func (b *BanffProposalBlock) FeeFromOChain(assetID ids.ID) *big.Int {
+func (b *BanffProposalBlock) FeeFromOChain(assetID ids.ID) uint64 {
 	feeOChain := b.ApricotProposalBlock.FeeFromOChain(assetID)
 	for _, tx := range b.Transactions {
-		burned := tx.Burned(assetID)
-		feeOChain.Add(feeOChain, new(big.Int).SetUint64(burned))
+		feeOChain += tx.Burned(assetID)
 	}
 	return feeOChain
 }
@@ -66,9 +64,7 @@ func NewBanffProposalBlock(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			FeeAChain: []byte{},
-			FeeDChain: []byte{},
-			Tx:        tx,
+			Tx: tx,
 		},
 	}
 	return blk, initialize(blk)
@@ -79,8 +75,8 @@ func NewBanffProposalBlockWithFee(
 	parentID ids.ID,
 	height uint64,
 	tx *txs.Tx,
-	feeFromAChain *big.Int,
-	feeFromDChain *big.Int,
+	feeFromAChain uint64,
+	feeFromDChain uint64,
 ) (*BanffProposalBlock, error) {
 	blk := &BanffProposalBlock{
 		Time: uint64(timestamp.Unix()),
@@ -89,8 +85,8 @@ func NewBanffProposalBlockWithFee(
 				PrntID: parentID,
 				Hght:   height,
 			},
-			FeeAChain: feeFromAChain.Bytes(),
-			FeeDChain: feeFromDChain.Bytes(),
+			FeeAChain: feeFromAChain,
+			FeeDChain: feeFromDChain,
 			Tx:        tx,
 		},
 	}
@@ -100,8 +96,8 @@ func NewBanffProposalBlockWithFee(
 type ApricotProposalBlock struct {
 	CommonBlock `serialize:"true"`
 	Tx          *txs.Tx `serialize:"true" json:"tx"`
-	FeeAChain   []byte  `serialize:"true" json:"feeFromAChain"`
-	FeeDChain   []byte  `serialize:"true" json:"feeFromDChain"`
+	FeeAChain   uint64  `serialize:"true" json:"feeFromAChain"`
+	FeeDChain   uint64  `serialize:"true" json:"feeFromDChain"`
 }
 
 func (b *ApricotProposalBlock) initialize(bytes []byte) error {
@@ -124,23 +120,22 @@ func (b *ApricotProposalBlock) Visit(v Visitor) error {
 	return v.ApricotProposalBlock(b)
 }
 
-func (b *ApricotProposalBlock) FeeFromAChain() *big.Int {
-	return new(big.Int).SetBytes(b.FeeAChain)
+func (b *ApricotProposalBlock) FeeFromAChain() uint64 {
+	return b.FeeAChain
 }
 
-func (b *ApricotProposalBlock) FeeFromDChain() *big.Int {
-	return new(big.Int).SetBytes(b.FeeDChain)
+func (b *ApricotProposalBlock) FeeFromDChain() uint64 {
+	return b.FeeDChain
 }
 
-func (b *ApricotProposalBlock) FeeFromOChain(assetID ids.ID) *big.Int {
-	burned := b.Tx.Burned(assetID)
-	return new(big.Int).SetUint64(burned)
+func (b *ApricotProposalBlock) FeeFromOChain(assetID ids.ID) uint64 {
+	return b.Tx.Burned(assetID)
 }
 
-func (b *ApricotProposalBlock) AccumulatedFee(assetID ids.ID) *big.Int {
+func (b *ApricotProposalBlock) AccumulatedFee(assetID ids.ID) uint64 {
 	accumulatedFee := b.FeeFromOChain(assetID)
-	accumulatedFee.Add(accumulatedFee, b.FeeFromAChain())
-	accumulatedFee.Add(accumulatedFee, b.FeeFromDChain())
+	accumulatedFee += b.FeeFromAChain()
+	accumulatedFee += b.FeeFromDChain()
 	return accumulatedFee
 }
 
@@ -157,9 +152,7 @@ func NewApricotProposalBlock(
 			PrntID: parentID,
 			Hght:   height,
 		},
-		FeeAChain: []byte{},
-		FeeDChain: []byte{},
-		Tx:        tx,
+		Tx: tx,
 	}
 	return blk, initialize(blk)
 }

@@ -142,8 +142,8 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(new(big.Int).SetUint64(1), nil).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
-	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
-	onParentAccept.EXPECT().GetCurrentAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
+	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(uint64(0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentAccumulatedFee().Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetFeePerWeightStored().Return(new(big.Int), nil).AnyTimes()
 
 	// no pending stakers

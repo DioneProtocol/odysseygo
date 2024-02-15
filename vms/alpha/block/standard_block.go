@@ -5,7 +5,6 @@ package block
 
 import (
 	"fmt"
-	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/codec"
@@ -76,11 +75,10 @@ func (b *StandardBlock) Bytes() []byte {
 	return b.bytes
 }
 
-func (b *StandardBlock) AccumulatedFee(assetID ids.ID) *big.Int {
-	accumulatedFee := big.NewInt(0)
+func (b *StandardBlock) AccumulatedFee(assetID ids.ID) uint64 {
+	accumulatedFee := uint64(0)
 	for _, tx := range b.Transactions {
-		burned := tx.Burned(assetID)
-		accumulatedFee.Add(accumulatedFee, new(big.Int).SetUint64(burned))
+		accumulatedFee += tx.Burned(assetID)
 	}
 	return accumulatedFee
 }
