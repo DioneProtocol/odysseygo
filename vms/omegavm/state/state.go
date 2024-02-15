@@ -2510,7 +2510,6 @@ func (s *state) writeMetadata() error {
 			return fmt.Errorf("failed to write current accumulated fee: %w", err)
 		}
 		s.persistedCurrentAccumulatedFee.Set(s.currentAccumulatedFee)
-		fmt.Println("WRITE", s.persistedCurrentAccumulatedFee)
 	}
 
 	return nil

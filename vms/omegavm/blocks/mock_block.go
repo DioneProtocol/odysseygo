@@ -68,6 +68,20 @@ func (mr *MockBlockMockRecorder) Bytes() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bytes", reflect.TypeOf((*MockBlock)(nil).Bytes))
 }
 
+// FeeFromAChain mocks base method.
+func (m *MockBlock) FeeFromAChain() *big.Int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FeeFromAChain")
+	ret0, _ := ret[0].(*big.Int)
+	return ret0
+}
+
+// FeeFromAChain indicates an expected call of FeeFromAChain.
+func (mr *MockBlockMockRecorder) FeeFromAChain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromAChain", reflect.TypeOf((*MockBlock)(nil).FeeFromAChain))
+}
+
 // FeeFromDChain mocks base method.
 func (m *MockBlock) FeeFromDChain() *big.Int {
 	m.ctrl.T.Helper()
@@ -82,18 +96,18 @@ func (mr *MockBlockMockRecorder) FeeFromDChain() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromDChain", reflect.TypeOf((*MockBlock)(nil).FeeFromDChain))
 }
 
-// FeeFromAChain mocks base method.
-func (m *MockBlock) FeeFromAChain() *big.Int {
+// FeeFromOChain mocks base method.
+func (m *MockBlock) FeeFromOChain(arg0 ids.ID) *big.Int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FeeFromAChain")
+	ret := m.ctrl.Call(m, "FeeFromOChain", arg0)
 	ret0, _ := ret[0].(*big.Int)
 	return ret0
 }
 
-// FeeFromAChain indicates an expected call of FeeFromAChain.
-func (mr *MockBlockMockRecorder) FeeFromAChain() *gomock.Call {
+// FeeFromOChain indicates an expected call of FeeFromOChain.
+func (mr *MockBlockMockRecorder) FeeFromOChain(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromAChain", reflect.TypeOf((*MockBlock)(nil).FeeFromAChain))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FeeFromOChain", reflect.TypeOf((*MockBlock)(nil).FeeFromOChain), arg0)
 }
 
 // Height mocks base method.
@@ -148,20 +162,6 @@ func (m *MockBlock) Parent() ids.ID {
 func (mr *MockBlockMockRecorder) Parent() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Parent", reflect.TypeOf((*MockBlock)(nil).Parent))
-}
-
-// TotalAccumulatedFee mocks base method.
-func (m *MockBlock) TotalAccumulatedFee(arg0 ids.ID) *big.Int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "TotalAccumulatedFee", arg0)
-	ret0, _ := ret[0].(*big.Int)
-	return ret0
-}
-
-// TotalAccumulatedFee indicates an expected call of TotalAccumulatedFee.
-func (mr *MockBlockMockRecorder) TotalAccumulatedFee(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "TotalAccumulatedFee", reflect.TypeOf((*MockBlock)(nil).TotalAccumulatedFee), arg0)
 }
 
 // Txs mocks base method.

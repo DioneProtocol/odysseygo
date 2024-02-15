@@ -511,8 +511,8 @@ func TestServiceGetTxJSON_BaseTx(t *testing.T) {
 	require.NoError(err)
 	jsonString := string(jsonTxBytes)
 	require.Contains(jsonString, `"memo":"0x0102030405060708"`)
-	require.Contains(jsonString, `"inputs":[{"txID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","outputIndex":2,"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
-	require.Contains(jsonString, `"outputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]`)
+	require.Contains(jsonString, `"inputs":[{"txID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","outputIndex":2,"assetID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
+	require.Contains(jsonString, `"outputs":[{"assetID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]`)
 }
 
 func TestServiceGetTxJSON_ExportTx(t *testing.T) {
@@ -537,8 +537,8 @@ func TestServiceGetTxJSON_ExportTx(t *testing.T) {
 	jsonTxBytes, err := stdjson.Marshal(reply.Tx)
 	require.NoError(err)
 	jsonString := string(jsonTxBytes)
-	require.Contains(jsonString, `"inputs":[{"txID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","outputIndex":2,"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
-	require.Contains(jsonString, `"exportedOutputs":[{"assetID":"2XGxUr7VF7j1iwUp2aiGe4b6Ue2yyNghNS1SuNTNmZ77dPpXFZ","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]}`)
+	require.Contains(jsonString, `"inputs":[{"txID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","outputIndex":2,"assetID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","input":{"amount":50000,"signatureIndices":[0]}}]`)
+	require.Contains(jsonString, `"exportedOutputs":[{"assetID":"KwPwtiZ8vajYp8WNb4ktD5fz2fnDJ6ZPLQrnYNmh2ymDVVniB","fxID":"spdxUxVJQbX85MGxMHbKw1sHxMnSqJ3QBzDyDYEP3h6TLuxqQ","output":{"addresses":["A-testing1lnk637g0edwnqc2tn8tel39652fswa3xk4r65e"],"amount":49000,"locktime":0,"threshold":1}}]}`)
 }
 
 func TestServiceGetTxJSON_CreateAssetTx(t *testing.T) {

@@ -91,9 +91,11 @@ func TestRewards(t *testing.T) {
 			duration:       defaultMinStakingDuration,
 			stakeAmount:    defaultMinValidatorStake,
 			existingAmount: 360 * units.MegaDione,
+			expectedReward: 1370,
 		},
 		// (720M - 400M) * (1M / 400M) * (10% + 2% * MinimumStakingDuration / MaximumStakingDuration) * MinimumStakingDuration / MaximumStakingDuration
 		{
+			duration:       defaultMinStakingDuration,
 			stakeAmount:    units.MegaDione,
 			existingAmount: 400 * units.MegaDione,
 			expectedReward: 219298179771,

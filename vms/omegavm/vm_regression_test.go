@@ -983,11 +983,11 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	{
 		staker0, err := newState.GetCurrentValidator(constants.PrimaryNetworkID, nodeID0)
 		require.NoError(err)
-		require.Equal(uint64(60000000), staker0.PotentialReward)
+		require.Equal(uint64(0), staker0.PotentialReward)
 
 		staker1, err := newState.GetCurrentValidator(constants.PrimaryNetworkID, nodeID1)
 		require.NoError(err)
-		require.Equal(uint64(59999999), staker1.PotentialReward)
+		require.Equal(uint64(0), staker1.PotentialReward)
 
 		_, err = newState.GetPendingValidator(constants.PrimaryNetworkID, nodeID0)
 		require.ErrorIs(err, database.ErrNotFound)

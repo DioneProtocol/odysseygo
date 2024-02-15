@@ -521,12 +521,19 @@ func TestBuildBlock(t *testing.T) {
 				mempool.EXPECT().HasTxs().Return(false)
 				mempool.EXPECT().PeekTxs(targetBlockSize).Return(nil)
 
+				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetAChainValue().Return(new(big.Int)).Times(1)
+				feeCollector.EXPECT().GetDChainValue().Return(new(big.Int)).Times(1)
+
 				clk := &mockable.Clock{}
 				clk.Set(now)
 				return &builder{
 					Mempool: mempool,
 					txExecutorBackend: &txexecutor.Backend{
 						Clk: clk,
+						Ctx: &snow.Context{
+							FeeCollector: feeCollector,
+						},
 					},
 				}
 			},

@@ -222,6 +222,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetStakeSyncTimestamp().Return(time.Unix(1, 0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetStakerAccumulatedMintRate().Return(new(big.Int), nil).AnyTimes()
 	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentAccumulatedFee().Return(new(big.Int), nil).AnyTimes()
 	onParentAccept.EXPECT().GetFeePerWeightStored().Return(new(big.Int), nil).AnyTimes()
 
 	currentStakersIt := state.NewMockStakerIterator(ctrl)
