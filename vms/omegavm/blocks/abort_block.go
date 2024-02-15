@@ -4,6 +4,7 @@
 package blocks
 
 import (
+	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -63,6 +64,22 @@ func (*ApricotAbortBlock) Txs() []*txs.Tx {
 
 func (b *ApricotAbortBlock) Visit(v Visitor) error {
 	return v.ApricotAbortBlock(b)
+}
+
+func (b *ApricotAbortBlock) FeeFromXChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotAbortBlock) FeeFromCChain() *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotAbortBlock) FeeFromPChain(ids.ID) *big.Int {
+	return new(big.Int)
+}
+
+func (b *ApricotAbortBlock) AccumulatedFee(ids.ID) *big.Int {
+	return new(big.Int)
 }
 
 // NewApricotAbortBlock is kept for testing purposes only.

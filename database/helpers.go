@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -95,6 +96,33 @@ func ParseUInt32(b []byte) (uint32, error) {
 		return 0, errWrongSize
 	}
 	return binary.BigEndian.Uint32(b), nil
+}
+
+func PutBigInt(db KeyValueReaderWriter, key []byte, val *big.Int) error {
+	var valBytes []byte
+	if val.Sign() >= 0 {
+		valBytes = []byte{0}
+	} else {
+		valBytes = []byte{1}
+	}
+	valBytes = append(valBytes, val.Bytes()...)
+	return db.Put(key, valBytes)
+}
+
+func GetBigInt(db KeyValueReader, key []byte) (*big.Int, error) {
+	valBytes, err := db.Get(key)
+	if err != nil {
+		return new(big.Int), err
+	}
+	if len(valBytes) < 2 {
+		return new(big.Int), errWrongSize
+	}
+	value := new(big.Int).SetBytes(valBytes[1:])
+	negative := valBytes[0] != 0
+	if negative {
+		value.Neg(value)
+	}
+	return value, nil
 }
 
 func PutTimestamp(db KeyValueWriter, key []byte, val time.Time) error {

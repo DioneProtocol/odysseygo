@@ -29,14 +29,29 @@ type preDelegateeRewardMetadata struct {
 	PotentialReward uint64        `serialize:"true"`
 }
 
+type delegatorMetadata struct {
+	PotentialReward       uint64 `serialize:"true"`
+	MintRateBytes         []byte `serialize:"true"`
+	FeePerWeightPaidBytes []byte `serialize:"true"`
+}
+
 type validatorMetadata struct {
 	UpDuration               time.Duration `serialize:"true"`
 	LastUpdated              uint64        `serialize:"true"` // Unix time in seconds
 	PotentialReward          uint64        `serialize:"true"`
 	PotentialDelegateeReward uint64        `serialize:"true"`
+	MintRateBytes            []byte        `serialize:"true"`
+	FeePerWeightPaidBytes    []byte        `serialize:"true"`
 
 	txID        ids.ID
 	lastUpdated time.Time
+}
+
+func parseDelegatorMetadata(bytes []byte, metadata *delegatorMetadata) error {
+	if _, err := txs.Codec.Unmarshal(bytes, metadata); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Permissioned validators originally wrote their values as nil.
