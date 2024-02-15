@@ -6,5 +6,5 @@ network: mainnet
 db_dir: /data/avalanchego
 log_dir: /var/log/avalanchego
 config_dir: /etc/avalanchego
-repo_url: https://github.com/ava-labs/avalanchego
+repo_url: https://github.com/DioneProtocol/odysseygo
 repo_folder: /tmp/avalanchego

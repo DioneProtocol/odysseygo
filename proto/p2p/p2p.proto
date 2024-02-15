@@ -3,7 +3,7 @@ syntax = "proto3";
 package p2p;
 
 // Reference: https://developers.google.com/protocol-buffers/docs/proto3
-option go_package = "github.com/ava-labs/avalanchego/proto/pb/p2p";
+option go_package = "github.com/DioneProtocol/odysseygo/proto/pb/p2p";
 
 // Represents peer-to-peer messages.
 // Only one type can be non-null.
@@ -96,7 +96,7 @@ message Pong {
 // For instance, the network ID must be matched and timestamp should be in-sync.
 // Otherwise, the remote peer closes the connection.
 // ref. "avalanchego/network/peer#handleVersion"
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/network#Network "Dispatch"
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/network#Network "Dispatch"
 message Version {
   uint32 network_id = 1;
   uint64 my_time = 2;
@@ -108,7 +108,7 @@ message Version {
   repeated bytes tracked_subnets = 8;
 }
 
-// ref. https://pkg.go.dev/github.com/ava-labs/avalanchego/utils/ips#ClaimedIPPort
+// ref. https://pkg.go.dev/github.com/DioneProtocol/odysseygo/utils/ips#ClaimedIPPort
 message ClaimedIpPort {
   bytes x509_certificate = 1;
   bytes ip_addr = 2;
