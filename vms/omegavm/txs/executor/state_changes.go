@@ -161,10 +161,6 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 		return err
 	}
 
-	if s.feePerWeightStored == nil {
-		s.feePerWeightStored = new(big.Int)
-	}
-
 	lastAccumulatedFee, err := parentState.GetLastAccumulatedFee()
 	if err != nil {
 		return err
@@ -177,6 +173,10 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 
 	if lastAccumulatedFee == curAccumFee {
 		return nil
+	}
+
+	if s.feePerWeightStored == nil {
+		s.feePerWeightStored = new(big.Int)
 	}
 
 	vdrs, exists := backend.Config.Validators.Get(constants.OmegaChainID)
@@ -326,14 +326,16 @@ func AdvanceTimeTo(
 				return nil, err
 			}
 
-			feePerWeightStored, err := parentState.GetFeePerWeightStored()
-			if err != nil {
-				return nil, err
+			feePerWeightStored := changes.feePerWeightStored
+			if feePerWeightStored == nil {
+				feePerWeightStored, err = parentState.GetFeePerWeightStored()
+				if err != nil {
+					return nil, err
+				}
 			}
 
-			feeCalculator := reward.NewDistributeCalculator(feePerWeightStored)
 			mint := reward.CalculateMintReward(stakerToRemove.Weight, stakerToRemove.MintRate, changes.accumulatedMintRate)
-			fee := feeCalculator.Calculate(stakerToRemove.Weight, stakerToRemove.FeePerWeightPaid)
+			fee := reward.CalculateFeeReward(feePerWeightStored, stakerToRemove.Weight, stakerToRemove.FeePerWeightPaid)
 
 			stakerToRemove.PotentialReward = mint + fee
 			changes.updatedSupplies[stakerToRemove.SubnetID] = supply + stakerToRemove.PotentialReward

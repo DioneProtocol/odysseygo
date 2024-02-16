@@ -7,24 +7,8 @@ import (
 	"math/big"
 )
 
-var _ DistributeCalculator = (*distributeCalculator)(nil)
-
-type DistributeCalculator interface {
-	Calculate(weight uint64, feePerWeightPaid *big.Int) uint64
-}
-
-type distributeCalculator struct {
-	feePerWeightStored *big.Int
-}
-
-func NewDistributeCalculator(feePerWeightStored *big.Int) DistributeCalculator {
-	return &distributeCalculator{
-		feePerWeightStored: feePerWeightStored,
-	}
-}
-
-func (dc *distributeCalculator) Calculate(weight uint64, feePerWeightPaid *big.Int) uint64 {
-	feePerWeightDiff := new(big.Int).Set(dc.feePerWeightStored)
+func CalculateFeeReward(feePerWeightStored *big.Int, weight uint64, feePerWeightPaid *big.Int) uint64 {
+	feePerWeightDiff := new(big.Int).Set(feePerWeightStored)
 	feePerWeightDiff.Sub(feePerWeightDiff, feePerWeightPaid)
 	potentialReward := new(big.Int).SetUint64(weight)
 	potentialReward.Mul(potentialReward, feePerWeightDiff)
