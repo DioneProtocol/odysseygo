@@ -19,7 +19,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/google/btree v1.1.2
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/rpc v1.2.0
+	github.com/gorilla/rpc v1.2.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/holiman/bloomfilter/v2 v2.0.3
