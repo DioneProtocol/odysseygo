@@ -37,6 +37,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/config"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/fx"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/genesis"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/metrics"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/state"
@@ -135,7 +136,11 @@ func (vm *VM) Initialize(
 	}
 
 	rewards := reward.NewCalculator(vm.RewardConfig)
-	mintCalculator := reward.NewMintCalculator(vm.MintConfig)
+	genesisState, err := genesis.ParseState(genesisBytes)
+	if err != nil {
+		return err
+	}
+	mintCalculator := reward.NewMintCalculator(vm.MintConfig, genesisState.InitialSupply)
 
 	vm.state, err = state.New(
 		vm.dbManager.Current().Database,
