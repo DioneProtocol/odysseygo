@@ -43,6 +43,11 @@ type MintConfig struct {
 	// MintingPeriod is period of minting
 	MintingPeriod time.Duration `json:"mintingPeriod"`
 
-	// MintAmount is the amount of tokens to mint
-	MintAmount uint64 `json:"mintAmount"`
+	// MintAmount is the percent of the total supply to mint during the minting
+	// period
+	MintRate uint64 `json:"mintRate"`
+
+	// MintAmount is the maximum amount of tokens to mint during the minting
+	// period
+	MaxMintAmount uint64 `json:"maxMintAmount"`
 }
