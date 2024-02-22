@@ -196,7 +196,7 @@ func TestStandardTxExecutorAddDelegator(t *testing.T) {
 			description:          fmt.Sprintf("delegator should not be added more than (%s) in the future", MaxFutureStartTime),
 			stakeAmount:          dummyH.config.MinDelegatorStake,
 			startTime:            uint64(currentTimestamp.Add(MaxFutureStartTime + time.Second).Unix()),
-			endTime:              uint64(currentTimestamp.Add(MaxFutureStartTime + defaultMinStakingDuration + time.Second).Unix()),
+			endTime:              uint64(currentTimestamp.Add(MaxFutureStartTime + defaultMinDelegatorStakingDuration + time.Second).Unix()),
 			nodeID:               nodeID,
 			rewardAddress:        rewardAddress,
 			feeKeys:              []*secp256k1.PrivateKey{preFundedKeys[0]},
@@ -446,7 +446,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 
 	// starts validating primary network 10 seconds after genesis
 	dsStartTime := defaultGenesisTime.Add(10 * time.Second)
-	dsEndTime := dsStartTime.Add(5 * defaultMinStakingDuration)
+	dsEndTime := dsStartTime.Add(5 * defaultMinValidatorStakingDuration)
 
 	addDSTx, err := env.txBuilder.NewAddValidatorTx(
 		env.config.MinValidatorStake, // stake amount
@@ -585,7 +585,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddSubnetValidatorTx(
 			defaultWeight,               // weight
 			uint64(newTimestamp.Unix()), // start time
-			uint64(newTimestamp.Add(defaultMinStakingDuration).Unix()), // end time
+			uint64(newTimestamp.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			ids.NodeID(nodeID), // node ID
 			testSubnet1.ID(),   // subnet ID
 			[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -669,7 +669,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddSubnetValidatorTx(
 			defaultWeight,            // weight
 			uint64(startTime.Unix()), // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix())+1, // end time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix())+1, // end time
 			ids.NodeID(nodeID), // node ID
 			testSubnet1.ID(),   // subnet ID
 			[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1], testSubnet1ControlKeys[2]},
@@ -702,7 +702,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddSubnetValidatorTx(
 			defaultWeight,            // weight
 			uint64(startTime.Unix()), // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix()), // end time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			ids.NodeID(nodeID), // node ID
 			testSubnet1.ID(),   // subnet ID
 			[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[2]},
@@ -735,7 +735,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddSubnetValidatorTx(
 			defaultWeight,            // weight
 			uint64(startTime.Unix()), // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix()), // end time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			ids.NodeID(nodeID), // node ID
 			testSubnet1.ID(),   // subnet ID
 			[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], preFundedKeys[1]},
@@ -767,7 +767,7 @@ func TestStandardTxExecutorAddSubnetValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddSubnetValidatorTx(
 			defaultWeight,              // weight
 			uint64(startTime.Unix())+1, // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix())+1, // end time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix())+1, // end time
 			ids.NodeID(nodeID), // node ID
 			testSubnet1.ID(),   // subnet ID
 			[]*secp256k1.PrivateKey{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
@@ -843,7 +843,7 @@ func TestStandardTxExecutorAddValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddValidatorTx(
 			env.config.MinValidatorStake,
 			uint64(defaultValidateStartTime.Add(MaxFutureStartTime).Unix()+1),
-			uint64(defaultValidateStartTime.Add(MaxFutureStartTime).Add(defaultMinStakingDuration).Unix()+1),
+			uint64(defaultValidateStartTime.Add(MaxFutureStartTime).Add(defaultMinValidatorStakingDuration).Unix()+1),
 			nodeID,
 			ids.ShortEmpty,
 			reward.PercentDenominator,
@@ -868,9 +868,9 @@ func TestStandardTxExecutorAddValidator(t *testing.T) {
 		// Case: Validator in current validator set of primary network
 		startTime := defaultGenesisTime.Add(1 * time.Second)
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,                            // stake amount
-			uint64(startTime.Unix()),                                // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix()), // end time
+			env.config.MinValidatorStake,                                     // stake amount
+			uint64(startTime.Unix()),                                         // start time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			nodeID,
 			ids.ShortEmpty,
 			reward.PercentDenominator, // shares
@@ -905,9 +905,9 @@ func TestStandardTxExecutorAddValidator(t *testing.T) {
 		// Case: Validator in pending validator set of primary network
 		startTime := defaultGenesisTime.Add(1 * time.Second)
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,                            // stake amount
-			uint64(startTime.Unix()),                                // start time
-			uint64(startTime.Add(defaultMinStakingDuration).Unix()), // end time
+			env.config.MinValidatorStake,                                     // stake amount
+			uint64(startTime.Unix()),                                         // start time
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			nodeID,
 			ids.ShortEmpty,
 			reward.PercentDenominator, // shares
@@ -943,7 +943,7 @@ func TestStandardTxExecutorAddValidator(t *testing.T) {
 		tx, err := env.txBuilder.NewAddValidatorTx( // create the tx
 			env.config.MinValidatorStake,
 			uint64(startTime.Unix()),
-			uint64(startTime.Add(defaultMinStakingDuration).Unix()),
+			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()),
 			nodeID,
 			ids.ShortEmpty,
 			reward.PercentDenominator,
@@ -1358,20 +1358,22 @@ func newTransformSubnetTx(t *testing.T) (*txs.TransformSubnetTx, *txs.Tx) {
 				Memo: []byte("hi"),
 			},
 		},
-		Subnet:                   ids.GenerateTestID(),
-		AssetID:                  ids.GenerateTestID(),
-		InitialSupply:            10,
-		MaximumSupply:            10,
-		MinConsumptionRate:       0,
-		MaxConsumptionRate:       reward.PercentDenominator,
-		MinValidatorStake:        2,
-		MaxValidatorStake:        10,
-		MinStakeDuration:         1,
-		MaxStakeDuration:         2,
-		MinDelegationFee:         reward.PercentDenominator,
-		MinDelegatorStake:        1,
-		MaxValidatorWeightFactor: 1,
-		UptimeRequirement:        reward.PercentDenominator,
+		Subnet:                    ids.GenerateTestID(),
+		AssetID:                   ids.GenerateTestID(),
+		InitialSupply:             10,
+		MaximumSupply:             10,
+		MinConsumptionRate:        0,
+		MaxConsumptionRate:        reward.PercentDenominator,
+		MinValidatorStake:         2,
+		MaxValidatorStake:         10,
+		MinValidatorStakeDuration: 1,
+		MaxValidatorStakeDuration: 2,
+		MinDelegatorStakeDuration: 1,
+		MaxDelegatorStakeDuration: 2,
+		MinDelegationFee:          reward.PercentDenominator,
+		MinDelegatorStake:         1,
+		MaxValidatorWeightFactor:  1,
+		UptimeRequirement:         reward.PercentDenominator,
 		SubnetAuth: &secp256k1fx.Credential{
 			Sigs: make([][65]byte, 1),
 		},
@@ -1454,10 +1456,34 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 			err: txs.ErrNilTx,
 		},
 		{
-			name: "max stake duration too large",
+			name: "max validator stake duration too large",
 			newExecutor: func(ctrl *gomock.Controller) (*txs.TransformSubnetTx, *StandardTxExecutor) {
 				env := newValidTransformSubnetTxVerifyEnv(t, ctrl)
-				env.unsignedTx.MaxStakeDuration = math.MaxUint32
+				env.unsignedTx.MaxValidatorStakeDuration = math.MaxUint32
+				env.state = state.NewMockDiff(ctrl)
+				e := &StandardTxExecutor{
+					Backend: &Backend{
+						Config: &config.Config{
+							BanffTime: env.banffTime,
+						},
+						Bootstrapped: &utils.Atomic[bool]{},
+						Fx:           env.fx,
+						FlowChecker:  env.flowChecker,
+						Ctx:          &snow.Context{},
+					},
+					Tx:    env.tx,
+					State: env.state,
+				}
+				e.Bootstrapped.Set(true)
+				return env.unsignedTx, e
+			},
+			err: errMaxStakeDurationTooLarge,
+		},
+		{
+			name: "max delegator stake duration too large",
+			newExecutor: func(ctrl *gomock.Controller) (*txs.TransformSubnetTx, *StandardTxExecutor) {
+				env := newValidTransformSubnetTxVerifyEnv(t, ctrl)
+				env.unsignedTx.MaxDelegatorStakeDuration = math.MaxUint32
 				env.state = state.NewMockDiff(ctrl)
 				e := &StandardTxExecutor{
 					Backend: &Backend{
@@ -1487,8 +1513,9 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				e := &StandardTxExecutor{
 					Backend: &Backend{
 						Config: &config.Config{
-							BanffTime:        env.banffTime,
-							MaxStakeDuration: math.MaxInt64,
+							BanffTime:                 env.banffTime,
+							MaxValidatorStakeDuration: math.MaxInt64,
+							MaxDelegatorStakeDuration: math.MaxInt64,
 						},
 						Bootstrapped: &utils.Atomic[bool]{},
 						Fx:           env.fx,
@@ -1518,8 +1545,9 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				e := &StandardTxExecutor{
 					Backend: &Backend{
 						Config: &config.Config{
-							BanffTime:        env.banffTime,
-							MaxStakeDuration: math.MaxInt64,
+							BanffTime:                 env.banffTime,
+							MaxValidatorStakeDuration: math.MaxInt64,
+							MaxDelegatorStakeDuration: math.MaxInt64,
 						},
 						Bootstrapped: &utils.Atomic[bool]{},
 						Fx:           env.fx,
@@ -1554,8 +1582,9 @@ func TestStandardExecutorTransformSubnetTx(t *testing.T) {
 				e := &StandardTxExecutor{
 					Backend: &Backend{
 						Config: &config.Config{
-							BanffTime:        env.banffTime,
-							MaxStakeDuration: math.MaxInt64,
+							BanffTime:                 env.banffTime,
+							MaxValidatorStakeDuration: math.MaxInt64,
+							MaxDelegatorStakeDuration: math.MaxInt64,
 						},
 						Bootstrapped: &utils.Atomic[bool]{},
 						Fx:           env.fx,

@@ -83,11 +83,17 @@ type Config struct {
 	// UptimePercentage is the minimum uptime required to be rewarded for staking
 	UptimePercentage float64
 
-	// Minimum amount of time to allow a staker to stake
-	MinStakeDuration time.Duration
+	// Minimum amount of time to allow a validator to stake
+	MinValidatorStakeDuration time.Duration
 
-	// Maximum amount of time to allow a staker to stake
-	MaxStakeDuration time.Duration
+	// Maximum amount of time to allow a validator to stake
+	MaxValidatorStakeDuration time.Duration
+
+	// Minimum amount of time to allow a delegator to stake
+	MinDelegatorStakeDuration time.Duration
+
+	// Maximum amount of time to allow a delegator to stake
+	MaxDelegatorStakeDuration time.Duration
 
 	// Config for the minting function
 	RewardConfig reward.Config

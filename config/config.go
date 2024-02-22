@@ -804,8 +804,10 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.MinValidatorStake = v.GetUint64(MinValidatorStakeKey)
 		config.MaxValidatorStake = v.GetUint64(MaxValidatorStakeKey)
 		config.MinDelegatorStake = v.GetUint64(MinDelegatorStakeKey)
-		config.MinStakeDuration = v.GetDuration(MinStakeDurationKey)
-		config.MaxStakeDuration = v.GetDuration(MaxStakeDurationKey)
+		config.MinValidatorStakeDuration = v.GetDuration(MinValidatorStakeDurationKey)
+		config.MaxValidatorStakeDuration = v.GetDuration(MaxValidatorStakeDurationKey)
+		config.MinDelegatorStakeDuration = v.GetDuration(MinDelegatorStakeDurationKey)
+		config.MaxDelegatorStakeDuration = v.GetDuration(MaxDelegatorStakeDurationKey)
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
 		config.RewardConfig.MinConsumptionRate = v.GetUint64(StakeMinConsumptionRateKey)
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
@@ -821,15 +823,19 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 			return node.StakingConfig{}, errMinValidatorStakeAboveMax
 		case config.MinDelegationFee > 1_000_000:
 			return node.StakingConfig{}, errInvalidDelegationFee
-		case config.MinStakeDuration <= 0:
+		case config.MinValidatorStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
-		case config.MaxStakeDuration < config.MinStakeDuration:
+		case config.MaxValidatorStakeDuration < config.MinValidatorStakeDuration:
+			return node.StakingConfig{}, errMinStakeDurationAboveMax
+		case config.MinDelegatorStakeDuration <= 0:
+			return node.StakingConfig{}, errInvalidMinStakeDuration
+		case config.MaxDelegatorStakeDuration < config.MinDelegatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.RewardConfig.MaxConsumptionRate > reward.PercentDenominator:
 			return node.StakingConfig{}, errStakeMaxConsumptionTooLarge
 		case config.RewardConfig.MaxConsumptionRate < config.RewardConfig.MinConsumptionRate:
 			return node.StakingConfig{}, errStakeMaxConsumptionBelowMin
-		case config.RewardConfig.MintingPeriod < config.MaxStakeDuration:
+		case config.RewardConfig.MintingPeriod < config.MaxValidatorStakeDuration:
 			return node.StakingConfig{}, errStakeMintingPeriodBelowMin
 		}
 	} else {

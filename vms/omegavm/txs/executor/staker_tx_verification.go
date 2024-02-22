@@ -106,11 +106,11 @@ func verifyAddValidatorTx(
 		// Ensure the validator fee is at least the minimum amount
 		return nil, ErrInsufficientDelegationFee
 
-	case duration < backend.Config.MinStakeDuration:
+	case duration < backend.Config.MinValidatorStakeDuration:
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
-	case duration > backend.Config.MaxStakeDuration:
+	case duration > backend.Config.MaxValidatorStakeDuration:
 		// Ensure staking length is not too long
 		return nil, ErrStakeTooLong
 	}
@@ -190,11 +190,11 @@ func verifyAddSubnetValidatorTx(
 
 	duration := tx.Validator.Duration()
 	switch {
-	case duration < backend.Config.MinStakeDuration:
+	case duration < backend.Config.MinValidatorStakeDuration:
 		// Ensure staking length is not too short
 		return ErrStakeTooShort
 
-	case duration > backend.Config.MaxStakeDuration:
+	case duration > backend.Config.MaxValidatorStakeDuration:
 		// Ensure staking length is not too long
 		return ErrStakeTooLong
 	}
@@ -351,11 +351,11 @@ func verifyAddDelegatorTx(
 
 	duration := tx.Validator.Duration()
 	switch {
-	case duration < backend.Config.MinStakeDuration:
+	case duration < backend.Config.MinDelegatorStakeDuration:
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
-	case duration > backend.Config.MaxStakeDuration:
+	case duration > backend.Config.MaxDelegatorStakeDuration:
 		// Ensure staking length is not too long
 		return nil, ErrStakeTooLong
 
@@ -591,8 +591,8 @@ func getValidatorRules(
 			assetID:           backend.Ctx.DIONEAssetID,
 			minValidatorStake: backend.Config.MinValidatorStake,
 			maxValidatorStake: backend.Config.MaxValidatorStake,
-			minStakeDuration:  backend.Config.MinStakeDuration,
-			maxStakeDuration:  backend.Config.MaxStakeDuration,
+			minStakeDuration:  backend.Config.MinValidatorStakeDuration,
+			maxStakeDuration:  backend.Config.MaxValidatorStakeDuration,
 			minDelegationFee:  backend.Config.MinDelegationFee,
 		}, nil
 	}
@@ -610,8 +610,8 @@ func getValidatorRules(
 		assetID:           transformSubnet.AssetID,
 		minValidatorStake: transformSubnet.MinValidatorStake,
 		maxValidatorStake: transformSubnet.MaxValidatorStake,
-		minStakeDuration:  time.Duration(transformSubnet.MinStakeDuration) * time.Second,
-		maxStakeDuration:  time.Duration(transformSubnet.MaxStakeDuration) * time.Second,
+		minStakeDuration:  time.Duration(transformSubnet.MinValidatorStakeDuration) * time.Second,
+		maxStakeDuration:  time.Duration(transformSubnet.MaxValidatorStakeDuration) * time.Second,
 		minDelegationFee:  transformSubnet.MinDelegationFee,
 	}, nil
 }
@@ -779,8 +779,8 @@ func getDelegatorRules(
 			assetID:                  backend.Ctx.DIONEAssetID,
 			minDelegatorStake:        backend.Config.MinDelegatorStake,
 			maxValidatorStake:        backend.Config.MaxValidatorStake,
-			minStakeDuration:         backend.Config.MinStakeDuration,
-			maxStakeDuration:         backend.Config.MaxStakeDuration,
+			minStakeDuration:         backend.Config.MinDelegatorStakeDuration,
+			maxStakeDuration:         backend.Config.MaxDelegatorStakeDuration,
 			maxValidatorWeightFactor: MaxValidatorWeightFactor,
 		}, nil
 	}
@@ -798,8 +798,8 @@ func getDelegatorRules(
 		assetID:                  transformSubnet.AssetID,
 		minDelegatorStake:        transformSubnet.MinDelegatorStake,
 		maxValidatorStake:        transformSubnet.MaxValidatorStake,
-		minStakeDuration:         time.Duration(transformSubnet.MinStakeDuration) * time.Second,
-		maxStakeDuration:         time.Duration(transformSubnet.MaxStakeDuration) * time.Second,
+		minStakeDuration:         time.Duration(transformSubnet.MinDelegatorStakeDuration) * time.Second,
+		maxStakeDuration:         time.Duration(transformSubnet.MaxDelegatorStakeDuration) * time.Second,
 		maxValidatorWeightFactor: transformSubnet.MaxValidatorWeightFactor,
 	}, nil
 }

@@ -31,7 +31,7 @@ var (
 	}`)
 
 	genesisStakingCfg = &StakingConfig{
-		MaxStakeDuration: 365 * 24 * time.Hour,
+		MaxValidatorStakeDuration: 365 * 24 * time.Hour,
 	}
 )
 
@@ -101,7 +101,7 @@ func TestValidateConfig(t *testing.T) {
 			networkID: 12345,
 			config: func() *Config {
 				thisConfig := LocalConfig
-				thisConfig.InitialStakeDuration = uint64(genesisStakingCfg.MaxStakeDuration+time.Second) / uint64(time.Second)
+				thisConfig.InitialStakeDuration = uint64(genesisStakingCfg.MaxValidatorStakeDuration+time.Second) / uint64(time.Second)
 				return &thisConfig
 			}(),
 			expectedErr: errStakeDurationTooHigh,

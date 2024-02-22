@@ -91,7 +91,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 	require.NoError(vm.SetPreference(context.Background(), vm.manager.LastAccepted()))
 
 	firstDelegatorStartTime := validatorStartTime.Add(executor.SyncBound).Add(1 * time.Second)
-	firstDelegatorEndTime := firstDelegatorStartTime.Add(vm.MinStakeDuration)
+	firstDelegatorEndTime := firstDelegatorStartTime.Add(vm.MinDelegatorStakeDuration)
 
 	// create valid tx
 	addFirstDelegatorTx, err := vm.txBuilder.NewAddDelegatorTx(
@@ -123,7 +123,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 	require.NoError(vm.SetPreference(context.Background(), vm.manager.LastAccepted()))
 
 	secondDelegatorStartTime := firstDelegatorEndTime.Add(2 * time.Second)
-	secondDelegatorEndTime := secondDelegatorStartTime.Add(vm.MinStakeDuration)
+	secondDelegatorEndTime := secondDelegatorStartTime.Add(vm.MinDelegatorStakeDuration)
 
 	vm.clock.Set(secondDelegatorStartTime.Add(-10 * executor.SyncBound))
 
@@ -149,7 +149,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 	require.NoError(vm.SetPreference(context.Background(), vm.manager.LastAccepted()))
 
 	thirdDelegatorStartTime := firstDelegatorEndTime.Add(-time.Second)
-	thirdDelegatorEndTime := thirdDelegatorStartTime.Add(vm.MinStakeDuration)
+	thirdDelegatorEndTime := thirdDelegatorStartTime.Add(vm.MinDelegatorStakeDuration)
 
 	// create valid tx
 	addThirdDelegatorTx, err := vm.txBuilder.NewAddDelegatorTx(
@@ -174,19 +174,19 @@ func TestAddDelegatorTxHeapCorruption(t *testing.T) {
 	validatorStake := defaultMaxValidatorStake / 5
 
 	delegator1StartTime := validatorStartTime
-	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinStakingDuration)
+	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinDelegatorStakingDuration)
 	delegator1Stake := defaultMinValidatorStake
 
-	delegator2StartTime := validatorStartTime.Add(1 * defaultMinStakingDuration)
-	delegator2EndTime := delegator1StartTime.Add(6 * defaultMinStakingDuration)
+	delegator2StartTime := validatorStartTime.Add(1 * defaultMinDelegatorStakingDuration)
+	delegator2EndTime := delegator1StartTime.Add(6 * defaultMinDelegatorStakingDuration)
 	delegator2Stake := defaultMinValidatorStake
 
-	delegator3StartTime := validatorStartTime.Add(2 * defaultMinStakingDuration)
-	delegator3EndTime := delegator1StartTime.Add(4 * defaultMinStakingDuration)
+	delegator3StartTime := validatorStartTime.Add(2 * defaultMinDelegatorStakingDuration)
+	delegator3EndTime := delegator1StartTime.Add(4 * defaultMinDelegatorStakingDuration)
 	delegator3Stake := defaultMaxValidatorStake - validatorStake - 2*defaultMinValidatorStake
 
-	delegator4StartTime := validatorStartTime.Add(5 * defaultMinStakingDuration)
-	delegator4EndTime := delegator1StartTime.Add(7 * defaultMinStakingDuration)
+	delegator4StartTime := validatorStartTime.Add(5 * defaultMinDelegatorStakingDuration)
+	delegator4EndTime := delegator1StartTime.Add(7 * defaultMinDelegatorStakingDuration)
 	delegator4Stake := defaultMaxValidatorStake - validatorStake - defaultMinValidatorStake
 
 	tests := []struct {
@@ -350,13 +350,15 @@ func TestUnverifiedParentPanicRegression(t *testing.T) {
 	primaryVdrs := validators.NewSet()
 	_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
 	vm := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		Validators:             vdrs,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		Validators:                vdrs,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		BanffTime:                 banffForkTime,
 	}}
 
 	ctx := defaultContext(t)
@@ -477,7 +479,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	}()
 
 	newValidatorStartTime := vm.clock.Time().Add(executor.SyncBound).Add(1 * time.Second)
-	newValidatorEndTime := newValidatorStartTime.Add(defaultMinStakingDuration)
+	newValidatorEndTime := newValidatorStartTime.Add(defaultMinValidatorStakingDuration)
 
 	key, err := testKeyFactory.NewPrivateKey()
 	require.NoError(err)
@@ -695,7 +697,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	vm.state.SetCurrentSupply(constants.PrimaryNetworkID, defaultRewardConfig.SupplyCap/2)
 
 	newValidatorStartTime0 := vm.clock.Time().Add(executor.SyncBound).Add(1 * time.Second)
-	newValidatorEndTime0 := newValidatorStartTime0.Add(defaultMaxStakingDuration)
+	newValidatorEndTime0 := newValidatorStartTime0.Add(defaultMaxValidatorStakingDuration)
 
 	nodeID0 := ids.NodeID(ids.GenerateTestShortID())
 
@@ -868,7 +870,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	require.Equal(choices.Processing, importBlkStatus)
 
 	newValidatorStartTime1 := newValidatorStartTime0.Add(executor.SyncBound).Add(1 * time.Second)
-	newValidatorEndTime1 := newValidatorStartTime1.Add(defaultMaxStakingDuration)
+	newValidatorEndTime1 := newValidatorStartTime1.Add(defaultMaxValidatorStakingDuration)
 
 	nodeID1 := ids.NodeID(ids.GenerateTestShortID())
 
@@ -1035,7 +1037,7 @@ func TestValidatorSetAtCacheOverwriteRegression(t *testing.T) {
 	}
 
 	newValidatorStartTime0 := vm.clock.Time().Add(executor.SyncBound).Add(1 * time.Second)
-	newValidatorEndTime0 := newValidatorStartTime0.Add(defaultMaxStakingDuration)
+	newValidatorEndTime0 := newValidatorStartTime0.Add(defaultMaxValidatorStakingDuration)
 
 	nodeID5 := ids.GenerateTestNodeID()
 
@@ -1142,11 +1144,11 @@ func TestAddDelegatorTxAddBeforeRemove(t *testing.T) {
 	validatorStake := defaultMaxValidatorStake / 5
 
 	delegator1StartTime := validatorStartTime
-	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinStakingDuration)
+	delegator1EndTime := delegator1StartTime.Add(3 * defaultMinDelegatorStakingDuration)
 	delegator1Stake := defaultMaxValidatorStake - validatorStake
 
 	delegator2StartTime := delegator1EndTime
-	delegator2EndTime := delegator2StartTime.Add(3 * defaultMinStakingDuration)
+	delegator2EndTime := delegator2StartTime.Add(3 * defaultMinDelegatorStakingDuration)
 	delegator2Stake := defaultMaxValidatorStake - validatorStake
 
 	vm, _, _ := defaultVM(t)
@@ -1474,10 +1476,10 @@ func TestSubnetValidatorBLSKeyDiffAfterExpiry(t *testing.T) {
 	var (
 		primaryStartTime   = currentTime.Add(executor.SyncBound)
 		subnetStartTime    = primaryStartTime.Add(executor.SyncBound)
-		subnetEndTime      = subnetStartTime.Add(defaultMinStakingDuration)
+		subnetEndTime      = subnetStartTime.Add(defaultMinValidatorStakingDuration)
 		primaryEndTime     = subnetEndTime.Add(time.Second)
 		primaryReStartTime = primaryEndTime.Add(executor.SyncBound)
-		primaryReEndTime   = primaryReStartTime.Add(defaultMinStakingDuration)
+		primaryReEndTime   = primaryReStartTime.Add(defaultMinValidatorStakingDuration)
 	)
 
 	// insert primary network validator
@@ -1754,9 +1756,9 @@ func TestPrimaryNetworkValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	// A primary network validator stake twice
 	var (
 		primaryStartTime1 = currentTime.Add(executor.SyncBound)
-		primaryEndTime1   = primaryStartTime1.Add(defaultMinStakingDuration)
+		primaryEndTime1   = primaryStartTime1.Add(defaultMinValidatorStakingDuration)
 		primaryStartTime2 = primaryEndTime1.Add(executor.SyncBound)
-		primaryEndTime2   = primaryStartTime2.Add(defaultMinStakingDuration)
+		primaryEndTime2   = primaryStartTime2.Add(defaultMinValidatorStakingDuration)
 	)
 
 	// Add a primary network validator with no BLS key
@@ -1916,10 +1918,10 @@ func TestSubnetValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	var (
 		primaryStartTime1 = currentTime.Add(executor.SyncBound)
 		subnetStartTime   = primaryStartTime1.Add(executor.SyncBound)
-		subnetEndTime     = subnetStartTime.Add(defaultMinStakingDuration)
+		subnetEndTime     = subnetStartTime.Add(defaultMinValidatorStakingDuration)
 		primaryEndTime1   = subnetEndTime.Add(time.Second)
 		primaryStartTime2 = primaryEndTime1.Add(executor.SyncBound)
-		primaryEndTime2   = primaryStartTime2.Add(defaultMinStakingDuration)
+		primaryEndTime2   = primaryStartTime2.Add(defaultMinValidatorStakingDuration)
 	)
 
 	// Add a primary network validator with no BLS key
@@ -2127,7 +2129,7 @@ func TestSubnetValidatorSetAfterPrimaryNetworkValidatorRemoval(t *testing.T) {
 	var (
 		primaryStartTime1 = currentTime.Add(executor.SyncBound)
 		subnetStartTime   = primaryStartTime1.Add(executor.SyncBound)
-		subnetEndTime     = subnetStartTime.Add(defaultMinStakingDuration)
+		subnetEndTime     = subnetStartTime.Add(defaultMinValidatorStakingDuration)
 		primaryEndTime1   = subnetEndTime.Add(time.Second)
 	)
 
