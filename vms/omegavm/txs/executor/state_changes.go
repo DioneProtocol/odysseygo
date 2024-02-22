@@ -253,7 +253,14 @@ func AdvanceTimeTo(
 			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
 				return nil, err
 			}
-			stakerToAdd.FeePerWeightPaid = changes.feePerWeightStored
+			feePerWeightStored := changes.feePerWeightStored
+			if feePerWeightStored == nil {
+				feePerWeightStored, err = parentState.GetFeePerWeightStored()
+				if err != nil {
+					return nil, err
+				}
+			}
+			stakerToAdd.FeePerWeightPaid = feePerWeightStored
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
