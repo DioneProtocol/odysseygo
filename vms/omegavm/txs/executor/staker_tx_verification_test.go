@@ -40,12 +40,14 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 		subnetID            = ids.GenerateTestID()
 		customAssetID       = ids.GenerateTestID()
 		unsignedTransformTx = &txs.TransformSubnetTx{
-			AssetID:           customAssetID,
-			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
-			MinStakeDuration:  3,
-			MaxStakeDuration:  4,
-			MinDelegationFee:  5,
+			AssetID:                   customAssetID,
+			MinValidatorStake:         1,
+			MaxValidatorStake:         2,
+			MinValidatorStakeDuration: 3,
+			MaxValidatorStakeDuration: 4,
+			MinDelegatorStakeDuration: 3,
+			MaxDelegatorStakeDuration: 4,
+			MinDelegationFee:          5,
 		}
 		transformTx = txs.Tx{
 			Unsigned: unsignedTransformTx,
@@ -65,7 +67,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 			Validator: txs.Validator{
 				NodeID: ids.GenerateTestNodeID(),
 				Start:  1,
-				End:    1 + uint64(unsignedTransformTx.MinStakeDuration),
+				End:    1 + uint64(unsignedTransformTx.MinValidatorStakeDuration),
 				Wght:   unsignedTransformTx.MinValidatorStake,
 			},
 			Subnet: subnetID,
@@ -258,7 +260,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is 1 less than the minimum
 				tx.Validator.Start = 1
-				tx.Validator.End = uint64(unsignedTransformTx.MinStakeDuration)
+				tx.Validator.End = uint64(unsignedTransformTx.MinValidatorStakeDuration)
 				return &tx
 			},
 			expectedErr: ErrStakeTooShort,
@@ -288,7 +290,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				tx.DelegationShares = unsignedTransformTx.MinDelegationFee
 				// Note the duration is more than the maximum
 				tx.Validator.Start = 1
-				tx.Validator.End = 2 + uint64(unsignedTransformTx.MaxStakeDuration)
+				tx.Validator.End = 2 + uint64(unsignedTransformTx.MaxValidatorStakeDuration)
 				return &tx
 			},
 			expectedErr: ErrStakeTooLong,
@@ -474,7 +476,7 @@ func TestVerifyAddPermissionlessValidatorTx(t *testing.T) {
 				// Note this copies [verifiedTx]
 				tx := verifiedTx
 				tx.Validator.Start = uint64(MaxFutureStartTime.Seconds()) + 1
-				tx.Validator.End = tx.Validator.Start + uint64(unsignedTransformTx.MinStakeDuration)
+				tx.Validator.End = tx.Validator.Start + uint64(unsignedTransformTx.MinValidatorStakeDuration)
 				return &tx
 			},
 			expectedErr: ErrFutureStakeTime,
@@ -556,11 +558,13 @@ func TestGetValidatorRules(t *testing.T) {
 
 	var (
 		config = &config.Config{
-			MinValidatorStake: 1,
-			MaxValidatorStake: 2,
-			MinStakeDuration:  time.Second,
-			MaxStakeDuration:  2 * time.Second,
-			MinDelegationFee:  1337,
+			MinValidatorStake:         1,
+			MaxValidatorStake:         2,
+			MinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration: 2 * time.Second,
+			MinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration: 2 * time.Second,
+			MinDelegationFee:          1337,
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -584,8 +588,8 @@ func TestGetValidatorRules(t *testing.T) {
 				assetID:           dioneAssetID,
 				minValidatorStake: config.MinValidatorStake,
 				maxValidatorStake: config.MaxValidatorStake,
-				minStakeDuration:  config.MinStakeDuration,
-				maxStakeDuration:  config.MaxStakeDuration,
+				minStakeDuration:  config.MinValidatorStakeDuration,
+				maxStakeDuration:  config.MaxValidatorStakeDuration,
 				minDelegationFee:  config.MinDelegationFee,
 			},
 		},
@@ -624,12 +628,14 @@ func TestGetValidatorRules(t *testing.T) {
 				state := state.NewMockChain(ctrl)
 				tx := &txs.Tx{
 					Unsigned: &txs.TransformSubnetTx{
-						AssetID:           customAssetID,
-						MinValidatorStake: config.MinValidatorStake,
-						MaxValidatorStake: config.MaxValidatorStake,
-						MinStakeDuration:  1337,
-						MaxStakeDuration:  42,
-						MinDelegationFee:  config.MinDelegationFee,
+						AssetID:                   customAssetID,
+						MinValidatorStake:         config.MinValidatorStake,
+						MaxValidatorStake:         config.MaxValidatorStake,
+						MinValidatorStakeDuration: 1337,
+						MaxValidatorStakeDuration: 42,
+						MinDelegatorStakeDuration: 1337,
+						MaxDelegatorStakeDuration: 42,
+						MinDelegationFee:          config.MinDelegationFee,
 					},
 				}
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)
@@ -675,10 +681,12 @@ func TestGetDelegatorRules(t *testing.T) {
 	}
 	var (
 		config = &config.Config{
-			MinDelegatorStake: 1,
-			MaxValidatorStake: 2,
-			MinStakeDuration:  time.Second,
-			MaxStakeDuration:  2 * time.Second,
+			MinDelegatorStake:         1,
+			MaxValidatorStake:         2,
+			MinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration: 2 * time.Second,
+			MinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration: 2 * time.Second,
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -701,8 +709,8 @@ func TestGetDelegatorRules(t *testing.T) {
 				assetID:                  dioneAssetID,
 				minDelegatorStake:        config.MinDelegatorStake,
 				maxValidatorStake:        config.MaxValidatorStake,
-				minStakeDuration:         config.MinStakeDuration,
-				maxStakeDuration:         config.MaxStakeDuration,
+				minStakeDuration:         config.MinDelegatorStakeDuration,
+				maxStakeDuration:         config.MaxDelegatorStakeDuration,
 				maxValidatorWeightFactor: MaxValidatorWeightFactor,
 			},
 		},
@@ -741,14 +749,16 @@ func TestGetDelegatorRules(t *testing.T) {
 				state := state.NewMockChain(ctrl)
 				tx := &txs.Tx{
 					Unsigned: &txs.TransformSubnetTx{
-						AssetID:                  customAssetID,
-						MinDelegatorStake:        config.MinDelegatorStake,
-						MinValidatorStake:        config.MinValidatorStake,
-						MaxValidatorStake:        config.MaxValidatorStake,
-						MinStakeDuration:         1337,
-						MaxStakeDuration:         42,
-						MinDelegationFee:         config.MinDelegationFee,
-						MaxValidatorWeightFactor: 21,
+						AssetID:                   customAssetID,
+						MinDelegatorStake:         config.MinDelegatorStake,
+						MinValidatorStake:         config.MinValidatorStake,
+						MaxValidatorStake:         config.MaxValidatorStake,
+						MinValidatorStakeDuration: 1337,
+						MaxValidatorStakeDuration: 42,
+						MinDelegatorStakeDuration: 1337,
+						MaxDelegatorStakeDuration: 42,
+						MinDelegationFee:          config.MinDelegationFee,
+						MaxValidatorWeightFactor:  21,
 					},
 				}
 				state.EXPECT().GetSubnetTransformation(subnetID).Return(tx, nil)

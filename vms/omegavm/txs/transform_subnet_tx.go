@@ -78,15 +78,24 @@ type TransformSubnetTx struct {
 	// - Must be >= [MinValidatorStake]
 	// - Must be <= [MaximumSupply]
 	MaxValidatorStake uint64 `serialize:"true" json:"maxValidatorStake"`
-	// MinStakeDuration is the minimum number of seconds a staker can stake for.
+	// MinValidatorStakeDuration is the minimum number of seconds a staker can stake for.
 	// Restrictions:
 	// - Must be > 0
-	MinStakeDuration uint32 `serialize:"true" json:"minStakeDuration"`
-	// MaxStakeDuration is the maximum number of seconds a staker can stake for.
+	MinValidatorStakeDuration uint32 `serialize:"true" json:"minValidatorStakeDuration"`
+	// MaxValidatorStakeDuration is the maximum number of seconds a staker can stake for.
 	// Restrictions:
-	// - Must be >= [MinStakeDuration]
+	// - Must be >= [MinValidatorStakeDuration]
 	// - Must be <= [GlobalMaxStakeDuration]
-	MaxStakeDuration uint32 `serialize:"true" json:"maxStakeDuration"`
+	MaxValidatorStakeDuration uint32 `serialize:"true" json:"maxValidatorStakeDuration"`
+	// MinDelegatorStakeDuration is the minimum number of seconds a staker can stake for.
+	// Restrictions:
+	// - Must be > 0
+	MinDelegatorStakeDuration uint32 `serialize:"true" json:"minDelegatorStakeDuration"`
+	// MaxValidatorStakeDuration is the maximum number of seconds a staker can stake for.
+	// Restrictions:
+	// - Must be >= [MinDelegatorStakeDuration]
+	// - Must be <= [GlobalMaxStakeDuration]
+	MaxDelegatorStakeDuration uint32 `serialize:"true" json:"maxDelegatorStakeDuration"`
 	// MinDelegationFee is the minimum percentage a validator must charge a
 	// delegator for delegating.
 	// Restrictions:
@@ -140,9 +149,13 @@ func (tx *TransformSubnetTx) SyntacticVerify(ctx *snow.Context) error {
 		return errMinValidatorStakeAboveMax
 	case tx.MaxValidatorStake > tx.MaximumSupply:
 		return errMaxValidatorStakeTooLarge
-	case tx.MinStakeDuration == 0:
+	case tx.MinValidatorStakeDuration == 0:
 		return errMinStakeDurationZero
-	case tx.MinStakeDuration > tx.MaxStakeDuration:
+	case tx.MinValidatorStakeDuration > tx.MaxValidatorStakeDuration:
+		return errMinStakeDurationTooLarge
+	case tx.MinDelegatorStakeDuration == 0:
+		return errMinStakeDurationZero
+	case tx.MinDelegatorStakeDuration > tx.MaxDelegatorStakeDuration:
 		return errMinStakeDurationTooLarge
 	case tx.MinDelegationFee > reward.PercentDenominator:
 		return errMinDelegationFeeTooLarge

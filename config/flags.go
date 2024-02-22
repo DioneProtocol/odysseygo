@@ -271,9 +271,13 @@ func addNodeFlags(fs *pflag.FlagSet) {
 	fs.Uint64(MinDelegatorStakeKey, genesis.LocalParams.MinDelegatorStake, "Minimum stake, in nDIONE, that can be delegated on the primary network")
 	fs.Uint64(MinDelegatorFeeKey, uint64(genesis.LocalParams.MinDelegationFee), "Minimum delegation fee, in the range [0, 1000000], that can be charged for delegation on the primary network")
 	// Minimum Stake Duration
-	fs.Duration(MinStakeDurationKey, genesis.LocalParams.MinStakeDuration, "Minimum staking duration")
+	fs.Duration(MinValidatorStakeDurationKey, genesis.LocalParams.MinValidatorStakeDuration, "Minimum validator staking duration")
 	// Maximum Stake Duration
-	fs.Duration(MaxStakeDurationKey, genesis.LocalParams.MaxStakeDuration, "Maximum staking duration")
+	fs.Duration(MaxValidatorStakeDurationKey, genesis.LocalParams.MaxValidatorStakeDuration, "Maximum validator staking duration")
+	// Minimum Delegator Stake Duration
+	fs.Duration(MinDelegatorStakeDurationKey, genesis.LocalParams.MinDelegatorStakeDuration, "Minimum delegator staking duration")
+	// Maximum Delegator Stake Duration
+	fs.Duration(MaxDelegatorStakeDurationKey, genesis.LocalParams.MaxDelegatorStakeDuration, "Maximum delegator staking duration")
 	// Stake Reward Configs
 	fs.Uint64(StakeMaxConsumptionRateKey, genesis.LocalParams.RewardConfig.MaxConsumptionRate, "Maximum consumption rate of the remaining tokens to mint in the staking function")
 	fs.Uint64(StakeMinConsumptionRateKey, genesis.LocalParams.RewardConfig.MinConsumptionRate, "Minimum consumption rate of the remaining tokens to mint in the staking function")

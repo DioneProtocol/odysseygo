@@ -23,12 +23,18 @@ type StakingConfig struct {
 	// Minimum delegation fee, in the range [0, 1000000], that can be charged
 	// for delegation on the primary network.
 	MinDelegationFee uint32 `json:"minDelegationFee"`
-	// MinStakeDuration is the minimum amount of time a validator can validate
+	// MinValidatorStakeDuration is the minimum amount of time a validator can validate
 	// for in a single period.
-	MinStakeDuration time.Duration `json:"minStakeDuration"`
-	// MaxStakeDuration is the maximum amount of time a validator can validate
+	MinValidatorStakeDuration time.Duration `json:"minValidatorStakeDuration"`
+	// MaxValidatorStakeDuration is the maximum amount of time a validator can validate
 	// for in a single period.
-	MaxStakeDuration time.Duration `json:"maxStakeDuration"`
+	MaxValidatorStakeDuration time.Duration `json:"maxValidatorStakeDuration"`
+	// MinDelegatorStakeDuration is the minimum amount of time a delegator can delegate
+	// for in a single period.
+	MinDelegatorStakeDuration time.Duration `json:"minDelekatorStakeDuration"`
+	// MaxDelegatorStakeDuration is the maximum amount of time a delegator can delegate
+	// for in a single period.
+	MaxDelegatorStakeDuration time.Duration `json:"maxDelegatorStakeDuration"`
 	// RewardConfig is the config for the reward function.
 	RewardConfig reward.Config `json:"rewardConfig"`
 	// Config for the minting function

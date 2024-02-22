@@ -59,19 +59,21 @@ const (
 )
 
 var (
-	defaultMinStakingDuration = 24 * time.Hour
-	defaultMaxStakingDuration = 365 * 24 * time.Hour
-	defaultGenesisTime        = time.Date(1997, 1, 1, 0, 0, 0, 0, time.UTC)
-	defaultValidateStartTime  = defaultGenesisTime
-	defaultValidateEndTime    = defaultValidateStartTime.Add(20 * defaultMinStakingDuration)
-	defaultMinValidatorStake  = 5 * units.MilliDione
-	defaultBalance            = 100 * defaultMinValidatorStake
-	preFundedKeys             = secp256k1.TestKeys()
-	dioneAssetID              = ids.ID{'y', 'e', 'e', 't'}
-	defaultTxFee              = uint64(100)
-	aChainID                  = ids.Empty.Prefix(0)
-	dChainID                  = ids.Empty.Prefix(1)
-	lastAcceptedID            = ids.GenerateTestID()
+	defaultMinValidatorStakingDuration = 24 * time.Hour
+	defaultMaxValidatorStakingDuration = 365 * 24 * time.Hour
+	defaultMinDelegatorStakingDuration = 24 * time.Hour
+	defaultMaxDelegatorStakingDuration = 365 * 24 * time.Hour
+	defaultGenesisTime                 = time.Date(1997, 1, 1, 0, 0, 0, 0, time.UTC)
+	defaultValidateStartTime           = defaultGenesisTime
+	defaultValidateEndTime             = defaultValidateStartTime.Add(20 * defaultMinValidatorStakingDuration)
+	defaultMinValidatorStake           = 5 * units.MilliDione
+	defaultBalance                     = 100 * defaultMinValidatorStake
+	preFundedKeys                      = secp256k1.TestKeys()
+	dioneAssetID                       = ids.ID{'y', 'e', 'e', 't'}
+	defaultTxFee                       = uint64(100)
+	aChainID                           = ids.Empty.Prefix(0)
+	dChainID                           = ids.Empty.Prefix(1)
+	lastAcceptedID                     = ids.GenerateTestID()
 
 	testSubnet1            *txs.Tx
 	testSubnet1ControlKeys = preFundedKeys[0:3]
@@ -295,17 +297,19 @@ func defaultConfig(postBanff, postCortina bool) config.Config {
 	primaryVdrs := validators.NewSet()
 	_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
 	return config.Config{
-		Chains:                 chains.TestManager,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		Validators:             vdrs,
-		TxFee:                  defaultTxFee,
-		CreateSubnetTxFee:      100 * defaultTxFee,
-		CreateBlockchainTxFee:  100 * defaultTxFee,
-		MinValidatorStake:      5 * units.MilliDione,
-		MaxValidatorStake:      500 * units.MilliDione,
-		MinDelegatorStake:      1 * units.MilliDione,
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
+		Chains:                    chains.TestManager,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		Validators:                vdrs,
+		TxFee:                     defaultTxFee,
+		CreateSubnetTxFee:         100 * defaultTxFee,
+		CreateBlockchainTxFee:     100 * defaultTxFee,
+		MinValidatorStake:         5 * units.MilliDione,
+		MaxValidatorStake:         500 * units.MilliDione,
+		MinDelegatorStake:         1 * units.MilliDione,
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
 		RewardConfig: reward.Config{
 			MaxConsumptionRate: .12 * reward.PercentDenominator,
 			MinConsumptionRate: .10 * reward.PercentDenominator,

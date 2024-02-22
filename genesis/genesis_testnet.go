@@ -30,13 +30,15 @@ var (
 			AddSubnetDelegatorFee:         units.MilliDione,
 		},
 		StakingConfig: StakingConfig{
-			UptimeRequirement: .8, // 80%
-			MinValidatorStake: 1 * units.Dione,
-			MaxValidatorStake: 3 * units.MegaDione,
-			MinDelegatorStake: 1 * units.Dione,
-			MinDelegationFee:  20000, // 2%
-			MinStakeDuration:  24 * time.Hour,
-			MaxStakeDuration:  365 * 24 * time.Hour,
+			UptimeRequirement:         .8, // 80%
+			MinValidatorStake:         1 * units.Dione,
+			MaxValidatorStake:         3 * units.MegaDione,
+			MinDelegatorStake:         1 * units.Dione,
+			MinDelegationFee:          20000, // 2%
+			MinValidatorStakeDuration: 24 * time.Hour,
+			MaxValidatorStakeDuration: 365 * 24 * time.Hour,
+			MinDelegatorStakeDuration: 24 * time.Hour,
+			MaxDelegatorStakeDuration: 365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,

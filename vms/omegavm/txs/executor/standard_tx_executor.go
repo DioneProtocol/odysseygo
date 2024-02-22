@@ -394,7 +394,11 @@ func (e *StandardTxExecutor) TransformSubnetTx(tx *txs.TransformSubnetTx) error 
 
 	// Note: math.MaxInt32 * time.Second < math.MaxInt64 - so this can never
 	// overflow.
-	if time.Duration(tx.MaxStakeDuration)*time.Second > e.Backend.Config.MaxStakeDuration {
+	if time.Duration(tx.MaxValidatorStakeDuration)*time.Second > e.Backend.Config.MaxValidatorStakeDuration {
+		return errMaxStakeDurationTooLarge
+	}
+
+	if time.Duration(tx.MaxDelegatorStakeDuration)*time.Second > e.Backend.Config.MaxDelegatorStakeDuration {
 		return errMaxStakeDurationTooLarge
 	}
 

@@ -72,8 +72,10 @@ import (
 const defaultWeight uint64 = 10000
 
 var (
-	defaultMinStakingDuration = 24 * time.Hour
-	defaultMaxStakingDuration = 365 * 24 * time.Hour
+	defaultMinValidatorStakingDuration = 24 * time.Hour
+	defaultMaxValidatorStakingDuration = 365 * 24 * time.Hour
+	defaultMinDelegatorStakingDuration = 24 * time.Hour
+	defaultMaxDelegatorStakingDuration = 365 * 24 * time.Hour
 
 	defaultRewardConfig = reward.Config{
 		MaxConsumptionRate: .12 * reward.PercentDenominator,
@@ -94,9 +96,9 @@ var (
 	defaultValidateStartTime = defaultGenesisTime
 
 	// time that genesis validators stop validating
-	defaultValidateEndTime = defaultValidateStartTime.Add(10 * defaultMinStakingDuration)
+	defaultValidateEndTime = defaultValidateStartTime.Add(10 * defaultMinValidatorStakingDuration)
 
-	banffForkTime = defaultValidateEndTime.Add(-5 * defaultMinStakingDuration)
+	banffForkTime = defaultValidateEndTime.Add(-5 * defaultMinValidatorStakingDuration)
 
 	// each key controls an address that has [defaultBalance] DIONE at genesis
 	keys = secp256k1.TestKeys()
@@ -303,23 +305,25 @@ func defaultVM(t *testing.T) (*VM, database.Database, *mutableSharedMemory) {
 	primaryVdrs := validators.NewSet()
 	_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
 	vm := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		SybilProtectionEnabled: true,
-		Validators:             vdrs,
-		TxFee:                  defaultTxFee,
-		CreateSubnetTxFee:      100 * defaultTxFee,
-		TransformSubnetTxFee:   100 * defaultTxFee,
-		CreateBlockchainTxFee:  100 * defaultTxFee,
-		MinValidatorStake:      defaultMinValidatorStake,
-		MaxValidatorStake:      defaultMaxValidatorStake,
-		MinDelegatorStake:      defaultMinDelegatorStake,
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		ApricotPhase3Time:      defaultValidateEndTime,
-		ApricotPhase5Time:      defaultValidateEndTime,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		SybilProtectionEnabled:    true,
+		Validators:                vdrs,
+		TxFee:                     defaultTxFee,
+		CreateSubnetTxFee:         100 * defaultTxFee,
+		TransformSubnetTxFee:      100 * defaultTxFee,
+		CreateBlockchainTxFee:     100 * defaultTxFee,
+		MinValidatorStake:         defaultMinValidatorStake,
+		MaxValidatorStake:         defaultMaxValidatorStake,
+		MinDelegatorStake:         defaultMinDelegatorStake,
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		ApricotPhase3Time:         defaultValidateEndTime,
+		ApricotPhase5Time:         defaultValidateEndTime,
+		BanffTime:                 banffForkTime,
 	}}
 
 	baseDBManager := manager.NewMemDB(version.Semantic1_0_0)
@@ -455,7 +459,7 @@ func TestAddValidatorCommit(t *testing.T) {
 	}()
 
 	startTime := vm.clock.Time().Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	nodeID := ids.GenerateTestNodeID()
 	rewardAddress := ids.GenerateTestShortID()
 
@@ -501,7 +505,7 @@ func TestInvalidAddValidatorCommit(t *testing.T) {
 	}()
 
 	startTime := defaultGenesisTime.Add(-txexecutor.SyncBound).Add(-1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	key, _ := testKeyFactory.NewPrivateKey()
 	nodeID := ids.NodeID(key.PublicKey().Address())
 
@@ -555,7 +559,7 @@ func TestAddValidatorReject(t *testing.T) {
 	}()
 
 	startTime := vm.clock.Time().Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	nodeID := ids.GenerateTestNodeID()
 	rewardAddress := ids.GenerateTestShortID()
 
@@ -602,7 +606,7 @@ func TestAddValidatorInvalidNotReissued(t *testing.T) {
 	repeatNodeID := ids.NodeID(keys[0].PublicKey().Address())
 
 	startTime := banffForkTime.Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 
 	// create valid tx
 	tx, err := vm.txBuilder.NewAddValidatorTx(
@@ -633,7 +637,7 @@ func TestAddSubnetValidatorAccept(t *testing.T) {
 	}()
 
 	startTime := vm.clock.Time().Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	nodeID := ids.NodeID(keys[0].PublicKey().Address())
 
 	// create valid tx
@@ -679,7 +683,7 @@ func TestAddSubnetValidatorReject(t *testing.T) {
 	}()
 
 	startTime := vm.clock.Time().Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	nodeID := ids.NodeID(keys[0].PublicKey().Address())
 
 	// create valid tx
@@ -1106,7 +1110,7 @@ func TestCreateSubnet(t *testing.T) {
 
 	// Now that we've created a new subnet, add a validator to that subnet
 	startTime := vm.clock.Time().Add(txexecutor.SyncBound).Add(1 * time.Second)
-	endTime := startTime.Add(defaultMinStakingDuration)
+	endTime := startTime.Add(defaultMinValidatorStakingDuration)
 	// [startTime, endTime] is subset of time keys[0] validates default subnet so tx is valid
 	addValidatorTx, err := vm.txBuilder.NewAddSubnetValidatorTx(
 		defaultWeight,
@@ -1325,13 +1329,15 @@ func TestRestartFullyAccepted(t *testing.T) {
 	firstPrimaryVdrs := validators.NewSet()
 	_ = firstVdrs.Add(constants.PrimaryNetworkID, firstPrimaryVdrs)
 	firstVM := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		Validators:             firstVdrs,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		Validators:                firstVdrs,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		BanffTime:                 banffForkTime,
 	}}
 
 	firstCtx := defaultContext(t)
@@ -1418,13 +1424,15 @@ func TestRestartFullyAccepted(t *testing.T) {
 	secondPrimaryVdrs := validators.NewSet()
 	_ = secondVdrs.Add(constants.PrimaryNetworkID, secondPrimaryVdrs)
 	secondVM := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		Validators:             secondVdrs,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		Validators:                secondVdrs,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		BanffTime:                 banffForkTime,
 	}}
 
 	secondCtx := defaultContext(t)
@@ -1473,13 +1481,15 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 	primaryVdrs := validators.NewSet()
 	_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
 	vm := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		Validators:             vdrs,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		Validators:                vdrs,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		BanffTime:                 banffForkTime,
 	}}
 
 	initialClkTime := banffForkTime.Add(time.Second)
@@ -1798,13 +1808,15 @@ func TestUnverifiedParent(t *testing.T) {
 	primaryVdrs := validators.NewSet()
 	_ = vdrs.Add(constants.PrimaryNetworkID, primaryVdrs)
 	vm := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		Validators:             vdrs,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		BanffTime:              banffForkTime,
+		Chains:                    chains.TestManager,
+		Validators:                vdrs,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		BanffTime:                 banffForkTime,
 	}}
 
 	initialClkTime := banffForkTime.Add(time.Second)
@@ -2035,8 +2047,8 @@ func TestUptimeDisallowedWithRestart(t *testing.T) {
 		nil,
 	))
 
-	secondVM.clock.Set(defaultValidateStartTime.Add(2 * defaultMinStakingDuration))
-	secondVM.uptimeManager.(uptime.TestManager).SetTime(defaultValidateStartTime.Add(2 * defaultMinStakingDuration))
+	secondVM.clock.Set(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration))
+	secondVM.uptimeManager.(uptime.TestManager).SetTime(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration))
 
 	require.NoError(secondVM.SetState(context.Background(), snow.Bootstrapping))
 	require.NoError(secondVM.SetState(context.Background(), snow.NormalOp))

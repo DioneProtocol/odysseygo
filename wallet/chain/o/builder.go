@@ -175,9 +175,13 @@ type Builder interface {
 	//   validator.
 	// - [maxValidatorStake] is the maximum amount of funds a single validator
 	//   can be allocated, including delegated funds.
-	// - [minStakeDuration] is the minimum number of seconds a staker can stake
+	// - [minValidatorStakeDuration] is the minimum number of seconds a validator can stake
 	//   for.
-	// - [maxStakeDuration] is the maximum number of seconds a staker can stake
+	// - [maxValidatorStakeDuration] is the maximum number of seconds a validator can stake
+	//   for.
+	// - [minDelegatorStakeDuration] is the minimum number of seconds a delegator can stake
+	//   for.
+	// - [maxDelegatorStakeDuration] is the maximum number of seconds a delegator can stake
 	//   for.
 	// - [minValidatorStake] is the minimum amount of funds required to become a
 	//   delegator.
@@ -195,8 +199,10 @@ type Builder interface {
 		maxConsumptionRate uint64,
 		minValidatorStake uint64,
 		maxValidatorStake uint64,
-		minStakeDuration time.Duration,
-		maxStakeDuration time.Duration,
+		minValidatorStakeDuration time.Duration,
+		maxValidatorStakeDuration time.Duration,
+		minDelegatorStakeDuration time.Duration,
+		maxDelegatorStakeDuration time.Duration,
 		minDelegationFee uint32,
 		minDelegatorStake uint64,
 		maxValidatorWeightFactor byte,
@@ -678,8 +684,10 @@ func (b *builder) NewTransformSubnetTx(
 	maxConsumptionRate uint64,
 	minValidatorStake uint64,
 	maxValidatorStake uint64,
-	minStakeDuration time.Duration,
-	maxStakeDuration time.Duration,
+	minValidatorStakeDuration time.Duration,
+	maxValidatorStakeDuration time.Duration,
+	minDelegatorStakeDuration time.Duration,
+	maxDelegatorStakeDuration time.Duration,
 	minDelegationFee uint32,
 	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
@@ -710,21 +718,23 @@ func (b *builder) NewTransformSubnetTx(
 			Outs:         outputs,
 			Memo:         ops.Memo(),
 		}},
-		Subnet:                   subnetID,
-		AssetID:                  assetID,
-		InitialSupply:            initialSupply,
-		MaximumSupply:            maxSupply,
-		MinConsumptionRate:       minConsumptionRate,
-		MaxConsumptionRate:       maxConsumptionRate,
-		MinValidatorStake:        minValidatorStake,
-		MaxValidatorStake:        maxValidatorStake,
-		MinStakeDuration:         uint32(minStakeDuration / time.Second),
-		MaxStakeDuration:         uint32(maxStakeDuration / time.Second),
-		MinDelegationFee:         minDelegationFee,
-		MinDelegatorStake:        minDelegatorStake,
-		MaxValidatorWeightFactor: maxValidatorWeightFactor,
-		UptimeRequirement:        uptimeRequirement,
-		SubnetAuth:               subnetAuth,
+		Subnet:                    subnetID,
+		AssetID:                   assetID,
+		InitialSupply:             initialSupply,
+		MaximumSupply:             maxSupply,
+		MinConsumptionRate:        minConsumptionRate,
+		MaxConsumptionRate:        maxConsumptionRate,
+		MinValidatorStake:         minValidatorStake,
+		MaxValidatorStake:         maxValidatorStake,
+		MinValidatorStakeDuration: uint32(minValidatorStakeDuration / time.Second),
+		MaxValidatorStakeDuration: uint32(maxValidatorStakeDuration / time.Second),
+		MinDelegatorStakeDuration: uint32(minDelegatorStakeDuration / time.Second),
+		MaxDelegatorStakeDuration: uint32(maxDelegatorStakeDuration / time.Second),
+		MinDelegationFee:          minDelegationFee,
+		MinDelegatorStake:         minDelegatorStake,
+		MaxValidatorWeightFactor:  maxValidatorWeightFactor,
+		UptimeRequirement:         uptimeRequirement,
+		SubnetAuth:                subnetAuth,
 	}, nil
 }
 
