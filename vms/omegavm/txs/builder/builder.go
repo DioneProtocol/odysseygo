@@ -166,6 +166,10 @@ type ProposalTxBuilder interface {
 	// RewardStakerTx creates a new transaction that proposes to remove the staker
 	// [validatorID] from the default validator set.
 	NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error)
+
+	// RewardStakerTxWithFee creates a new transaction that proposes to remove the staker
+	// [validatorID] from the default validator set with accumulated fee.
+	NewRewardValidatorTxWithFee(txID ids.ID, orionFee uint64) (*txs.Tx, error)
 }
 
 func New(
@@ -602,6 +606,16 @@ func (b *builder) NewAdvanceTimeTx(timestamp time.Time) (*txs.Tx, error) {
 
 func (b *builder) NewRewardValidatorTx(txID ids.ID) (*txs.Tx, error) {
 	utx := &txs.RewardValidatorTx{TxID: txID}
+	tx, err := txs.NewSigned(utx, txs.Codec, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, tx.SyntacticVerify(b.ctx)
+}
+
+func (b *builder) NewRewardValidatorTxWithFee(txID ids.ID, orionFee uint64) (*txs.Tx, error) {
+	utx := &txs.RewardValidatorTx{TxID: txID, OrionFee: orionFee}
 	tx, err := txs.NewSigned(utx, txs.Codec, nil)
 	if err != nil {
 		return nil, err

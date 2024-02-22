@@ -9,10 +9,12 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/metrics"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/state"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/validators"
 )
 
@@ -163,6 +165,11 @@ func (a *acceptor) optionBlock(b, parent blocks.Block, blockType string) error {
 		a.free(blkID)
 	}()
 
+	proposalBlock, ok := parent.(*blocks.ApricotProposalBlock)
+	if ok {
+		a.updateOrionFee(proposalBlock)
+	}
+
 	// Note that the parent must be accepted first.
 	if err := a.commonAccept(parent); err != nil {
 		return err
@@ -271,6 +278,35 @@ func (a *acceptor) standardBlock(b blocks.Block, blockType string) error {
 		zap.Stringer("parentID", b.Parent()),
 		zap.Stringer("utxoChecksum", a.state.Checksum()),
 	)
+
+	return nil
+}
+
+func (a *acceptor) updateOrionFee(b *blocks.ApricotProposalBlock) error {
+	rewardValidatorTx, ok := b.Tx.Unsigned.(*txs.RewardValidatorTx)
+	if !ok {
+		return fmt.Errorf("block %s doesn't have reward validator tx", b.Tx.ID())
+	}
+
+	orionFee := rewardValidatorTx.OrionFee
+	if orionFee == 0 {
+		return nil
+	}
+
+	stakerTx, _, err := a.state.GetTx(rewardValidatorTx.TxID)
+	if err != nil {
+		return err
+	}
+
+	addValidatorTx, ok := stakerTx.Unsigned.(*txs.AddValidatorTx)
+	if !ok {
+		return nil
+	}
+
+	nodes := []ids.NodeID{addValidatorTx.NodeID()}
+	if err := a.ctx.FeeCollector.SubOrionsValue(nodes, orionFee); err != nil {
+		return fmt.Errorf("failed to subtract orion fee: %w", err)
+	}
 
 	return nil
 }

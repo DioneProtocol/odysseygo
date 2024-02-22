@@ -323,6 +323,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 	stakerToRemove := currentStakerIterator.Value()
 	currentStakerIterator.Release()
 
+	stakerToRemove.PotentialReward += tx.OrionFee
+
 	if stakerToRemove.TxID != tx.TxID {
 		return fmt.Errorf(
 			"%w: %s != %s",

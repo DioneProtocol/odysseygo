@@ -362,7 +362,16 @@ func buildBlock(
 		return nil, fmt.Errorf("could not find next staker to reward: %w", err)
 	}
 	if shouldReward {
-		rewardValidatorTx, err := builder.txBuilder.NewRewardValidatorTx(stakerTxID)
+		stakerTx, _, err := parentState.GetTx(stakerTxID)
+		addValidatorTx, ok := stakerTx.Unsigned.(*txs.AddValidatorTx)
+
+		var orionFee uint64
+		if ok {
+			nodeID := addValidatorTx.NodeID()
+			orionFee = builder.txExecutorBackend.Ctx.FeeCollector.GetOrionValue(nodeID)
+		}
+
+		rewardValidatorTx, err := builder.txBuilder.NewRewardValidatorTxWithFee(stakerTxID, orionFee)
 		if err != nil {
 			return nil, fmt.Errorf("could not build tx to reward staker: %w", err)
 		}
