@@ -189,3 +189,18 @@ func (mr *MockBuilderMockRecorder) NewRewardValidatorTx(arg0 interface{}) *gomoc
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewRewardValidatorTx", reflect.TypeOf((*MockBuilder)(nil).NewRewardValidatorTx), arg0)
 }
+
+// NewRewardValidatorTxWithFee mocks base method.
+func (m *MockBuilder) NewRewardValidatorTxWithFee(arg0 ids.ID, arg1 uint64) (*txs.Tx, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NewRewardValidatorTxWithFee", arg0, arg1)
+	ret0, _ := ret[0].(*txs.Tx)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewRewardValidatorTxWithFee indicates an expected call of NewRewardValidatorTxWithFee.
+func (mr *MockBuilderMockRecorder) NewRewardValidatorTxWithFee(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewRewardValidatorTxWithFee", reflect.TypeOf((*MockBuilder)(nil).NewRewardValidatorTxWithFee), arg0, arg1)
+}

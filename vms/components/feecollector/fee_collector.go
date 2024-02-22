@@ -38,7 +38,7 @@ type collector struct {
 	aChainValue *atomic.Uint64
 	orions      map[ids.NodeID]uint64
 
-	orionsDb database.Database
+	orionsDb linkeddb.LinkedDB
 	db       database.Database
 }
 
@@ -78,7 +78,7 @@ func New(db database.Database) (FeeCollector, error) {
 		aChainValue: &aChainValue,
 		dChainValue: &dChainValue,
 		orions:      orions,
-		orionsDb:    orionsDb,
+		orionsDb:    orionsListDb,
 	}, nil
 }
 
@@ -88,16 +88,12 @@ func (c *collector) updateChainValue(newValue uint64, key []byte) error {
 	return database.PutUInt64(c.db, key, newValue)
 }
 
-func (c *collector) updateOrions(orions []ids.NodeID, value uint64, positive bool) error {
+func (c *collector) updateOrions(orions []ids.NodeID, value uint64) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	for _, orion := range orions {
-		if positive {
-			c.orions[orion] += value
-		} else {
-			c.orions[orion] -= value
-		}
+		c.orions[orion] += value
 		if err := database.PutUInt64(c.orionsDb, orion.Bytes(), c.orions[orion]); err != nil {
 			return err
 		}
@@ -135,11 +131,11 @@ func (c *collector) SubDChainValue(amount uint64) error {
 }
 
 func (c *collector) AddOrionsValue(orions []ids.NodeID, amount uint64) error {
-	return c.updateOrions(orions, amount, true)
+	return c.updateOrions(orions, amount)
 }
 
 func (c *collector) SubOrionsValue(orions []ids.NodeID, amount uint64) error {
-	return c.updateOrions(orions, amount, false)
+	return c.updateOrions(orions, ^(amount - 1))
 }
 
 func (c *collector) GetOrionValue(nodeID ids.NodeID) uint64 {
