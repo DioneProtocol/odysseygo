@@ -152,7 +152,7 @@ func validateConfig(networkID uint32, config *Config, stakingCfg *StakingConfig)
 
 	// Initial stake duration of genesis validators must be
 	// not larger than maximal stake duration specified for any validator.
-	if config.InitialStakeDuration > uint64(stakingCfg.MaxStakeDuration.Seconds()) {
+	if config.InitialStakeDuration > uint64(stakingCfg.MaxValidatorStakeDuration.Seconds()) {
 		return errStakeDurationTooHigh
 	}
 

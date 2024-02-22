@@ -476,7 +476,7 @@ func buildTimestampsList(events []uint8, currentTime time.Time, nodeID ids.NodeI
 	res := make([]*validatorInputData, 0, len(events))
 
 	currentTime = currentTime.Add(txexecutor.SyncBound)
-	switch endTime := currentTime.Add(defaultMinStakingDuration); events[0] {
+	switch endTime := currentTime.Add(defaultMinValidatorStakingDuration); events[0] {
 	case startPrimaryWithBLS:
 		sk, err := bls.NewSecretKey()
 		if err != nil {
@@ -510,7 +510,7 @@ func buildTimestampsList(events []uint8, currentTime time.Time, nodeID ids.NodeI
 
 		switch currentEvent := events[i]; currentEvent {
 		case startSubnetValidator:
-			endTime := currentTime.Add(defaultMinStakingDuration)
+			endTime := currentTime.Add(defaultMinValidatorStakingDuration)
 			res = append(res, &validatorInputData{
 				eventType: startSubnetValidator,
 				startTime: currentTime,
@@ -529,7 +529,7 @@ func buildTimestampsList(events []uint8, currentTime time.Time, nodeID ids.NodeI
 				return nil, fmt.Errorf("could not make private key: %w", err)
 			}
 
-			endTime := currentTime.Add(defaultMinStakingDuration)
+			endTime := currentTime.Add(defaultMinValidatorStakingDuration)
 			val := &validatorInputData{
 				eventType: startPrimaryWithBLS,
 				startTime: currentTime,
@@ -542,7 +542,7 @@ func buildTimestampsList(events []uint8, currentTime time.Time, nodeID ids.NodeI
 
 		case startPrimaryWithoutBLS:
 			currentTime = currentPrimaryVal.endTime.Add(txexecutor.SyncBound)
-			endTime := currentTime.Add(defaultMinStakingDuration)
+			endTime := currentTime.Add(defaultMinValidatorStakingDuration)
 			val := &validatorInputData{
 				eventType: startPrimaryWithoutBLS,
 				startTime: currentTime,
@@ -714,24 +714,26 @@ func buildVM(t *testing.T) (*VM, ids.ID, error) {
 
 	forkTime := defaultGenesisTime
 	vm := &VM{Config: config.Config{
-		Chains:                 chains.TestManager,
-		UptimeLockedCalculator: uptime.NewLockedCalculator(),
-		SybilProtectionEnabled: true,
-		Validators:             vdrs,
-		TxFee:                  defaultTxFee,
-		CreateSubnetTxFee:      100 * defaultTxFee,
-		TransformSubnetTxFee:   100 * defaultTxFee,
-		CreateBlockchainTxFee:  100 * defaultTxFee,
-		MinValidatorStake:      defaultMinValidatorStake,
-		MaxValidatorStake:      defaultMaxValidatorStake,
-		MinDelegatorStake:      defaultMinDelegatorStake,
-		MinStakeDuration:       defaultMinStakingDuration,
-		MaxStakeDuration:       defaultMaxStakingDuration,
-		RewardConfig:           defaultRewardConfig,
-		ApricotPhase3Time:      forkTime,
-		ApricotPhase5Time:      forkTime,
-		BanffTime:              forkTime,
-		CortinaTime:            forkTime,
+		Chains:                    chains.TestManager,
+		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
+		SybilProtectionEnabled:    true,
+		Validators:                vdrs,
+		TxFee:                     defaultTxFee,
+		CreateSubnetTxFee:         100 * defaultTxFee,
+		TransformSubnetTxFee:      100 * defaultTxFee,
+		CreateBlockchainTxFee:     100 * defaultTxFee,
+		MinValidatorStake:         defaultMinValidatorStake,
+		MaxValidatorStake:         defaultMaxValidatorStake,
+		MinDelegatorStake:         defaultMinDelegatorStake,
+		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
+		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
+		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
+		RewardConfig:              defaultRewardConfig,
+		ApricotPhase3Time:         forkTime,
+		ApricotPhase5Time:         forkTime,
+		BanffTime:                 forkTime,
+		CortinaTime:               forkTime,
 	}}
 	vm.clock.Set(forkTime.Add(time.Second))
 
@@ -842,7 +844,7 @@ func buildCustomGenesis() ([]byte, error) {
 		return nil, err
 	}
 
-	starTime := mockable.MaxTime.Add(-1 * defaultMinStakingDuration)
+	starTime := mockable.MaxTime.Add(-1 * defaultMinValidatorStakingDuration)
 	endTime := mockable.MaxTime
 	genesisValidator := api.PermissionlessValidator{
 		Staker: api.Staker{

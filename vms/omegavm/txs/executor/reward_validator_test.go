@@ -235,7 +235,7 @@ func TestRewardDelegatorTxExecuteOnCommitPreDelegateeDeferral(t *testing.T) {
 	delRewardAddress := ids.GenerateTestShortID()
 
 	vdrStartTime := uint64(defaultValidateStartTime.Unix()) + 1
-	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinStakingDuration).Unix())
+	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration).Unix())
 	vdrNodeID := ids.GenerateTestNodeID()
 
 	vdrTx, err := env.txBuilder.NewAddValidatorTx(
@@ -359,7 +359,7 @@ func TestRewardDelegatorTxExecuteOnCommitPostDelegateeDeferral(t *testing.T) {
 	delRewardAddress := ids.GenerateTestShortID()
 
 	vdrStartTime := uint64(defaultValidateStartTime.Unix()) + 1
-	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinStakingDuration).Unix())
+	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration).Unix())
 	vdrNodeID := ids.GenerateTestNodeID()
 
 	vdrTx, err := env.txBuilder.NewAddValidatorTx(
@@ -579,7 +579,7 @@ func TestRewardDelegatorTxAndValidatorTxExecuteOnCommitPostDelegateeDeferral(t *
 	delRewardAddress := ids.GenerateTestShortID()
 
 	vdrStartTime := uint64(defaultValidateStartTime.Unix()) + 1
-	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinStakingDuration).Unix())
+	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration).Unix())
 	vdrNodeID := ids.GenerateTestNodeID()
 
 	vdrTx, err := env.txBuilder.NewAddValidatorTx(
@@ -742,7 +742,7 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	delRewardAddress := ids.GenerateTestShortID()
 
 	vdrStartTime := uint64(defaultValidateStartTime.Unix()) + 1
-	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinStakingDuration).Unix())
+	vdrEndTime := uint64(defaultValidateStartTime.Add(2 * defaultMinValidatorStakingDuration).Unix())
 	vdrNodeID := ids.GenerateTestNodeID()
 
 	vdrTx, err := env.txBuilder.NewAddValidatorTx(

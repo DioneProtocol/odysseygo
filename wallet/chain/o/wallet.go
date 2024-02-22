@@ -162,9 +162,13 @@ type Wallet interface {
 	//   validator.
 	// - [maxValidatorStake] is the maximum amount of funds a single validator
 	//   can be allocated, including delegated funds.
-	// - [minStakeDuration] is the minimum number of seconds a staker can stake
+	// - [minValidatorStakeDuration] is the minimum number of seconds a validator can stake
 	//   for.
-	// - [maxStakeDuration] is the maximum number of seconds a staker can stake
+	// - [maxValidatorStakeDuration] is the maximum number of seconds a validator can stake
+	//   for.
+	// - [minDelegatorStakeDuration] is the minimum number of seconds a delegator can stake
+	//   for.
+	// - [maxDelegatorStakeDuration] is the maximum number of seconds a delegator can stake
 	//   for.
 	// - [minValidatorStake] is the minimum amount of funds required to become a
 	//   delegator.
@@ -182,8 +186,10 @@ type Wallet interface {
 		maxConsumptionRate uint64,
 		minValidatorStake uint64,
 		maxValidatorStake uint64,
-		minStakeDuration time.Duration,
-		maxStakeDuration time.Duration,
+		minValidatorStakeDuration time.Duration,
+		maxValidatorStakeDuration time.Duration,
+		minDelegatorStakeDuration time.Duration,
+		maxDelegatorStakeDuration time.Duration,
 		minDelegationFee uint32,
 		minDelegatorStake uint64,
 		maxValidatorWeightFactor byte,
@@ -391,8 +397,10 @@ func (w *wallet) IssueTransformSubnetTx(
 	maxConsumptionRate uint64,
 	minValidatorStake uint64,
 	maxValidatorStake uint64,
-	minStakeDuration time.Duration,
-	maxStakeDuration time.Duration,
+	minValidatorStakeDuration time.Duration,
+	maxValidatorStakeDuration time.Duration,
+	minDelegatorStakeDuration time.Duration,
+	maxDelegatorStakeDuration time.Duration,
 	minDelegationFee uint32,
 	minDelegatorStake uint64,
 	maxValidatorWeightFactor byte,
@@ -408,8 +416,10 @@ func (w *wallet) IssueTransformSubnetTx(
 		maxConsumptionRate,
 		minValidatorStake,
 		maxValidatorStake,
-		minStakeDuration,
-		maxStakeDuration,
+		minValidatorStakeDuration,
+		maxValidatorStakeDuration,
+		minDelegatorStakeDuration,
+		maxDelegatorStakeDuration,
 		minDelegationFee,
 		minDelegatorStake,
 		maxValidatorWeightFactor,
