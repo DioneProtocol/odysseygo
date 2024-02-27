@@ -18,6 +18,10 @@ func (*dummyFeeCollector) AddAChainValue(amount uint64) error {
 	return nil
 }
 
+func (*dummyFeeCollector) AddURewardValue(amount uint64) error {
+	return nil
+}
+
 func (*dummyFeeCollector) GetDChainValue() uint64 {
 	return 0
 }
@@ -26,10 +30,18 @@ func (*dummyFeeCollector) GetAChainValue() uint64 {
 	return 0
 }
 
+func (*dummyFeeCollector) GetURewardValue() uint64 {
+	return 0
+}
+
 func (*dummyFeeCollector) SubDChainValue(amount uint64) error {
 	return nil
 }
 
 func (*dummyFeeCollector) SubAChainValue(amount uint64) error {
+	return nil
+}
+
+func (*dummyFeeCollector) SubURewardValue(amount uint64) error {
 	return nil
 }
