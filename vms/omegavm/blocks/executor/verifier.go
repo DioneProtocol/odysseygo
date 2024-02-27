@@ -390,6 +390,7 @@ func (v *verifier) proposalBlock(
 			onCommitState:         onCommitState,
 			onAbortState:          onAbortState,
 			initiallyPreferCommit: txExecutor.PrefersCommit,
+			undistributedReward:   txExecutor.UndistributedReward,
 		},
 		statelessBlock: b,
 		// It is safe to use [b.onAbortState] here because the timestamp will
