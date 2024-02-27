@@ -123,6 +123,11 @@ func (a *acceptor) abortBlock(b blocks.Block, blockType string) error {
 		return fmt.Errorf("%w: %s", state.ErrMissingParentState, parentID)
 	}
 
+	_, ok = parentState.statelessBlock.(*blocks.ApricotProposalBlock)
+	if ok {
+		a.updateUndistributedReward(parentState)
+	}
+
 	if a.bootstrapped.Get() {
 		if parentState.initiallyPreferCommit {
 			a.metrics.MarkOptionVoteLost()
@@ -271,6 +276,14 @@ func (a *acceptor) standardBlock(b blocks.Block, blockType string) error {
 		zap.Stringer("parentID", b.Parent()),
 		zap.Stringer("utxoChecksum", a.state.Checksum()),
 	)
+
+	return nil
+}
+
+func (a *acceptor) updateUndistributedReward(ps *blockState) error {
+	if ps.undistributedReward > 0 {
+		a.ctx.FeeCollector.AddURewardValue(ps.undistributedReward)
+	}
 
 	return nil
 }
