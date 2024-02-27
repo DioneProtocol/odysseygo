@@ -1,7 +1,6 @@
 package feecollector
 
 import (
-	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -70,7 +69,6 @@ func New(db database.Database) (FeeCollector, error) {
 }
 
 func (c *collector) updateChainValue(newValue uint64, key []byte) error {
-	fmt.Println("Fee collector updated value: ", string(key), ", amount: ", newValue)
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	return database.PutUInt64(c.db, key, newValue)

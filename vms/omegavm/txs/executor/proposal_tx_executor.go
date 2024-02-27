@@ -63,6 +63,9 @@ type ProposalTxExecutor struct {
 	// [PrefersCommit] is true iff this node initially prefers to
 	// commit this block transaction.
 	PrefersCommit bool
+
+	// [UndistributedReward] is reward that the delegator/validator should have received
+	UndistributedReward uint64
 }
 
 func (*ProposalTxExecutor) CreateChainTx(*txs.CreateChainTx) error {
@@ -610,19 +613,19 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 		return ErrShouldBePermissionlessStaker
 	}
 
-	// If the reward is aborted, then the current supply should be decreased.
-	currentSupply, err := e.OnAbortState.GetCurrentSupply(stakerToRemove.SubnetID)
-	if err != nil {
-		return err
-	}
-	newSupply, err := math.Sub(currentSupply, stakerToRemove.PotentialReward)
-	if err != nil {
-		return err
-	}
-	e.OnAbortState.SetCurrentSupply(stakerToRemove.SubnetID, newSupply)
-
 	var expectedUptimePercentage float64
 	if stakerToRemove.SubnetID != constants.PrimaryNetworkID {
+		// If the reward is aborted, then the current supply should be decreased.
+		currentSupply, err := e.OnAbortState.GetCurrentSupply(stakerToRemove.SubnetID)
+		if err != nil {
+			return err
+		}
+		newSupply, err := math.Sub(currentSupply, stakerToRemove.PotentialReward)
+		if err != nil {
+			return err
+		}
+		e.OnAbortState.SetCurrentSupply(stakerToRemove.SubnetID, newSupply)
+
 		transformSubnetIntf, err := e.OnCommitState.GetSubnetTransformation(stakerToRemove.SubnetID)
 		if err != nil {
 			return err
@@ -648,6 +651,10 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 	}
 
 	e.PrefersCommit = uptime >= expectedUptimePercentage
+
+	if !e.PrefersCommit {
+		e.UndistributedReward = stakerToRemove.PotentialReward
+	}
 	return nil
 }
 

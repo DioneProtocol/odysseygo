@@ -20,6 +20,7 @@ type standardBlockState struct {
 
 type proposalBlockState struct {
 	initiallyPreferCommit bool
+	undistributedReward   uint64
 	onCommitState         state.Diff
 	onAbortState          state.Diff
 }
