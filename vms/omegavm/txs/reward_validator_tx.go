@@ -26,6 +26,8 @@ type RewardValidatorTx struct {
 	// ID of the tx that created the delegator/validator being removed/rewarded
 	TxID ids.ID `serialize:"true" json:"txID"`
 
+	OrionFee uint64 `serialize:"true" json:"orionFee"`
+
 	// Marks if this validator should be rewarded according to this node.
 	ShouldPreferCommit bool `json:"-"`
 
