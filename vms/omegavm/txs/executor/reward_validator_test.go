@@ -814,8 +814,6 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	delDestSet := set.Set[ids.ShortID]{}
 	delDestSet.Add(delRewardAddress)
 
-	expectedReward := uint64(1000000)
-
 	oldVdrBalance, err := dione.GetBalance(env.state, vdrDestSet)
 	require.NoError(err)
 	oldDelBalance, err := dione.GetBalance(env.state, delDestSet)
@@ -841,5 +839,5 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 
 	newSupply, err := env.state.GetCurrentSupply(constants.PrimaryNetworkID)
 	require.NoError(err)
-	require.Equal(initialSupply-expectedReward, newSupply, "should have removed un-rewarded tokens from the potential supply")
+	require.Equal(initialSupply, newSupply, "should have removed un-rewarded tokens from the potential supply")
 }

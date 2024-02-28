@@ -363,8 +363,11 @@ func buildBlock(
 	}
 	if shouldReward {
 		stakerTx, _, err := parentState.GetTx(stakerTxID)
-		addValidatorTx, ok := stakerTx.Unsigned.(*txs.AddValidatorTx)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't find staking tx: %w", err)
+		}
 
+		addValidatorTx, ok := stakerTx.Unsigned.(*txs.AddValidatorTx)
 		var orionFee uint64
 		if ok {
 			nodeID := addValidatorTx.NodeID()
