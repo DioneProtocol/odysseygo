@@ -79,6 +79,20 @@ func (mr *MockFeeCollectorMockRecorder) AddOrionsValue(arg0, arg1 interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrionsValue", reflect.TypeOf((*MockFeeCollector)(nil).AddOrionsValue), arg0, arg1)
 }
 
+// AddURewardValue mocks base method.
+func (m *MockFeeCollector) AddURewardValue(arg0 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddURewardValue", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddURewardValue indicates an expected call of AddURewardValue.
+func (mr *MockFeeCollectorMockRecorder) AddURewardValue(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddURewardValue", reflect.TypeOf((*MockFeeCollector)(nil).AddURewardValue), arg0)
+}
+
 // GetAChainValue mocks base method.
 func (m *MockFeeCollector) GetAChainValue() uint64 {
 	m.ctrl.T.Helper()
@@ -121,6 +135,20 @@ func (mr *MockFeeCollectorMockRecorder) GetOrionValue(arg0 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrionValue", reflect.TypeOf((*MockFeeCollector)(nil).GetOrionValue), arg0)
 }
 
+// GetURewardValue mocks base method.
+func (m *MockFeeCollector) GetURewardValue() uint64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetURewardValue")
+	ret0, _ := ret[0].(uint64)
+	return ret0
+}
+
+// GetURewardValue indicates an expected call of GetURewardValue.
+func (mr *MockFeeCollectorMockRecorder) GetURewardValue() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetURewardValue", reflect.TypeOf((*MockFeeCollector)(nil).GetURewardValue))
+}
+
 // SubAChainValue mocks base method.
 func (m *MockFeeCollector) SubAChainValue(arg0 uint64) error {
 	m.ctrl.T.Helper()
@@ -161,4 +189,18 @@ func (m *MockFeeCollector) SubOrionsValue(arg0 []ids.NodeID, arg1 uint64) error 
 func (mr *MockFeeCollectorMockRecorder) SubOrionsValue(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubOrionsValue", reflect.TypeOf((*MockFeeCollector)(nil).SubOrionsValue), arg0, arg1)
+}
+
+// SubURewardValue mocks base method.
+func (m *MockFeeCollector) SubURewardValue(arg0 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubURewardValue", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SubURewardValue indicates an expected call of SubURewardValue.
+func (mr *MockFeeCollectorMockRecorder) SubURewardValue(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubURewardValue", reflect.TypeOf((*MockFeeCollector)(nil).SubURewardValue), arg0)
 }
