@@ -23,6 +23,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms/components/verify"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/blocks"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/state"
+	"github.com/DioneProtocol/odysseygo/vms/omegavm/status"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/txs/mempool"
 	"github.com/DioneProtocol/odysseygo/vms/secp256k1fx"
@@ -358,9 +359,10 @@ func TestBuildBlock(t *testing.T) {
 
 				// The tx builder should be asked to build a reward tx
 				txBuilder := txbuilder.NewMockBuilder(ctrl)
-				txBuilder.EXPECT().NewRewardValidatorTx(stakerTxID).Return(transactions[0], nil)
+				txBuilder.EXPECT().NewRewardValidatorTxWithFee(stakerTxID, uint64(0)).Return(transactions[0], nil)
 
 				feeCollector := feecollector.NewMockFeeCollector(ctrl)
+				feeCollector.EXPECT().GetOrionValue(ids.NodeID{}).Return(uint64(0)).Times(1)
 				feeCollector.EXPECT().GetAChainValue().Return(uint64(0)).Times(1)
 				feeCollector.EXPECT().GetDChainValue().Return(uint64(0)).Times(1)
 
@@ -390,7 +392,11 @@ func TestBuildBlock(t *testing.T) {
 				})
 				currentStakerIter.EXPECT().Release()
 
+				unsignedNextStakerTx := &txs.AddValidatorTx{}
+				tx := &txs.Tx{Unsigned: unsignedNextStakerTx}
+
 				s.EXPECT().GetCurrentStakerIterator().Return(currentStakerIter, nil)
+				s.EXPECT().GetTx(stakerTxID).Return(tx, status.Unknown, nil)
 				return s
 			},
 			expectedBlkF: func(require *require.Assertions) blocks.Block {
