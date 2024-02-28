@@ -284,9 +284,10 @@ func addNodeFlags(fs *pflag.FlagSet) {
 	fs.Duration(StakeMintingPeriodKey, genesis.LocalParams.RewardConfig.MintingPeriod, "Consumption period of the staking function")
 	fs.Uint64(StakeSupplyCapKey, genesis.LocalParams.RewardConfig.SupplyCap, "Supply cap of the staking function")
 	// Mint Reward Configs
-	fs.Uint64(MintAmountKey, 0, "Amount of tokens to mint")
+	fs.Uint64(MaxMintAmountKey, 0, "Max amount of tokens to mint")
+	fs.Uint64(MintRateKey, 0, "Mint rate is the percent of the total supply to mint during the minting period")
 	fs.Int64(MintSinceKey, 0, "Timestamp of the start of the minting period")
-	fs.Duration(MintingPeriod, 0, "Minting period")
+	fs.Duration(MintingPeriodKey, 0, "Minting period")
 	// Subnets
 	fs.String(TrackSubnetsKey, "", "List of subnets for the node to track. A node tracking a subnet will track the uptimes of the subnet validators and attempt to sync all the chains in the subnet. Before validating a subnet, a node should be tracking the subnet to avoid impacting their subnet validation uptime")
 

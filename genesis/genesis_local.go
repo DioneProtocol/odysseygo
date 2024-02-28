@@ -64,8 +64,9 @@ var (
 				SupplyCap:          720 * units.MegaDione,
 			},
 			MintConfig: reward.MintConfig{
-				MintingPeriod: 2 * 365 * 24 * time.Hour,
-				MintAmount:    500 * units.MegaDione,
+				MintingPeriod: 365 * 24 * time.Hour,
+				MaxMintAmount: 500 * units.MegaDione,
+				MintRate:      40_000, // 4%
 			},
 		},
 	}

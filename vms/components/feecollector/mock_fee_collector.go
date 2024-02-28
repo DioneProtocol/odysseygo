@@ -10,6 +10,7 @@ package feecollector
 import (
 	reflect "reflect"
 
+	ids "github.com/DioneProtocol/odysseygo/ids"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -64,6 +65,20 @@ func (mr *MockFeeCollectorMockRecorder) AddDChainValue(arg0 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).AddDChainValue), arg0)
 }
 
+// AddOrionsValue mocks base method.
+func (m *MockFeeCollector) AddOrionsValue(arg0 []ids.NodeID, arg1 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddOrionsValue", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddOrionsValue indicates an expected call of AddOrionsValue.
+func (mr *MockFeeCollectorMockRecorder) AddOrionsValue(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrionsValue", reflect.TypeOf((*MockFeeCollector)(nil).AddOrionsValue), arg0, arg1)
+}
+
 // GetAChainValue mocks base method.
 func (m *MockFeeCollector) GetAChainValue() uint64 {
 	m.ctrl.T.Helper()
@@ -92,6 +107,20 @@ func (mr *MockFeeCollectorMockRecorder) GetDChainValue() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).GetDChainValue))
 }
 
+// GetOrionValue mocks base method.
+func (m *MockFeeCollector) GetOrionValue(arg0 ids.NodeID) uint64 {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrionValue", arg0)
+	ret0, _ := ret[0].(uint64)
+	return ret0
+}
+
+// GetOrionValue indicates an expected call of GetOrionValue.
+func (mr *MockFeeCollectorMockRecorder) GetOrionValue(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrionValue", reflect.TypeOf((*MockFeeCollector)(nil).GetOrionValue), arg0)
+}
+
 // SubAChainValue mocks base method.
 func (m *MockFeeCollector) SubAChainValue(arg0 uint64) error {
 	m.ctrl.T.Helper()
@@ -118,4 +147,18 @@ func (m *MockFeeCollector) SubDChainValue(arg0 uint64) error {
 func (mr *MockFeeCollectorMockRecorder) SubDChainValue(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubDChainValue", reflect.TypeOf((*MockFeeCollector)(nil).SubDChainValue), arg0)
+}
+
+// SubOrionsValue mocks base method.
+func (m *MockFeeCollector) SubOrionsValue(arg0 []ids.NodeID, arg1 uint64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SubOrionsValue", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SubOrionsValue indicates an expected call of SubOrionsValue.
+func (mr *MockFeeCollectorMockRecorder) SubOrionsValue(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SubOrionsValue", reflect.TypeOf((*MockFeeCollector)(nil).SubOrionsValue), arg0, arg1)
 }

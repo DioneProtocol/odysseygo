@@ -74,6 +74,7 @@ var (
 	errInvalidMinStakeDuration                = errors.New("min stake duration must be > 0")
 	errMinStakeDurationAboveMax               = errors.New("max stake duration can't be less than min stake duration")
 	errStakeMaxConsumptionTooLarge            = fmt.Errorf("max stake consumption must be less than or equal to %d", reward.PercentDenominator)
+	errMintRateTooLarge                       = fmt.Errorf("mint rate must be less than or equal to %d", reward.PercentDenominator)
 	errStakeMaxConsumptionBelowMin            = errors.New("stake max consumption can't be less than min stake consumption")
 	errStakeMintingPeriodBelowMin             = errors.New("stake minting period can't be less than max stake duration")
 	errCannotTrackPrimaryNetwork              = errors.New("cannot track primary network")
@@ -813,9 +814,10 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
 		config.RewardConfig.SupplyCap = v.GetUint64(StakeSupplyCapKey)
 		config.MinDelegationFee = v.GetUint32(MinDelegatorFeeKey)
-		config.MintConfig.MintAmount = v.GetUint64(MintAmountKey)
 		config.MintConfig.MintSince = v.GetInt64(MintSinceKey)
-		config.MintConfig.MintingPeriod = v.GetDuration(MintingPeriod)
+		config.MintConfig.MaxMintAmount = v.GetUint64(MaxMintAmountKey)
+		config.MintConfig.MintRate = v.GetUint64(MintRateKey)
+		config.MintConfig.MintingPeriod = v.GetDuration(MintingPeriodKey)
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:
 			return node.StakingConfig{}, errInvalidUptimeRequirement
@@ -837,6 +839,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 			return node.StakingConfig{}, errStakeMaxConsumptionBelowMin
 		case config.RewardConfig.MintingPeriod < config.MaxValidatorStakeDuration:
 			return node.StakingConfig{}, errStakeMintingPeriodBelowMin
+		case config.MintConfig.MintRate > reward.PercentDenominator:
+			return node.StakingConfig{}, errMintRateTooLarge
 		}
 	} else {
 		config.StakingConfig = genesis.GetStakingConfig(networkID)

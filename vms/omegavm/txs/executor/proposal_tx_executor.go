@@ -326,6 +326,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 	stakerToRemove := currentStakerIterator.Value()
 	currentStakerIterator.Release()
 
+	stakerToRemove.PotentialReward += tx.OrionFee
+
 	if stakerToRemove.TxID != tx.TxID {
 		return fmt.Errorf(
 			"%w: %s != %s",
@@ -651,10 +653,8 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 	}
 
 	e.PrefersCommit = uptime >= expectedUptimePercentage
+	e.UndistributedReward = stakerToRemove.PotentialReward
 
-	if !e.PrefersCommit {
-		e.UndistributedReward = stakerToRemove.PotentialReward
-	}
 	return nil
 }
 
