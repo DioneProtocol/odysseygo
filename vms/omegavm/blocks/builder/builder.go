@@ -14,6 +14,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/snow/consensus/snowman"
 	"github.com/DioneProtocol/odysseygo/snow/engine/common"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/timer"
 	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 	"github.com/DioneProtocol/odysseygo/utils/units"
@@ -367,9 +368,9 @@ func buildBlock(
 			return nil, fmt.Errorf("couldn't find staking tx: %w", err)
 		}
 
-		addValidatorTx, ok := stakerTx.Unsigned.(*txs.AddValidatorTx)
+		addValidatorTx, ok := stakerTx.Unsigned.(txs.ValidatorTx)
 		var orionFee uint64
-		if ok {
+		if ok && addValidatorTx.SubnetID() == constants.PrimaryNetworkID {
 			nodeID := addValidatorTx.NodeID()
 			orionFee = builder.txExecutorBackend.Ctx.FeeCollector.GetOrionValue(nodeID)
 		}
