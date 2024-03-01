@@ -653,7 +653,10 @@ func (e *ProposalTxExecutor) RewardValidatorTx(tx *txs.RewardValidatorTx) error 
 	}
 
 	e.PrefersCommit = uptime >= expectedUptimePercentage
-	e.UndistributedReward = stakerToRemove.PotentialReward
+
+	if stakerToRemove.SubnetID == constants.PrimaryNetworkID {
+		e.UndistributedReward = stakerToRemove.PotentialReward
+	}
 
 	return nil
 }
