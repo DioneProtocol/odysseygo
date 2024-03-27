@@ -3,8 +3,8 @@
         "node0": {
             "id": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9650",
             "stakingPort": "9651",
             "dbDir": "/db",
@@ -14,8 +14,8 @@
         "node1": {
             "id": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9652",
             "stakingPort": "9653",
             "dbDir": "/db",
@@ -25,8 +25,8 @@
         "node2": {
             "id": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9654",
             "stakingPort": "9655",
             "dbDir": "/db",
@@ -36,8 +36,8 @@
         "node3": {
             "id": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9656",
             "stakingPort": "9657",
             "dbDir": "/db",
@@ -47,8 +47,8 @@
         "node4": {
             "id": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9658",
             "stakingPort": "9659",
             "dbDir": "/db",
@@ -59,8 +59,8 @@
     "nodes": {
         "node5": {
             "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "127.0.0.1",
+            "ip": "0.0.0.0",
+            "hostIp": "0.0.0.0",
             "httpPort": "9660",
             "stakingPort": "9661",
             "dbDir": "/db"
