@@ -19,15 +19,15 @@ var (
 	// MainnetParams are the params used for mainnet
 	MainnetParams = Params{
 		TxFeeConfig: TxFeeConfig{
-			TxFee:                         50 * units.Dione,
-			CreateAssetTxFee:              100 * units.Dione,
-			CreateSubnetTxFee:             3 * units.KiloDione,
-			TransformSubnetTxFee:          50 * units.Dione,
-			CreateBlockchainTxFee:         3 * units.KiloDione,
+			TxFee:                         5 * units.Dione,
+			CreateAssetTxFee:              10 * units.Dione,
+			CreateSubnetTxFee:             300 * units.Dione,
+			TransformSubnetTxFee:          5 * units.Dione,
+			CreateBlockchainTxFee:         300 * units.Dione,
 			AddPrimaryNetworkValidatorFee: 0,
 			AddPrimaryNetworkDelegatorFee: 0,
-			AddSubnetValidatorFee:         50 * units.Dione,
-			AddSubnetDelegatorFee:         50 * units.Dione,
+			AddSubnetValidatorFee:         5 * units.Dione,
+			AddSubnetDelegatorFee:         5 * units.Dione,
 		},
 		StakingConfig: StakingConfig{
 			UptimeRequirement:         .8, // 80%
