@@ -394,7 +394,7 @@ func NewTestGenesis(
 	// Define D-Chain genesis
 	dChainGenesis := &core.Genesis{
 		Config: &params.ChainConfig{
-			ChainID: big.NewInt(43112), // Arbitrary chain ID is arbitrary
+			ChainID: big.NewInt(131312), // Arbitrary chain ID is arbitrary
 		},
 		Difficulty: big.NewInt(0), // Difficulty is a mandatory field
 		GasLimit:   DefaultGasLimit,
