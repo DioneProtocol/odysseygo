@@ -26,7 +26,7 @@ import (
 var _ = e2e.DescribeAChain("[Interchain Workflow]", func() {
 	require := require.New(ginkgo.GinkgoT())
 
-	const transferAmount = 10 * units.Dione
+	const transferAmount = 30 * units.Dione
 
 	ginkgo.It("should ensure that funds can be transferred from the A-Chain to the D-Chain and the O-Chain", func() {
 		nodeURI := e2e.Env.GetRandomNodeURI()
