@@ -58,7 +58,7 @@ To start developing on OdysseyGo, you'll need a few things installed.
 - Build the odysseygo binary
 
 ```sh
-./scripts/build.sh
+./scripts/build_odyssey.sh
 ```
 
 - Run unit tests
@@ -82,7 +82,3 @@ To start developing on OdysseyGo, you'll need a few things installed.
 ### Do you have questions about the source code?
 
 - Ask any question about OdysseyGo under GitHub [discussions](https://github.com/DioneProtocol/odysseygo/discussions/categories/q-a).
-
-### Do you want to contribute to the Odyssey documentation?
-
-- Please check out the `odyssey-docs` repository [here](https://github.com/DioneProtocol/odyssey-docs).
