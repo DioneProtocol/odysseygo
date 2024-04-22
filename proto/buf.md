@@ -2,10 +2,6 @@
 
 Now Serving: **Protocol Version 28**
 
-Protobuf files are hosted at
-[https://buf.build/DioneProtocol/odyssey](https://buf.build/DioneProtocol/odyssey) and
-can be used as dependencies in other projects.
-
 Protobuf linting and generation for this project is managed by
 [buf](https://github.com/bufbuild/buf).
 
@@ -32,6 +28,3 @@ subnet vm must use the same protocol version to be compatible.
 - Checkout appropriate tag in OdysseyGo `git checkout v1.10.1`
 - Change to proto/ directory `cd proto`.
 - Publish new tag to buf registry. `buf push -t v26`
-
-Note: Publishing requires auth to the DioneProtocol org in buf
-https://buf.build/DioneProtocol/repositories

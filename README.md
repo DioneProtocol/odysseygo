@@ -1,10 +1,4 @@
-<div align="center">
-  <img src="resources/OdysseyLogoRed.png?raw=true">
-</div>
-
----
-
-Node implementation for the [Odyssey](https://dione.network) network -
+Node implementation for the Odyssey network -
 a blockchains platform with high throughput, and blazing fast transactions.
 
 ## Installation
@@ -44,67 +38,13 @@ This will clone and checkout the `master` branch.
 Build OdysseyGo by running the build script:
 
 ```sh
-./scripts/build.sh
+./scripts/build_odyssey.sh
 ```
 
 The `odysseygo` binary is now in the `build` directory. To run:
 
 ```sh
 ./build/odysseygo
-```
-
-### Binary Repository
-
-Install OdysseyGo using an `apt` repository.
-
-#### Adding the APT Repository
-
-If you already have the APT repository added, you do not need to add it again.
-
-To add the repository on Ubuntu, run:
-
-```sh
-sudo su -
-wget -qO - https://downloads.dione.network/odysseygo.gpg.key | tee /etc/apt/trusted.gpg.d/odysseygo.asc
-source /etc/os-release && echo "deb https://downloads.dione.network/apt $UBUNTU_CODENAME main" > /etc/apt/sources.list.d/odyssey.list
-exit
-```
-
-#### Installing the Latest Version
-
-After adding the APT repository, install `odysseygo` by running:
-
-```sh
-sudo apt update
-sudo apt install odysseygo
-```
-
-### Binary Install
-
-Download the [latest build](https://github.com/DioneProtocol/odysseygo/releases/latest) for your operating system and architecture.
-
-The Odyssey binary to be executed is named `odysseygo`.
-
-### Docker Install
-
-Make sure Docker is installed on the machine - so commands like `docker run` etc. are available.
-
-Building the Docker image of latest `odysseygo` branch can be done by running:
-
-```sh
-./scripts/build_image.sh
-```
-
-To check the built image, run:
-
-```sh
-docker image ls
-```
-
-The image should be tagged as `odyplatform/odysseygo:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Odyssey source it was built from. To run the Odyssey node, run:
-
-```sh
-docker run -ti -p 9650:9650 -p 9651:9651 odyplatform/odysseygo:xxxxxxxx /odysseygo/build/odysseygo
 ```
 
 ## Running Odyssey
@@ -129,15 +69,11 @@ To connect to the Testnet Testnet, run:
 ./build/odysseygo --network-id=testnet
 ```
 
-### Creating a Local Testnet
-
-See [this tutorial.](https://docs.dione.network/build/tutorials/platform/create-a-local-test-network/)
-
 ## Bootstrapping
 
 A node needs to catch up to the latest network state before it can participate in consensus and serve API calls. This process (called bootstrapping) currently takes several days for a new node connected to Mainnet.
 
-A node will not [report healthy](https://docs.dione.network/build/odysseygo-apis/health) until it is done bootstrapping.
+A node will not report healthy until it is done bootstrapping.
 
 Improvements that reduce the amount of time it takes to bootstrap are under development.
 
@@ -240,9 +176,3 @@ To officially support a new platform, one must satisfy the following requirement
 | Build passes                       | &check; | &check; | &check; |
 | Unit and integration tests pass    | &check; | &check; |         |
 | End-to-end and stress tests pass   | &check; |         |         |
-
-## Security Bugs
-
-**We and our community welcome responsible disclosures.**
-
-Please refer to our [Security Policy](SECURITY.md) and [Security Advisories](https://github.com/DioneProtocol/odysseygo/security/advisories).
