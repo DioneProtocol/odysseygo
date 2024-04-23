@@ -2,7 +2,6 @@
 
 # Odysseygo root folder
 ODYSSEY_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
-cd $ODYSSEY_PATH
 # Load the constants
 source "$ODYSSEY_PATH"/scripts/constants.sh
 
@@ -25,12 +24,10 @@ fi
 source "$ODYSSEY_PATH"/scripts/parse_run_config.sh
 
 run_node() {
-echo -ne "[Unit]\nDescription=Service for odyssey network's validator\n\n[Service]\nType=simple
-ExecStart='$odysseygo_path' --public-ip=${BOOTSTRAP_PUBLIC_IPS[$1]} --http-host=${BOOTSTRAP_PUBLIC_IPS[$1]} --http-port=${BOOTSTRAP_HTTP_PORTS[$1]} --staking-port=${BOOTSTRAP_STAKING_PORTS[$1]} --db-dir=${BOOTSTRAP_DB_DIRS[$1]}/${BOOTSTRAP_NODE_NAMES[$1]} --log-dir=${BOOTSTRAP_DB_DIRS[$1]}/${BOOTSTRAP_NODE_NAMES[$1]}/logs --chain-config-dir="$ODYSSEY_PATH"/scripts/configs --network-id=${BOOTSTRAP_NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS --staking-tls-cert-file=${TLC_CERT_PATHS[$1]} --staking-tls-key-file=${TLC_KEY_PATHS[$1]}
-Restart=on-failure\nRestartSec=5\nPIDFile=/tmp/odyssey$i.pid\n\n[Install]\nWantedBy=default.target" > /etc/systemd/system/node-validator-$i.service
-systemctl daemon-reload
-systemctl start node-validator-$i.service
-systemctl enable node-validator-$i.service
+  "$odysseygo_path" --public-ip=${BOOTSTRAP_PUBLIC_IPS[$1]} --http-host=${BOOTSTRAP_PUBLIC_IPS[$1]} --http-port=${BOOTSTRAP_HTTP_PORTS[$1]} --staking-port=${BOOTSTRAP_STAKING_PORTS[$1]} \
+  --db-dir=${BOOTSTRAP_DB_DIRS[$1]}/${BOOTSTRAP_NODE_NAMES[$1]} --log-dir=${BOOTSTRAP_DB_DIRS[$1]}/${BOOTSTRAP_NODE_NAMES[$1]}/logs --chain-config-dir="$ODYSSEY_PATH"/scripts/configs --network-id=${BOOTSTRAP_NETWORK_IDS[$1]} \
+  --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS --staking-tls-cert-file=${TLS_CERT_PATHS[$1]} \
+  --staking-tls-key-file=${TLS_KEY_PATHS[$1]}
 }
 
 for i in ${!BOOTSTRAP_PUBLIC_IPS[@]}; do
