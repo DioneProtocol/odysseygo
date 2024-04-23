@@ -59,7 +59,12 @@ else
 fi
 
 run_node() {
-  "$odysseygo_path" --public-ip=${PUBLIC_IPS[$1]} --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
+echo -ne "[Unit]\nDescription=Service for odyssey network's node\n\n[Service]\nType=simple
+ExecStart='$odysseygo_path' --public-ip=${PUBLIC_IPS[$1]} --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
+Restart=on-failure\nRestartSec=5\nPIDFile=/tmp/node-$node_name.pid\n\n[Install]\nWantedBy=default.target" > /etc/systemd/system/node-$node_name.service
+systemctl daemon-reload
+systemctl start node-$node_name.service
+systemctl enable node-$node_name.service
 }
 
 run_node $node_index

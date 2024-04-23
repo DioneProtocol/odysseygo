@@ -95,14 +95,14 @@ for line in $RAW_NETWORK_IDS; do
   NETWORK_IDS+=("$line")
 done
 
-RAW_TLC_KEY_PATHS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.bootstrapNodes[].tlcKeyFilePath' | sed -e 's/^"//' -e 's/"$//')
-TLC_KEY_PATHS=()
-for line in $RAW_TLC_KEY_PATHS; do
-  TLC_KEY_PATHS+=("$ODYSSEY_PATH$line")
+RAW_TLS_KEY_PATHS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.bootstrapNodes[].tlsKeyFilePath' | sed -e 's/^"//' -e 's/"$//')
+TLS_KEY_PATHS=()
+for line in $RAW_TLS_KEY_PATHS; do
+  TLS_KEY_PATHS+=("$ODYSSEY_PATH$line")
 done
 
-RAW_TLC_CERT_PATHS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.bootstrapNodes[].tlcCertFilePath' | sed -e 's/^"//' -e 's/"$//')
-TLC_CERT_PATHS=()
-for line in $RAW_TLC_CERT_PATHS; do
-  TLC_CERT_PATHS+=("$ODYSSEY_PATH$line")
+RAW_TLS_CERT_PATHS=$(cat "$ODYSSEY_PATH"/scripts/run_config.json | jq '.bootstrapNodes[].tlsCertFilePath' | sed -e 's/^"//' -e 's/"$//')
+TLS_CERT_PATHS=()
+for line in $RAW_TLS_CERT_PATHS; do
+  TLS_CERT_PATHS+=("$ODYSSEY_PATH$line")
 done
