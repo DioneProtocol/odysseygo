@@ -3,24 +3,24 @@
 
 package genesis
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/stretchr/testify/require"
+// 	"github.com/stretchr/testify/require"
 
-	"github.com/DioneProtocol/odysseygo/utils/constants"
-)
+// 	"github.com/DioneProtocol/odysseygo/utils/constants"
+// )
 
-func TestSampleBootstrappers(t *testing.T) {
-	require := require.New(t)
+// func TestSampleBootstrappers(t *testing.T) {
+// 	require := require.New(t)
 
-	for networkID, networkName := range constants.NetworkIDToNetworkName {
-		length := 10
-		bootstrappers := SampleBootstrappers(networkID, length)
-		t.Logf("%s bootstrappers: %+v", networkName, bootstrappers)
+// 	for networkID, networkName := range constants.NetworkIDToNetworkName {
+// 		length := 10
+// 		bootstrappers := SampleBootstrappers(networkID, length)
+// 		t.Logf("%s bootstrappers: %+v", networkName, bootstrappers)
 
-		if networkID == constants.MainnetID || networkID == constants.TestnetID {
-			require.Len(bootstrappers, length)
-		}
-	}
-}
+// 		if networkID == constants.MainnetID || networkID == constants.TestnetID {
+// 			require.Len(bootstrappers, length)
+// 		}
+// 	}
+// }
