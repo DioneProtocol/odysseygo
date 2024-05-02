@@ -1,6 +1,6 @@
 # Block Composition and Formation Logic
 
-OdysseyGo v1.9.0 (Banff) slightly changes the way the O-chain selects transactions to be included in next block and deals with block timestamps. In this brief document we detail the process and the changes.
+OdysseyGo (Banff) slightly changes the way the O-chain selects transactions to be included in next block and deals with block timestamps. In this brief document we detail the process and the changes.
 
 ## Apricot
 

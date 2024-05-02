@@ -29,8 +29,8 @@ import (
 const (
 	totalRounds = 50
 
-	metricBlksProcessing = "odyssey_X_blks_processing"
-	metricBlksAccepted   = "odyssey_X_blks_accepted_count"
+	metricBlksProcessing = "odyssey_A_blks_processing"
+	metricBlksAccepted   = "odyssey_A_blks_accepted_count"
 )
 
 // This test requires that the network not have ongoing blocks and
