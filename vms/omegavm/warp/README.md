@@ -2,7 +2,7 @@
 
 Odyssey Warp Messaging (AWM) provides a primitive for cross-subnet communication on the Odyssey Network.
 
-The Odyssey O-Chain provides an index of every Subnet's validator set on the Odyssey Network, including the BLS public key of each validator (as of the [Banff Upgrade](https://github.com/DioneProtocol/odysseygo/releases/v1.9.0)). AWM utilizes the weighted validator sets stored on the O-Chain to build a cross-subnet communication protocol between any two Subnets on the Odyssey Network.
+The Odyssey O-Chain provides an index of every Subnet's validator set on the Odyssey Network, including the BLS public key of each validator (as of the Banff Upgrade). AWM utilizes the weighted validator sets stored on the O-Chain to build a cross-subnet communication protocol between any two Subnets on the Odyssey Network.
 
 Any Virtual Machine (VM) on Odyssey can integrate Odyssey Warp Messaging to send and receive messages across Odyssey Subnets.
 
