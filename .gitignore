@@ -62,3 +62,4 @@ tests/upgrade/upgrade.test
 vendor
 
 **/testdata
+test-api-nodes
