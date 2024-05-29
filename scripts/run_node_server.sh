@@ -60,7 +60,7 @@ fi
 
 run_node() {
 echo -ne "[Unit]\nDescription=Service for odyssey network's node\nAfter=network.target\nAfter=syslog.target\n\n[Service]\nType=simple\nUser=root\n
-ExecStart='$odysseygo_path' --public-ip=${PUBLIC_IPS[$1]} --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
+ExecStart='$odysseygo_path' --public-ip=${PUBLIC_IPS[$1]} --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --chain-config-dir="$ODYSSEY_PATH"/scripts/configs/archive --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
 Restart=on-failure\nRestartSec=5\nPIDFile=/tmp/node-$node_name.pid\n\n[Install]\nWantedBy=default.target" > /etc/systemd/system/node-$node_name.service
 systemctl daemon-reload
 systemctl start node-$node_name.service
