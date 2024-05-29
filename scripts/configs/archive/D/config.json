@@ -13,5 +13,5 @@
     "internal-debug",
     "debug-tracer"
   ],
-  "pruning-enabled": "false"
+  "pruning-enabled": false
 }
