@@ -1,4 +1,25 @@
 {
     "mainnet": [],
-    "fuji": []
+    "testnet": [
+        {
+            "id": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
+            "ip": "3.234.76.166:9651"
+        },
+        {
+            "id": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
+            "ip": "3.234.76.166:9653"
+        },
+        {
+            "id": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
+            "ip": "3.234.76.166:9655"
+        },
+        {
+            "id": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
+            "ip": "3.234.76.166:9657"
+        },
+        {
+            "id": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
+            "ip": "3.234.76.166:9659"
+        }
+    ]
 }
