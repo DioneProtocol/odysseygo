@@ -12,16 +12,16 @@ import (
 )
 
 var Noop Tracer = noOpTracer{
-	t: trace.NewNoopTracerProvider().Tracer(constants.AppName),
+	Tracer: trace.NewNoopTracerProvider().Tracer(constants.AppName),
 }
 
 // noOpTracer is an implementation of trace.Tracer that does nothing.
 type noOpTracer struct {
-	t trace.Tracer
+	trace.Tracer
 }
 
 func (n noOpTracer) Start(ctx context.Context, spanName string, opts ...trace.SpanStartOption) (context.Context, trace.Span) {
-	return n.t.Start(ctx, spanName, opts...)
+	return n.Tracer.Start(ctx, spanName, opts...)
 }
 
 func (noOpTracer) Close() error {
