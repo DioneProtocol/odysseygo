@@ -1,0 +1,37 @@
+name: Testing github action with auto-release
+
+on:
+  push:
+    branches:
+      - devops
+
+jobs:
+  build-odysseygo:
+    name: Build Odysseygo binary
+    runs-on: ubuntu-2204
+    env:
+      ARCH: "amd64"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: .github/actions/install_deps/action.yml
+
+      - uses: .github/actions/setup_go/action.yml
+
+      - name: Build Binary
+        run: |
+          ./scripts/build.sh
+        shell: bash
+
+      - name: Archive binary in Targz
+        run: |
+          cd build
+          tar -czvf ../odysseygo-linux-amd64-test.tar.gz odysseygo
+        shell: bash
+
+      - name: Upload artifact with odysseygo
+        uses: actions/upload-artifact@v4
+        with:
+          name: odysseygo-linux-$ARCH-test
+          path: odysseygo-linux-$ARCH-test.tar.gz
+          retention-days: 30

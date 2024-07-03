@@ -1,0 +1,10 @@
+name: Install dependencies
+description: Install dependencies and additional packages
+runs:
+  using: composite
+  steps:
+    - name: Install deps
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install build-essential
+      shell: bash
