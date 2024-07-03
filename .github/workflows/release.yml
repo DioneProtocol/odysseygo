@@ -1,0 +1,62 @@
+name: Release Odysseygo with version
+
+on:
+  push:
+    branches:
+      - prod
+    tags:
+      - v*.*.*
+
+jobs:
+  build-odysseygo:
+    name: Build Odysseygo binary
+    runs-on: ubuntu-2204
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: .github/actions/install_deps/action.yml
+
+      - uses: .github/actions/setup_go/action.yml
+
+      - name: Build Binary
+        run: |
+          ./scripts/build.sh
+        shell: bash
+
+      - name: Try to get tag from git
+        if: "${{ github.event.inputs.tag == '' }}"
+        id: get_tag_from_git
+        run: |
+          echo "TAG=${GITHUB_REF/refs\/tags\//}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Try to get tag from workflow dispatch
+        if: "${{ github.event.inputs.tag != '' }}"
+        id: get_tag_from_workflow
+        run: |
+          echo "TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Create tarball
+        run: |
+          cd build
+          tar -czvf ../odysseygo-linux-amd64-${{ env.TAG }}.tar.gz odysseygo
+        shell: bash
+
+      - name: Upload artifact with odysseygo
+        uses: actions/upload-artifact@v4
+        with:
+          name: amd64
+          path: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          retention-days: 30
+
+      - name: Create Rrelease
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG }}
+          release_name: Release ${{ env.TAG }}
+          draft: false
+          prerelease: false
