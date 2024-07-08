@@ -1,9 +1,9 @@
-name: Release Odysseygo with version
+name: Testing github action with test release
 
 on:
   push:
     tags:
-      - v*.*.*
+      - test-v*.*
 
 jobs:
   build-odysseygo:

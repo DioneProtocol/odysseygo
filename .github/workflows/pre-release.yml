@@ -2,21 +2,19 @@ name: Pre-release Odysseygo with version
 
 on:
   push:
-    branches:
-      - prod
     tags:
       - v*.*.*-beta-*
 
 jobs:
   build-odysseygo:
     name: Build Odysseygo binary
-    runs-on: ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: .github/actions/install_deps/action.yml
+      - uses: ./.github/actions/install-deps
 
-      - uses: .github/actions/setup_go/action.yml
+      - uses: ./.github/actions/setup-go
 
       - name: Build Binary
         run: |
@@ -37,7 +35,7 @@ jobs:
           echo "TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Create tarball
+      - name: Archive binary in Targz
         run: |
           cd build
           tar -czvf ../odysseygo-linux-amd64-${{ env.TAG }}.tar.gz odysseygo
@@ -46,17 +44,28 @@ jobs:
       - name: Upload artifact with odysseygo
         uses: actions/upload-artifact@v4
         with:
-          name: amd64
+          name: odysseygo-linux-amd64-${{ env.TAG }}
           path: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
           retention-days: 30
 
-      - name: Create Pre-release
-        id: create_pre_release
+      - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG }}
-          release_name: Pre-release ${{ env.TAG }}
+          release_name: Release ${{ env.TAG }}
           draft: false
-          prerelease: true
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_name: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_content_type: application/x-tar
