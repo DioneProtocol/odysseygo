@@ -347,11 +347,11 @@ func TestGenesis(t *testing.T) {
 	}{
 		{
 			networkID:  constants.MainnetID,
-			expectedID: "2mNFB92FK9Vnx6VqL5pTXpGW4Z8qsknxfZH4a7WifL6jdD6h3y",
+			expectedID: "Jgy4FHB94diRPiQ8X4pUZtmswF9Q49ci6DxHaRnuKd39i3LCD",
 		},
 		{
 			networkID:  constants.TestnetID,
-			expectedID: "2UdPdQ3zKpYFUCwbARa9yXSVicGrfAZLXbDPPArhGPtx7oJ4Gv",
+			expectedID: "AszEbaoXCRDgcEPDcQ27hvJrXo8rzWoMp9rDD6AKhga6yJHRw",
 		},
 		{
 			networkID:  constants.LocalID,
@@ -390,7 +390,7 @@ func TestVMGenesis(t *testing.T) {
 				},
 				{
 					vmID:       constants.DeltaID,
-					expectedID: "2t8uZPFzHugbPywgJtXECqu2siGn8ZkPoS2YHc1UApQVThPkpx",
+					expectedID: "2FLTrjytVnGQmwELuZWa771pkjAbj3GYmujaFVxnfhinAFjB5a",
 				},
 			},
 		},
@@ -403,7 +403,7 @@ func TestVMGenesis(t *testing.T) {
 				},
 				{
 					vmID:       constants.DeltaID,
-					expectedID: "49mww4UEpfsqqJPhC3XsBZYQHJ3vphg4cNwwGwj7TAyrCs16k",
+					expectedID: "2PQemmQmJ8UDGfsznCnsDrBfYRnZxMqrU1tgvS8uWbukLV2bGa",
 				},
 			},
 		},
