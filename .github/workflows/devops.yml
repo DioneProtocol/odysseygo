@@ -1,36 +1,24 @@
-name: Testing github action for devops
+name: Test Release Creation
 
 on:
   push:
     branches:
-      - devops
+      - develop
+
 jobs:
-  build-odysseygo:
-    name: Build Odysseygo binary
+  create-release:
     runs-on: ubuntu-latest
-    env:
-      ARCH: "amd64"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: ./.github/actions/install-deps
-
-      - uses: ./.github/actions/setup-go
-
-      - name: Build Binary
-        run: |
-          ./scripts/build.sh
-        shell: bash
-
-      - name: Archive binary in Targz
-        run: |
-          cd build
-          tar -czvf ../odysseygo-linux-amd64-test.tar.gz odysseygo
-        shell: bash
-
-      - name: Upload artifact with odysseygo
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         with:
-          name: odysseygo-linux-amd64-test
-          path: odysseygo-linux-amd64-test.tar.gz
-          retention-days: 30
+          tag_name: 'v1.0.0-test'
+          release_name: 'Test Release'
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
