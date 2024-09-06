@@ -2,50 +2,12 @@
   "networkID": 5,
   "allocations": [
     {
-      "ethAddr": "0x64a517Ed6Ba7F4e7FB420208B0483Ff3ddabF45F",
-      "dioneAddr": "A-testnet1r476vw5wm7zrqc2ewetqrztzpvjsncqxd2u6u0",
+      "ethAddr": "0x45fF3582A97a653f1Deeb982DFa35755d586263C",
+      "dioneAddr": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "initialAmount": 0,
       "unlockSchedule": [
         {
-          "amount": 40000000000000000
-        }
-      ]
-    },
-    {
-      "ethAddr": "0x24B5Ed35dA75faDF1a664C1c1a38792144fe7377",
-      "dioneAddr": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
-      "initialAmount": 100000000000000000,
-      "unlockSchedule": []
-    },
-    {
-      "ethAddr": "0xA2d5608d7C0af2931e54E2a1B19f4F5eEc5436B5",
-      "dioneAddr": "A-testnet1qyk45qgud6xwlsawcxh92pvc39fqfttcym3hd7",
-      "initialAmount": 100000000000000000,
-      "unlockSchedule": []
-    },
-    {
-      "ethAddr": "0xD14251ECD06ed4b57D4c8b2Fcda35BaCf97c930b",
-      "dioneAddr": "A-testnet1wfs693kdjzj2zmtxk30fp8jlc2qkq0yk85qe6c",
-      "initialAmount": 100000000000000000,
-      "unlockSchedule": []
-    },
-    {
-      "ethAddr": "0x9F95Fa755926b9564b852ae54b7B7746d2132aa4",
-      "dioneAddr": "A-testnet10wuqcv80j5yhg2fwmwykat3q4ww8ulhwdj9wwu",
-      "initialAmount": 40000000000000000,
-      "unlockSchedule": [
-        {
-          "amount": 40000000000000000
-        }
-      ]
-    },
-    {
-      "ethAddr": "0x3B90Beea0B5a93EF3cAD0244DC6be0c1aA0Ece5A",
-      "dioneAddr": "A-testnet1fakfvvmttwg575xyjuy07y3l86c9lkxsuqa6nc",
-      "initialAmount": 40000000000000000,
-      "unlockSchedule": [
-        {
-          "amount": 40000000000000000
+          "amount": 50000000000000000
         }
       ]
     }
@@ -53,31 +15,31 @@
   "startTime": 1710900000,
   "initialStakeDuration": 31536000,
   "initialStakeDurationOffset": 54000,
-  "initialStakedFunds": ["A-testnet1r476vw5wm7zrqc2ewetqrztzpvjsncqxd2u6u0"],
+  "initialStakedFunds": ["A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g"],
   "initialStakers": [
     {
       "nodeID": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
-      "rewardAddress": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
+      "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
       "nodeID": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
-      "rewardAddress": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
+      "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
       "nodeID": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
-      "rewardAddress": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
+      "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
       "nodeID": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
-      "rewardAddress": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
+      "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
       "nodeID": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
-      "rewardAddress": "A-testnet1zgjm3xv0qy62tevqztz86qyz78q7cl0e38zkaw",
+      "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     }
   ],
