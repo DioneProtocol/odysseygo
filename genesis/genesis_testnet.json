@@ -18,27 +18,27 @@
   "initialStakedFunds": ["A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g"],
   "initialStakers": [
     {
-      "nodeID": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
+      "nodeID": "NodeID-HBZJTeTJi1rin8vTWMnyFsRuMH186Lm5e",
       "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
-      "nodeID": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
+      "nodeID": "NodeID-KJvZe6FS9kPxZvyLeCAe25X3R3TQjazrp",
       "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
-      "nodeID": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
+      "nodeID": "NodeID-7rnzL2CJYhYmvnyQvpmpRQAHhhjmf1EcB",
       "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
-      "nodeID": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
+      "nodeID": "NodeID-GRKMRoLQsY88CNuj75fXwivaaGkaxfhBY",
       "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     },
     {
-      "nodeID": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
+      "nodeID": "NodeID-JExZFRdGBB9K8RNsusRpdonDqQAB35APb",
       "rewardAddress": "A-testnet1r9hs8kngy642xu387fgw4cf8vwne7n3dke3y9g",
       "delegationFee": 250000
     }
