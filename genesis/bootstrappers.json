@@ -1,25 +1,25 @@
 {
-    "mainnet": [],
-    "testnet": [
-        {
-            "id": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
-            "ip": "3.234.76.166:9651"
-        },
-        {
-            "id": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
-            "ip": "3.234.76.166:9653"
-        },
-        {
-            "id": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
-            "ip": "3.234.76.166:9655"
-        },
-        {
-            "id": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
-            "ip": "3.234.76.166:9657"
-        },
-        {
-            "id": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
-            "ip": "3.234.76.166:9659"
-        }
-    ]
+  "mainnet": [],
+  "testnet": [
+    {
+      "id": "NodeID-HBZJTeTJi1rin8vTWMnyFsRuMH186Lm5e",
+      "ip": "52.86.220.224:9651"
+    },
+    {
+      "id": "NodeID-KJvZe6FS9kPxZvyLeCAe25X3R3TQjazrp",
+      "ip": "54.224.133.30:9653"
+    },
+    {
+      "id": "NodeID-7rnzL2CJYhYmvnyQvpmpRQAHhhjmf1EcB",
+      "ip": "3.81.85.214:9655"
+    },
+    {
+      "id": "NodeID-GRKMRoLQsY88CNuj75fXwivaaGkaxfhBY",
+      "ip": "34.228.208.86:9657"
+    },
+    {
+      "id": "NodeID-JExZFRdGBB9K8RNsusRpdonDqQAB35APb",
+      "ip": "107.23.228.223:9659"
+    }
+  ]
 }
