@@ -31,7 +31,7 @@ var (
 	}`)
 
 	genesisStakingCfg = &StakingConfig{
-		MaxValidatorStakeDuration: 365 * 24 * time.Hour,
+		MaxValidatorStakeDuration: 6 * 365 * 24 * time.Hour,
 	}
 )
 
@@ -165,7 +165,7 @@ func TestValidateConfig(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			err := validateConfig(test.networkID, test.config, genesisStakingCfg)
-			require.ErrorIs(t, err, test.expectedErr)
+			require.ErrorIs(t, err, test.expectedErr, name)
 		})
 	}
 }
@@ -347,11 +347,11 @@ func TestGenesis(t *testing.T) {
 	}{
 		{
 			networkID:  constants.MainnetID,
-			expectedID: "Jgy4FHB94diRPiQ8X4pUZtmswF9Q49ci6DxHaRnuKd39i3LCD",
+			expectedID: "FhQqCkL5mMSZsteD6QMYpXfxvbzE53sc9i6qNGTwRGqJAbtzx",
 		},
 		{
 			networkID:  constants.TestnetID,
-			expectedID: "AszEbaoXCRDgcEPDcQ27hvJrXo8rzWoMp9rDD6AKhga6yJHRw",
+			expectedID: "2V2khWeJWhv3LjtBizj3CZt3eD12Z1QF287GrmnV7WYoGEkFKG",
 		},
 		{
 			networkID:  constants.LocalID,
@@ -386,11 +386,11 @@ func TestVMGenesis(t *testing.T) {
 			vmTest: []vmTest{
 				{
 					vmID:       constants.AlphaID,
-					expectedID: "26fSMXs1duy66TXoDHhgTVZckqv3UNs5DP3a2aQrGvRbBSmmAN",
+					expectedID: "2YjjguzbzbhbpQYUioAcNmw5xbmiHKrae8S2HWVKLH6Ce7DiD6",
 				},
 				{
 					vmID:       constants.DeltaID,
-					expectedID: "2FLTrjytVnGQmwELuZWa771pkjAbj3GYmujaFVxnfhinAFjB5a",
+					expectedID: "faqcDVftkSVcZ2nESGxGKKZbNALcaU5AUc15SwwaiTkAgy3KK",
 				},
 			},
 		},
@@ -399,11 +399,11 @@ func TestVMGenesis(t *testing.T) {
 			vmTest: []vmTest{
 				{
 					vmID:       constants.AlphaID,
-					expectedID: "Tv3yjrRiBDoyarcwXtezFEHaGKumWBPC5KAD3f4YEx4thhXwo",
+					expectedID: "3wRxPEwJZTqP38NFkKHU1pWriDcePzEvj8PAtHikzmMpwAXML",
 				},
 				{
 					vmID:       constants.DeltaID,
-					expectedID: "2PQemmQmJ8UDGfsznCnsDrBfYRnZxMqrU1tgvS8uWbukLV2bGa",
+					expectedID: "L1m631VHS1yuYkicaNRQTzzbE71dG942sgF3sCnHFgCTzNmsD",
 				},
 			},
 		},
@@ -457,11 +457,11 @@ func TestDIONEAssetID(t *testing.T) {
 	}{
 		{
 			networkID:  constants.MainnetID,
-			expectedID: "2DR1aKd3HpkDZcc38eW2W18v2iqgnQb8w2X8jWPwvshzcfGrfr",
+			expectedID: "D8mxfovjYSN6XMbpWxaRk6xqdFHCQcxwzvGP9tmTx2AsiPFUc",
 		},
 		{
 			networkID:  constants.TestnetID,
-			expectedID: "2fZZYVKV6SiKgPFj6GpPMVFNeGFwp7cdb1W1hbw2sBUpQX1tMG",
+			expectedID: "2NXDF6rpi7fJqFnuSKSnoVCNF3Py22xdjQavy9QgvjL3zr2yue",
 		},
 		{
 			networkID:  constants.LocalID,
