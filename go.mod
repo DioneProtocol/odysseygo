@@ -9,7 +9,7 @@ go 1.20
 
 require (
 	github.com/DataDog/zstd v1.5.2
-	github.com/DioneProtocol/coreth v0.0.1
+	github.com/DioneProtocol/coreth v0.0.2
 	github.com/DioneProtocol/ledger-odyssey/go v0.0.0-20240716144700-70b2cf851d2f
 	github.com/Microsoft/go-winio v0.5.2
 	github.com/NYTimes/gziphandler v1.1.1
