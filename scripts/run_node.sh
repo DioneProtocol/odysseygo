@@ -59,7 +59,7 @@ else
 fi
 
 run_node() {
-  "$odysseygo_path" --public-ip=${PUBLIC_IPS[$1]} --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --chain-config-dir="$ODYSSEY_PATH"/scripts/configs/archive --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
+  "$odysseygo_path" --public-ip-resolution-service opendns --http-host=${PUBLIC_IPS[$1]} --http-port=${HTTP_PORTS[$1]} --staking-port=${STAKING_PORTS[$1]} --db-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]} --log-dir=${DB_DIRS[$1]}/${NODE_NAMES[$1]}/logs --chain-config-dir="$ODYSSEY_PATH"/scripts/configs/archive --network-id=${NETWORK_IDS[$1]} --http-allowed-hosts=* --bootstrap-ips=$BOOTSTRAP_HOST_IPS --bootstrap-ids=$BOOTSTRAP_IDS
 }
 
 run_node $node_index
