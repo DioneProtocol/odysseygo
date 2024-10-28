@@ -1,69 +1,69 @@
 {
-    "bootstrapNodes": {
-        "node0": {
-            "id": "NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew",
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9650",
-            "stakingPort": "9651",
-            "dbDir": "/db",
-            "tlsKeyFilePath": "/staking/local/NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew/staking.key",
-            "tlsCertFilePath": "/staking/local/NodeID-3hwBts7XQCan5bmsXkMvhvp9PKmYU3Vew/staking.crt"
-        },
-        "node1": {
-            "id": "NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc",
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9652",
-            "stakingPort": "9653",
-            "dbDir": "/db",
-            "tlsKeyFilePath": "/staking/local/NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc/staking.key",
-            "tlsCertFilePath": "/staking/local/NodeID-Kgogi5o8Z2LU3PbRzG8vYgPUydzWX1Sdc/staking.crt"
-        },
-        "node2": {
-            "id": "NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw",
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9654",
-            "stakingPort": "9655",
-            "dbDir": "/db",
-            "tlsKeyFilePath": "/staking/local/NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw/staking.key",
-            "tlsCertFilePath": "/staking/local/NodeID-BR1CEGsUvTaiaWZ4xCbTH1qPkekWLo7Yw/staking.crt"
-        },
-        "node3": {
-            "id": "NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv",
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9656",
-            "stakingPort": "9657",
-            "dbDir": "/db",
-            "tlsKeyFilePath": "/staking/local/NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv/staking.key",
-            "tlsCertFilePath": "/staking/local/NodeID-2qVRTzWa8BNfQVF6oA3uK4qB2qqGc1ZMv/staking.crt"
-        },
-        "node4": {
-            "id": "NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc",
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9658",
-            "stakingPort": "9659",
-            "dbDir": "/db",
-            "tlsKeyFilePath": "/staking/local/NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc/staking.key",
-            "tlsCertFilePath": "/staking/local/NodeID-HJDRdKqrhz9ZvWaEQyVTGQ4N2X4vqa8Yc/staking.crt"
-        }
+  "bootstrapNodes": {
+    "node0": {
+      "id": "NodeID-HBZJTeTJi1rin8vTWMnyFsRuMH186Lm5e",
+      "networkId": "testnet",
+      "hostIp": "34.195.91.43",
+      "ip": "0.0.0.0",
+      "httpPort": "9650",
+      "stakingPort": "9651",
+      "dbDir": "/db",
+      "tlsKeyFilePath": "/data/node1/staking.key",
+      "tlsCertFilePath": "/data/node1/staking.crt"
     },
-    "nodes": {
-        "node5": {
-            "networkId": "testnet",
-            "ip": "127.0.0.1",
-            "hostIp": "0.0.0.0",
-            "httpPort": "9660",
-            "stakingPort": "9661",
-            "dbDir": "/db"
-        }
+    "node1": {
+      "id": "NodeID-KJvZe6FS9kPxZvyLeCAe25X3R3TQjazrp",
+      "networkId": "testnet",
+      "hostIp": "34.228.174.219",
+      "ip": "0.0.0.0",
+      "httpPort": "9652",
+      "stakingPort": "9653",
+      "dbDir": "/db",
+      "tlsKeyFilePath": "/data/node2/staking.key",
+      "tlsCertFilePath": "/data/node2/staking.crt"
+    },
+    "node2": {
+      "id": "NodeID-7rnzL2CJYhYmvnyQvpmpRQAHhhjmf1EcB",
+      "networkId": "testnet",
+      "hostIp": "3.229.34.54",
+      "ip": "0.0.0.0",
+      "httpPort": "9654",
+      "stakingPort": "9655",
+      "dbDir": "/db",
+      "tlsKeyFilePath": "/data/node3/staking.key",
+      "tlsCertFilePath": "/data/node3/staking.crt"
+    },
+    "node3": {
+      "id": "NodeID-GRKMRoLQsY88CNuj75fXwivaaGkaxfhBY",
+      "networkId": "testnet",
+      "hostIp": "52.202.152.112",
+      "ip": "0.0.0.0",
+      "httpPort": "9656",
+      "stakingPort": "9657",
+      "dbDir": "/db",
+      "tlsKeyFilePath": "/data/node4/staking.key",
+      "tlsCertFilePath": "/data/node4/staking.crt"
+    },
+    "node4": {
+      "id": "NodeID-JExZFRdGBB9K8RNsusRpdonDqQAB35APb",
+      "networkId": "testnet",
+      "hostIp": "54.234.187.185",
+      "ip": "0.0.0.0",
+      "httpPort": "9658",
+      "stakingPort": "9659",
+      "dbDir": "/db",
+      "tlsKeyFilePath": "/data/node5/staking.key",
+      "tlsCertFilePath": "/data/node5/staking.crt"
     }
+  },
+  "nodes": {
+    "node5": {
+      "networkId": "testnet",
+      "hostIp": "127.0.0.1",
+      "ip": "0.0.0.0",
+      "httpPort": "9660",
+      "stakingPort": "9661",
+      "dbDir": "/db"
+    }
+  }
 }
