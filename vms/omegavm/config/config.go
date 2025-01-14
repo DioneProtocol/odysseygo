@@ -113,6 +113,9 @@ type Config struct {
 	// Time of the Cortina network upgrade
 	CortinaTime time.Time
 
+	// Time of the AP7 network upgrade
+	ApricotPhase7Time time.Time
+
 	// UseCurrentHeight forces [GetMinimumHeight] to return the current height
 	// of the O-Chain instead of the oldest block in the [recentlyAccepted]
 	// window.
@@ -137,6 +140,10 @@ func (c *Config) IsBanffActivated(timestamp time.Time) bool {
 
 func (c *Config) IsCortinaActivated(timestamp time.Time) bool {
 	return !timestamp.Before(c.CortinaTime)
+}
+
+func (c *Config) IsApricotPhase7Activated(timestamp time.Time) bool {
+	return !timestamp.Before(c.ApricotPhase7Time)
 }
 
 func (c *Config) GetCreateBlockchainTxFee(timestamp time.Time) uint64 {
