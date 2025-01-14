@@ -95,6 +95,12 @@ type Config struct {
 	// Maximum amount of time to allow a delegator to stake
 	MaxDelegatorStakeDuration time.Duration
 
+	// Minimum amount of time to allow a validator to stake
+	ApricotPhase7MinValidatorStakeDuration time.Duration
+
+	// Minimum amount of time to allow a delegator to stake
+	ApricotPhase7MinDelegatorStakeDuration time.Duration
+
 	// Config for the minting function
 	RewardConfig reward.Config
 
@@ -144,6 +150,20 @@ func (c *Config) IsCortinaActivated(timestamp time.Time) bool {
 
 func (c *Config) IsApricotPhase7Activated(timestamp time.Time) bool {
 	return !timestamp.Before(c.ApricotPhase7Time)
+}
+
+func (c *Config) GetMinValidatorStakeDuration(timestamp time.Time) time.Duration {
+	if c.IsApricotPhase7Activated(timestamp) {
+		return c.ApricotPhase7MinValidatorStakeDuration
+	}
+	return c.MinValidatorStakeDuration
+}
+
+func (c *Config) GetMinDelegatorStakeDuration(timestamp time.Time) time.Duration {
+	if c.IsApricotPhase7Activated(timestamp) {
+		return c.ApricotPhase7MinDelegatorStakeDuration
+	}
+	return c.MinDelegatorStakeDuration
 }
 
 func (c *Config) GetCreateBlockchainTxFee(timestamp time.Time) uint64 {
