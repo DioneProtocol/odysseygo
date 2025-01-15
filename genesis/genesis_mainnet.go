@@ -20,6 +20,7 @@ var (
 	MainnetParams = Params{
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                         5 * units.Dione,
+			ApricotPhase7TxFee:            units.Dione,
 			CreateAssetTxFee:              10 * units.Dione,
 			CreateSubnetTxFee:             300 * units.Dione,
 			TransformSubnetTxFee:          5 * units.Dione,

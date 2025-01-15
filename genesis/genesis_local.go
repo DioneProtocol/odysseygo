@@ -38,6 +38,7 @@ var (
 	LocalParams = Params{
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                         units.MilliDione,
+			ApricotPhase7TxFee:            units.MilliDione,
 			CreateAssetTxFee:              units.MilliDione,
 			CreateSubnetTxFee:             100 * units.MilliDione,
 			TransformSubnetTxFee:          100 * units.MilliDione,
