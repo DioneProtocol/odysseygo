@@ -48,7 +48,7 @@ func Dial(addr string) (*Client, error) {
 	c, err := net.DialUnix("unix", nil, unixAddr)
 	if err != nil {
 		if isTimeoutError(err) {
-			return nil, errReadTimeout{c.RemoteAddr()}
+			return nil, errReadTimeout{unixAddr}
 		}
 		return nil, err
 	}
