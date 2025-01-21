@@ -324,7 +324,7 @@ func removeSubnetValidatorValidation(
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			backend.Ctx.DIONEAssetID: backend.Config.TxFee,
+			backend.Ctx.DIONEAssetID: backend.Config.GetTxFee(chainState.GetTimestamp()),
 		},
 	); err != nil {
 		return nil, false, fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)

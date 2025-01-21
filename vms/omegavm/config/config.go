@@ -44,6 +44,9 @@ type Config struct {
 	// Fee that is burned by every non-state creating transaction
 	TxFee uint64
 
+	// Fee that is burned by every non-state creating transaction
+	ApricotPhase7TxFee uint64
+
 	// Fee that must be burned by every state creating transaction before AP3
 	CreateAssetTxFee uint64
 
@@ -164,6 +167,13 @@ func (c *Config) GetMinDelegatorStakeDuration(timestamp time.Time) time.Duration
 		return c.ApricotPhase7MinDelegatorStakeDuration
 	}
 	return c.MinDelegatorStakeDuration
+}
+
+func (c *Config) GetTxFee(timestamp time.Time) uint64 {
+	if c.IsApricotPhase7Activated(timestamp) {
+		return c.ApricotPhase7TxFee
+	}
+	return c.TxFee
 }
 
 func (c *Config) GetCreateBlockchainTxFee(timestamp time.Time) uint64 {

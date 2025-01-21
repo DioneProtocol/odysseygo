@@ -50,6 +50,8 @@ type StakingConfig struct {
 type TxFeeConfig struct {
 	// Transaction fee
 	TxFee uint64 `json:"txFee"`
+	// Transaction fee
+	ApricotPhase7TxFee uint64 `json:"apricotPhase7TxFee"`
 	// Transaction fee for create asset transactions
 	CreateAssetTxFee uint64 `json:"createAssetTxFee"`
 	// Transaction fee for create subnet transactions

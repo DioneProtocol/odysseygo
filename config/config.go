@@ -862,6 +862,7 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 	if networkID != constants.MainnetID && networkID != constants.TestnetID {
 		return genesis.TxFeeConfig{
 			TxFee:                         v.GetUint64(TxFeeKey),
+			ApricotPhase7TxFee:            v.GetUint64(TxFeeKey),
 			CreateAssetTxFee:              v.GetUint64(CreateAssetTxFeeKey),
 			CreateSubnetTxFee:             v.GetUint64(CreateSubnetTxFeeKey),
 			TransformSubnetTxFee:          v.GetUint64(TransformSubnetTxFeeKey),
