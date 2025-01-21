@@ -818,6 +818,7 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.MintConfig.MaxMintAmount = v.GetUint64(MaxMintAmountKey)
 		config.MintConfig.MintRate = v.GetUint64(MintRateKey)
 		config.MintConfig.MintingPeriod = v.GetDuration(MintingPeriodKey)
+		config.MintConfig.AnnualEmission = v.GetUint64(AnnualEmission)
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:
 			return node.StakingConfig{}, errInvalidUptimeRequirement

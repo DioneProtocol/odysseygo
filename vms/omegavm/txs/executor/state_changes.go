@@ -139,7 +139,7 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 	mintConfig := backend.Config.MintConfig
 
 	// Config is not set
-	if mintConfig.MintingPeriod == 0 {
+	if mintConfig.MintingPeriod == 0 && mintConfig.AnnualEmission == 0 {
 		s.accumulatedMintRate = new(big.Int).SetUint64(0)
 		return nil
 	}

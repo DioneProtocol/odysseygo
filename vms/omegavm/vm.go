@@ -136,11 +136,17 @@ func (vm *VM) Initialize(
 	}
 
 	rewards := reward.NewCalculator(vm.RewardConfig)
-	genesisState, err := genesis.ParseState(genesisBytes)
-	if err != nil {
-		return err
+
+	var mintCalculator reward.MintCalculator
+	if vm.ctx.NetworkID == constants.MainnetID {
+		mintCalculator = reward.NewMintCalculatorWithFixedEmission(vm.MintConfig.AnnualEmission)
+	} else {
+		genesisState, err := genesis.ParseState(genesisBytes)
+		if err != nil {
+			return err
+		}
+		mintCalculator = reward.NewMintCalculator(vm.MintConfig, genesisState.InitialSupply)
 	}
-	mintCalculator := reward.NewMintCalculator(vm.MintConfig, genesisState.InitialSupply)
 
 	vm.state, err = state.New(
 		vm.dbManager.Current().Database,

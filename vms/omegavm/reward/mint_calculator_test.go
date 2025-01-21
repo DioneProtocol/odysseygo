@@ -88,6 +88,80 @@ func TestMintWithMaxMintAmount(t *testing.T) {
 
 }
 
+func TestMintCalculatorFixedEmission(t *testing.T) {
+	tests := []struct {
+		lastSyncTime       uint64
+		newChainTime       uint64
+		annualMint         uint64
+		expectedMintAmount uint64
+	}{
+		{
+			lastSyncTime:       0,
+			newChainTime:       year,
+			annualMint:         1000,
+			expectedMintAmount: 1000,
+		},
+		{
+			lastSyncTime:       year,
+			newChainTime:       2 * year,
+			annualMint:         1000,
+			expectedMintAmount: 1000,
+		},
+		{
+			lastSyncTime:       0,
+			newChainTime:       2 * year,
+			annualMint:         1000,
+			expectedMintAmount: 2000,
+		},
+		{
+			lastSyncTime:       year,
+			newChainTime:       3 * year,
+			annualMint:         1000,
+			expectedMintAmount: 2000,
+		},
+		{
+			lastSyncTime:       0,
+			newChainTime:       year / 2,
+			annualMint:         1000,
+			expectedMintAmount: 500,
+		},
+		{
+			lastSyncTime:       year / 2,
+			newChainTime:       year,
+			annualMint:         1000,
+			expectedMintAmount: 500,
+		},
+	}
+
+	for _, test := range tests {
+		c := NewMintCalculatorWithFixedEmission(test.annualMint)
+
+		for totalWeight := uint64(1); totalWeight < 10; totalWeight++ {
+			for weight := uint64(0); weight <= totalWeight; weight++ {
+				expectedReward := test.expectedMintAmount * weight / totalWeight
+				name := fmt.Sprintf("mint(%d,%d,%d,%d)==%d",
+					weight,
+					totalWeight,
+					test.lastSyncTime,
+					test.newChainTime,
+					expectedReward,
+				)
+				t.Run(name, func(t *testing.T) {
+					mintRate := c.CalculateMintRate(
+						totalWeight,
+						time.Unix(int64(test.lastSyncTime), 0),
+						time.Unix(int64(test.newChainTime), 0),
+					)
+					reward := CalculateMintReward(weight, new(big.Int), mintRate)
+
+					// might happen roundoff error
+					require.True(t, expectedReward-reward <= 1, "%d != %d", expectedReward, reward)
+				})
+			}
+		}
+	}
+}
+
 func TestMintWithInflationRate(t *testing.T) {
 	maxMintAmount := uint64(1_000_000_000_000_000)
 	initialSupply := uint64(1_000_000)

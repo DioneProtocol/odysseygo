@@ -50,4 +50,7 @@ type MintConfig struct {
 	// MintAmount is the maximum amount of tokens to mint during the minting
 	// period
 	MaxMintAmount uint64 `json:"maxMintAmount"`
+
+	// AnnualEmission is the amount of tokens to be minted annually
+	AnnualEmission uint64 `json:"annualEmission"`
 }

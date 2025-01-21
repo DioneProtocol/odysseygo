@@ -10,9 +10,11 @@ import (
 
 var (
 	_ MintCalculator = (*mintCalculator)(nil)
+	_ MintCalculator = (*mintCalculatorFixedEmission)(nil)
 
 	// 32 bits for unix time + 64 bits for a weight
-	mintShift uint = 96
+	mintShift uint   = 96
+	year      uint64 = 365 * 24 * 60 * 60
 )
 
 type MintCalculator interface {
@@ -29,6 +31,19 @@ type mintCalculator struct {
 	percentDenominator *big.Int
 }
 
+type mintCalculatorFixedEmission struct {
+	annualEmission *big.Int
+}
+
+func CalculateMintReward(weight uint64, stakerMintRate, accumulatedMintRate *big.Int) uint64 {
+	weightBigInt := new(big.Int).SetUint64(weight)
+	result := new(big.Int).Set(accumulatedMintRate)
+	result.Sub(result, stakerMintRate)
+	result.Mul(result, weightBigInt)
+	result.Rsh(result, mintShift)
+	return result.Uint64()
+}
+
 func NewMintCalculator(config MintConfig, initialSupply uint64) *mintCalculator {
 	mintPeriod := uint64(config.MintingPeriod.Seconds())
 	return &mintCalculator{
@@ -40,15 +55,6 @@ func NewMintCalculator(config MintConfig, initialSupply uint64) *mintCalculator 
 		initialSupply:      new(big.Int).SetUint64(initialSupply),
 		percentDenominator: new(big.Int).SetUint64(PercentDenominator),
 	}
-}
-
-func CalculateMintReward(weight uint64, stakerMintRate, accumulatedMintRate *big.Int) uint64 {
-	weightBigInt := new(big.Int).SetUint64(weight)
-	result := new(big.Int).Set(accumulatedMintRate)
-	result.Sub(result, stakerMintRate)
-	result.Mul(result, weightBigInt)
-	result.Rsh(result, mintShift)
-	return result.Uint64()
 }
 
 func (c *mintCalculator) CalculateMintRate(totalWeight uint64, lastSyncTime, newChainTime time.Time) *big.Int {
@@ -103,6 +109,33 @@ func (c *mintCalculator) CalculateMintRate(totalWeight uint64, lastSyncTime, new
 	result.Lsh(result, mintShift)
 	result.Div(result, c.mintPeriodBigInt)
 	result.Div(result, totalWeightBigInt)
+
+	return result
+}
+
+func NewMintCalculatorWithFixedEmission(annualEmission uint64) MintCalculator {
+	return &mintCalculatorFixedEmission{
+		annualEmission: new(big.Int).Set(new(big.Int).SetUint64(annualEmission)),
+	}
+}
+
+func (c *mintCalculatorFixedEmission) CalculateMintRate(totalWeight uint64, lastSyncTime, newChainTime time.Time) *big.Int {
+	if totalWeight == 0 {
+		return new(big.Int)
+	}
+
+	lastSyncTimeUnix := lastSyncTime.Unix()
+	newChainTimeUnix := newChainTime.Unix()
+
+	if newChainTimeUnix <= lastSyncTimeUnix {
+		return new(big.Int)
+	}
+
+	result := new(big.Int).SetInt64(newChainTimeUnix - lastSyncTimeUnix)
+	result.Mul(result, c.annualEmission)
+	result.Lsh(result, mintShift)
+	result.Div(result, new(big.Int).SetUint64(year))
+	result.Div(result, new(big.Int).SetUint64(totalWeight))
 
 	return result
 }
