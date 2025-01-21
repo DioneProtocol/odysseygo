@@ -139,11 +139,16 @@ func TestManagerVerifyTx(t *testing.T) {
 					Unsigned: unsigned,
 				}
 			},
-			managerF: func(*gomock.Controller) *manager {
+			managerF: func(ctrl *gomock.Controller) *manager {
+				// These values don't matter for this test
+				state := states.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Time{})
+
 				return &manager{
 					backend: &executor.Backend{
 						Bootstrapped: true,
 					},
+					state: state,
 				}
 			},
 			expectedErr: errTestSyntacticVerifyFail,
@@ -166,7 +171,7 @@ func TestManagerVerifyTx(t *testing.T) {
 				// These values don't matter for this test
 				state := states.NewMockState(ctrl)
 				state.EXPECT().GetLastAccepted().Return(preferred)
-				state.EXPECT().GetTimestamp().Return(time.Time{})
+				state.EXPECT().GetTimestamp().Times(2).Return(time.Time{})
 
 				return &manager{
 					backend: &executor.Backend{
@@ -199,7 +204,7 @@ func TestManagerVerifyTx(t *testing.T) {
 				// These values don't matter for this test
 				state := states.NewMockState(ctrl)
 				state.EXPECT().GetLastAccepted().Return(preferred)
-				state.EXPECT().GetTimestamp().Return(time.Time{})
+				state.EXPECT().GetTimestamp().Times(2).Return(time.Time{})
 
 				return &manager{
 					backend: &executor.Backend{
@@ -240,6 +245,8 @@ func TestManagerVerifyTx(t *testing.T) {
 				diffState := states.NewMockDiff(ctrl)
 				diffState.EXPECT().GetLastAccepted().Return(preferredID)
 				diffState.EXPECT().GetTimestamp().Return(time.Time{})
+				state := states.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Time{})
 
 				return &manager{
 					backend: &executor.Backend{
@@ -252,6 +259,7 @@ func TestManagerVerifyTx(t *testing.T) {
 							importedInputs: set.Of(inputID),
 						},
 					},
+					state:        state,
 					lastAccepted: lastAcceptedID,
 					preferred:    preferredID,
 				}
@@ -278,7 +286,7 @@ func TestManagerVerifyTx(t *testing.T) {
 				// These values don't matter for this test
 				state := states.NewMockState(ctrl)
 				state.EXPECT().GetLastAccepted().Return(preferred)
-				state.EXPECT().GetTimestamp().Return(time.Time{})
+				state.EXPECT().GetTimestamp().Times(2).Return(time.Time{})
 
 				return &manager{
 					backend: &executor.Backend{
