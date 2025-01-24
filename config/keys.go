@@ -31,6 +31,7 @@ const (
 	MintRateKey                                        = "mint-rate"
 	MintSinceKey                                       = "mint-since"
 	MintingPeriodKey                                   = "mint-period"
+	AnnualEmission                                     = "annual-emission"
 	MinValidatorStakeDurationKey                       = "min-validator-stake-duration"
 	MaxValidatorStakeDurationKey                       = "max-validator-stake-duration"
 	MinDelegatorStakeDurationKey                       = "min-delegator-stake-duration"
