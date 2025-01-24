@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/rpc/v2"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/utils/ips"
 	"github.com/DioneProtocol/odysseygo/utils/json"
 	"github.com/DioneProtocol/odysseygo/utils/logging"
+	"github.com/DioneProtocol/odysseygo/utils/timer/mockable"
 	"github.com/DioneProtocol/odysseygo/version"
 	"github.com/DioneProtocol/odysseygo/vms"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
@@ -32,6 +34,9 @@ var errNoChainProvided = errors.New("argument 'chain' not given")
 
 // Info is the API service for unprivileged info on a node
 type Info struct {
+	// Used to mock time.
+	clock mockable.Clock
+
 	Parameters
 	log          logging.Logger
 	myIP         ips.DynamicIPPort
@@ -48,6 +53,7 @@ type Parameters struct {
 	NodePOP                       *signer.ProofOfPossession
 	NetworkID                     uint32
 	TxFee                         uint64
+	ApricotPhase7TxFee            uint64
 	CreateAssetTxFee              uint64
 	CreateSubnetTxFee             uint64
 	TransformSubnetTxFee          uint64
@@ -57,6 +63,18 @@ type Parameters struct {
 	AddSubnetValidatorFee         uint64
 	AddSubnetDelegatorFee         uint64
 	VMManager                     vms.Manager
+	ApricotPhase7Time             time.Time
+}
+
+func (p *Parameters) IsApricotPhase7Activated(timestamp time.Time) bool {
+	return !timestamp.Before(p.ApricotPhase7Time)
+}
+
+func (p *Parameters) GetTxFee(timestamp time.Time) uint64 {
+	if p.IsApricotPhase7Activated(timestamp) {
+		return p.ApricotPhase7TxFee
+	}
+	return p.TxFee
 }
 
 // NewService returns a new admin API service
@@ -338,7 +356,7 @@ func (i *Info) GetTxFee(_ *http.Request, _ *struct{}, reply *GetTxFeeResponse) e
 		zap.String("method", "getTxFee"),
 	)
 
-	reply.TxFee = json.Uint64(i.TxFee)
+	reply.TxFee = json.Uint64(i.Parameters.GetTxFee(i.clock.Time()))
 	reply.CreateAssetTxFee = json.Uint64(i.CreateAssetTxFee)
 	reply.CreateSubnetTxFee = json.Uint64(i.CreateSubnetTxFee)
 	reply.TransformSubnetTxFee = json.Uint64(i.TransformSubnetTxFee)

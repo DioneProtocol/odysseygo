@@ -558,13 +558,16 @@ func TestGetValidatorRules(t *testing.T) {
 
 	var (
 		config = &config.Config{
-			MinValidatorStake:         1,
-			MaxValidatorStake:         2,
-			MinValidatorStakeDuration: time.Second,
-			MaxValidatorStakeDuration: 2 * time.Second,
-			MinDelegatorStakeDuration: time.Second,
-			MaxDelegatorStakeDuration: 2 * time.Second,
-			MinDelegationFee:          1337,
+			MinValidatorStake:                      1,
+			MaxValidatorStake:                      2,
+			MinValidatorStakeDuration:              2 * time.Second,
+			ApricotPhase7MinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration:              3 * time.Second,
+			MinDelegatorStakeDuration:              2 * time.Second,
+			ApricotPhase7MinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration:              3 * time.Second,
+			MinDelegationFee:                       1337,
+			ApricotPhase7Time:                      time.Unix(10, 0),
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -581,14 +584,39 @@ func TestGetValidatorRules(t *testing.T) {
 					DIONEAssetID: dioneAssetID,
 				},
 			},
-			chainStateF: func(*gomock.Controller) state.Chain {
-				return nil
+			chainStateF: func(ctrl *gomock.Controller) state.Chain {
+				state := state.NewMockChain(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Unix(1, 0))
+				return state
 			},
 			expectedRules: &addValidatorRules{
 				assetID:           dioneAssetID,
 				minValidatorStake: config.MinValidatorStake,
 				maxValidatorStake: config.MaxValidatorStake,
 				minStakeDuration:  config.MinValidatorStakeDuration,
+				maxStakeDuration:  config.MaxValidatorStakeDuration,
+				minDelegationFee:  config.MinDelegationFee,
+			},
+		},
+		{
+			name:     "primary network after AP7",
+			subnetID: constants.PrimaryNetworkID,
+			backend: &Backend{
+				Config: config,
+				Ctx: &snow.Context{
+					DIONEAssetID: dioneAssetID,
+				},
+			},
+			chainStateF: func(ctrl *gomock.Controller) state.Chain {
+				state := state.NewMockChain(ctrl)
+				state.EXPECT().GetTimestamp().Return(config.ApricotPhase7Time)
+				return state
+			},
+			expectedRules: &addValidatorRules{
+				assetID:           dioneAssetID,
+				minValidatorStake: config.MinValidatorStake,
+				maxValidatorStake: config.MaxValidatorStake,
+				minStakeDuration:  config.ApricotPhase7MinValidatorStakeDuration,
 				maxStakeDuration:  config.MaxValidatorStakeDuration,
 				minDelegationFee:  config.MinDelegationFee,
 			},
@@ -681,12 +709,15 @@ func TestGetDelegatorRules(t *testing.T) {
 	}
 	var (
 		config = &config.Config{
-			MinDelegatorStake:         1,
-			MaxValidatorStake:         2,
-			MinValidatorStakeDuration: time.Second,
-			MaxValidatorStakeDuration: 2 * time.Second,
-			MinDelegatorStakeDuration: time.Second,
-			MaxDelegatorStakeDuration: 2 * time.Second,
+			MinDelegatorStake:                      1,
+			MaxValidatorStake:                      2,
+			MinValidatorStakeDuration:              2 * time.Second,
+			ApricotPhase7MinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration:              3 * time.Second,
+			MinDelegatorStakeDuration:              2 * time.Second,
+			ApricotPhase7MinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration:              3 * time.Second,
+			ApricotPhase7Time:                      time.Unix(10, 0),
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -702,14 +733,39 @@ func TestGetDelegatorRules(t *testing.T) {
 					DIONEAssetID: dioneAssetID,
 				},
 			},
-			chainStateF: func(*gomock.Controller) state.Chain {
-				return nil
+			chainStateF: func(ctrl *gomock.Controller) state.Chain {
+				state := state.NewMockChain(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Unix(1, 0))
+				return state
 			},
 			expectedRules: &addDelegatorRules{
 				assetID:                  dioneAssetID,
 				minDelegatorStake:        config.MinDelegatorStake,
 				maxValidatorStake:        config.MaxValidatorStake,
 				minStakeDuration:         config.MinDelegatorStakeDuration,
+				maxStakeDuration:         config.MaxDelegatorStakeDuration,
+				maxValidatorWeightFactor: MaxValidatorWeightFactor,
+			},
+		},
+		{
+			name:     "primary network after AP7",
+			subnetID: constants.PrimaryNetworkID,
+			backend: &Backend{
+				Config: config,
+				Ctx: &snow.Context{
+					DIONEAssetID: dioneAssetID,
+				},
+			},
+			chainStateF: func(ctrl *gomock.Controller) state.Chain {
+				state := state.NewMockChain(ctrl)
+				state.EXPECT().GetTimestamp().Return(config.ApricotPhase7Time)
+				return state
+			},
+			expectedRules: &addDelegatorRules{
+				assetID:                  dioneAssetID,
+				minDelegatorStake:        config.MinDelegatorStake,
+				maxValidatorStake:        config.MaxValidatorStake,
+				minStakeDuration:         config.ApricotPhase7MinDelegatorStakeDuration,
 				maxStakeDuration:         config.MaxDelegatorStakeDuration,
 				maxValidatorWeightFactor: MaxValidatorWeightFactor,
 			},

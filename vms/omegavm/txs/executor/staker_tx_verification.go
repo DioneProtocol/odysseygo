@@ -92,6 +92,7 @@ func verifyAddValidatorTx(
 	}
 
 	duration := tx.Validator.Duration()
+	currentTimestamp := chainState.GetTimestamp()
 
 	switch {
 	case tx.Validator.Wght < backend.Config.MinValidatorStake:
@@ -106,7 +107,7 @@ func verifyAddValidatorTx(
 		// Ensure the validator fee is at least the minimum amount
 		return nil, ErrInsufficientDelegationFee
 
-	case duration < backend.Config.MinValidatorStakeDuration:
+	case duration < backend.Config.GetMinValidatorStakeDuration(currentTimestamp):
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
@@ -123,7 +124,6 @@ func verifyAddValidatorTx(
 		return outs, nil
 	}
 
-	currentTimestamp := chainState.GetTimestamp()
 	// Ensure the proposed validator starts after the current time
 	startTime := tx.StartTime()
 	if !currentTimestamp.Before(startTime) {
@@ -189,8 +189,10 @@ func verifyAddSubnetValidatorTx(
 	}
 
 	duration := tx.Validator.Duration()
+	currentTimestamp := chainState.GetTimestamp()
+
 	switch {
-	case duration < backend.Config.MinValidatorStakeDuration:
+	case duration < backend.Config.GetMinValidatorStakeDuration(currentTimestamp):
 		// Ensure staking length is not too short
 		return ErrStakeTooShort
 
@@ -203,7 +205,6 @@ func verifyAddSubnetValidatorTx(
 		return nil
 	}
 
-	currentTimestamp := chainState.GetTimestamp()
 	// Ensure the proposed validator starts after the current timestamp
 	validatorStartTime := tx.StartTime()
 	if !currentTimestamp.Before(validatorStartTime) {
@@ -323,7 +324,7 @@ func removeSubnetValidatorValidation(
 		tx.Outs,
 		baseTxCreds,
 		map[ids.ID]uint64{
-			backend.Ctx.DIONEAssetID: backend.Config.TxFee,
+			backend.Ctx.DIONEAssetID: backend.Config.GetTxFee(chainState.GetTimestamp()),
 		},
 	); err != nil {
 		return nil, false, fmt.Errorf("%w: %w", ErrFlowCheckFailed, err)
@@ -350,8 +351,10 @@ func verifyAddDelegatorTx(
 	}
 
 	duration := tx.Validator.Duration()
+	currentTimestamp := chainState.GetTimestamp()
+
 	switch {
-	case duration < backend.Config.MinDelegatorStakeDuration:
+	case duration < backend.Config.GetMinDelegatorStakeDuration(currentTimestamp):
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
@@ -372,7 +375,6 @@ func verifyAddDelegatorTx(
 		return outs, nil
 	}
 
-	currentTimestamp := chainState.GetTimestamp()
 	// Ensure the proposed validator starts after the current timestamp
 	validatorStartTime := tx.StartTime()
 	if !currentTimestamp.Before(validatorStartTime) {
@@ -587,11 +589,13 @@ func getValidatorRules(
 	subnetID ids.ID,
 ) (*addValidatorRules, error) {
 	if subnetID == constants.PrimaryNetworkID {
+		currentTimestamp := chainState.GetTimestamp()
+
 		return &addValidatorRules{
 			assetID:           backend.Ctx.DIONEAssetID,
 			minValidatorStake: backend.Config.MinValidatorStake,
 			maxValidatorStake: backend.Config.MaxValidatorStake,
-			minStakeDuration:  backend.Config.MinValidatorStakeDuration,
+			minStakeDuration:  backend.Config.GetMinValidatorStakeDuration(currentTimestamp),
 			maxStakeDuration:  backend.Config.MaxValidatorStakeDuration,
 			minDelegationFee:  backend.Config.MinDelegationFee,
 		}, nil
@@ -775,11 +779,13 @@ func getDelegatorRules(
 	subnetID ids.ID,
 ) (*addDelegatorRules, error) {
 	if subnetID == constants.PrimaryNetworkID {
+		currentTimestamp := chainState.GetTimestamp()
+
 		return &addDelegatorRules{
 			assetID:                  backend.Ctx.DIONEAssetID,
 			minDelegatorStake:        backend.Config.MinDelegatorStake,
 			maxValidatorStake:        backend.Config.MaxValidatorStake,
-			minStakeDuration:         backend.Config.MinDelegatorStakeDuration,
+			minStakeDuration:         backend.Config.GetMinDelegatorStakeDuration(currentTimestamp),
 			maxStakeDuration:         backend.Config.MaxDelegatorStakeDuration,
 			maxValidatorWeightFactor: MaxValidatorWeightFactor,
 		}, nil
