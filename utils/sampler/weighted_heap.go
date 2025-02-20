@@ -4,6 +4,8 @@
 package sampler
 
 import (
+	"cmp"
+
 	"github.com/DioneProtocol/odysseygo/utils"
 	"github.com/DioneProtocol/odysseygo/utils/math"
 )
@@ -19,17 +21,16 @@ type weightedHeapElement struct {
 	index            int
 }
 
-func (e weightedHeapElement) Less(other weightedHeapElement) bool {
+// Compare the elements. Weight is in decreasing order. Index is in increasing
+// order.
+func (e weightedHeapElement) Compare(other weightedHeapElement) int {
 	// By accounting for the initial index of the weights, this results in a
 	// stable sort. We do this rather than using `sort.Stable` because of the
 	// reported change in performance of the sort used.
-	if e.weight > other.weight {
-		return true
+	if weightCmp := cmp.Compare(other.weight, e.weight); weightCmp != 0 {
+		return weightCmp
 	}
-	if e.weight < other.weight {
-		return false
-	}
-	return e.index < other.index
+	return cmp.Compare(e.index, other.index)
 }
 
 // Sampling is performed by executing a search over a tree of elements in the

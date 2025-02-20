@@ -4,6 +4,7 @@
 package metrics
 
 import (
+	"cmp"
 	"errors"
 	"fmt"
 	"sync"
@@ -91,7 +92,7 @@ func (g *multiGatherer) Register(namespace string, gatherer prometheus.Gatherer)
 }
 
 func sortMetrics(m []*dto.MetricFamily) {
-	slices.SortFunc(m, func(i, j *dto.MetricFamily) bool {
-		return *i.Name < *j.Name
+	slices.SortFunc(m, func(i, j *dto.MetricFamily) int {
+		return cmp.Compare(*i.Name, *j.Name)
 	})
 }
