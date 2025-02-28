@@ -4,6 +4,7 @@
 package utils
 
 import (
+	"cmp"
 	"math/rand"
 	"testing"
 	"time"
@@ -15,8 +16,8 @@ var _ Sortable[sortable] = sortable(0)
 
 type sortable int
 
-func (s sortable) Less(other sortable) bool {
-	return s < other
+func (s sortable) Compare(other sortable) int {
+	return cmp.Compare(s, other)
 }
 
 func TestSortSliceSortable(t *testing.T) {

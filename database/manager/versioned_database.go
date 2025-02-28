@@ -23,5 +23,5 @@ func (db *VersionedDatabase) Close() error {
 
 // Note this sorts in descending order (newest version --> oldest version)
 func (db *VersionedDatabase) Compare(other *VersionedDatabase) int {
-	return db.Version.Compare(other.Version)
+	return other.Version.Compare(db.Version)
 }

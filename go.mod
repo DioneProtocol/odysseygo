@@ -7,8 +7,6 @@ module github.com/DioneProtocol/odysseygo
 // go.mod (here, only major.minor can be specified)
 go 1.21.13
 
-toolchain go1.22.6
-
 require (
 	github.com/DataDog/zstd v1.5.2
 	github.com/DioneProtocol/coreth v0.0.0-00010101000000-000000000000
