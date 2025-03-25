@@ -2462,7 +2462,7 @@ func (s *state) writeMetadata() error {
 		if err := database.PutBigInt(s.singletonDB, stakerMintRateKey, s.stakerAccumulatedMintRate); err != nil {
 			return fmt.Errorf("failed to write staker mint rate: %w", err)
 		}
-		s.persistedStakerAccumulatedMintRate = s.stakerAccumulatedMintRate
+		s.persistedStakerAccumulatedMintRate.Set(s.stakerAccumulatedMintRate)
 	}
 	if s.persistedCurrentSupply != s.currentSupply {
 		if err := database.PutUInt64(s.singletonDB, currentSupplyKey, s.currentSupply); err != nil {
