@@ -120,12 +120,10 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 		return nil
 	}
 
-	validators, ok := backend.Config.Validators.Get(constants.PrimaryNetworkID)
-	if !ok {
-		return fmt.Errorf("couldn't get primary validators")
+	totalWeight, err := parentState.GetCurrentValidatorsWeight(constants.OmegaChainID)
+	if err != nil {
+		return err
 	}
-
-	totalWeight := validators.Weight()
 	mintRate, err := parentState.GetStakerAccumulatedMintRate()
 	if err != nil {
 		return err
@@ -155,7 +153,7 @@ func (s *stateChanges) updateAccumulatedMintRate(backend *Backend, parentState s
 	return nil
 }
 
-func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Chain) error {
+func (s *stateChanges) updateFeePerWeight(parentState state.Chain) error {
 	curAccumFee, err := parentState.GetCurrentAccumulatedFee()
 	if err != nil {
 		return err
@@ -179,13 +177,9 @@ func (s *stateChanges) updateFeePerWeight(backend *Backend, parentState state.Ch
 		s.feePerWeightStored = new(big.Int)
 	}
 
-	vdrs, exists := backend.Config.Validators.Get(constants.OmegaChainID)
-	if !exists {
-		return fmt.Errorf("primary network vdrs not exists")
-	}
-	totalWeight := vdrs.Weight()
-	if totalWeight == 0 {
-		return nil
+	totalWeight, err := parentState.GetCurrentValidatorsWeight(constants.OmegaChainID)
+	if err != nil {
+		return err
 	}
 
 	accumFeeDiff := curAccumFee - lastAccumulatedFee
@@ -250,7 +244,7 @@ func AdvanceTimeTo(
 
 		switch stakerToRemove.Priority {
 		case txs.PrimaryNetworkValidatorPendingPriority, txs.PrimaryNetworkDelegatorApricotPendingPriority, txs.PrimaryNetworkDelegatorBanffPendingPriority:
-			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+			if err := changes.updateFeePerWeight(parentState); err != nil {
 				return nil, err
 			}
 			feePerWeightStored := changes.feePerWeightStored
@@ -329,7 +323,7 @@ func AdvanceTimeTo(
 			if err := changes.updateAccumulatedMintRate(backend, parentState, newChainTime); err != nil {
 				return nil, err
 			}
-			if err := changes.updateFeePerWeight(backend, parentState); err != nil {
+			if err := changes.updateFeePerWeight(parentState); err != nil {
 				return nil, err
 			}
 

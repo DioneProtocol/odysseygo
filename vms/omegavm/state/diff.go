@@ -177,6 +177,34 @@ func (d *diff) GetCurrentValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker,
 	}
 }
 
+func (d *diff) GetCurrentValidatorsWeight(subnetID ids.ID) (uint64, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return 0, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+
+	totalWeight, err := parentState.GetCurrentValidatorsWeight(subnetID)
+	if err != nil {
+		return 0, err
+	}
+
+	if d.currentStakerDiffs.addedStakers != nil {
+		iter := NewTreeIterator(d.currentStakerDiffs.addedStakers)
+		for iter.Next() {
+			staker := iter.Value()
+			totalWeight += staker.Weight
+		}
+	}
+
+	if d.currentStakerDiffs.deletedStakers != nil {
+		for _, staker := range d.currentStakerDiffs.deletedStakers {
+			totalWeight -= staker.Weight
+		}
+	}
+
+	return totalWeight, nil
+}
+
 func (d *diff) SetDelegateeReward(subnetID ids.ID, nodeID ids.NodeID, amount uint64) error {
 	if d.modifiedDelegateeRewards == nil {
 		d.modifiedDelegateeRewards = make(map[ids.ID]map[ids.NodeID]uint64)

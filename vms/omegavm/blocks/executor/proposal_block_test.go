@@ -173,6 +173,7 @@ func TestBanffProposalBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetTimestamp().Return(parentTime).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentSupply(constants.PrimaryNetworkID).Return(uint64(1000), nil).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentStakersLen().Return(uint64(0), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentValidatorsWeight(constants.PrimaryNetworkID).Return(uint64(1), nil).AnyTimes()
 
 	env.blkManager.(*manager).blkIDToState[parentID] = &blockState{
 		statelessBlock: banffParentBlk,
