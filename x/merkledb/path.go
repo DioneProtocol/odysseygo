@@ -5,6 +5,7 @@ package merkledb
 
 import (
 	"bytes"
+	"cmp"
 	"reflect"
 	"strings"
 	"unsafe"
@@ -81,6 +82,13 @@ func (s SerializedPath) AppendNibble(nibble byte) SerializedPath {
 	// shift the nibble 4 left if even, do nothing if odd
 	value[len(value)-1] += nibble << (4 * even)
 	return SerializedPath{Value: value, NibbleLength: s.NibbleLength + 1}
+}
+
+func (s SerializedPath) Compare(other SerializedPath) int {
+	if valueCmp := bytes.Compare(s.Value, other.Value); valueCmp != 0 {
+		return valueCmp
+	}
+	return cmp.Compare(s.NibbleLength, other.NibbleLength)
 }
 
 type path string

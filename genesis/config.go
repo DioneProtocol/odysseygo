@@ -4,6 +4,7 @@
 package genesis
 
 import (
+	"cmp"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -53,9 +54,11 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 	return ua, err
 }
 
-func (a Allocation) Less(other Allocation) bool {
-	return a.InitialAmount < other.InitialAmount ||
-		(a.InitialAmount == other.InitialAmount && a.DIONEAddr.Less(other.DIONEAddr))
+func (a Allocation) Compare(other Allocation) int {
+	if amountCmp := cmp.Compare(a.InitialAmount, other.InitialAmount); amountCmp != 0 {
+		return amountCmp
+	}
+	return a.DIONEAddr.Compare(other.DIONEAddr)
 }
 
 type Staker struct {

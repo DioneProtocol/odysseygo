@@ -251,14 +251,14 @@ func TestUTXOLess(t *testing.T) {
 		name     string
 		utxo1    UTXO
 		utxo2    UTXO
-		expected bool
+		expected int
 	}
 	tests := []test{
 		{
 			name:     "both empty",
 			utxo1:    UTXO{},
 			utxo2:    UTXO{},
-			expected: false,
+			expected: 0,
 		},
 		{
 			name:  "first locktime smaller",
@@ -266,7 +266,7 @@ func TestUTXOLess(t *testing.T) {
 			utxo2: UTXO{
 				Locktime: 1,
 			},
-			expected: true,
+			expected: -1,
 		},
 		{
 			name: "first locktime larger",
@@ -274,7 +274,7 @@ func TestUTXOLess(t *testing.T) {
 				Locktime: 1,
 			},
 			utxo2:    UTXO{},
-			expected: false,
+			expected: 1,
 		},
 		{
 			name:  "first amount smaller",
@@ -282,7 +282,7 @@ func TestUTXOLess(t *testing.T) {
 			utxo2: UTXO{
 				Amount: 1,
 			},
-			expected: true,
+			expected: -1,
 		},
 		{
 			name: "first amount larger",
@@ -290,7 +290,7 @@ func TestUTXOLess(t *testing.T) {
 				Amount: 1,
 			},
 			utxo2:    UTXO{},
-			expected: false,
+			expected: 1,
 		},
 		{
 			name: "first address smaller",
@@ -300,7 +300,7 @@ func TestUTXOLess(t *testing.T) {
 			utxo2: UTXO{
 				Address: largerAddrStr,
 			},
-			expected: true,
+			expected: -1,
 		},
 		{
 			name: "first address larger",
@@ -310,13 +310,13 @@ func TestUTXOLess(t *testing.T) {
 			utxo2: UTXO{
 				Address: smallerAddrStr,
 			},
-			expected: false,
+			expected: 1,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			require.Equal(t, tt.expected, tt.utxo1.Less(tt.utxo2))
+			require.Equal(t, tt.expected, tt.utxo1.Compare(tt.utxo2))
 		})
 	}
 }

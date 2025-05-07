@@ -4,6 +4,7 @@
 package snowman
 
 import (
+	"cmp"
 	"context"
 	"time"
 
@@ -48,6 +49,6 @@ func (b *TestBlock) Bytes() []byte {
 	return b.BytesV
 }
 
-func (b *TestBlock) Less(other *TestBlock) bool {
-	return b.HeightV < other.HeightV
+func (b *TestBlock) Compare(other *TestBlock) int {
+	return cmp.Compare(b.HeightV, other.HeightV)
 }
