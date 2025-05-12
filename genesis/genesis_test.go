@@ -351,7 +351,7 @@ func TestGenesis(t *testing.T) {
 		},
 		{
 			networkID:  constants.TestnetID,
-			expectedID: "2V2khWeJWhv3LjtBizj3CZt3eD12Z1QF287GrmnV7WYoGEkFKG",
+			expectedID: "ki11uLwNpPEjXBQpmCbZhDgN6ifbeeZaNwnXqnU8f1vvxdiaL",
 		},
 		{
 			networkID:  constants.LocalID,
@@ -399,11 +399,11 @@ func TestVMGenesis(t *testing.T) {
 			vmTest: []vmTest{
 				{
 					vmID:       constants.AlphaID,
-					expectedID: "3wRxPEwJZTqP38NFkKHU1pWriDcePzEvj8PAtHikzmMpwAXML",
+					expectedID: "2itujZouifvPRPyEhnSr1o2iiKp7FGQaxGmsuxbnFX3DQHhMmc",
 				},
 				{
 					vmID:       constants.DeltaID,
-					expectedID: "L1m631VHS1yuYkicaNRQTzzbE71dG942sgF3sCnHFgCTzNmsD",
+					expectedID: "iCeQJdXtTfeCSQLbGBXByK2fwRd5GkrBTM1tjgZnPVK4pe7vj",
 				},
 			},
 		},
@@ -461,7 +461,7 @@ func TestDIONEAssetID(t *testing.T) {
 		},
 		{
 			networkID:  constants.TestnetID,
-			expectedID: "2NXDF6rpi7fJqFnuSKSnoVCNF3Py22xdjQavy9QgvjL3zr2yue",
+			expectedID: "2atrn25yWCfKveSTnp5bhihzRkndGFBbbWPbxGitUvipmqvDy9",
 		},
 		{
 			networkID:  constants.LocalID,
