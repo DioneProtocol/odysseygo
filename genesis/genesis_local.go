@@ -38,6 +38,7 @@ var (
 	LocalParams = Params{
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                         units.MilliDione,
+			ApricotPhase7TxFee:            units.MilliDione,
 			CreateAssetTxFee:              units.MilliDione,
 			CreateSubnetTxFee:             100 * units.MilliDione,
 			TransformSubnetTxFee:          100 * units.MilliDione,
@@ -48,15 +49,17 @@ var (
 			AddSubnetDelegatorFee:         units.MilliDione,
 		},
 		StakingConfig: StakingConfig{
-			UptimeRequirement:         .8, // 80%
-			MinValidatorStake:         2 * units.KiloDione,
-			MinDelegatorStake:         25 * units.Dione,
-			MaxValidatorStake:         3 * units.MegaDione,
-			MinDelegationFee:          20000, // 2%
-			MinValidatorStakeDuration: 24 * time.Hour,
-			MaxValidatorStakeDuration: 365 * 24 * time.Hour,
-			MinDelegatorStakeDuration: 24 * time.Hour,
-			MaxDelegatorStakeDuration: 365 * 24 * time.Hour,
+			UptimeRequirement:                      .8, // 80%
+			MinValidatorStake:                      2 * units.KiloDione,
+			MinDelegatorStake:                      25 * units.Dione,
+			MaxValidatorStake:                      3 * units.MegaDione,
+			MinDelegationFee:                       20000, // 2%
+			MinValidatorStakeDuration:              24 * time.Hour,
+			MaxValidatorStakeDuration:              365 * 24 * time.Hour,
+			MinDelegatorStakeDuration:              24 * time.Hour,
+			MaxDelegatorStakeDuration:              365 * 24 * time.Hour,
+			ApricotPhase7MinValidatorStakeDuration: 24 * time.Hour,
+			ApricotPhase7MinDelegatorStakeDuration: 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,

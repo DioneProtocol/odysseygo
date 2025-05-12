@@ -809,6 +809,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.MaxValidatorStakeDuration = v.GetDuration(MaxValidatorStakeDurationKey)
 		config.MinDelegatorStakeDuration = v.GetDuration(MinDelegatorStakeDurationKey)
 		config.MaxDelegatorStakeDuration = v.GetDuration(MaxDelegatorStakeDurationKey)
+		config.ApricotPhase7MinValidatorStakeDuration = v.GetDuration(MinValidatorStakeDurationKey)
+		config.ApricotPhase7MinDelegatorStakeDuration = v.GetDuration(MinDelegatorStakeDurationKey)
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
 		config.RewardConfig.MinConsumptionRate = v.GetUint64(StakeMinConsumptionRateKey)
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
@@ -827,11 +829,19 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 			return node.StakingConfig{}, errInvalidDelegationFee
 		case config.MinValidatorStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
+		case config.ApricotPhase7MinValidatorStakeDuration <= 0:
+			return node.StakingConfig{}, errInvalidMinStakeDuration
 		case config.MaxValidatorStakeDuration < config.MinValidatorStakeDuration:
+			return node.StakingConfig{}, errMinStakeDurationAboveMax
+		case config.MaxValidatorStakeDuration < config.ApricotPhase7MinValidatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.MinDelegatorStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
+		case config.ApricotPhase7MinDelegatorStakeDuration <= 0:
+			return node.StakingConfig{}, errInvalidMinStakeDuration
 		case config.MaxDelegatorStakeDuration < config.MinDelegatorStakeDuration:
+			return node.StakingConfig{}, errMinStakeDurationAboveMax
+		case config.MaxDelegatorStakeDuration < config.ApricotPhase7MinDelegatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.RewardConfig.MaxConsumptionRate > reward.PercentDenominator:
 			return node.StakingConfig{}, errStakeMaxConsumptionTooLarge
@@ -852,6 +862,7 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 	if networkID != constants.MainnetID && networkID != constants.TestnetID {
 		return genesis.TxFeeConfig{
 			TxFee:                         v.GetUint64(TxFeeKey),
+			ApricotPhase7TxFee:            v.GetUint64(TxFeeKey),
 			CreateAssetTxFee:              v.GetUint64(CreateAssetTxFeeKey),
 			CreateSubnetTxFee:             v.GetUint64(CreateSubnetTxFeeKey),
 			TransformSubnetTxFee:          v.GetUint64(TransformSubnetTxFeeKey),

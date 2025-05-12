@@ -177,7 +177,7 @@ func (e *StandardTxExecutor) ImportTx(tx *txs.ImportTx) error {
 			tx.Outs,
 			e.Tx.Creds,
 			map[ids.ID]uint64{
-				e.Ctx.DIONEAssetID: e.Config.TxFee,
+				e.Ctx.DIONEAssetID: e.Config.GetTxFee(e.State.GetTimestamp()),
 			},
 		); err != nil {
 			return err
@@ -225,7 +225,7 @@ func (e *StandardTxExecutor) ExportTx(tx *txs.ExportTx) error {
 		outs,
 		e.Tx.Creds,
 		map[ids.ID]uint64{
-			e.Ctx.DIONEAssetID: e.Config.TxFee,
+			e.Ctx.DIONEAssetID: e.Config.GetTxFee(e.State.GetTimestamp()),
 		},
 	); err != nil {
 		return fmt.Errorf("failed verifySpend: %w", err)

@@ -31,10 +31,16 @@ type StakingConfig struct {
 	MaxValidatorStakeDuration time.Duration `json:"maxValidatorStakeDuration"`
 	// MinDelegatorStakeDuration is the minimum amount of time a delegator can delegate
 	// for in a single period.
-	MinDelegatorStakeDuration time.Duration `json:"minDelekatorStakeDuration"`
+	MinDelegatorStakeDuration time.Duration `json:"minDelegatorStakeDuration"`
 	// MaxDelegatorStakeDuration is the maximum amount of time a delegator can delegate
 	// for in a single period.
 	MaxDelegatorStakeDuration time.Duration `json:"maxDelegatorStakeDuration"`
+	// ApricotPhase7MinValidatorStakeDuration is the minimum amount of time a validator can validate
+	// for in a single period.
+	ApricotPhase7MinValidatorStakeDuration time.Duration `json:"apricotPhase7MinValidatorStakeDuration"`
+	// ApricotPhase7MinDelegatorStakeDuration is the minimum amount of time a delegator can delegate
+	// for in a single period.
+	ApricotPhase7MinDelegatorStakeDuration time.Duration `json:"apricotPhase7MinDelegatorStakeDuration"`
 	// RewardConfig is the config for the reward function.
 	RewardConfig reward.Config `json:"rewardConfig"`
 	// Config for the minting function
@@ -44,6 +50,8 @@ type StakingConfig struct {
 type TxFeeConfig struct {
 	// Transaction fee
 	TxFee uint64 `json:"txFee"`
+	// Transaction fee
+	ApricotPhase7TxFee uint64 `json:"apricotPhase7TxFee"`
 	// Transaction fee for create asset transactions
 	CreateAssetTxFee uint64 `json:"createAssetTxFee"`
 	// Transaction fee for create subnet transactions
