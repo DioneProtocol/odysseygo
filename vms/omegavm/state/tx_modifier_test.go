@@ -37,7 +37,10 @@ func TestTxModifier(t *testing.T) {
 				},
 			},
 		},
-		RewardsOwner:     &secp256k1fx.OutputOwners{},
+		RewardsOwner: &secp256k1fx.OutputOwners{
+			Addrs:     []ids.ShortID{rewardOwnerID},
+			Threshold: uint32(1),
+		},
 		DelegationShares: reward.PercentDenominator,
 	}
 	genesisValidatorTx := &txs.Tx{Unsigned: genesisValidator}
@@ -106,7 +109,7 @@ func TestTxModifier(t *testing.T) {
 		owner := utx.RewardsOwner.(*secp256k1fx.OutputOwners)
 		require.Equal(genesisValidator.Validator.NodeID, utx.NodeID())
 		require.Equal(genesisValidator.Validator.Start, utx.Start)
-		require.Equal(genesisValidator.Validator.End-testnetEndTimeDecrement, utx.End)
+		require.Equal(genesisValidator.Validator.End, utx.End)
 		require.Equal(genesisValidator.Validator.Wght, utx.Wght)
 		require.Equal(len(owner.Addrs), 1)
 		require.Equal(owner.Addrs[0], rewardOwnerID)

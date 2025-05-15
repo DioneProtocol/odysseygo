@@ -905,6 +905,9 @@ func TestBlockReject(t *testing.T) {
 				mockPreferredState.EXPECT().GetLastAccepted().Return(ids.GenerateTestID()).AnyTimes()
 				mockPreferredState.EXPECT().GetTimestamp().Return(time.Now()).AnyTimes()
 
+				state := states.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Now()).AnyTimes()
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
@@ -923,6 +926,7 @@ func TestBlockReject(t *testing.T) {
 							},
 							blockID: {},
 						},
+						state: state,
 					},
 				}
 			},
@@ -964,6 +968,9 @@ func TestBlockReject(t *testing.T) {
 				mockPreferredState.EXPECT().GetLastAccepted().Return(ids.GenerateTestID()).AnyTimes()
 				mockPreferredState.EXPECT().GetTimestamp().Return(time.Now()).AnyTimes()
 
+				state := states.NewMockState(ctrl)
+				state.EXPECT().GetTimestamp().Return(time.Now()).AnyTimes()
+
 				return &Block{
 					Block: mockBlock,
 					manager: &manager{
@@ -982,6 +989,7 @@ func TestBlockReject(t *testing.T) {
 							},
 							blockID: {},
 						},
+						state: state,
 					},
 				}
 			},
