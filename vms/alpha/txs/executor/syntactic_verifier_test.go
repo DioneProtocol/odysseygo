@@ -28,10 +28,8 @@ import (
 var (
 	keys      = secp256k1.TestKeys()
 	feeConfig = config.Config{
-		TxFee:              2,
-		ApricotPhase7TxFee: 1,
-		CreateAssetTxFee:   3,
-		ApricotPhase7Time:  time.Unix(10, 0),
+		TxFee:            2,
+		CreateAssetTxFee: 3,
 	}
 )
 
@@ -139,8 +137,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     nil,
+			err: nil,
 		},
 		{
 			name: "wrong networkID",
@@ -152,8 +149,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrWrongNetworkID,
+			err: dione.ErrWrongNetworkID,
 		},
 		{
 			name: "wrong chainID",
@@ -165,8 +161,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrWrongChainID,
+			err: dione.ErrWrongChainID,
 		},
 		{
 			name: "memo too large",
@@ -178,8 +173,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrMemoTooLarge,
+			err: dione.ErrMemoTooLarge,
 		},
 		{
 			name: "invalid output",
@@ -199,8 +193,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     secp256k1fx.ErrNoValueOutput,
+			err: secp256k1fx.ErrNoValueOutput,
 		},
 		{
 			name: "unsorted outputs",
@@ -231,8 +224,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrOutputsNotSorted,
+			err: dione.ErrOutputsNotSorted,
 		},
 		{
 			name: "invalid input",
@@ -252,8 +244,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     secp256k1fx.ErrNoValueInput,
+			err: secp256k1fx.ErrNoValueInput,
 		},
 		{
 			name: "duplicate inputs",
@@ -271,8 +262,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					},
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrInputsNotSortedUnique,
+			err: dione.ErrInputsNotSortedUnique,
 		},
 		{
 			name: "input overflow",
@@ -304,8 +294,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					},
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     math.ErrOverflow,
+			err: math.ErrOverflow,
 		},
 		{
 			name: "output overflow",
@@ -335,8 +324,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     math.ErrOverflow,
+			err: math.ErrOverflow,
 		},
 		{
 			name: "insufficient funds",
@@ -356,8 +344,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrInsufficientFunds,
+			err: dione.ErrInsufficientFunds,
 		},
 		{
 			name: "invalid credential",
@@ -369,8 +356,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					}},
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     secp256k1fx.ErrNilCredential,
+			err: secp256k1fx.ErrNilCredential,
 		},
 		{
 			name: "wrong number of credentials",
@@ -379,8 +365,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Unsigned: &txs.BaseTx{BaseTx: baseTx},
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     errWrongNumberOfCredentials,
+			err: errWrongNumberOfCredentials,
 		},
 		{
 			name: "barely sufficient funds",
@@ -400,8 +385,7 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     nil,
+			err: nil,
 		},
 		{
 			name: "barely insufficient funds",
@@ -421,59 +405,15 @@ func TestSyntacticVerifierBaseTx(t *testing.T) {
 					Creds:    creds,
 				}
 			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrInsufficientFunds,
-		},
-		{
-			name: "barely insufficient funds before AP7",
-			txFunc: func() *txs.Tx {
-				input := input
-				input.In = &secp256k1fx.TransferInput{
-					Amt:   fxOutput.Amt + feeConfig.ApricotPhase7TxFee,
-					Input: inputSigners,
-				}
-
-				baseTx := baseTx
-				baseTx.Ins = []*dione.TransferableInput{
-					&input,
-				}
-				return &txs.Tx{
-					Unsigned: &txs.BaseTx{BaseTx: baseTx},
-					Creds:    creds,
-				}
-			},
-			curTime: time.Unix(0, 0),
-			err:     dione.ErrInsufficientFunds,
-		},
-		{
-			name: "barely sufficient funds after AP7",
-			txFunc: func() *txs.Tx {
-				input := input
-				input.In = &secp256k1fx.TransferInput{
-					Amt:   fxOutput.Amt + feeConfig.ApricotPhase7TxFee,
-					Input: inputSigners,
-				}
-
-				baseTx := baseTx
-				baseTx.Ins = []*dione.TransferableInput{
-					&input,
-				}
-				return &txs.Tx{
-					Unsigned: &txs.BaseTx{BaseTx: baseTx},
-					Creds:    creds,
-				}
-			},
-			curTime: feeConfig.ApricotPhase7Time,
-			err:     nil,
+			err: dione.ErrInsufficientFunds,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			tx := test.txFunc()
 			verifier := &SyntacticVerifier{
-				Backend:          backend,
-				CurrentTimestamp: test.curTime,
-				Tx:               tx,
+				Backend: backend,
+				Tx:      tx,
 			}
 			err := tx.Unsigned.Visit(verifier)
 			require.ErrorIs(t, err, test.err)

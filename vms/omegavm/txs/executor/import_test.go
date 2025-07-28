@@ -99,7 +99,7 @@ func TestNewImportTx(t *testing.T) {
 			sharedMemory: fundedSharedMemory(
 				env.ctx.AChainID,
 				map[ids.ID]uint64{
-					env.ctx.DIONEAssetID: env.config.GetTxFee(env.state.GetTimestamp()) - 1,
+					env.ctx.DIONEAssetID: env.config.TxFee - 1,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},
@@ -123,7 +123,7 @@ func TestNewImportTx(t *testing.T) {
 			sharedMemory: fundedSharedMemory(
 				dChainID,
 				map[ids.ID]uint64{
-					env.ctx.DIONEAssetID: env.config.GetTxFee(env.config.ApricotPhase5Time),
+					env.ctx.DIONEAssetID: env.config.TxFee,
 				},
 			),
 			sourceKeys:  []*secp256k1.PrivateKey{sourceKey},

@@ -20,7 +20,6 @@ var (
 	TestnetParams = Params{
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                         5 * units.Dione,
-			ApricotPhase7TxFee:            500 * units.MilliDione,
 			CreateAssetTxFee:              10 * units.Dione,
 			CreateSubnetTxFee:             300 * units.Dione,
 			TransformSubnetTxFee:          5 * units.Dione,

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/DioneProtocol/odysseygo/ids"
@@ -48,8 +47,7 @@ var (
 
 type SyntacticVerifier struct {
 	*Backend
-	CurrentTimestamp time.Time
-	Tx               *txs.Tx
+	Tx *txs.Tx
 }
 
 func (v *SyntacticVerifier) BaseTx(tx *txs.BaseTx) error {
@@ -58,7 +56,7 @@ func (v *SyntacticVerifier) BaseTx(tx *txs.BaseTx) error {
 	}
 
 	err := dione.VerifyTx(
-		v.Config.GetTxFee(v.CurrentTimestamp),
+		v.Config.TxFee,
 		v.FeeAssetID,
 		[][]*dione.TransferableInput{tx.Ins},
 		[][]*dione.TransferableOutput{tx.Outs},

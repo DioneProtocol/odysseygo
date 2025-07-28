@@ -302,7 +302,6 @@ func defaultConfig(postBanff, postCortina bool) config.Config {
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
 		Validators:                vdrs,
 		TxFee:                     defaultTxFee,
-		ApricotPhase7TxFee:        defaultTxFee / 2,
 		CreateSubnetTxFee:         100 * defaultTxFee,
 		CreateBlockchainTxFee:     100 * defaultTxFee,
 		MinValidatorStake:         5 * units.MilliDione,
