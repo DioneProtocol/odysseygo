@@ -461,9 +461,8 @@ func (vm *VM) ParseTx(_ context.Context, bytes []byte) (snowstorm.Tx, error) {
 	}
 
 	err = tx.Unsigned.Visit(&txexecutor.SyntacticVerifier{
-		Backend:          vm.txBackend,
-		CurrentTimestamp: vm.state.GetTimestamp(),
-		Tx:               tx,
+		Backend: vm.txBackend,
+		Tx:      tx,
 	})
 	if err != nil {
 		return nil, err

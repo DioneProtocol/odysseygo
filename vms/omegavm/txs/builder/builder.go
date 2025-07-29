@@ -252,20 +252,19 @@ func (b *builder) NewImportTx(
 
 	ins := []*dione.TransferableInput{}
 	outs := []*dione.TransferableOutput{}
-	txFee := b.cfg.GetTxFee(b.state.GetTimestamp())
 	switch {
-	case importedDIONE < txFee: // imported amount goes toward paying tx fee
+	case importedDIONE < b.cfg.TxFee: // imported amount goes toward paying tx fee
 		var baseSigners [][]*secp256k1.PrivateKey
-		ins, outs, _, baseSigners, err = b.Spend(b.state, keys, 0, txFee-importedDIONE, changeAddr)
+		ins, outs, _, baseSigners, err = b.Spend(b.state, keys, 0, b.cfg.TxFee-importedDIONE, changeAddr)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 		}
 		signers = append(baseSigners, signers...)
 		delete(importedAmounts, b.ctx.DIONEAssetID)
-	case importedDIONE == txFee:
+	case importedDIONE == b.cfg.TxFee:
 		delete(importedAmounts, b.ctx.DIONEAssetID)
 	default:
-		importedAmounts[b.ctx.DIONEAssetID] -= txFee
+		importedAmounts[b.ctx.DIONEAssetID] -= b.cfg.TxFee
 	}
 
 	for assetID, amount := range importedAmounts {
@@ -310,10 +309,9 @@ func (b *builder) NewExportTx(
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
-	txFee := b.cfg.GetTxFee(b.state.GetTimestamp())
-	toBurn, err := math.Add64(amount, txFee)
+	toBurn, err := math.Add64(amount, b.cfg.TxFee)
 	if err != nil {
-		return nil, fmt.Errorf("amount (%d) + tx fee(%d) overflows", amount, txFee)
+		return nil, fmt.Errorf("amount (%d) + tx fee(%d) overflows", amount, b.cfg.TxFee)
 	}
 	ins, outs, _, signers, err := b.Spend(b.state, keys, 0, toBurn, changeAddr)
 	if err != nil {
@@ -524,7 +522,7 @@ func (b *builder) NewAddSubnetValidatorTx(
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
-	ins, outs, _, signers, err := b.Spend(b.state, keys, 0, b.cfg.GetTxFee(b.state.GetTimestamp()), changeAddr)
+	ins, outs, _, signers, err := b.Spend(b.state, keys, 0, b.cfg.TxFee, changeAddr)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 	}
@@ -567,7 +565,7 @@ func (b *builder) NewRemoveSubnetValidatorTx(
 	keys []*secp256k1.PrivateKey,
 	changeAddr ids.ShortID,
 ) (*txs.Tx, error) {
-	ins, outs, _, signers, err := b.Spend(b.state, keys, 0, b.cfg.GetTxFee(b.state.GetTimestamp()), changeAddr)
+	ins, outs, _, signers, err := b.Spend(b.state, keys, 0, b.cfg.TxFee, changeAddr)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 	}
