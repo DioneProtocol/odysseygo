@@ -102,8 +102,8 @@ var (
 	CortinaDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
 	ApricotPhase7Times = map[uint32]time.Time{
-		constants.MainnetID: time.Date(2025, time.January, 14, 17, 0, 0, 0, time.UTC),
-		constants.TestnetID: time.Date(2025, time.January, 14, 17, 0, 0, 0, time.UTC),
+		constants.MainnetID: time.Date(2025, time.August, 1, 11, 0, 0, 0, time.UTC),
+		constants.TestnetID: time.Date(2025, time.August, 1, 11, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase7DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 )
