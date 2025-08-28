@@ -422,6 +422,21 @@ func (mr *MockStateMockRecorder) GetCurrentValidator(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentValidator", reflect.TypeOf((*MockState)(nil).GetCurrentValidator), arg0, arg1)
 }
 
+// GetCurrentValidatorsWeight mocks base method.
+func (m *MockState) GetCurrentValidatorsWeight(arg0 ids.ID) (uint64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrentValidatorsWeight", arg0)
+	ret0, _ := ret[0].(uint64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrentValidatorsWeight indicates an expected call of GetCurrentValidatorsWeight.
+func (mr *MockStateMockRecorder) GetCurrentValidatorsWeight(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentValidatorsWeight", reflect.TypeOf((*MockState)(nil).GetCurrentValidatorsWeight), arg0)
+}
+
 // GetDelegateeReward mocks base method.
 func (m *MockState) GetDelegateeReward(arg0 ids.ID, arg1 ids.NodeID) (uint64, error) {
 	m.ctrl.T.Helper()

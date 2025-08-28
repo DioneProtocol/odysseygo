@@ -21,6 +21,10 @@ type CurrentStakers interface {
 	// [database.ErrNotFound] is returned.
 	GetCurrentValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker, error)
 
+	// GetCurrentValidatorsWeight returns the total [weight] of validators on
+	// [subnetID]. If the subnet does not exist, [database.ErrNotFound] is returned.
+	GetCurrentValidatorsWeight(subnetID ids.ID) (uint64, error)
+
 	// PutCurrentValidator adds the [staker] describing a validator to the
 	// staker set.
 	//
@@ -135,6 +139,31 @@ func (v *baseStakers) GetValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker,
 		return nil, database.ErrNotFound
 	}
 	return validator.validator, nil
+}
+
+func (v *baseStakers) GetCurrentValidatorsWeight(subnetID ids.ID) (uint64, error) {
+	subnetValidators, ok := v.validators[subnetID]
+	if !ok {
+		return 0, database.ErrNotFound
+	}
+
+	totalWeight := uint64(0)
+	for _, validator := range subnetValidators {
+		if validator.validator == nil {
+			return 0, database.ErrNotFound
+		}
+
+		totalWeight += validator.validator.Weight
+		delegatorsIterator := NewTreeIterator(validator.delegators)
+		defer delegatorsIterator.Release()
+
+		for delegatorsIterator.Next() {
+			delegator := delegatorsIterator.Value()
+			totalWeight += delegator.Weight
+		}
+	}
+
+	return totalWeight, nil
 }
 
 func (v *baseStakers) PutValidator(staker *Staker) {

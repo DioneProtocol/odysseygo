@@ -145,6 +145,7 @@ func TestBanffStandardBlockTimeVerification(t *testing.T) {
 	onParentAccept.EXPECT().GetLastAccumulatedFee().Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetCurrentAccumulatedFee().Return(uint64(0), nil).AnyTimes()
 	onParentAccept.EXPECT().GetFeePerWeightStored().Return(new(big.Int), nil).AnyTimes()
+	onParentAccept.EXPECT().GetCurrentValidatorsWeight(constants.PrimaryNetworkID).Return(uint64(1), nil).AnyTimes()
 
 	// no pending stakers
 	pendingIt := state.NewMockStakerIterator(ctrl)

@@ -724,6 +724,10 @@ func (s *state) GetCurrentValidator(subnetID ids.ID, nodeID ids.NodeID) (*Staker
 	return s.currentStakers.GetValidator(subnetID, nodeID)
 }
 
+func (s *state) GetCurrentValidatorsWeight(subnetID ids.ID) (uint64, error) {
+	return s.currentStakers.GetCurrentValidatorsWeight(subnetID)
+}
+
 func (s *state) PutCurrentValidator(staker *Staker) {
 	s.currentStakers.PutValidator(staker)
 }
