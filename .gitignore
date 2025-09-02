@@ -63,3 +63,5 @@ vendor
 
 **/testdata
 test-api-nodes
+
+data/
