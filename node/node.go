@@ -77,6 +77,7 @@ import (
 	"github.com/DioneProtocol/odysseygo/vms"
 	"github.com/DioneProtocol/odysseygo/vms/alpha"
 	"github.com/DioneProtocol/odysseygo/vms/components/feecollector"
+	"github.com/DioneProtocol/odysseygo/vms/components/parammanager"
 	"github.com/DioneProtocol/odysseygo/vms/nftfx"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/signer"
@@ -126,6 +127,8 @@ type Node struct {
 
 	// Storage for collection
 	feeCollector feecollector.FeeCollector
+
+	paramManager parammanager.ParamManager
 
 	// Monitors node health and runs health checks
 	health health.Health
@@ -830,6 +833,7 @@ func (n *Node) initChainManager(dioneAssetID ids.ID) error {
 		Keystore:                                n.keystore,
 		AtomicMemory:                            n.sharedMemory,
 		FeeCollector:                            n.feeCollector,
+		ParamManager:                            n.paramManager,
 		DIONEAssetID:                            dioneAssetID,
 		AChainID:                                aChainID,
 		DChainID:                                dChainID,
@@ -905,11 +909,11 @@ func (n *Node) initVMs() error {
 				AddSubnetValidatorFee:         n.Config.AddSubnetValidatorFee,
 				AddSubnetDelegatorFee:         n.Config.AddSubnetDelegatorFee,
 				UptimePercentage:              n.Config.UptimeRequirement,
-				MinValidatorStake:             n.Config.MinValidatorStake,
+				MinValidatorStake:             n.GetMinStake,
 				MaxValidatorStake:             n.Config.MaxValidatorStake,
 				MinDelegatorStake:             n.Config.MinDelegatorStake,
 				MinDelegationFee:              n.Config.MinDelegationFee,
-				MinValidatorStakeDuration:     n.Config.MinValidatorStakeDuration,
+				MinValidatorStakeDuration:     n.GetMinStakeDuration,
 				MaxValidatorStakeDuration:     n.Config.MaxValidatorStakeDuration,
 				MinDelegatorStakeDuration:     n.Config.MinDelegatorStakeDuration,
 				MaxDelegatorStakeDuration:     n.Config.MaxDelegatorStakeDuration,
@@ -963,12 +967,40 @@ func (n *Node) initVMs() error {
 	return err
 }
 
+func (n *Node) GetMinStake() uint64 {
+	contractConfig := n.paramManager.GetMinValidatorStake()
+
+	if contractConfig != 0 && contractConfig != n.Config.StakingConfig.MinValidatorStake {
+		n.Config.StakingConfig.MinValidatorStake = contractConfig
+	}
+
+	return n.Config.StakingConfig.MinValidatorStake
+}
+
+func (n *Node) GetMinStakeDuration() time.Duration {
+	contractConfig := n.paramManager.GetMinValidatorStakeDuration()
+
+	if contractConfig != 0 && contractConfig != n.Config.StakingConfig.MinValidatorStakeDuration {
+		n.Config.StakingConfig.MinValidatorStakeDuration = contractConfig
+	}
+
+	return n.Config.StakingConfig.MinValidatorStakeDuration
+}
+
 // initSharedMemory initializes the fee collector
 func (n *Node) initFeeCollector() error {
 	n.Log.Info("initializing FeeCollector")
 	feeCollectorDB := prefixdb.New([]byte("fee collector"), n.DB)
 	feeCollector, err := feecollector.New(feeCollectorDB)
 	n.feeCollector = feeCollector
+	return err
+}
+
+func (n *Node) initParamManager() error {
+	n.Log.Info("initializing ParamManager")
+	paramManagerDB := prefixdb.New([]byte("param manager"), n.DB)
+	paramManager, err := parammanager.New(paramManagerDB)
+	n.paramManager = paramManager
 	return err
 }
 
@@ -1426,6 +1458,10 @@ func (n *Node) Initialize(
 
 	if err := n.initFeeCollector(); err != nil { // Initialize fee collector
 		return fmt.Errorf("couldn't initialize fee collector: %w", err)
+	}
+
+	if err := n.initParamManager(); err != nil { // Initialize param manager
+		return fmt.Errorf("couldn't initialize param manager: %w", err)
 	}
 
 	n.initSharedMemory() // Initialize shared memory

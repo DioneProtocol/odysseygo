@@ -2365,7 +2365,7 @@ func (s *Service) GetMinStake(_ *http.Request, args *GetMinStakeArgs, reply *Get
 	)
 
 	if args.SubnetID == constants.PrimaryNetworkID {
-		reply.MinValidatorStake = json.Uint64(s.vm.MinValidatorStake)
+		reply.MinValidatorStake = json.Uint64(s.vm.MinValidatorStake())
 		reply.MinDelegatorStake = json.Uint64(s.vm.MinDelegatorStake)
 		return nil
 	}

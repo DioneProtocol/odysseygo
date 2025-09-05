@@ -291,6 +291,14 @@ func defaultCtx(db database.Database) (*snow.Context, *mutableSharedMemory) {
 	return ctx, msm
 }
 
+func minValidatorStake() uint64 {
+	return 5 * units.MilliDione
+}
+
+func minValidatorStakeDuration() time.Duration {
+	return defaultMinValidatorStakingDuration
+}
+
 func defaultConfig() *config.Config {
 	vdrs := validators.NewManager()
 	primaryVdrs := validators.NewSet()
@@ -302,10 +310,10 @@ func defaultConfig() *config.Config {
 		TxFee:                     defaultTxFee,
 		CreateSubnetTxFee:         100 * defaultTxFee,
 		CreateBlockchainTxFee:     100 * defaultTxFee,
-		MinValidatorStake:         5 * units.MilliDione,
+		MinValidatorStake:         minValidatorStake,
 		MaxValidatorStake:         500 * units.MilliDione,
 		MinDelegatorStake:         1 * units.MilliDione,
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,

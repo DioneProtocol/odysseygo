@@ -69,7 +69,7 @@ type Config struct {
 	AddSubnetDelegatorFee uint64
 
 	// The minimum amount of tokens one must bond to be a validator
-	MinValidatorStake uint64
+	MinValidatorStake func() uint64
 
 	// The maximum amount of tokens that can be bonded on a validator
 	MaxValidatorStake uint64
@@ -84,7 +84,7 @@ type Config struct {
 	UptimePercentage float64
 
 	// Minimum amount of time to allow a validator to stake
-	MinValidatorStakeDuration time.Duration
+	MinValidatorStakeDuration func() time.Duration
 
 	// Maximum amount of time to allow a validator to stake
 	MaxValidatorStakeDuration time.Duration

@@ -88,6 +88,11 @@ curl -X POST "http://localhost:9650/ext/bc/24t5rTdVwRXfjYSfJJpvwuDz6UjYn9YpGv5dh
     "id": 1
   }'
 
+curl -s -X POST -H 'content-type: application/json' --data '{
+  "jsonrpc":"2.0","id":1,"method":"omega.getMinStake",
+  "params":{"subnetID":"11111111111111111111111111111111LpoYY"}
+}' http://127.0.0.1:9650/ext/bc/O
+
 ./build/odysseygo --network-id=testnet --chain-config-dir="scripts/configs/archive" --http-port=9662 --staking-port=9663 --db-dir=./data/node1 --log-dir=./data/node1/logs --data-dir=./data/node1/.odysseygo
 
 ./build/odysseygo --network-id=123456 --http-port=9652 --staking-port=9653 --db-dir=./data/node2 --log-dir=./data/node2/logs --data-dir=./data/node2/.odysseygo

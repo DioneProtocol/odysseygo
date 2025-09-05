@@ -62,7 +62,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 
 	// create valid tx
 	addValidatorTx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(validatorStartTime.Unix()),
 		uint64(validatorEndTime.Unix()),
 		nodeID,
@@ -95,7 +95,7 @@ func TestAddDelegatorTxOverDelegatedRegression(t *testing.T) {
 
 	// create valid tx
 	addFirstDelegatorTx, err := vm.txBuilder.NewAddDelegatorTx(
-		4*vm.MinValidatorStake, // maximum amount of stake this delegator can provide
+		4*vm.MinValidatorStake(), // maximum amount of stake this delegator can provide
 		uint64(firstDelegatorStartTime.Unix()),
 		uint64(firstDelegatorEndTime.Unix()),
 		nodeID,
@@ -353,7 +353,7 @@ func TestUnverifiedParentPanicRegression(t *testing.T) {
 		Chains:                    chains.TestManager,
 		Validators:                vdrs,
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		// MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
@@ -488,7 +488,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 
 	// Create the tx to add a new validator
 	addValidatorTx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(newValidatorStartTime.Unix()),
 		uint64(newValidatorEndTime.Unix()),
 		nodeID,
@@ -1495,7 +1495,7 @@ func TestSubnetValidatorBLSKeyDiffAfterExpiry(t *testing.T) {
 	ins, unstakedOuts, stakedOuts, signers, err := utxoHandler.Spend(
 		vm.state,
 		keys,
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		vm.Config.AddPrimaryNetworkValidatorFee,
 		addr, // change Addresss
 	)
@@ -1512,7 +1512,7 @@ func TestSubnetValidatorBLSKeyDiffAfterExpiry(t *testing.T) {
 			NodeID: nodeID,
 			Start:  uint64(primaryStartTime.Unix()),
 			End:    uint64(primaryEndTime.Unix()),
-			Wght:   vm.MinValidatorStake,
+			Wght:   vm.MinValidatorStake(),
 		},
 		Subnet:    constants.PrimaryNetworkID,
 		Signer:    signer.NewProofOfPossession(sk1),
@@ -1626,7 +1626,7 @@ func TestSubnetValidatorBLSKeyDiffAfterExpiry(t *testing.T) {
 	ins, unstakedOuts, stakedOuts, signers, err = utxoHandler.Spend(
 		vm.state,
 		keys,
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		vm.Config.AddPrimaryNetworkValidatorFee,
 		addr, // change Addresss
 	)
@@ -1643,7 +1643,7 @@ func TestSubnetValidatorBLSKeyDiffAfterExpiry(t *testing.T) {
 			NodeID: nodeID,
 			Start:  uint64(primaryReStartTime.Unix()),
 			End:    uint64(primaryReEndTime.Unix()),
-			Wght:   vm.MinValidatorStake,
+			Wght:   vm.MinValidatorStake(),
 		},
 		Subnet:    constants.PrimaryNetworkID,
 		Signer:    signer.NewProofOfPossession(sk2),
@@ -1765,7 +1765,7 @@ func TestPrimaryNetworkValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	nodeID := ids.GenerateTestNodeID()
 	addr := keys[0].PublicKey().Address()
 	primaryTx1, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(primaryStartTime1.Unix()),
 		uint64(primaryEndTime1.Unix()),
 		nodeID,
@@ -1826,7 +1826,7 @@ func TestPrimaryNetworkValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	ins, unstakedOuts, stakedOuts, signers, err := utxoHandler.Spend(
 		vm.state,
 		keys,
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		vm.Config.AddPrimaryNetworkValidatorFee,
 		addr, // change Addresss
 	)
@@ -1843,7 +1843,7 @@ func TestPrimaryNetworkValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 			NodeID: nodeID,
 			Start:  uint64(primaryStartTime2.Unix()),
 			End:    uint64(primaryEndTime2.Unix()),
-			Wght:   vm.MinValidatorStake,
+			Wght:   vm.MinValidatorStake(),
 		},
 		Subnet:    constants.PrimaryNetworkID,
 		Signer:    signer.NewProofOfPossession(sk2),
@@ -1928,7 +1928,7 @@ func TestSubnetValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	nodeID := ids.GenerateTestNodeID()
 	addr := keys[0].PublicKey().Address()
 	primaryTx1, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(primaryStartTime1.Unix()),
 		uint64(primaryEndTime1.Unix()),
 		nodeID,
@@ -2028,7 +2028,7 @@ func TestSubnetValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 	ins, unstakedOuts, stakedOuts, signers, err := utxoHandler.Spend(
 		vm.state,
 		keys,
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		vm.Config.AddPrimaryNetworkValidatorFee,
 		addr, // change Addresss
 	)
@@ -2045,7 +2045,7 @@ func TestSubnetValidatorPopulatedToEmptyBLSKeyDiff(t *testing.T) {
 			NodeID: nodeID,
 			Start:  uint64(primaryStartTime2.Unix()),
 			End:    uint64(primaryEndTime2.Unix()),
-			Wght:   vm.MinValidatorStake,
+			Wght:   vm.MinValidatorStake(),
 		},
 		Subnet:    constants.PrimaryNetworkID,
 		Signer:    signer.NewProofOfPossession(sk2),
@@ -2137,7 +2137,7 @@ func TestSubnetValidatorSetAfterPrimaryNetworkValidatorRemoval(t *testing.T) {
 	nodeID := ids.GenerateTestNodeID()
 	addr := keys[0].PublicKey().Address()
 	primaryTx1, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(primaryStartTime1.Unix()),
 		uint64(primaryEndTime1.Unix()),
 		nodeID,

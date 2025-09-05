@@ -263,7 +263,7 @@ func takeValidatorsSnapshotAtCurrentHeightAndTest(vm *VM, validatorsSetByHeightA
 func addSubnetValidator(vm *VM, data *validatorInputData, subnetID ids.ID) (*state.Staker, error) {
 	addr := keys[0].PublicKey().Address()
 	signedTx, err := vm.txBuilder.NewAddSubnetValidatorTx(
-		vm.Config.MinValidatorStake,
+		vm.Config.MinValidatorStake(),
 		uint64(data.startTime.Unix()),
 		uint64(data.endTime.Unix()),
 		data.nodeID,
@@ -283,7 +283,7 @@ func addPrimaryValidatorWithBLSKey(vm *VM, data *validatorInputData) (*state.Sta
 	ins, unstakedOuts, stakedOuts, signers, err := utxoHandler.Spend(
 		vm.state,
 		keys,
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		vm.Config.AddPrimaryNetworkValidatorFee,
 		addr, // change Addresss
 	)
@@ -306,7 +306,7 @@ func addPrimaryValidatorWithBLSKey(vm *VM, data *validatorInputData) (*state.Sta
 			NodeID: data.nodeID,
 			Start:  uint64(data.startTime.Unix()),
 			End:    uint64(data.endTime.Unix()),
-			Wght:   vm.MinValidatorStake,
+			Wght:   vm.MinValidatorStake(),
 		},
 		Subnet:    constants.PrimaryNetworkID,
 		Signer:    signer.NewProofOfPossession(sk),
@@ -340,7 +340,7 @@ func addPrimaryValidatorWithBLSKey(vm *VM, data *validatorInputData) (*state.Sta
 func addPrimaryValidatorWithoutBLSKey(vm *VM, data *validatorInputData) (*state.Staker, error) {
 	addr := keys[0].PublicKey().Address()
 	signedTx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.Config.MinValidatorStake,
+		vm.Config.MinValidatorStake(),
 		uint64(data.startTime.Unix()),
 		uint64(data.endTime.Unix()),
 		data.nodeID,
@@ -705,6 +705,14 @@ func TestTimestampListGenerator(t *testing.T) {
 	properties.TestingRun(t)
 }
 
+func getMinValidatorStake() uint64 {
+	return defaultMinValidatorStake
+}
+
+func getMinValidatorStakeDuration() time.Duration {
+	return defaultMinValidatorStakingDuration
+}
+
 // add a single validator at the end of times,
 // to make sure it won't pollute our tests
 func buildVM(t *testing.T) (*VM, ids.ID, error) {
@@ -722,10 +730,10 @@ func buildVM(t *testing.T) (*VM, ids.ID, error) {
 		CreateSubnetTxFee:         100 * defaultTxFee,
 		TransformSubnetTxFee:      100 * defaultTxFee,
 		CreateBlockchainTxFee:     100 * defaultTxFee,
-		MinValidatorStake:         defaultMinValidatorStake,
+		MinValidatorStake:         getMinValidatorStake,
 		MaxValidatorStake:         defaultMaxValidatorStake,
 		MinDelegatorStake:         defaultMinDelegatorStake,
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: getMinValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
