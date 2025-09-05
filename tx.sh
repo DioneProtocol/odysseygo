@@ -69,7 +69,7 @@ curl -X POST "http://localhost:9650/ext/bc/24t5rTdVwRXfjYSfJJpvwuDz6UjYn9YpGv5dh
     "id": 1
   }'
 
-  curl -X POST "http://localhost:9650/ext/bc/2sBQUKZFdtgBMDhfNX9Ph72SPE8fXj33yY1a33vQ97wiQL76es/rpc" \
+  curl -X POST "http://localhost:9650/ext/bc/m3Fo7ibkiC3311FGwE8qKZpv6EmA4KmwWCLb4etPEtPhRcpNN/rpc" \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
