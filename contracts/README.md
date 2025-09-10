@@ -1,6 +1,6 @@
 # Contract Value Reader
 
-A Go script to read values from the BasicContract deployed at address `0x9` in the Odyssey genesis.
+A Go script to read values from the BasicContract deployed at address `0x000000000000000000000000000000000000012a` in the Odyssey genesis.
 
 ## 📋 Complete Process
 
