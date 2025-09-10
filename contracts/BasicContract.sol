@@ -1,10 +1,11 @@
-pragma solidity ^0.5.0;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.17;
 
 contract BasicContract {
     uint256 public value;
-    
-    constructor() public {
-        value = 1000;
+    event ValueUpdates(uint256 indexed newValue);
+    constructor() {
+        value = 123456;
     }
     
     function get() public view returns (uint256) {
@@ -12,6 +13,8 @@ contract BasicContract {
     }
     
     function set(uint256 _value) public {
+
         value = _value;
+        emit ValueUpdates(_value);
     }
 }

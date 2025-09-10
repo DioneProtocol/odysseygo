@@ -411,8 +411,8 @@ github.com/labstack/echo/v4 v4.5.0/go.mod h1:czIriw4a0C1dFun+ObrXp7ok03xON0N1awS
 github.com/labstack/gommon v0.3.0/go.mod h1:MULnywXg0yavhxWKc+lOruYdAhDwPK9wf0OL7NoOu+k=
 github.com/leanovate/gopter v0.2.9 h1:fQjYxZaynp97ozCzfOyOuAGOU4aU/z37zf/tOujFk7c=
 github.com/leanovate/gopter v0.2.9/go.mod h1:U2L/78B+KVFIx2VmW6onHJQzXtFb+p5y3y2Sh+Jxxv8=
-github.com/lucanali/coreth v0.0.0-20250905123922-c73969fddc3b h1:QqdtD5tAp3ug8V98qJsQu6mrOug5zHaVclGPl2N5Fto=
-github.com/lucanali/coreth v0.0.0-20250905123922-c73969fddc3b/go.mod h1:ywQ6JfLxjdaQbrMTb0Tyl7AzxSCnmlIIhEVoUpRqYR4=
+github.com/lucanali/coreth v0.0.0-20250910063332-33cf9d2563d6 h1:zUeOvPPD1CERcwkOL6U7ltFLwTRsD4kCqKxK0iJ+RYo=
+github.com/lucanali/coreth v0.0.0-20250910063332-33cf9d2563d6/go.mod h1:ywQ6JfLxjdaQbrMTb0Tyl7AzxSCnmlIIhEVoUpRqYR4=
 github.com/magiconair/properties v1.8.0/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/magiconair/properties v1.8.6 h1:5ibWZ6iY0NctNGWo87LalDlEZ6R41TqbbDamhfG/Qzo=
 github.com/magiconair/properties v1.8.6/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
