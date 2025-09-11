@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/snow/engine/common"
@@ -175,8 +176,13 @@ func (c *Client) CrossChainAppRequest(
 // Response messages don't need to be prefixed because request ids are tracked
 // which map to the expected response handler.
 func (c *Client) prefixMessage(src []byte) []byte {
-	messageBytes := make([]byte, len(c.handlerPrefix)+len(src))
+	handlerPrefixLen := len(c.handlerPrefix)
+	srcLen := len(src)
+	if srcLen > math.MaxInt-handlerPrefixLen {
+		panic(fmt.Sprintf("prefixMessage: message too large: handlerPrefixLen=%d, srcLen=%d", handlerPrefixLen, srcLen))
+	}
+	messageBytes := make([]byte, handlerPrefixLen+srcLen)
 	copy(messageBytes, c.handlerPrefix)
-	copy(messageBytes[len(c.handlerPrefix):], src)
+	copy(messageBytes[handlerPrefixLen:], src)
 	return messageBytes
 }
