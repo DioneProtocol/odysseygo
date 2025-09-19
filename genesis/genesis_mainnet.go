@@ -7,6 +7,7 @@ import (
 	"time"
 
 	_ "embed"
+	"math"
 
 	"github.com/DioneProtocol/odysseygo/utils/units"
 	"github.com/DioneProtocol/odysseygo/vms/omegavm/reward"
@@ -43,11 +44,11 @@ var (
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      365 * 24 * time.Hour,
-				SupplyCap:          720 * units.MegaDione,
+				SupplyCap:          math.MaxUint64,
 			},
 			MintConfig: reward.MintConfig{
 				MintingPeriod: 365 * 24 * time.Hour,
-				MaxMintAmount: 500 * units.MegaDione,
+				MaxMintAmount: math.MaxUint64,
 				MintRate:      40_000, // 4%
 			},
 		},
