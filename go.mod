@@ -7,7 +7,7 @@ module github.com/DioneProtocol/odysseygo
 // go.mod (here, only major.minor can be specified)
 go 1.20
 
-replace github.com/DioneProtocol/coreth => github.com/lucanali/coreth v0.0.0-20250910131022-9123b338fb9a
+replace github.com/DioneProtocol/coreth => github.com/lucanali/coreth v0.0.0-20250922103829-ebcaf75f2665
 
 require (
 	github.com/DataDog/zstd v1.5.2
