@@ -1,6 +1,11 @@
 # Check if node is ready
 curl -X GET "http://localhost:9650/ext/health"
 
+curl -X POST "http://localhost:9650/ext/info" -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"info.uptime","params":{"chain":"A"},"id":1}' 
+
+curl -s -X POST http://127.0.0.1:9650/ext/bc/O -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"omega.getCurrentValidators","params":{"subnetID":"11111111111111111111111111111111LpoYY"}}'
+
+curl -s -X POST http://127.0.0.1:9650/ext/bc/O -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"omega.getPendingValidators","params":{"subnetID":"11111111111111111111111111111111LpoYY"}}'
 # Check node health status
 curl -X POST "http://localhost:9650/ext/health" \
   -H "Content-Type: application/json" \
@@ -38,6 +43,10 @@ curl -X POST "http://localhost:9650/ext/info" \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","method":"info.getNetworkID","params":{},"id":1}'
 
+  curl -X POST "http://localhost:9650/ext/info" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"info.peers","params":{},"id":1}'
+
 # Check if chain is bootstrapped
 curl -X POST "http://localhost:9650/ext/info" \
   -H "Content-Type: application/json" \
@@ -59,8 +68,15 @@ curl -X POST "http://localhost:9650/ext/info" \
     "id": 1
   }'
 
+curl -X POST -H "Content-Type: application/json" -d '{                                         
+    "jsonrpc": "2.0",
+    "method": "eth_getBlockByNumber",
+    "params": ["0x1", false],  
+    "id": 1
+  }' http://localhost:9650/ext/bc/D/rpc
 
-curl -X POST "http://localhost:9650/ext/bc/24t5rTdVwRXfjYSfJJpvwuDz6UjYn9YpGv5dhmcE3mNF9S6Nq4/rpc" \
+
+curl -X POST "http://localhost:9650/ext/bc/D/rpc" \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -69,7 +85,7 @@ curl -X POST "http://localhost:9650/ext/bc/24t5rTdVwRXfjYSfJJpvwuDz6UjYn9YpGv5dh
     "id": 1
   }'
 
-  curl -X POST "http://localhost:9650/ext/bc/m3Fo7ibkiC3311FGwE8qKZpv6EmA4KmwWCLb4etPEtPhRcpNN/rpc" \
+  curl -X POST "http://localhost:9650/ext/bc/D/rpc" \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
@@ -79,19 +95,28 @@ curl -X POST "http://localhost:9650/ext/bc/24t5rTdVwRXfjYSfJJpvwuDz6UjYn9YpGv5dh
   }'
 
 
-  curl -X POST "http://localhost:9650/ext/bc/2sBQUKZFdtgBMDhfNX9Ph72SPE8fXj33yY1a33vQ97wiQL76es/rpc" \
+  curl -X POST "http://localhost:9650/ext/bc/D/rpc" \
   -H "Content-Type: application/json" \
   -d '{
     "jsonrpc": "2.0",
     "method": "eth_getBalance",
-    "params": ["0x6a2Dd038A65f2118dD849C53F9d5812056788899", "latest"],
+    "params": ["0x3470a4336413ed7a1f7a5fb06ffb2d2102873ef0", "latest"],
     "id": 1
   }'
+
+curl -s -X POST http://127.0.0.1:9650/ext/bc/O -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"omega.getUTXOs","params":{"addresses":["O-testnet1klqj9yz44y2flc5dyxum23nn5ucr35xycwfqxq"]}}'
+
+curl -s -X POST http://127.0.0.1:9650/ext/bc/O -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"omega.getBalance","params":{"addresses":["O-testnet1klqj9yz44y2flc5dyxum23nn5ucr35xycwfqxq"]}}'
+
+curl -s -X POST http://127.0.0.1:9650/ext/bc/O -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"omega.getTxStatus","params":{"txID":"<importTxID>"}}'
 
 curl -s -X POST -H 'content-type: application/json' --data '{
   "jsonrpc":"2.0","id":1,"method":"omega.getMinStake",
   "params":{"subnetID":"11111111111111111111111111111111LpoYY"}
-}' http://127.0.0.1:9650/ext/bc/O
+}' http://localhost:9650/ext/bc/O
+
+curl -s -H 'content-type: application/json' -d '{"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["0xe4175f400f5b748943ea9a59ece822f19a1312cca0bbdd9ff66043d7641a5d1a"],"id":1}' http://45.55.93.124:9650/ext/bc/D/rpc | jq .
+
 
 ./build/odysseygo --network-id=testnet --chain-config-dir="scripts/configs/archive" --http-port=9662 --staking-port=9663 --db-dir=./data/node1 --log-dir=./data/node1/logs --data-dir=./data/node1/.odysseygo
 
