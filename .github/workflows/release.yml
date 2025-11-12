@@ -20,23 +20,18 @@ jobs:
 
       - uses: ./.github/actions/setup-go
 
+      - name: Get tag from git
+        id: get_tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Building version: ${TAG}"
+        shell: bash
+
       - name: Build Binary
         run: |
           ./scripts/build.sh
-        shell: bash
-
-      - name: Try to get tag from git
-        if: "${{ github.event.inputs.tag == '' }}"
-        id: get_tag_from_git
-        run: |
-          echo "TAG=${GITHUB_REF/refs\/tags\//}" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Try to get tag from workflow dispatch
-        if: "${{ github.event.inputs.tag != '' }}"
-        id: get_tag_from_workflow
-        run: |
-          echo "TAG=${{ github.event.inputs.tag }}" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Create directory and move binary
@@ -80,3 +75,29 @@ jobs:
           asset_path: ./odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
           asset_name: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
           asset_content_type: application/x-tar
+
+  trigger-installer-build:
+    name: Trigger Installer Build
+    needs: build-odysseygo
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && secrets.INSTALLER_REPO_TOKEN != ''
+    steps:
+      - name: Get tag
+        id: get_tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Version: ${TAG}"
+
+      - name: Trigger installer workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.INSTALLER_REPO_TOKEN }}
+          repository: DioneProtocol/odysseygo-installer
+          event-type: odysseygo-release
+          client-payload: |
+            {
+              "version": "${{ steps.get_tag.outputs.tag }}",
+              "ref": "${{ github.ref }}",
+              "sha": "${{ github.sha }}"
+            }
