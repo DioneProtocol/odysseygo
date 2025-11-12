@@ -80,7 +80,7 @@ jobs:
     name: Trigger Installer Build
     needs: build-odysseygo
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && secrets.INSTALLER_REPO_TOKEN != ''
+    if: github.event_name == 'push'
     steps:
       - name: Get tag
         id: get_tag
