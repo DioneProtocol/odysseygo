@@ -28,6 +28,10 @@ func (*dummyFeeCollector) AddURewardValue(amount uint64) error {
 	return nil
 }
 
+func (*dummyFeeCollector) UpdateOrionsNodes(orions []ids.NodeID) error {
+	return nil
+}
+
 func (*dummyFeeCollector) GetAChainValue() uint64 {
 	return 0
 }
@@ -38,6 +42,10 @@ func (*dummyFeeCollector) GetDChainValue() uint64 {
 
 func (*dummyFeeCollector) GetOrionValue(ids.NodeID) uint64 {
 	return 0
+}
+
+func (*dummyFeeCollector) GetOrionsNodesList() []ids.NodeID {
+	return []ids.NodeID{}
 }
 
 func (*dummyFeeCollector) GetURewardValue() uint64 {
