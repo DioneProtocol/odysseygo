@@ -333,6 +333,8 @@ func TestSetWeight(t *testing.T) {
 func TestSetSample(t *testing.T) {
 	require := require.New(t)
 
+	SetOrionChecker(nil)
+
 	s := NewSet()
 
 	sampled, err := s.Sample(0)
@@ -367,6 +369,259 @@ func TestSetSample(t *testing.T) {
 	sampled, err = s.Sample(3)
 	require.NoError(err)
 	require.Equal([]ids.NodeID{nodeID1, nodeID1, nodeID1}, sampled)
+}
+
+type mockOrionChecker struct {
+	nodes []ids.NodeID
+}
+
+func (m *mockOrionChecker) GetOrionsNodesList() []ids.NodeID {
+	return m.nodes
+}
+
+
+// validatorOrionRatio is 0, all validators are orions
+func TestSetSample_AllOrionsSample(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	nodeID0 := ids.GenerateTestNodeID()
+	nodeID1 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(nodeID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(nodeID1, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{nodeID0, nodeID1},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.Nil(err)
+	for _, id := range sampled {
+		require.True(id == nodeID0 || id == nodeID1)
+	}
+}
+
+
+// validatorOrionRatio is 0, some validators are orions
+func TestSetSample_OrionsExcluded(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.NoError(err)
+	require.Len(sampled, 2)
+
+	for _, id := range sampled {
+		require.NotEqual(orionID, id)
+		require.True(id == otherID0 || id == otherID1)
+	}
+}
+
+// validatorOrionRatio is 0.2, no validators are orions
+func TestSetSample_NoOrions(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.NoError(err)
+	require.Len(sampled, 2)
+}
+
+// validatorOrionRatio is 0.2, all validators are orions
+func TestSetSample_AllOrionsSampleWhenRatioNonZero(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	nodeID0 := ids.GenerateTestNodeID()
+	nodeID1 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(nodeID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(nodeID1, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{nodeID0, nodeID1},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.Nil(err)
+	for _, id := range sampled {
+		require.True(id == nodeID0 || id == nodeID1)
+	}
+}
+
+
+// validatorOrionRatio is 0.2, some validators are orions
+func TestSetSample_OrionsExcludedWhenRatioNonZero(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+	otherID2 := ids.GenerateTestNodeID()
+	otherID3 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID2, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID3, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID, otherID2},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.NoError(err)
+	require.Len(sampled, 2)
+
+	orionsCount := 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID2 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(1, orionsCount)
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID, otherID2, otherID3},
+	})
+
+	sampled, err = s.Sample(2)
+	require.NoError(err)
+	require.Len(sampled, 2)
+
+	orionsCount = 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID2 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(1, orionsCount)
+}
+
+// validatorOrionRatio is 1, all validators are orions
+func TestSetSample_AllOrionsSampleWhenRatioOne(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	nodeID0 := ids.GenerateTestNodeID()
+	nodeID1 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(nodeID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(nodeID1, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{nodeID0, nodeID1},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(2)
+	require.Nil(err)
+	for _, id := range sampled {
+		require.True(id == nodeID0 || id == nodeID1)
+	}
+
+	nodeID2 := ids.GenerateTestNodeID()
+	require.NoError(s.Add(nodeID2, nil, ids.Empty, 1))
+
+	sampled, err = s.Sample(2)
+	require.Nil(err)
+	for _, id := range sampled {
+		require.True(id == nodeID0 || id == nodeID1 || id == nodeID2)
+	}
+}
+
+// validatorOrionRatio is 1, some validators are orions
+func TestSetSample_OrionsExcludedWhenRatioOne(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+	otherID2 := ids.GenerateTestNodeID()
+	otherID3 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 2))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID2, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID3, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID, otherID2},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(6)
+	require.NoError(err)
+	require.Len(sampled, 6)
+
+	orionsCount := 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID2 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(2, orionsCount)
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID, otherID2, otherID3},
+	})
+
+	sampled, err = s.Sample(6)
+	require.NoError(err)
+	require.Len(sampled, 6)
+
+	orionsCount = 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID2 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(2, orionsCount)
 }
 
 func TestSetString(t *testing.T) {

@@ -972,6 +972,7 @@ func (n *Node) initFeeCollector() error {
 	feeCollectorDB := prefixdb.New([]byte("fee collector"), n.DB)
 	feeCollector, err := feecollector.New(feeCollectorDB)
 	n.feeCollector = feeCollector
+	validators.SetOrionChecker(n.feeCollector)
 	return err
 }
 

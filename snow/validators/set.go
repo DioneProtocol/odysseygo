@@ -6,10 +6,14 @@ package validators
 import (
 	"errors"
 	"fmt"
+	stdMath "math"
+	"math/rand"
+	"slices"
 	"strings"
 	"sync"
 
 	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 	"github.com/DioneProtocol/odysseygo/utils/formatting"
 	"github.com/DioneProtocol/odysseygo/utils/math"
@@ -24,6 +28,16 @@ var (
 	errDuplicateValidator = errors.New("duplicate validator")
 	errMissingValidator   = errors.New("missing validator")
 )
+
+type OrionChecker interface {
+	GetOrionsNodesList() []ids.NodeID
+}
+
+var orionChecker OrionChecker
+
+func SetOrionChecker(checker OrionChecker) {
+	orionChecker = checker
+}
 
 // Set of validators that can be sampled
 type Set interface {
@@ -345,22 +359,66 @@ func (s *vdrSet) Sample(size int) ([]ids.NodeID, error) {
 }
 
 func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
-	if !s.samplerInitialized {
-		if err := s.sampler.Initialize(s.weights); err != nil {
-			return nil, err
-		}
-		s.samplerInitialized = true
+	filteredWeights := make([]uint64, 0, len(s.weights))
+	indexMap := make([]int, 0, len(s.weights))
+	var orions []ids.NodeID
+	if orionChecker != nil {
+		orions = orionChecker.GetOrionsNodesList()
 	}
 
-	indices, err := s.sampler.Sample(size)
+	var orionsWeights []uint64
+	var orionsIndices []int
+	for i, vdr := range s.vdrSlice {
+		if slices.Contains(orions, vdr.NodeID) {
+			orionsWeights = append(orionsWeights, vdr.Weight)
+			orionsIndices = append(orionsIndices, i)
+			continue
+		}
+		filteredWeights = append(filteredWeights, vdr.Weight)
+		indexMap = append(indexMap, i)
+	}
+
+	orionsListLength := len(orionsWeights)
+
+	allowedOrions := int(stdMath.Floor(float64(len(s.weights)) * constants.ValidatorOrionRatio))    
+	if allowedOrions > 0 || len(filteredWeights) == 0 {
+		if orionsListLength <= allowedOrions || len(filteredWeights) == 0 {
+			for i, weight := range orionsWeights {
+				filteredWeights = append(filteredWeights, weight)
+				indexMap = append(indexMap, orionsIndices[i])
+			}
+		} else {
+			idxs := rand.Perm(orionsListLength)
+			for i := 0; i < allowedOrions; i++ {
+				idx := idxs[i]
+				filteredWeights = append(filteredWeights, orionsWeights[idx])
+				indexMap = append(indexMap, orionsIndices[idx])
+			}
+		}
+	}
+
+	if len(filteredWeights) == 0 {
+		return nil, fmt.Errorf("no validators available after exclusions")
+	}
+
+	tempSampler := sampler.NewWeightedWithoutReplacement()
+	if err := tempSampler.Initialize(filteredWeights); err != nil {
+		return nil, err
+	}
+
+	indices, err := tempSampler.Sample(size)
 	if err != nil {
 		return nil, err
 	}
 
 	list := make([]ids.NodeID, size)
 	for i, index := range indices {
-		list[i] = s.vdrSlice[index].NodeID
+		if index < 0 || index >= len(indexMap) {
+			return nil, fmt.Errorf("sample index %d out of range %d", index, len(indexMap))
+		}
+		list[i] = s.vdrSlice[indexMap[index]].NodeID
 	}
+
 	return list, nil
 }
 
