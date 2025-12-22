@@ -402,6 +402,23 @@ func TestSetSample_AllOrionsSample(t *testing.T) {
 	for _, id := range sampled {
 		require.True(id == nodeID0 || id == nodeID1)
 	}
+
+	nodeID2 := ids.GenerateTestNodeID()
+	nodeID3 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(nodeID2, nil, ids.Empty, 1))
+	require.NoError(s.Add(nodeID3, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{nodeID0, nodeID1},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err = s.Sample(2)
+	require.Nil(err)
+	for _, id := range sampled {
+		require.False(id == nodeID0 || id == nodeID1)
+	}
 }
 
 

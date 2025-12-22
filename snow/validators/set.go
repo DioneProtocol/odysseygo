@@ -380,19 +380,24 @@ func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
 
 	orionsListLength := len(orionsWeights)
 
-	allowedOrions := int(stdMath.Floor(float64(len(s.weights)) * constants.ValidatorOrionRatio))    
-	if allowedOrions > 0 || len(filteredWeights) == 0 {
-		if orionsListLength <= allowedOrions || len(filteredWeights) == 0 {
-			for i, weight := range orionsWeights {
-				filteredWeights = append(filteredWeights, weight)
-				indexMap = append(indexMap, orionsIndices[i])
-			}
-		} else {
-			idxs := rand.Perm(orionsListLength)
-			for i := 0; i < allowedOrions; i++ {
-				idx := idxs[i]
-				filteredWeights = append(filteredWeights, orionsWeights[idx])
-				indexMap = append(indexMap, orionsIndices[idx])
+	if len(filteredWeights) == 0 {
+		filteredWeights = orionsWeights
+		indexMap = orionsIndices
+	} else {
+		allowedOrions := int(stdMath.Floor(float64(len(s.weights)) * constants.ValidatorOrionRatio))    
+		if allowedOrions > 0 {
+			if orionsListLength <= allowedOrions {
+				for i, weight := range orionsWeights {
+					filteredWeights = append(filteredWeights, weight)
+					indexMap = append(indexMap, orionsIndices[i])
+				}
+			} else {
+				idxs := rand.Perm(orionsListLength)
+				for i := 0; i < allowedOrions; i++ {
+					idx := idxs[i]
+					filteredWeights = append(filteredWeights, orionsWeights[idx])
+					indexMap = append(indexMap, orionsIndices[idx])
+				}
 			}
 		}
 	}
