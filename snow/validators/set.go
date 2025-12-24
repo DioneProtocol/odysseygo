@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
 	"github.com/DioneProtocol/odysseygo/utils/constants"
@@ -27,16 +28,26 @@ var (
 	errZeroWeight         = errors.New("weight must be non-zero")
 	errDuplicateValidator = errors.New("duplicate validator")
 	errMissingValidator   = errors.New("missing validator")
+
+	orionChecker OrionChecker
+
+    apricotPhase7ActivationTime time.Time
 )
 
 type OrionChecker interface {
 	GetOrionsNodesList() []ids.NodeID
 }
 
-var orionChecker OrionChecker
-
 func SetOrionChecker(checker OrionChecker) {
 	orionChecker = checker
+}
+
+func SetApricotPhase7ActivationTime(time time.Time) {
+	apricotPhase7ActivationTime = time
+}
+
+func IsApricotPhase7Activated() bool {
+	return time.Now().UTC().After(apricotPhase7ActivationTime)
 }
 
 // Set of validators that can be sampled
@@ -355,10 +366,34 @@ func (s *vdrSet) Sample(size int) ([]ids.NodeID, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	if IsApricotPhase7Activated() {
+		return s.sampleApricotPhase7(size)
+	}
+
 	return s.sample(size)
 }
 
 func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
+	if !s.samplerInitialized {
+		if err := s.sampler.Initialize(s.weights); err != nil {
+			return nil, err
+		}
+		s.samplerInitialized = true
+	}
+
+	indices, err := s.sampler.Sample(size)
+	if err != nil {
+		return nil, err
+	}
+
+	list := make([]ids.NodeID, size)
+	for i, index := range indices {
+		list[i] = s.vdrSlice[index].NodeID
+	}
+	return list, nil
+}
+
+func (s *vdrSet) sampleApricotPhase7(size int) ([]ids.NodeID, error) {
 	filteredWeights := make([]uint64, 0, len(s.weights))
 	indexMap := make([]int, 0, len(s.weights))
 	var orions []ids.NodeID
@@ -405,17 +440,17 @@ func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
 	if len(filteredWeights) == 0 {
 		return nil, fmt.Errorf("no validators available after exclusions")
 	}
-
+	
 	tempSampler := sampler.NewWeightedWithoutReplacement()
 	if err := tempSampler.Initialize(filteredWeights); err != nil {
 		return nil, err
 	}
-
+	
 	indices, err := tempSampler.Sample(size)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	list := make([]ids.NodeID, size)
 	for i, index := range indices {
 		if index < 0 || index >= len(indexMap) {

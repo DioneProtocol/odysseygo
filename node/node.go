@@ -973,6 +973,7 @@ func (n *Node) initFeeCollector() error {
 	feeCollector, err := feecollector.New(feeCollectorDB)
 	n.feeCollector = feeCollector
 	validators.SetOrionChecker(n.feeCollector)
+	validators.SetApricotPhase7ActivationTime(version.GetApricotPhase7Time(n.Config.NetworkID))
 	return err
 }
 
