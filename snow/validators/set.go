@@ -7,8 +7,6 @@ import (
 	"errors"
 	"fmt"
 	stdMath "math"
-	"math/rand"
-	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -31,11 +29,13 @@ var (
 
 	orionChecker OrionChecker
 
-    apricotPhase7ActivationTime time.Time
+	apricotPhase7ActivationTime time.Time
+
+	orionSampleSizeRatio *float64
 )
 
 type OrionChecker interface {
-	GetOrionsNodesList() []ids.NodeID
+	GetOrionsNodesList() ([]ids.NodeID, uint64)
 }
 
 func SetOrionChecker(checker OrionChecker) {
@@ -48,6 +48,17 @@ func SetApricotPhase7ActivationTime(time time.Time) {
 
 func IsApricotPhase7Activated() bool {
 	return time.Now().UTC().After(apricotPhase7ActivationTime)
+}
+
+func setOrionSampleSizeRatio(ratio float64) {
+	orionSampleSizeRatio = &ratio
+}
+
+func getOrionSampleSizeRatio() float64 {
+	if orionSampleSizeRatio != nil {
+		return *orionSampleSizeRatio
+	}
+	return constants.OrionSampleSizeRatio
 }
 
 // Set of validators that can be sampled
@@ -121,6 +132,7 @@ func NewSet() Set {
 	return &vdrSet{
 		vdrs:    make(map[ids.NodeID]*Validator),
 		sampler: sampler.NewWeightedWithoutReplacement(),
+		orionsSampler: sampler.NewWeightedWithoutReplacement(),
 	}
 }
 
@@ -129,6 +141,7 @@ func NewBestSet(expectedSampleSize int) Set {
 	return &vdrSet{
 		vdrs:    make(map[ids.NodeID]*Validator),
 		sampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
+		orionsSampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
 	}
 }
 
@@ -139,8 +152,14 @@ type vdrSet struct {
 	weights     []uint64
 	totalWeight uint64
 
-	samplerInitialized bool
-	sampler            sampler.WeightedWithoutReplacement
+	samplerInitialized         bool
+	sampler                    sampler.WeightedWithoutReplacement
+	orionsLastUpdatedTimestamp uint64
+
+	// Separate samplers for orions
+	orionsSampler            sampler.WeightedWithoutReplacement
+	orionsIndices            []int
+	normalIndices            []int
 
 	callbackListeners []SetCallbackListener
 }
@@ -393,73 +412,97 @@ func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
 	return list, nil
 }
 
-func (s *vdrSet) sampleApricotPhase7(size int) ([]ids.NodeID, error) {
-	filteredWeights := make([]uint64, 0, len(s.weights))
-	indexMap := make([]int, 0, len(s.weights))
-	var orions []ids.NodeID
-	if orionChecker != nil {
-		orions = orionChecker.GetOrionsNodesList()
+func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
+	orionsSamplingSize := int(stdMath.Floor(float64(size) * getOrionSampleSizeRatio()))
+	normalSamplingSize := size - orionsSamplingSize
+	
+	list := make([]ids.NodeID, 0, size)
+	
+	if normalSamplingSize > 0 && len(s.normalIndices) > 0 {
+		if len(s.orionsIndices) == 0 {
+			normalSamplingSize = size
+		}
+		indices, err := s.sampler.Sample(normalSamplingSize)
+		if err != nil {
+			return nil, err
+		}
+		for _, index := range indices {
+			if index < 0 || index >= len(s.normalIndices) {
+				return nil, fmt.Errorf("normal sample index %d out of range %d", index, len(s.normalIndices))
+			}
+			list = append(list, s.vdrSlice[s.normalIndices[index]].NodeID)
+		}
 	}
 
-	var orionsWeights []uint64
-	var orionsIndices []int
+	if orionsSamplingSize > 0 && len(s.orionsIndices) > 0 {
+		if len(s.normalIndices) == 0 {
+			orionsSamplingSize = size
+		}
+		indices, err := s.orionsSampler.Sample(orionsSamplingSize)
+		if err != nil {
+			return nil, err
+		}
+		for _, index := range indices {
+			if index < 0 || index >= len(s.orionsIndices) {
+				return nil, fmt.Errorf("orion sample index %d out of range %d", index, len(s.orionsIndices))
+			}
+			list = append(list, s.vdrSlice[s.orionsIndices[index]].NodeID)
+		}
+	}
+
+	return list, nil
+}
+
+func (s *vdrSet) sampleApricotPhase7(size int) ([]ids.NodeID, error) {
+	var orions []ids.NodeID
+	var orionsSet map[ids.NodeID]bool
+	var lastUpdatedTimestamp uint64
+	if orionChecker != nil {
+		orions, lastUpdatedTimestamp = orionChecker.GetOrionsNodesList()
+		if lastUpdatedTimestamp == s.orionsLastUpdatedTimestamp && s.samplerInitialized {
+			return s.sampleLastUpdated(size)
+		}
+
+		// To check if node id exist in orion set with lesser complexity
+		orionsSet = make(map[ids.NodeID]bool, len(orions))
+		for _, nodeID := range orions {
+			orionsSet[nodeID] = true
+		}
+	}
+
+	normalValidatorsWeights := make([]uint64, 0)
+	normalValidatorsIndices := make([]int, 0)
+	orionsWeights := make([]uint64, 0)
+	orionsIndices := make([]int, 0)
+
 	for i, vdr := range s.vdrSlice {
-		if slices.Contains(orions, vdr.NodeID) {
+		if orionsSet != nil && orionsSet[vdr.NodeID] {
 			orionsWeights = append(orionsWeights, vdr.Weight)
 			orionsIndices = append(orionsIndices, i)
 			continue
 		}
-		filteredWeights = append(filteredWeights, vdr.Weight)
-		indexMap = append(indexMap, i)
+		normalValidatorsWeights = append(normalValidatorsWeights, vdr.Weight)
+		normalValidatorsIndices = append(normalValidatorsIndices, i)
 	}
 
-	orionsListLength := len(orionsWeights)
-
-	if len(filteredWeights) == 0 {
-		filteredWeights = orionsWeights
-		indexMap = orionsIndices
-	} else {
-		allowedOrions := int(stdMath.Floor(float64(len(s.weights)) * constants.ValidatorOrionRatio))    
-		if allowedOrions > 0 {
-			if orionsListLength <= allowedOrions {
-				for i, weight := range orionsWeights {
-					filteredWeights = append(filteredWeights, weight)
-					indexMap = append(indexMap, orionsIndices[i])
-				}
-			} else {
-				idxs := rand.Perm(orionsListLength)
-				for i := 0; i < allowedOrions; i++ {
-					idx := idxs[i]
-					filteredWeights = append(filteredWeights, orionsWeights[idx])
-					indexMap = append(indexMap, orionsIndices[idx])
-				}
-			}
+	if len(normalValidatorsWeights) > 0 {
+		if err := s.sampler.Initialize(normalValidatorsWeights); err != nil {
+			return nil, err
+		}
+	}
+	
+	if len(orionsWeights) > 0 {
+		if err := s.orionsSampler.Initialize(orionsWeights); err != nil {
+			return nil, err
 		}
 	}
 
-	if len(filteredWeights) == 0 {
-		return nil, fmt.Errorf("no validators available after exclusions")
-	}
-	
-	tempSampler := sampler.NewWeightedWithoutReplacement()
-	if err := tempSampler.Initialize(filteredWeights); err != nil {
-		return nil, err
-	}
-	
-	indices, err := tempSampler.Sample(size)
-	if err != nil {
-		return nil, err
-	}
-	
-	list := make([]ids.NodeID, size)
-	for i, index := range indices {
-		if index < 0 || index >= len(indexMap) {
-			return nil, fmt.Errorf("sample index %d out of range %d", index, len(indexMap))
-		}
-		list[i] = s.vdrSlice[indexMap[index]].NodeID
-	}
+	s.orionsLastUpdatedTimestamp = lastUpdatedTimestamp
+	s.normalIndices = normalValidatorsIndices
+	s.samplerInitialized = true
+	s.orionsIndices = orionsIndices
 
-	return list, nil
+	return s.sampleLastUpdated(size)
 }
 
 func (s *vdrSet) Weight() uint64 {

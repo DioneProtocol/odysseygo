@@ -93,7 +93,7 @@ func (mr *MockFeeCollectorMockRecorder) AddURewardValue(arg0 interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddURewardValue", reflect.TypeOf((*MockFeeCollector)(nil).AddURewardValue), arg0)
 }
 
-func (m *MockFeeCollector) UpdateOrionsNodes(orions []ids.NodeID) error {
+func (m *MockFeeCollector) UpdateOrionsNodes(orions []ids.NodeID, timestamp uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateOrionsNodes", orions)
 	ret0, _ := ret[0].(error)
@@ -143,11 +143,12 @@ func (mr *MockFeeCollectorMockRecorder) GetOrionValue(arg0 interface{}) *gomock.
 }
 
 // GetOrionsNodesList mocks base method.
-func (m *MockFeeCollector) GetOrionsNodesList() []ids.NodeID {
+func (m *MockFeeCollector) GetOrionsNodesList() ([]ids.NodeID, uint64) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrionsNodesList")
 	ret0, _ := ret[0].([]ids.NodeID)
-	return ret0
+	ret1, _ := ret[1].(uint64)
+	return ret0, ret1
 }
 
 // GetOrionsNodesList indicates an expected call of GetOrionsNodesList.

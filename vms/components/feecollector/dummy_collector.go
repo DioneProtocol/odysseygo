@@ -28,7 +28,7 @@ func (*dummyFeeCollector) AddURewardValue(amount uint64) error {
 	return nil
 }
 
-func (*dummyFeeCollector) UpdateOrionsNodes(orions []ids.NodeID) error {
+func (*dummyFeeCollector) UpdateOrionsNodes(orions []ids.NodeID, timestamp uint64) error {
 	return nil
 }
 
@@ -44,8 +44,8 @@ func (*dummyFeeCollector) GetOrionValue(ids.NodeID) uint64 {
 	return 0
 }
 
-func (*dummyFeeCollector) GetOrionsNodesList() []ids.NodeID {
-	return []ids.NodeID{}
+func (*dummyFeeCollector) GetOrionsNodesList() ([]ids.NodeID, uint64) {
+	return []ids.NodeID{}, 0
 }
 
 func (*dummyFeeCollector) GetURewardValue() uint64 {

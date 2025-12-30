@@ -7,5 +7,7 @@ package constants
 // pointer.
 const PointerOverhead = 8
 
-
-const ValidatorOrionRatio float64 = 0   // ratio of number of orions to total number of validators
+// OrionSampleSizeRatio defines the ratio of orions that will be present in the sample size list.
+// The orion sample size is calculated as: floor(sampleSize * OrionSampleSizeRatio).
+// For example, if sample size is 20 and ratio is 0.2, then orion sample size will be 4.
+const OrionSampleSizeRatio float64 = 0
