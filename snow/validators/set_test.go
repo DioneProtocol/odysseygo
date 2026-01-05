@@ -549,6 +549,9 @@ func TestSetSample_OrionsExcludedWhenRatioNonZero(t *testing.T) {
 		}
 	}
 
+	// the last validator should be the orion as we sampled normal validators first
+	require.Equal(orionID, sampled[len(sampled)-1])
+
 	require.Equal(1, orionsCount)
 
 	orionID4 := ids.GenerateTestNodeID()
@@ -621,11 +624,9 @@ func TestSetSample_OrionsWithMixWeight(t *testing.T) {
 		}
 	}
 
-	if otherID2Count == 1 {
-		require.Equal(1, orionIDCount)
-	} else {
-		require.Equal(4, otherID2Count)
-	}
+	// all validators are orion
+	require.Equal(1, orionIDCount)
+	require.Equal(4, otherID2Count)
 }
 
 // validatorOrionRatio is 1, all validators are orions
@@ -702,6 +703,141 @@ func TestSetSample_OrionsWhenRatioOne(t *testing.T) {
 	}
 
 	require.Equal(6, orionsCount)
+}
+
+func TestSetSample_Orions(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	setOrionSampleSizeRatio(float64(2))
+	defer setOrionSampleSizeRatio(float64(0))
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+	otherID2 := ids.GenerateTestNodeID()
+	otherID3 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 5))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID2, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID3, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(5)
+	require.NoError(err)
+
+	// if ratio is greater than 1, then the sample size should be the size of the set
+	require.Len(sampled, 5)
+
+	orionsCount := 0
+	for _, id := range sampled {
+		if id == orionID {
+			orionsCount++
+		}
+	}
+
+	// all validators should be orions
+	require.Equal(5, orionsCount)
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{},
+	})
+
+	require.NoError(s.RemoveWeight(orionID, 5))
+
+	sampled, err = s.Sample(4)
+	require.NoError(err)
+
+	// if ratio is greater than 1, then the sample size should be the size of the set
+	require.Len(sampled, 4)
+
+	orionsCount = 0
+	normalCount := 0
+	for _, id := range sampled {
+		if id == orionID {
+			orionsCount++
+		} else {
+			normalCount++
+		}
+	}
+    
+	require.Equal(0, orionsCount)
+
+	// all validators should be normal as we don't have any orions in the set
+	require.Equal(4, normalCount)
+
+}
+
+func TestSetSample_OrionsPositionInSample(t *testing.T) {
+	require := require.New(t)
+
+	s := NewSet()
+
+	setOrionSampleSizeRatio(float64(0.2))
+	defer setOrionSampleSizeRatio(float64(0))
+
+	orionID := ids.GenerateTestNodeID()
+	otherID0 := ids.GenerateTestNodeID()
+	otherID1 := ids.GenerateTestNodeID()
+	otherID2 := ids.GenerateTestNodeID()
+	otherID3 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(orionID, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID0, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID1, nil, ids.Empty, 2))
+	require.NoError(s.Add(otherID2, nil, ids.Empty, 1))
+	require.NoError(s.Add(otherID3, nil, ids.Empty, 1))
+
+	SetOrionChecker(&mockOrionChecker{
+		nodes: []ids.NodeID{orionID, otherID0},
+	})
+	defer SetOrionChecker(nil)
+
+	sampled, err := s.Sample(5)
+	require.NoError(err)
+
+	require.Len(sampled, 5)
+
+	orionsCount := 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID0 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(1, orionsCount)
+
+	// the last validator should be the orion always as we sampled normal validators first
+	require.Equal(true, sampled[len(sampled)-1] == orionID || sampled[len(sampled)-1] == otherID0)
+	
+	otherID4 := ids.GenerateTestNodeID()
+
+	require.NoError(s.Add(otherID4, nil, ids.Empty, 10))
+	
+	sampled, err = s.Sample(10)
+	require.NoError(err)
+
+	require.Len(sampled, 10)
+
+	orionsCount = 0
+	for _, id := range sampled {
+		if id == orionID || id == otherID0 {
+			orionsCount++
+		}
+	}
+
+	require.Equal(2, orionsCount)
+
+	// the last and second last validator should be the orions always as we sampled normal validators first
+	require.Equal(true, sampled[len(sampled)-1] == orionID || sampled[len(sampled)-1] == otherID0)
+	require.Equal(true, sampled[len(sampled)-2] == orionID || sampled[len(sampled)-2] == otherID0)
 }
 
 func TestSetString(t *testing.T) {
