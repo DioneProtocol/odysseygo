@@ -413,15 +413,23 @@ func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
 }
 
 func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
-	orionsSamplingSize := int(stdMath.Floor(float64(size) * getOrionSampleSizeRatio()))
+	ratio := getOrionSampleSizeRatio()
+	if ratio > 1 {
+		ratio = 1
+	}
+
+	orionsSamplingSize := int(stdMath.Floor(float64(size) * ratio))
 	normalSamplingSize := size - orionsSamplingSize
 	
 	list := make([]ids.NodeID, 0, size)
+
+	if len(s.orionsIndices) == 0 {
+		normalSamplingSize = size
+	} else if len(s.normalIndices) == 0 {
+		orionsSamplingSize = size
+	}
 	
 	if normalSamplingSize > 0 && len(s.normalIndices) > 0 {
-		if len(s.orionsIndices) == 0 {
-			normalSamplingSize = size
-		}
 		indices, err := s.sampler.Sample(normalSamplingSize)
 		if err != nil {
 			return nil, err
@@ -435,9 +443,6 @@ func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
 	}
 
 	if orionsSamplingSize > 0 && len(s.orionsIndices) > 0 {
-		if len(s.normalIndices) == 0 {
-			orionsSamplingSize = size
-		}
 		indices, err := s.orionsSampler.Sample(orionsSamplingSize)
 		if err != nil {
 			return nil, err
