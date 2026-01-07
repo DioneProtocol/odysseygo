@@ -30,6 +30,7 @@ var (
 	orionChecker OrionChecker
 
 	apricotPhase7ActivationTime time.Time
+	isfirstTimeApricoteStarted bool 
 
 	orionSampleSizeRatio *float64
 )
@@ -386,6 +387,10 @@ func (s *vdrSet) Sample(size int) ([]ids.NodeID, error) {
 	defer s.lock.Unlock()
 
 	if IsApricotPhase7Activated() {
+		if !isfirstTimeApricoteStarted {
+			s.samplerInitialized = false
+			isfirstTimeApricoteStarted = true
+		}
 		return s.sampleApricotPhase7(size)
 	}
 
