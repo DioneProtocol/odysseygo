@@ -1,0 +1,158 @@
+name: Test Multi-Arch Release Build
+
+# Manual trigger for testing - won't affect production releases
+on:
+  workflow_dispatch:
+    inputs:
+      test_version:
+        description: 'Test version tag (e.g., v1.10.14-test)'
+        required: true
+        default: 'v1.10.14-test'
+      create_release:
+        description: 'Create a draft release?'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  build-odysseygo:
+    name: Build Odysseygo binary (${{ matrix.arch }})
+    permissions: write-all
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            goarch: amd64
+            cc: gcc
+          - arch: arm64
+            goarch: arm64
+            cc: aarch64-linux-gnu-gcc
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/install-deps
+
+      - uses: ./.github/actions/setup-go
+
+      - name: Install ARM64 cross-compiler
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Set version tag
+        id: get_tag
+        run: |
+          TAG=${{ github.event.inputs.test_version }}
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Building version: ${TAG}"
+        shell: bash
+
+      - name: Build Binary
+        run: |
+          export CGO_ENABLED=1
+          export GOOS=linux
+          export GOARCH=${{ matrix.goarch }}
+          export CC=${{ matrix.cc }}
+          export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+          git_commit=$(git rev-list -1 HEAD)
+          go mod download
+          go build -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit" \
+            -o ./build/odysseygo ./main/*.go
+        shell: bash
+
+      - name: Verify binary
+        run: |
+          echo "Binary info:"
+          file ./build/odysseygo
+          ls -la ./build/odysseygo
+        shell: bash
+
+      - name: Create directory and move binary
+        run: |
+          mkdir -p build/odysseygo-${{ env.TAG }}
+          mv build/odysseygo build/odysseygo-${{ env.TAG }}/odysseygo
+        shell: bash
+
+      - name: Archive binary in Targz
+        run: |
+          cd build
+          tar -czvf ../odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}.tar.gz odysseygo-${{ env.TAG }}
+        shell: bash
+
+      - name: Upload artifact with odysseygo
+        uses: actions/upload-artifact@v4
+        with:
+          name: odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}
+          path: odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}.tar.gz
+          retention-days: 7
+
+  create-release:
+    name: Create Draft Release (Optional)
+    needs: build-odysseygo
+    if: github.event.inputs.create_release == 'true'
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set version tag
+        id: get_tag
+        run: |
+          TAG=${{ github.event.inputs.test_version }}
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Release version: ${TAG}"
+        shell: bash
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -name "*.tar.gz"
+
+      - name: Create Draft Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG }}
+          release_name: "[TEST] Release ${{ env.TAG }}"
+          draft: true
+          prerelease: true
+
+      - name: Upload AMD64 Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/odysseygo-linux-amd64-${{ env.TAG }}/odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_name: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_content_type: application/x-tar
+
+      - name: Upload ARM64 Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/odysseygo-linux-arm64-${{ env.TAG }}/odysseygo-linux-arm64-${{ env.TAG }}.tar.gz
+          asset_name: odysseygo-linux-arm64-${{ env.TAG }}.tar.gz
+          asset_content_type: application/x-tar
+
+      - name: Output release URL
+        run: |
+          echo "Draft release created: ${{ steps.create_release.outputs.html_url }}"
+          echo "Remember to delete this test release after verification!"
