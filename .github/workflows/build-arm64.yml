@@ -1,0 +1,68 @@
+name: Build ARM64 Binary
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: 'Git tag to build from (e.g., v1.10.12)'
+        required: true
+        default: 'v1.10.12'
+
+permissions:
+  contents: write
+
+jobs:
+  build-arm64:
+    name: Build ARM64 Binary
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.version_tag }}
+
+      - uses: ./.github/actions/install-deps
+
+      - uses: ./.github/actions/setup-go
+
+      - name: Install ARM64 cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Build ARM64 Binary
+        run: |
+          export CGO_ENABLED=1
+          export GOOS=linux
+          export GOARCH=arm64
+          export CC=aarch64-linux-gnu-gcc
+          export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+          git_commit=$(git rev-list -1 HEAD)
+          go mod download
+          go build -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit" \
+            -o ./build/odysseygo ./main/*.go
+        shell: bash
+
+      - name: Create tarball
+        run: |
+          TAG=${{ github.event.inputs.version_tag }}
+          mkdir -p build/odysseygo-${TAG}
+          mv build/odysseygo build/odysseygo-${TAG}/odysseygo
+          cd build
+          tar -czvf ../odysseygo-linux-arm64-${TAG}.tar.gz odysseygo-${TAG}
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: odysseygo-linux-arm64-${{ github.event.inputs.version_tag }}
+          path: odysseygo-linux-arm64-${{ github.event.inputs.version_tag }}.tar.gz
+          retention-days: 30
+
+      - name: Upload to existing release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG=${{ github.event.inputs.version_tag }}
+          gh release upload ${TAG} odysseygo-linux-arm64-${TAG}.tar.gz --clobber
+        shell: bash
