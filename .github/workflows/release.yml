@@ -10,15 +10,30 @@ permissions:
 
 jobs:
   build-odysseygo:
-    name: Build Odysseygo binary
+    name: Build Odysseygo binary (${{ matrix.arch }})
     permissions: write-all
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            goarch: amd64
+            cc: gcc
+          - arch: arm64
+            goarch: arm64
+            cc: aarch64-linux-gnu-gcc
     steps:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/install-deps
 
       - uses: ./.github/actions/setup-go
+
+      - name: Install ARM64 cross-compiler
+        if: matrix.arch == 'arm64'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Get tag from git
         id: get_tag
@@ -31,7 +46,15 @@ jobs:
 
       - name: Build Binary
         run: |
-          ./scripts/build.sh
+          export CGO_ENABLED=1
+          export GOOS=linux
+          export GOARCH=${{ matrix.goarch }}
+          export CC=${{ matrix.cc }}
+          export CGO_CFLAGS="-O -D__BLST_PORTABLE__"
+          git_commit=$(git rev-list -1 HEAD)
+          go mod download
+          go build -ldflags "-X github.com/DioneProtocol/odysseygo/version.GitCommit=$git_commit" \
+            -o ./build/odysseygo ./main/*.go
         shell: bash
 
       - name: Create directory and move binary
@@ -43,15 +66,40 @@ jobs:
       - name: Archive binary in Targz
         run: |
           cd build
-          tar -czvf ../odysseygo-linux-amd64-${{ env.TAG }}.tar.gz odysseygo-${{ env.TAG }}
+          tar -czvf ../odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}.tar.gz odysseygo-${{ env.TAG }}
         shell: bash
 
       - name: Upload artifact with odysseygo
         uses: actions/upload-artifact@v4
         with:
-          name: odysseygo-linux-amd64-${{ env.TAG }}
-          path: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          name: odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}
+          path: odysseygo-linux-${{ matrix.arch }}-${{ env.TAG }}.tar.gz
           retention-days: 30
+
+  create-release:
+    name: Create Release and Upload Assets
+    needs: build-odysseygo
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get tag from git
+        id: get_tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "TAG=${TAG}" >> "$GITHUB_ENV"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Release version: ${TAG}"
+        shell: bash
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f -name "*.tar.gz"
 
       - name: Create Release
         id: create_release
@@ -63,22 +111,30 @@ jobs:
           release_name: Release ${{ env.TAG }}
           draft: false
           prerelease: false
-          allowUpdates: true
 
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload AMD64 Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_path: ./artifacts/odysseygo-linux-amd64-${{ env.TAG }}/odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
           asset_name: odysseygo-linux-amd64-${{ env.TAG }}.tar.gz
+          asset_content_type: application/x-tar
+
+      - name: Upload ARM64 Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/odysseygo-linux-arm64-${{ env.TAG }}/odysseygo-linux-arm64-${{ env.TAG }}.tar.gz
+          asset_name: odysseygo-linux-arm64-${{ env.TAG }}.tar.gz
           asset_content_type: application/x-tar
 
   trigger-installer-build:
     name: Trigger Installer Build
-    needs: build-odysseygo
+    needs: create-release
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     steps:
