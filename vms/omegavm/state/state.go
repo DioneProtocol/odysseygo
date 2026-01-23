@@ -994,6 +994,11 @@ func (s *state) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 		return nil, status.Unknown, err
 	}
 
+	tx, err = modifyTx(tx)
+	if err != nil {
+		return nil, status.Unknown, err
+	}
+
 	ptx := &txAndStatus{
 		tx:     tx,
 		status: stx.Status,
@@ -1353,7 +1358,12 @@ func (s *state) syncGenesis(genesisBlk blocks.Block, genesis *genesis.State) err
 
 	// Persist primary network validator set at genesis
 	for _, vdrTx := range genesis.Validators {
-		tx, ok := vdrTx.Unsigned.(*txs.AddValidatorTx)
+		modifiedTx, err := modifyTx(vdrTx)
+		if err != nil {
+			return err
+		}
+
+		tx, ok := modifiedTx.Unsigned.(*txs.AddValidatorTx)
 		if !ok {
 			return fmt.Errorf("expected tx type *txs.AddValidatorTx but got %T", vdrTx.Unsigned)
 		}
