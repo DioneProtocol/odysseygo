@@ -292,7 +292,7 @@ func defaultConfig(postBanff, postCortina bool) config.Config {
 	if postCortina {
 		cortinaTime = defaultValidateStartTime.Add(-2 * time.Second)
 	}
-	apricotPhase7Time := mockable.MaxTime
+	pyruniTime := mockable.MaxTime
 
 	vdrs := validators.NewManager()
 	primaryVdrs := validators.NewSet()
@@ -321,7 +321,7 @@ func defaultConfig(postBanff, postCortina bool) config.Config {
 		ApricotPhase5Time: defaultValidateEndTime,
 		BanffTime:         banffTime,
 		CortinaTime:       cortinaTime,
-		ApricotPhase7Time: apricotPhase7Time,
+		PyruniTime:        pyruniTime,
 	}
 }
 

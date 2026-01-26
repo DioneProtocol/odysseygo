@@ -101,11 +101,11 @@ var (
 	}
 	CortinaDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 
-	ApricotPhase7Times = map[uint32]time.Time{
+	PyruniTimes = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2025, time.August, 4, 8, 0, 0, 0, time.UTC),
 		constants.TestnetID: time.Date(2025, time.August, 4, 8, 0, 0, 0, time.UTC),
 	}
-	ApricotPhase7DefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
+	PyruniDefaultTime = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 )
 
 func init() {
@@ -178,11 +178,11 @@ func GetCortinaTime(networkID uint32) time.Time {
 	return CortinaDefaultTime
 }
 
-func GetApricotPhase7Time(networkID uint32) time.Time {
-	if upgradeTime, exists := ApricotPhase7Times[networkID]; exists {
+func GetPyruniTime(networkID uint32) time.Time {
+	if upgradeTime, exists := PyruniTimes[networkID]; exists {
 		return upgradeTime
 	}
-	return ApricotPhase7DefaultTime
+	return PyruniDefaultTime
 }
 
 func GetCompatibility(networkID uint32) Compatibility {

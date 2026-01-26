@@ -29,8 +29,8 @@ var (
 
 	orionChecker OrionChecker
 
-	apricotPhase7ActivationTime time.Time
-	isfirstTimeApricoteStarted bool 
+	pyruniActivationTime       time.Time
+	isfirstTimeApricoteStarted bool
 
 	orionSampleSizeRatio *float64
 )
@@ -43,12 +43,12 @@ func SetOrionChecker(checker OrionChecker) {
 	orionChecker = checker
 }
 
-func SetApricotPhase7ActivationTime(time time.Time) {
-	apricotPhase7ActivationTime = time
+func SetPyruniActivationTime(time time.Time) {
+	pyruniActivationTime = time
 }
 
-func IsApricotPhase7Activated() bool {
-	return time.Now().UTC().After(apricotPhase7ActivationTime)
+func IsPyruniActivated() bool {
+	return time.Now().UTC().After(pyruniActivationTime)
 }
 
 func setOrionSampleSizeRatio(ratio float64) {
@@ -131,8 +131,8 @@ type SetCallbackListener interface {
 // NewSet returns a new, empty set of validators.
 func NewSet() Set {
 	return &vdrSet{
-		vdrs:    make(map[ids.NodeID]*Validator),
-		sampler: sampler.NewWeightedWithoutReplacement(),
+		vdrs:          make(map[ids.NodeID]*Validator),
+		sampler:       sampler.NewWeightedWithoutReplacement(),
 		orionsSampler: sampler.NewWeightedWithoutReplacement(),
 	}
 }
@@ -140,8 +140,8 @@ func NewSet() Set {
 // NewBestSet returns a new, empty set of validators.
 func NewBestSet(expectedSampleSize int) Set {
 	return &vdrSet{
-		vdrs:    make(map[ids.NodeID]*Validator),
-		sampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
+		vdrs:          make(map[ids.NodeID]*Validator),
+		sampler:       sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
 		orionsSampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
 	}
 }
@@ -158,9 +158,9 @@ type vdrSet struct {
 	orionsLastUpdatedTimestamp uint64
 
 	// Separate samplers for orions
-	orionsSampler            sampler.WeightedWithoutReplacement
-	orionsIndices            []int
-	normalIndices            []int
+	orionsSampler sampler.WeightedWithoutReplacement
+	orionsIndices []int
+	normalIndices []int
 
 	callbackListeners []SetCallbackListener
 }
@@ -386,12 +386,12 @@ func (s *vdrSet) Sample(size int) ([]ids.NodeID, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if IsApricotPhase7Activated() {
+	if IsPyruniActivated() {
 		if !isfirstTimeApricoteStarted {
 			s.samplerInitialized = false
 			isfirstTimeApricoteStarted = true
 		}
-		return s.sampleApricotPhase7(size)
+		return s.samplePyruni(size)
 	}
 
 	return s.sample(size)
@@ -425,7 +425,7 @@ func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
 
 	orionsSamplingSize := int(stdMath.Floor(float64(size) * ratio))
 	normalSamplingSize := size - orionsSamplingSize
-	
+
 	list := make([]ids.NodeID, 0, size)
 
 	if len(s.orionsIndices) == 0 {
@@ -433,7 +433,7 @@ func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
 	} else if len(s.normalIndices) == 0 {
 		orionsSamplingSize = size
 	}
-	
+
 	if normalSamplingSize > 0 && len(s.normalIndices) > 0 {
 		indices, err := s.sampler.Sample(normalSamplingSize)
 		if err != nil {
@@ -463,7 +463,7 @@ func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
 	return list, nil
 }
 
-func (s *vdrSet) sampleApricotPhase7(size int) ([]ids.NodeID, error) {
+func (s *vdrSet) samplePyruni(size int) ([]ids.NodeID, error) {
 	var orions []ids.NodeID
 	var orionsSet map[ids.NodeID]bool
 	var lastUpdatedTimestamp uint64
@@ -500,7 +500,7 @@ func (s *vdrSet) sampleApricotPhase7(size int) ([]ids.NodeID, error) {
 			return nil, err
 		}
 	}
-	
+
 	if len(orionsWeights) > 0 {
 		if err := s.orionsSampler.Initialize(orionsWeights); err != nil {
 			return nil, err

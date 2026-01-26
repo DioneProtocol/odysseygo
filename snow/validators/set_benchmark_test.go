@@ -36,11 +36,11 @@ func setupValidators(b *testing.B, totalValidators int, orionCount int) (*vdrSet
 	return s, orionNodes
 }
 
-// BenchmarkSampleApricotPhase7_SmallSet benchmarks sampling with a small validator set
-func BenchmarkSampleApricotPhase7_SmallSet(b *testing.B) {
+// BenchmarkSamplePyruni_SmallSet benchmarks sampling with a small validator set
+func BenchmarkSamplePyruni_SmallSet(b *testing.B) {
 	// Activate Apricot Phase 7
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	s, orionNodes := setupValidators(b, 10, 2)
 	SetOrionChecker(&mockOrionChecker{nodes: orionNodes})
@@ -57,10 +57,10 @@ func BenchmarkSampleApricotPhase7_SmallSet(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_MediumSet benchmarks sampling with a medium validator set
-func BenchmarkSampleApricotPhase7_MediumSet(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_MediumSet benchmarks sampling with a medium validator set
+func BenchmarkSamplePyruni_MediumSet(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	s, orionNodes := setupValidators(b, 100, 20)
 	SetOrionChecker(&mockOrionChecker{nodes: orionNodes})
@@ -77,10 +77,10 @@ func BenchmarkSampleApricotPhase7_MediumSet(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_LargeSet benchmarks sampling with a large validator set
-func BenchmarkSampleApricotPhase7_LargeSet(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_LargeSet benchmarks sampling with a large validator set
+func BenchmarkSamplePyruni_LargeSet(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	s, orionNodes := setupValidators(b, 1000, 200)
 	SetOrionChecker(&mockOrionChecker{nodes: orionNodes})
@@ -97,10 +97,10 @@ func BenchmarkSampleApricotPhase7_LargeSet(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_AllOrions benchmarks when all validators are orions
-func BenchmarkSampleApricotPhase7_AllOrions(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_AllOrions benchmarks when all validators are orions
+func BenchmarkSamplePyruni_AllOrions(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	totalValidators := 100
 	s, orionNodes := setupValidators(b, totalValidators, totalValidators)
@@ -118,10 +118,10 @@ func BenchmarkSampleApricotPhase7_AllOrions(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_NoOrions benchmarks when no validators are orions
-func BenchmarkSampleApricotPhase7_NoOrions(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_NoOrions benchmarks when no validators are orions
+func BenchmarkSamplePyruni_NoOrions(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	s, _ := setupValidators(b, 100, 0)
 	SetOrionChecker(&mockOrionChecker{nodes: []ids.NodeID{}})
@@ -138,10 +138,10 @@ func BenchmarkSampleApricotPhase7_NoOrions(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_VaryingSampleSizes benchmarks different sample sizes
-func BenchmarkSampleApricotPhase7_VaryingSampleSizes(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_VaryingSampleSizes benchmarks different sample sizes
+func BenchmarkSamplePyruni_VaryingSampleSizes(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	sampleSizes := []int{1, 5, 10, 20, 50}
 
@@ -162,10 +162,10 @@ func BenchmarkSampleApricotPhase7_VaryingSampleSizes(b *testing.B) {
 	}
 }
 
-// BenchmarkSampleApricotPhase7_VaryingOrionRatios benchmarks different orion ratios
-func BenchmarkSampleApricotPhase7_VaryingOrionRatios(b *testing.B) {
-	SetApricotPhase7ActivationTime(time.Now().Add(time.Hour))
-	defer SetApricotPhase7ActivationTime(time.Time{})
+// BenchmarkSamplePyruni_VaryingOrionRatios benchmarks different orion ratios
+func BenchmarkSamplePyruni_VaryingOrionRatios(b *testing.B) {
+	SetPyruniActivationTime(time.Now().Add(time.Hour))
+	defer SetPyruniActivationTime(time.Time{})
 
 	totalValidators := 100
 	orionRatios := []struct {
