@@ -101,6 +101,12 @@ type Config struct {
 	// Minimum amount of time to allow a delegator to stake
 	PyruniMinDelegatorStakeDuration time.Duration
 
+	// Maximum amount of time to allow a validator to stake
+	PyruniMaxValidatorStakeDuration time.Duration
+
+	// Maximum amount of time to allow a delegator to stake
+	PyruniMaxDelegatorStakeDuration time.Duration
+
 	// Config for the minting function
 	RewardConfig reward.Config
 
@@ -164,6 +170,20 @@ func (c *Config) GetMinDelegatorStakeDuration(timestamp time.Time) time.Duration
 		return c.PyruniMinDelegatorStakeDuration
 	}
 	return c.MinDelegatorStakeDuration
+}
+
+func (c *Config) GetMaxValidatorStakeDuration(timestamp time.Time) time.Duration {
+	if c.IsPyruniActivated(timestamp) {
+		return c.PyruniMaxValidatorStakeDuration
+	}
+	return c.MaxValidatorStakeDuration
+}
+
+func (c *Config) GetMaxDelegatorStakeDuration(timestamp time.Time) time.Duration {
+	if c.IsPyruniActivated(timestamp) {
+		return c.PyruniMaxDelegatorStakeDuration
+	}
+	return c.MaxDelegatorStakeDuration
 }
 
 func (c *Config) GetCreateBlockchainTxFee(timestamp time.Time) uint64 {

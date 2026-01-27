@@ -59,6 +59,8 @@ var (
 			MaxDelegatorStakeDuration:       365 * 24 * time.Hour,
 			PyruniMinValidatorStakeDuration: 24 * time.Hour,
 			PyruniMinDelegatorStakeDuration: 24 * time.Hour,
+			PyruniMaxValidatorStakeDuration: 365 * 24 * time.Hour,
+			PyruniMaxDelegatorStakeDuration: 365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,

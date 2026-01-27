@@ -915,6 +915,8 @@ func (n *Node) initVMs() error {
 				MaxDelegatorStakeDuration:       n.Config.MaxDelegatorStakeDuration,
 				PyruniMinValidatorStakeDuration: n.Config.PyruniMinValidatorStakeDuration,
 				PyruniMinDelegatorStakeDuration: n.Config.PyruniMinDelegatorStakeDuration,
+				PyruniMaxValidatorStakeDuration: n.Config.PyruniMaxValidatorStakeDuration,
+				PyruniMaxDelegatorStakeDuration: n.Config.PyruniMaxDelegatorStakeDuration,
 				RewardConfig:                    n.Config.RewardConfig,
 				MintConfig:                      n.Config.MintConfig,
 				ApricotPhase3Time:               version.GetApricotPhase3Time(n.Config.NetworkID),

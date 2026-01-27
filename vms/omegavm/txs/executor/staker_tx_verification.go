@@ -111,7 +111,7 @@ func verifyAddValidatorTx(
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
-	case duration > backend.Config.MaxValidatorStakeDuration:
+	case duration > backend.Config.GetMaxValidatorStakeDuration(currentTimestamp):
 		// Ensure staking length is not too long
 		return nil, ErrStakeTooLong
 	}
@@ -358,7 +358,7 @@ func verifyAddDelegatorTx(
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
-	case duration > backend.Config.MaxDelegatorStakeDuration:
+	case duration > backend.Config.GetMaxDelegatorStakeDuration(currentTimestamp):
 		// Ensure staking length is not too long
 		return nil, ErrStakeTooLong
 
@@ -596,7 +596,7 @@ func getValidatorRules(
 			minValidatorStake: backend.Config.MinValidatorStake,
 			maxValidatorStake: backend.Config.MaxValidatorStake,
 			minStakeDuration:  backend.Config.GetMinValidatorStakeDuration(currentTimestamp),
-			maxStakeDuration:  backend.Config.MaxValidatorStakeDuration,
+			maxStakeDuration:  backend.Config.GetMaxValidatorStakeDuration(currentTimestamp),
 			minDelegationFee:  backend.Config.MinDelegationFee,
 		}, nil
 	}
@@ -786,7 +786,7 @@ func getDelegatorRules(
 			minDelegatorStake:        backend.Config.MinDelegatorStake,
 			maxValidatorStake:        backend.Config.MaxValidatorStake,
 			minStakeDuration:         backend.Config.GetMinDelegatorStakeDuration(currentTimestamp),
-			maxStakeDuration:         backend.Config.MaxDelegatorStakeDuration,
+			maxStakeDuration:         backend.Config.GetMaxDelegatorStakeDuration(currentTimestamp),
 			maxValidatorWeightFactor: MaxValidatorWeightFactor,
 		}, nil
 	}
