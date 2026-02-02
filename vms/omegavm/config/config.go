@@ -96,10 +96,10 @@ type Config struct {
 	MaxDelegatorStakeDuration time.Duration
 
 	// Minimum amount of time to allow a validator to stake
-	ApricotPhase7MinValidatorStakeDuration time.Duration
+	PyruniMinValidatorStakeDuration time.Duration
 
 	// Minimum amount of time to allow a delegator to stake
-	ApricotPhase7MinDelegatorStakeDuration time.Duration
+	PyruniMinDelegatorStakeDuration time.Duration
 
 	// Config for the minting function
 	RewardConfig reward.Config
@@ -120,7 +120,7 @@ type Config struct {
 	CortinaTime time.Time
 
 	// Time of the AP7 network upgrade
-	ApricotPhase7Time time.Time
+	PyruniTime time.Time
 
 	// UseCurrentHeight forces [GetMinimumHeight] to return the current height
 	// of the O-Chain instead of the oldest block in the [recentlyAccepted]
@@ -148,20 +148,20 @@ func (c *Config) IsCortinaActivated(timestamp time.Time) bool {
 	return !timestamp.Before(c.CortinaTime)
 }
 
-func (c *Config) IsApricotPhase7Activated(timestamp time.Time) bool {
-	return !timestamp.Before(c.ApricotPhase7Time)
+func (c *Config) IsPyruniActivated(timestamp time.Time) bool {
+	return !timestamp.Before(c.PyruniTime)
 }
 
 func (c *Config) GetMinValidatorStakeDuration(timestamp time.Time) time.Duration {
-	if c.IsApricotPhase7Activated(timestamp) {
-		return c.ApricotPhase7MinValidatorStakeDuration
+	if c.IsPyruniActivated(timestamp) {
+		return c.PyruniMinValidatorStakeDuration
 	}
 	return c.MinValidatorStakeDuration
 }
 
 func (c *Config) GetMinDelegatorStakeDuration(timestamp time.Time) time.Duration {
-	if c.IsApricotPhase7Activated(timestamp) {
-		return c.ApricotPhase7MinDelegatorStakeDuration
+	if c.IsPyruniActivated(timestamp) {
+		return c.PyruniMinDelegatorStakeDuration
 	}
 	return c.MinDelegatorStakeDuration
 }

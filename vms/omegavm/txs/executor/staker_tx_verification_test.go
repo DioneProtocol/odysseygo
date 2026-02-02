@@ -558,16 +558,16 @@ func TestGetValidatorRules(t *testing.T) {
 
 	var (
 		config = &config.Config{
-			MinValidatorStake:                      1,
-			MaxValidatorStake:                      2,
-			MinValidatorStakeDuration:              2 * time.Second,
-			ApricotPhase7MinValidatorStakeDuration: time.Second,
-			MaxValidatorStakeDuration:              3 * time.Second,
-			MinDelegatorStakeDuration:              2 * time.Second,
-			ApricotPhase7MinDelegatorStakeDuration: time.Second,
-			MaxDelegatorStakeDuration:              3 * time.Second,
-			MinDelegationFee:                       1337,
-			ApricotPhase7Time:                      time.Unix(10, 0),
+			MinValidatorStake:               1,
+			MaxValidatorStake:               2,
+			MinValidatorStakeDuration:       2 * time.Second,
+			PyruniMinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration:       3 * time.Second,
+			MinDelegatorStakeDuration:       2 * time.Second,
+			PyruniMinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration:       3 * time.Second,
+			MinDelegationFee:                1337,
+			PyruniTime:                      time.Unix(10, 0),
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -609,14 +609,14 @@ func TestGetValidatorRules(t *testing.T) {
 			},
 			chainStateF: func(ctrl *gomock.Controller) state.Chain {
 				state := state.NewMockChain(ctrl)
-				state.EXPECT().GetTimestamp().Return(config.ApricotPhase7Time)
+				state.EXPECT().GetTimestamp().Return(config.PyruniTime)
 				return state
 			},
 			expectedRules: &addValidatorRules{
 				assetID:           dioneAssetID,
 				minValidatorStake: config.MinValidatorStake,
 				maxValidatorStake: config.MaxValidatorStake,
-				minStakeDuration:  config.ApricotPhase7MinValidatorStakeDuration,
+				minStakeDuration:  config.PyruniMinValidatorStakeDuration,
 				maxStakeDuration:  config.MaxValidatorStakeDuration,
 				minDelegationFee:  config.MinDelegationFee,
 			},
@@ -709,15 +709,15 @@ func TestGetDelegatorRules(t *testing.T) {
 	}
 	var (
 		config = &config.Config{
-			MinDelegatorStake:                      1,
-			MaxValidatorStake:                      2,
-			MinValidatorStakeDuration:              2 * time.Second,
-			ApricotPhase7MinValidatorStakeDuration: time.Second,
-			MaxValidatorStakeDuration:              3 * time.Second,
-			MinDelegatorStakeDuration:              2 * time.Second,
-			ApricotPhase7MinDelegatorStakeDuration: time.Second,
-			MaxDelegatorStakeDuration:              3 * time.Second,
-			ApricotPhase7Time:                      time.Unix(10, 0),
+			MinDelegatorStake:               1,
+			MaxValidatorStake:               2,
+			MinValidatorStakeDuration:       2 * time.Second,
+			PyruniMinValidatorStakeDuration: time.Second,
+			MaxValidatorStakeDuration:       3 * time.Second,
+			MinDelegatorStakeDuration:       2 * time.Second,
+			PyruniMinDelegatorStakeDuration: time.Second,
+			MaxDelegatorStakeDuration:       3 * time.Second,
+			PyruniTime:                      time.Unix(10, 0),
 		}
 		dioneAssetID  = ids.GenerateTestID()
 		customAssetID = ids.GenerateTestID()
@@ -758,14 +758,14 @@ func TestGetDelegatorRules(t *testing.T) {
 			},
 			chainStateF: func(ctrl *gomock.Controller) state.Chain {
 				state := state.NewMockChain(ctrl)
-				state.EXPECT().GetTimestamp().Return(config.ApricotPhase7Time)
+				state.EXPECT().GetTimestamp().Return(config.PyruniTime)
 				return state
 			},
 			expectedRules: &addDelegatorRules{
 				assetID:                  dioneAssetID,
 				minDelegatorStake:        config.MinDelegatorStake,
 				maxValidatorStake:        config.MaxValidatorStake,
-				minStakeDuration:         config.ApricotPhase7MinDelegatorStakeDuration,
+				minStakeDuration:         config.PyruniMinDelegatorStakeDuration,
 				maxStakeDuration:         config.MaxDelegatorStakeDuration,
 				maxValidatorWeightFactor: MaxValidatorWeightFactor,
 			},
