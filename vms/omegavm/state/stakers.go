@@ -66,6 +66,8 @@ type CurrentStakers interface {
 	// the current staker set.
 	GetCurrentStakerIterator() (StakerIterator, error)
 
+	ModifyCurrentStakerIterator() (StakerIterator, error)
+
 	// GetCurrentStakersLen returns current stakers amount
 	GetCurrentStakersLen() (uint64, error)
 }
@@ -169,6 +171,17 @@ func (v *baseStakers) PutValidator(staker *Staker) {
 	v.stakers.ReplaceOrInsert(staker)
 }
 
+func (v *baseStakers) PutModifiedValidator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	validator.validator = staker
+
+	validatorDiff := v.getOrCreateValidatorDiff(staker.SubnetID, staker.NodeID)
+	validatorDiff.validator = staker
+	validatorDiff.validatorStatus = unmodified
+
+	v.stakers.ReplaceOrInsert(staker)
+}
+
 func (v *baseStakers) DeleteValidator(staker *Staker) {
 	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
 	validator.validator = nil
@@ -194,6 +207,22 @@ func (v *baseStakers) GetDelegatorIterator(subnetID ids.ID, nodeID ids.NodeID) S
 }
 
 func (v *baseStakers) PutDelegator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	if validator.delegators == nil {
+		validator.delegators = btree.NewG(defaultTreeDegree, (*Staker).Less)
+	}
+	validator.delegators.ReplaceOrInsert(staker)
+
+	validatorDiff := v.getOrCreateValidatorDiff(staker.SubnetID, staker.NodeID)
+	if validatorDiff.addedDelegators == nil {
+		validatorDiff.addedDelegators = btree.NewG(defaultTreeDegree, (*Staker).Less)
+	}
+	validatorDiff.addedDelegators.ReplaceOrInsert(staker)
+
+	v.stakers.ReplaceOrInsert(staker)
+}
+
+func (v *baseStakers) PutModifiedDelegator(staker *Staker) {
 	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
 	if validator.delegators == nil {
 		validator.delegators = btree.NewG(defaultTreeDegree, (*Staker).Less)
