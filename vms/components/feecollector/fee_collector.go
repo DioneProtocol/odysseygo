@@ -24,6 +24,7 @@ type FeeCollector interface {
 	AddAChainValue(amount uint64) error
 	AddOrionsValue(orions []ids.NodeID, amount uint64) error
 	AddURewardValue(amount uint64) error
+	UpdateOrionsNodes(orions []ids.NodeID, timestamp uint64) error
 
 	SubDChainValue(amount uint64) error
 	SubAChainValue(amount uint64) error
@@ -35,6 +36,8 @@ type FeeCollector interface {
 
 	GetOrionValue(ids.NodeID) uint64
 	GetURewardValue() uint64
+
+	GetOrionsNodesList() ([]ids.NodeID, uint64)
 }
 
 type collector struct {
@@ -43,6 +46,9 @@ type collector struct {
 	aChainValue  *atomic.Uint64
 	uRewardValue *atomic.Uint64
 	orions       map[ids.NodeID]uint64
+
+	orionsNodeslist  []ids.NodeID
+	orionsLastUpdatedTimestamp uint64
 
 	orionsDb linkeddb.LinkedDB
 	db       database.Database
@@ -165,8 +171,22 @@ func (c *collector) SubOrionsValue(orions []ids.NodeID, amount uint64) error {
 	return c.updateOrions(orions, ^(amount - 1))
 }
 
+func (c *collector) UpdateOrionsNodes(orions []ids.NodeID, timestamp uint64) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.orionsNodeslist = orions
+	c.orionsLastUpdatedTimestamp = timestamp
+	return nil
+}
+
 func (c *collector) GetOrionValue(nodeID ids.NodeID) uint64 {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 	return c.orions[nodeID]
+}	
+
+func (c *collector) GetOrionsNodesList() ([]ids.NodeID, uint64) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	return c.orionsNodeslist, c.orionsLastUpdatedTimestamp
 }

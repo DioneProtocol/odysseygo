@@ -6,10 +6,13 @@ package validators
 import (
 	"errors"
 	"fmt"
+	stdMath "math"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/DioneProtocol/odysseygo/ids"
+	"github.com/DioneProtocol/odysseygo/utils/constants"
 	"github.com/DioneProtocol/odysseygo/utils/crypto/bls"
 	"github.com/DioneProtocol/odysseygo/utils/formatting"
 	"github.com/DioneProtocol/odysseygo/utils/math"
@@ -23,7 +26,41 @@ var (
 	errZeroWeight         = errors.New("weight must be non-zero")
 	errDuplicateValidator = errors.New("duplicate validator")
 	errMissingValidator   = errors.New("missing validator")
+
+	orionChecker OrionChecker
+
+	pyruniActivationTime       time.Time
+	isfirstTimeApricoteStarted bool
+
+	orionSampleSizeRatio *float64
 )
+
+type OrionChecker interface {
+	GetOrionsNodesList() ([]ids.NodeID, uint64)
+}
+
+func SetOrionChecker(checker OrionChecker) {
+	orionChecker = checker
+}
+
+func SetPyruniActivationTime(time time.Time) {
+	pyruniActivationTime = time
+}
+
+func IsPyruniActivated() bool {
+	return time.Now().UTC().After(pyruniActivationTime)
+}
+
+func setOrionSampleSizeRatio(ratio float64) {
+	orionSampleSizeRatio = &ratio
+}
+
+func getOrionSampleSizeRatio() float64 {
+	if orionSampleSizeRatio != nil {
+		return *orionSampleSizeRatio
+	}
+	return constants.OrionSampleSizeRatio
+}
 
 // Set of validators that can be sampled
 type Set interface {
@@ -94,16 +131,18 @@ type SetCallbackListener interface {
 // NewSet returns a new, empty set of validators.
 func NewSet() Set {
 	return &vdrSet{
-		vdrs:    make(map[ids.NodeID]*Validator),
-		sampler: sampler.NewWeightedWithoutReplacement(),
+		vdrs:          make(map[ids.NodeID]*Validator),
+		sampler:       sampler.NewWeightedWithoutReplacement(),
+		orionsSampler: sampler.NewWeightedWithoutReplacement(),
 	}
 }
 
 // NewBestSet returns a new, empty set of validators.
 func NewBestSet(expectedSampleSize int) Set {
 	return &vdrSet{
-		vdrs:    make(map[ids.NodeID]*Validator),
-		sampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
+		vdrs:          make(map[ids.NodeID]*Validator),
+		sampler:       sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
+		orionsSampler: sampler.NewBestWeightedWithoutReplacement(expectedSampleSize),
 	}
 }
 
@@ -114,8 +153,14 @@ type vdrSet struct {
 	weights     []uint64
 	totalWeight uint64
 
-	samplerInitialized bool
-	sampler            sampler.WeightedWithoutReplacement
+	samplerInitialized         bool
+	sampler                    sampler.WeightedWithoutReplacement
+	orionsLastUpdatedTimestamp uint64
+
+	// Separate samplers for orions
+	orionsSampler sampler.WeightedWithoutReplacement
+	orionsIndices []int
+	normalIndices []int
 
 	callbackListeners []SetCallbackListener
 }
@@ -341,6 +386,14 @@ func (s *vdrSet) Sample(size int) ([]ids.NodeID, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
+	if IsPyruniActivated() {
+		if !isfirstTimeApricoteStarted {
+			s.samplerInitialized = false
+			isfirstTimeApricoteStarted = true
+		}
+		return s.samplePyruni(size)
+	}
+
 	return s.sample(size)
 }
 
@@ -362,6 +415,104 @@ func (s *vdrSet) sample(size int) ([]ids.NodeID, error) {
 		list[i] = s.vdrSlice[index].NodeID
 	}
 	return list, nil
+}
+
+func (s *vdrSet) sampleLastUpdated(size int) ([]ids.NodeID, error) {
+	ratio := getOrionSampleSizeRatio()
+	if ratio > 1 {
+		ratio = 1
+	}
+
+	orionsSamplingSize := int(stdMath.Floor(float64(size) * ratio))
+	normalSamplingSize := size - orionsSamplingSize
+
+	list := make([]ids.NodeID, 0, size)
+
+	if len(s.orionsIndices) == 0 {
+		normalSamplingSize = size
+	} else if len(s.normalIndices) == 0 {
+		orionsSamplingSize = size
+	}
+
+	if normalSamplingSize > 0 && len(s.normalIndices) > 0 {
+		indices, err := s.sampler.Sample(normalSamplingSize)
+		if err != nil {
+			return nil, err
+		}
+		for _, index := range indices {
+			if index < 0 || index >= len(s.normalIndices) {
+				return nil, fmt.Errorf("normal sample index %d out of range %d", index, len(s.normalIndices))
+			}
+			list = append(list, s.vdrSlice[s.normalIndices[index]].NodeID)
+		}
+	}
+
+	if orionsSamplingSize > 0 && len(s.orionsIndices) > 0 {
+		indices, err := s.orionsSampler.Sample(orionsSamplingSize)
+		if err != nil {
+			return nil, err
+		}
+		for _, index := range indices {
+			if index < 0 || index >= len(s.orionsIndices) {
+				return nil, fmt.Errorf("orion sample index %d out of range %d", index, len(s.orionsIndices))
+			}
+			list = append(list, s.vdrSlice[s.orionsIndices[index]].NodeID)
+		}
+	}
+
+	return list, nil
+}
+
+func (s *vdrSet) samplePyruni(size int) ([]ids.NodeID, error) {
+	var orions []ids.NodeID
+	var orionsSet map[ids.NodeID]bool
+	var lastUpdatedTimestamp uint64
+	if orionChecker != nil {
+		orions, lastUpdatedTimestamp = orionChecker.GetOrionsNodesList()
+		if lastUpdatedTimestamp == s.orionsLastUpdatedTimestamp && s.samplerInitialized {
+			return s.sampleLastUpdated(size)
+		}
+
+		// To check if node id exist in orion set with lesser complexity
+		orionsSet = make(map[ids.NodeID]bool, len(orions))
+		for _, nodeID := range orions {
+			orionsSet[nodeID] = true
+		}
+	}
+
+	normalValidatorsWeights := make([]uint64, 0)
+	normalValidatorsIndices := make([]int, 0)
+	orionsWeights := make([]uint64, 0)
+	orionsIndices := make([]int, 0)
+
+	for i, vdr := range s.vdrSlice {
+		if orionsSet != nil && orionsSet[vdr.NodeID] {
+			orionsWeights = append(orionsWeights, vdr.Weight)
+			orionsIndices = append(orionsIndices, i)
+			continue
+		}
+		normalValidatorsWeights = append(normalValidatorsWeights, vdr.Weight)
+		normalValidatorsIndices = append(normalValidatorsIndices, i)
+	}
+
+	if len(normalValidatorsWeights) > 0 {
+		if err := s.sampler.Initialize(normalValidatorsWeights); err != nil {
+			return nil, err
+		}
+	}
+
+	if len(orionsWeights) > 0 {
+		if err := s.orionsSampler.Initialize(orionsWeights); err != nil {
+			return nil, err
+		}
+	}
+
+	s.orionsLastUpdatedTimestamp = lastUpdatedTimestamp
+	s.normalIndices = normalValidatorsIndices
+	s.samplerInitialized = true
+	s.orionsIndices = orionsIndices
+
+	return s.sampleLastUpdated(size)
 }
 
 func (s *vdrSet) Weight() uint64 {

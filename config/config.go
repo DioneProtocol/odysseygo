@@ -811,6 +811,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.MaxDelegatorStakeDuration = v.GetDuration(MaxDelegatorStakeDurationKey)
 		config.PyruniMinValidatorStakeDuration = v.GetDuration(MinValidatorStakeDurationKey)
 		config.PyruniMinDelegatorStakeDuration = v.GetDuration(MinDelegatorStakeDurationKey)
+		config.PyruniMaxValidatorStakeDuration = v.GetDuration(MaxValidatorStakeDurationKey)
+		config.PyruniMaxDelegatorStakeDuration = v.GetDuration(MaxDelegatorStakeDurationKey)
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
 		config.RewardConfig.MinConsumptionRate = v.GetUint64(StakeMinConsumptionRateKey)
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
@@ -836,6 +838,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.MaxValidatorStakeDuration < config.PyruniMinValidatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
+		case config.PyruniMaxValidatorStakeDuration < config.PyruniMinValidatorStakeDuration:
+			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.MinDelegatorStakeDuration <= 0:
 			return node.StakingConfig{}, errInvalidMinStakeDuration
 		case config.PyruniMinDelegatorStakeDuration <= 0:
@@ -843,6 +847,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		case config.MaxDelegatorStakeDuration < config.MinDelegatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.MaxDelegatorStakeDuration < config.PyruniMinDelegatorStakeDuration:
+			return node.StakingConfig{}, errMinStakeDurationAboveMax
+		case config.PyruniMaxDelegatorStakeDuration < config.PyruniMinDelegatorStakeDuration:
 			return node.StakingConfig{}, errMinStakeDurationAboveMax
 		case config.RewardConfig.MaxConsumptionRate > reward.PercentDenominator:
 			return node.StakingConfig{}, errStakeMaxConsumptionTooLarge

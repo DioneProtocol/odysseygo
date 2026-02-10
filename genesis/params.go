@@ -41,6 +41,12 @@ type StakingConfig struct {
 	// PyruniMinDelegatorStakeDuration is the minimum amount of time a delegator can delegate
 	// for in a single period.
 	PyruniMinDelegatorStakeDuration time.Duration `json:"pyruniMinDelegatorStakeDuration"`
+	// PyruniMaxValidatorStakeDuration is the maximum amount of time a validator can validate
+	// for in a single period.
+	PyruniMaxValidatorStakeDuration time.Duration `json:"pyruniMaxValidatorStakeDuration"`
+	// PyruniMaxDelegatorStakeDuration is the maximum amount of time a delegator can delegate
+	// for in a single period.
+	PyruniMaxDelegatorStakeDuration time.Duration `json:"pyruniMaxDelegatorStakeDuration"`
 	// RewardConfig is the config for the reward function.
 	RewardConfig reward.Config `json:"rewardConfig"`
 	// Config for the minting function
