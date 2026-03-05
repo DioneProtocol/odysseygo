@@ -401,6 +401,8 @@ type state struct {
 	feePerWeightStored, persistedFeePerWeightStored               *big.Int
 	stakerAccumulatedMintRate, persistedStakerAccumulatedMintRate *big.Int
 	stakeSyncTimestamp, persistedStakeSyncTimestamp               time.Time
+
+	isTxModified bool
 }
 
 // heightRange is used to track which heights are safe to use the native DB
@@ -733,6 +735,9 @@ func (s *state) GetModifiedStakerParams(staker Staker) (*Staker, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	tx, _ = s.modifyTx(tx)
+
 	modifiedStakerTx, ok := tx.Unsigned.(txs.Staker)
 	if !ok {
 		return nil, fmt.Errorf("expected txs.Staker, got %T", tx.Unsigned)
@@ -762,13 +767,16 @@ func (s *state) DeleteCurrentDelegator(staker *Staker) {
 }
 
 func (s *state) GetCurrentStakerIterator() (StakerIterator, error) {
-	return s.currentStakers.GetStakerIterator(), nil
+	return s.ModifyCurrentStakerIterator()
 }
 
 
-// Todo: Add a new method to get modified delegators and validators end time.
 func (s *state) ModifyCurrentStakerIterator() (StakerIterator, error) {
 	if !s.cfg.IsPyruniActivated(s.timestamp) {
+		return s.currentStakers.GetStakerIterator(), nil
+	}
+
+	if s.isTxModified {
 		return s.currentStakers.GetStakerIterator(), nil
 	}
 
@@ -804,11 +812,12 @@ func (s *state) ModifyCurrentStakerIterator() (StakerIterator, error) {
 			s.currentStakers.DeleteValidator(prev)
 			s.currentStakers.PutModifiedValidator(modified)
 		} else {
-			// Todo: test delete delegator
-			// s.currentStakers.DeleteDelegator(prev)
+			s.currentStakers.DeleteModifiedDelegator(prev)
 			s.currentStakers.PutModifiedDelegator(modified)
 		}
 	}
+
+	s.isTxModified = true
 
 	return s.currentStakers.GetStakerIterator(), nil
 }
@@ -1051,11 +1060,6 @@ func (s *state) GetTx(txID ids.ID) (*txs.Tx, status.Status, error) {
 	}
 
 	tx, err := txs.Parse(txs.GenesisCodec, stx.Tx)
-	if err != nil {
-		return nil, status.Unknown, err
-	}
-
-	tx, err = s.modifyTx(tx)
 	if err != nil {
 		return nil, status.Unknown, err
 	}
@@ -1419,12 +1423,7 @@ func (s *state) syncGenesis(genesisBlk blocks.Block, genesis *genesis.State) err
 
 	// Persist primary network validator set at genesis
 	for _, vdrTx := range genesis.Validators {
-		modifiedTx, err := s.modifyTx(vdrTx)
-		if err != nil {
-			return err
-		}
-
-		tx, ok := modifiedTx.Unsigned.(*txs.AddValidatorTx)
+		tx, ok := vdrTx.Unsigned.(*txs.AddValidatorTx)
 		if !ok {
 			return fmt.Errorf("expected tx type *txs.AddValidatorTx but got %T", vdrTx.Unsigned)
 		}
@@ -1436,7 +1435,6 @@ func (s *state) syncGenesis(genesisBlk blocks.Block, genesis *genesis.State) err
 
 		s.PutCurrentValidator(staker)
 
-		// We add original transaction
 		s.AddTx(vdrTx, status.Committed)
 	}
 

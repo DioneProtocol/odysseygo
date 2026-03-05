@@ -449,9 +449,6 @@ func getNextStakerToReward(
 		return ids.Empty, false, ErrEndOfTime
 	}
 
-	// Todo
-	preferredState.ModifyCurrentStakerIterator()
-
 	currentStakerIterator, err := preferredState.GetCurrentStakerIterator()
 	if err != nil {
 		return ids.Empty, false, err

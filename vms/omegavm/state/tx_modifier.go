@@ -120,5 +120,5 @@ func reduceValidatorEndTime(tx *txs.Tx, endTimeDecrement uint64) (*txs.Tx, error
 }
 
 func checkReductionRequiredForDelegator(vdrStartTime int64, startTime int64, endTime int64, activationTime int64) bool {
-	return vdrStartTime == int64(genesis.TestnetConfig.StartTime) && (startTime < activationTime && endTime > activationTime)
+	return vdrStartTime == int64(genesis.TestnetConfig.StartTime) && (startTime < activationTime && endTime > testnetDelegatorEndTime.Unix())
 }

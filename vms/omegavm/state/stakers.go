@@ -229,13 +229,17 @@ func (v *baseStakers) PutModifiedDelegator(staker *Staker) {
 	}
 	validator.delegators.ReplaceOrInsert(staker)
 
-	validatorDiff := v.getOrCreateValidatorDiff(staker.SubnetID, staker.NodeID)
-	if validatorDiff.addedDelegators == nil {
-		validatorDiff.addedDelegators = btree.NewG(defaultTreeDegree, (*Staker).Less)
-	}
-	validatorDiff.addedDelegators.ReplaceOrInsert(staker)
-
 	v.stakers.ReplaceOrInsert(staker)
+}
+
+func (v *baseStakers) DeleteModifiedDelegator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	if validator.delegators != nil {
+		validator.delegators.Delete(staker)
+	}
+	v.pruneValidator(staker.SubnetID, staker.NodeID)
+
+	v.stakers.Delete(staker)
 }
 
 func (v *baseStakers) DeleteDelegator(staker *Staker) {
