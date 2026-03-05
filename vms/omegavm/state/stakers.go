@@ -66,6 +66,8 @@ type CurrentStakers interface {
 	// the current staker set.
 	GetCurrentStakerIterator() (StakerIterator, error)
 
+	ModifyCurrentStakerIterator() (StakerIterator, error)
+
 	// GetCurrentStakersLen returns current stakers amount
 	GetCurrentStakersLen() (uint64, error)
 }
@@ -169,6 +171,17 @@ func (v *baseStakers) PutValidator(staker *Staker) {
 	v.stakers.ReplaceOrInsert(staker)
 }
 
+func (v *baseStakers) PutModifiedValidator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	validator.validator = staker
+
+	validatorDiff := v.getOrCreateValidatorDiff(staker.SubnetID, staker.NodeID)
+	validatorDiff.validator = staker
+	validatorDiff.validatorStatus = unmodified
+
+	v.stakers.ReplaceOrInsert(staker)
+}
+
 func (v *baseStakers) DeleteValidator(staker *Staker) {
 	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
 	validator.validator = nil
@@ -207,6 +220,32 @@ func (v *baseStakers) PutDelegator(staker *Staker) {
 	validatorDiff.addedDelegators.ReplaceOrInsert(staker)
 
 	v.stakers.ReplaceOrInsert(staker)
+}
+
+// PutModifiedDelegator inserts a delegator whose staking parameters have been
+// updated in-memory into the validator's delegator set
+// and the flat staker index, without recording a diff entry.
+func (v *baseStakers) PutModifiedDelegator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	if validator.delegators == nil {
+		validator.delegators = btree.NewG(defaultTreeDegree, (*Staker).Less)
+	}
+	validator.delegators.ReplaceOrInsert(staker)
+
+	v.stakers.ReplaceOrInsert(staker)
+}
+
+// DeleteModifiedDelegator removes a previously modified delegator from the
+// validator's delegator set and the flat staker index, pruning the validator
+// if it no longer has any stakers, without recording a diff entry.
+func (v *baseStakers) DeleteModifiedDelegator(staker *Staker) {
+	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
+	if validator.delegators != nil {
+		validator.delegators.Delete(staker)
+	}
+	v.pruneValidator(staker.SubnetID, staker.NodeID)
+
+	v.stakers.Delete(staker)
 }
 
 func (v *baseStakers) DeleteDelegator(staker *Staker) {

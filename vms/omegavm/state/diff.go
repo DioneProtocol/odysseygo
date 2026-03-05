@@ -274,6 +274,18 @@ func (d *diff) GetCurrentStakerIterator() (StakerIterator, error) {
 	return d.currentStakerDiffs.GetStakerIterator(parentIterator), nil
 }
 
+func (d *diff) ModifyCurrentStakerIterator() (StakerIterator, error) {
+	parentState, ok := d.stateVersions.GetState(d.parentID)
+	if !ok {
+		return nil, fmt.Errorf("%w: %s", ErrMissingParentState, d.parentID)
+	}
+	parentIterator, err := parentState.ModifyCurrentStakerIterator()
+	if err != nil {
+		return nil, err
+	}
+	return d.currentStakerDiffs.GetStakerIterator(parentIterator), nil
+}
+
 func (d *diff) GetCurrentStakersLen() (uint64, error) {
 	parentState, ok := d.stateVersions.GetState(d.parentID)
 	if !ok {
