@@ -771,6 +771,10 @@ func (s *state) GetCurrentStakerIterator() (StakerIterator, error) {
 }
 
 
+// ModifyCurrentStakerIterator rewrites the current staker set after
+// Pyruni activation so that validators and delegators end times updated when iterated over, without
+// mutating the underlying persisted transactions.
+// It will only run once after Pyruni activation.
 func (s *state) ModifyCurrentStakerIterator() (StakerIterator, error) {
 	if !s.cfg.IsPyruniActivated(s.timestamp) {
 		return s.currentStakers.GetStakerIterator(), nil

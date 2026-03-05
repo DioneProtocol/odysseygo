@@ -37,12 +37,11 @@ func init() {
 	rewardOwnerID = addr
 }
 
-// modifyTx adjusts the end time and reward owner for genesis validators in
-// the transaction. It only affects the value returned by the GetTx function.
-// The state of the genesis transactions remains unchanged.
-//
-// Currently, there are no delegators on the testnet, so delegator end times do
-// not need to be adjusted.
+// modifyTx adjusts the end time and reward owner for genesis validators, 
+// non active validators and shortens delegator periods
+// that has delegation on genesis validators so they end at the configured delegator
+// cutoff time, once Pyruni is activated. 
+// It only affects the value returned by the GetCurrentStakerIterator function.
 func (s *state) modifyTx(tx *txs.Tx) (*txs.Tx, error) {
 	// update end time when pyruni is activated
 	if !s.cfg.IsPyruniActivated(s.timestamp) {

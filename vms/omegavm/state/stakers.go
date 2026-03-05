@@ -222,6 +222,9 @@ func (v *baseStakers) PutDelegator(staker *Staker) {
 	v.stakers.ReplaceOrInsert(staker)
 }
 
+// PutModifiedDelegator inserts a delegator whose staking parameters have been
+// updated in-memory into the validator's delegator set
+// and the flat staker index, without recording a diff entry.
 func (v *baseStakers) PutModifiedDelegator(staker *Staker) {
 	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
 	if validator.delegators == nil {
@@ -232,6 +235,9 @@ func (v *baseStakers) PutModifiedDelegator(staker *Staker) {
 	v.stakers.ReplaceOrInsert(staker)
 }
 
+// DeleteModifiedDelegator removes a previously modified delegator from the
+// validator's delegator set and the flat staker index, pruning the validator
+// if it no longer has any stakers, without recording a diff entry.
 func (v *baseStakers) DeleteModifiedDelegator(staker *Staker) {
 	validator := v.getOrCreateValidator(staker.SubnetID, staker.NodeID)
 	if validator.delegators != nil {
