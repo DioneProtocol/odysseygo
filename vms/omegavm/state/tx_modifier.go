@@ -18,15 +18,15 @@ var (
 	// each validator's end time to reduce the validation time.
 
 	// update time for delegator which has start time equal to genesis start time
-	testnetDelegatorEndTime = time.Date(2027, time.January, 1, 0, 0, 0, 0, time.UTC)
+	delegatorEndTime = time.Date(2027, time.January, 1, 0, 0, 0, 0, time.UTC)
 
 	nonActiveValidatorStartTime = time.Date(2025, time.March, 1, 0, 0, 0, 0, time.UTC)
 
 	// update time for non active validator which has start time before nonActiveValidatorStartTime
-	testnetNonActiveValidatorEndTimeDecrement uint64 = 1 * 365 * 24 * 60 * 60 // 1 year in seconds
+	nonActiveValidatorEndTimeDecrement uint64 = 1 * 365 * 24 * 60 * 60 // 1 year in seconds
 
 	// update time for validator which has end time before testnetEndTimeDecrement
-	testnetEndTimeDecrement uint64 = 5 * 365 * 24 * 60 * 60 // 5 years in seconds
+	endTimeDecrement uint64 = 5 * 365 * 24 * 60 * 60 // 5 years in seconds
 )
 
 func init() {
@@ -43,6 +43,9 @@ func init() {
 // cutoff time, once Pyruni is activated. 
 // It only affects the value returned by the GetCurrentStakerIterator function.
 func (s *state) modifyTx(tx *txs.Tx) (*txs.Tx, error) {
+	if s.ctx.NetworkID != genesis.MainnetConfig.NetworkID {
+		return tx, nil
+	}
 	// update end time when pyruni is activated
 	if !s.cfg.IsPyruniActivated(s.timestamp) {
 		return tx, nil
@@ -53,12 +56,12 @@ func (s *state) modifyTx(tx *txs.Tx) (*txs.Tx, error) {
 	case *txs.AddValidatorTx:
 		// We are looking for testnet genesis validators. Genesis validators have a
 		// start time equal to the genesis start time.
-		if utx.StartTime().Unix() == int64(genesis.TestnetConfig.StartTime) {
-			return reduceValidatorEndTime(tx, testnetEndTimeDecrement)
+		if utx.StartTime().Unix() == int64(genesis.MainnetConfig.StartTime) {
+			return reduceValidatorEndTime(tx, endTimeDecrement)
 		}
 
-		if (utx.StartTime().Unix() <= nonActiveValidatorStartTime.Unix() && utx.EndTime().Unix() > activationTime) && utx.StartTime().Unix() != int64(genesis.TestnetConfig.StartTime) {
-			return reduceValidatorEndTime(tx, testnetNonActiveValidatorEndTimeDecrement)
+		if (utx.StartTime().Unix() <= nonActiveValidatorStartTime.Unix() && utx.EndTime().Unix() > activationTime) && utx.StartTime().Unix() != int64(genesis.MainnetConfig.StartTime) {
+			return reduceValidatorEndTime(tx, nonActiveValidatorEndTimeDecrement)
 		}
 	case *txs.AddDelegatorTx:
 		vdrStartTime, err := s.GetStartTime(utx.NodeID(), utx.SubnetID())
@@ -73,7 +76,7 @@ func (s *state) modifyTx(tx *txs.Tx) (*txs.Tx, error) {
 			}
 	
 			utx := txCopy.Unsigned.(*txs.AddDelegatorTx)
-			utx.End = uint64(testnetDelegatorEndTime.Unix())
+			utx.End = uint64(delegatorEndTime.Unix())
 			return txCopy, nil
 	
 		}
@@ -90,7 +93,7 @@ func (s *state) modifyTx(tx *txs.Tx) (*txs.Tx, error) {
 			}
 	
 			utx := txCopy.Unsigned.(*txs.AddPermissionlessDelegatorTx)
-			utx.End = uint64(testnetDelegatorEndTime.Unix())
+			utx.End = uint64(delegatorEndTime.Unix())
 	
 			return txCopy, nil
 		}
@@ -119,5 +122,5 @@ func reduceValidatorEndTime(tx *txs.Tx, endTimeDecrement uint64) (*txs.Tx, error
 }
 
 func checkReductionRequiredForDelegator(vdrStartTime int64, startTime int64, endTime int64, activationTime int64) bool {
-	return vdrStartTime == int64(genesis.TestnetConfig.StartTime) && (startTime < activationTime && endTime > testnetDelegatorEndTime.Unix())
+	return vdrStartTime == int64(genesis.MainnetConfig.StartTime) && (startTime < activationTime && endTime > delegatorEndTime.Unix())
 }
