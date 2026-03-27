@@ -303,24 +303,24 @@
   ],
   "testnet": [
     {
-      "id": "NodeID-HBZJTeTJi1rin8vTWMnyFsRuMH186Lm5e",
+      "id": "NodeID-AiG6KkghRL3dxL1DUaj96Hkw9CbMjgZFX",
       "ip": "34.195.91.43:9651"
     },
     {
-      "id": "NodeID-KJvZe6FS9kPxZvyLeCAe25X3R3TQjazrp",
-      "ip": "34.228.174.219:9653"
+      "id": "NodeID-FBCwaceKVdiaXUmB6WBEj4vsZhbFomipb",
+      "ip": "34.228.174.219:9651"
     },
     {
-      "id": "NodeID-7rnzL2CJYhYmvnyQvpmpRQAHhhjmf1EcB",
-      "ip": "3.229.34.54:9655"
+      "id": "NodeID-8mGQSeBYADZirSKFmEes1BEdDH1rfdxWy",
+      "ip": "138.197.97.193:9651"
     },
     {
-      "id": "NodeID-GRKMRoLQsY88CNuj75fXwivaaGkaxfhBY",
-      "ip": "52.202.152.112:9657"
+      "id": "NodeID-4TUppLY9VVUHM6vgdpH8Vz9de6omJgkux",
+      "ip": "52.202.152.112:9651"
     },
     {
-      "id": "NodeID-JExZFRdGBB9K8RNsusRpdonDqQAB35APb",
-      "ip": "54.234.187.185:9659"
+      "id": "NodeID-EKzxZW7NbkHpCeknFej9mLmuTJbEy5UPq",
+      "ip": "142.93.79.217:9651"
     }
   ]
 }
