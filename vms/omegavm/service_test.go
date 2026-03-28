@@ -282,7 +282,7 @@ func TestGetTx(t *testing.T) {
 			"proposal block",
 			func(service *Service) (*txs.Tx, error) {
 				return service.vm.txBuilder.NewAddValidatorTx( // Test GetTx works for proposal blocks
-					service.vm.MinValidatorStake,
+					service.vm.MinValidatorStake(),
 					uint64(service.vm.clock.Time().Add(txexecutor.SyncBound).Unix()),
 					uint64(service.vm.clock.Time().Add(txexecutor.SyncBound).Add(defaultMinValidatorStakingDuration).Unix()),
 					ids.GenerateTestNodeID(),
@@ -525,7 +525,7 @@ func TestGetStake(t *testing.T) {
 
 	// Make sure this works for pending stakers
 	// Add a pending staker
-	stakeAmount = service.vm.MinValidatorStake + 54321
+	stakeAmount = service.vm.MinValidatorStake() + 54321
 	pendingStakerNodeID := ids.GenerateTestNodeID()
 	pendingStakerEndTime := uint64(defaultGenesisTime.Add(defaultMinValidatorStakingDuration).Unix())
 	tx, err = service.vm.txBuilder.NewAddValidatorTx(

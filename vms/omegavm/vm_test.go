@@ -298,6 +298,14 @@ func BuildGenesisTestWithArgs(t *testing.T, args *api.BuildGenesisArgs) (*api.Bu
 	return &buildGenesisArgs, genesisBytes
 }
 
+func minValidatorStake() uint64 {
+	return defaultMinValidatorStake
+}
+
+func minValidatorStakeDuration() time.Duration {
+	return defaultMinValidatorStakingDuration
+}
+
 func defaultVM(t *testing.T) (*VM, database.Database, *mutableSharedMemory) {
 	require := require.New(t)
 
@@ -313,10 +321,10 @@ func defaultVM(t *testing.T) (*VM, database.Database, *mutableSharedMemory) {
 		CreateSubnetTxFee:         100 * defaultTxFee,
 		TransformSubnetTxFee:      100 * defaultTxFee,
 		CreateBlockchainTxFee:     100 * defaultTxFee,
-		MinValidatorStake:         defaultMinValidatorStake,
+		MinValidatorStake:         minValidatorStake,
 		MaxValidatorStake:         defaultMaxValidatorStake,
 		MinDelegatorStake:         defaultMinDelegatorStake,
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
@@ -465,7 +473,7 @@ func TestAddValidatorCommit(t *testing.T) {
 
 	// create valid tx
 	tx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
@@ -511,7 +519,7 @@ func TestInvalidAddValidatorCommit(t *testing.T) {
 
 	// create invalid tx
 	tx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
@@ -565,7 +573,7 @@ func TestAddValidatorReject(t *testing.T) {
 
 	// create valid tx
 	tx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
@@ -610,7 +618,7 @@ func TestAddValidatorInvalidNotReissued(t *testing.T) {
 
 	// create valid tx
 	tx, err := vm.txBuilder.NewAddValidatorTx(
-		vm.MinValidatorStake,
+		vm.MinValidatorStake(),
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		repeatNodeID,
@@ -1332,7 +1340,7 @@ func TestRestartFullyAccepted(t *testing.T) {
 		Chains:                    chains.TestManager,
 		Validators:                firstVdrs,
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
@@ -1427,7 +1435,7 @@ func TestRestartFullyAccepted(t *testing.T) {
 		Chains:                    chains.TestManager,
 		Validators:                secondVdrs,
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
@@ -1484,7 +1492,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		Chains:                    chains.TestManager,
 		Validators:                vdrs,
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,
@@ -1811,7 +1819,7 @@ func TestUnverifiedParent(t *testing.T) {
 		Chains:                    chains.TestManager,
 		Validators:                vdrs,
 		UptimeLockedCalculator:    uptime.NewLockedCalculator(),
-		MinValidatorStakeDuration: defaultMinValidatorStakingDuration,
+		MinValidatorStakeDuration: minValidatorStakeDuration,
 		MaxValidatorStakeDuration: defaultMaxValidatorStakingDuration,
 		MinDelegatorStakeDuration: defaultMinDelegatorStakingDuration,
 		MaxDelegatorStakeDuration: defaultMaxDelegatorStakingDuration,

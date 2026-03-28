@@ -724,7 +724,7 @@ func TestAdvanceTimeTxDelegatorStakerWeight(t *testing.T) {
 
 	// Test validator weight after delegation
 	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake(), vdrWeight)
 }
 
 func TestAdvanceTimeTxDelegatorStakers(t *testing.T) {
@@ -770,7 +770,7 @@ func TestAdvanceTimeTxDelegatorStakers(t *testing.T) {
 	primarySet, ok := env.config.Validators.Get(constants.PrimaryNetworkID)
 	require.True(ok)
 	vdrWeight := primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinValidatorStake(), vdrWeight)
 
 	// Add delegator
 	pendingDelegatorStartTime := pendingValidatorStartTime.Add(1 * time.Second)
@@ -822,7 +822,7 @@ func TestAdvanceTimeTxDelegatorStakers(t *testing.T) {
 
 	// Test validator weight after delegation
 	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake(), vdrWeight)
 }
 
 // Test method InitiallyPrefersCommit
@@ -919,7 +919,7 @@ func addPendingValidator(
 	keys []*secp256k1.PrivateKey,
 ) (*txs.Tx, error) {
 	addPendingValidatorTx, err := env.txBuilder.NewAddValidatorTx(
-		env.config.MinValidatorStake,
+		env.config.MinValidatorStake(),
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,

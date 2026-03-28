@@ -1,0 +1,103 @@
+{
+  "networkID": 123456,
+  "allocations": [
+    {
+      "ethAddr": "0x5b9A1ef78F359e73B14142878704ac831e9500A8",
+      "dioneAddr": "A-kaito17xh0qyrz2z43xa39mxwy7emmh2naq4l5gwzzet",
+      "initialAmount": 1000000000000000000,
+      "unlockSchedule": [
+        {
+          "amount": 1000000000000000000,
+          "locktime": 0
+        }
+      ]
+    },
+    {
+      "ethAddr": "0xee455EB36b3368a83e0b4fE7b34252c99FcEcBD0",
+      "dioneAddr": "A-kaito12lhdf0t727kmu4rv5d80ut374v6406mu586mpa",
+      "initialAmount": 1000000000000000000,
+      "unlockSchedule": [
+        {
+          "amount": 1000000000000000000,
+          "locktime": 0
+        }
+      ]
+    },
+    {
+      "ethAddr": "0xfcAc22ad9d46CC83b0101b7f5C0Ed741a5760406",
+      "dioneAddr": "A-kaito1xe64srn4qhrqsf6nnn0q2d8ysy7ygk8wn3jnsw",
+      "initialAmount": 1000000000000000000,
+      "unlockSchedule": [
+        {
+          "amount": 1000000000000000000,
+          "locktime": 0
+        }
+      ]
+    },
+    {
+      "ethAddr": "0xCA52Ec9893189F3f9E08003F77301586d674719C",
+      "dioneAddr": "A-kaito1az8n2f6dumd6892ly5vrapr8sh9q8r7pgfw5nv",
+      "initialAmount": 1000000000000000000,
+      "unlockSchedule": [
+        {
+          "amount": 1000000000000000000,
+          "locktime": 0
+        }
+      ]
+    },
+    {
+      "ethAddr": "0x709c047F92F4e32F7123C8cA577432D1f55bee92",
+      "dioneAddr": "A-kaito1vnrpjfurul984gty3st485k5de5hd230kw5s9r",
+      "initialAmount": 1000000000000000000,
+      "unlockSchedule": [
+        {
+          "amount": 1000000000000000000,
+          "locktime": 0
+        }
+      ]
+    }
+  ],
+  "startTime": 1756472500,
+  "initialStakeDuration": 31536000,
+  "initialStakeDurationOffset": 5400,
+  "initialStakedFunds": [
+    "A-kaito17xh0qyrz2z43xa39mxwy7emmh2naq4l5gwzzet",
+    "A-kaito12lhdf0t727kmu4rv5d80ut374v6406mu586mpa",
+    "A-kaito1xe64srn4qhrqsf6nnn0q2d8ysy7ygk8wn3jnsw",
+    "A-kaito1az8n2f6dumd6892ly5vrapr8sh9q8r7pgfw5nv",
+    "A-kaito1vnrpjfurul984gty3st485k5de5hd230kw5s9r"
+  ],
+  "initialStakers": [
+    {
+      "nodeID": "NodeID-DFRpSjRPPByYm2jtX74aCpdrcstAfpAwR",
+      "rewardAddress": "A-kaito17xh0qyrz2z43xa39mxwy7emmh2naq4l5gwzzet",
+      "delegationFee": 1000000,
+      "stakeAmount": 200000000000000000
+    },
+    {
+      "nodeID": "NodeID-4tGmJnmgLYDq5aL4eYTD94E3Dr637kdtD",
+      "rewardAddress": "A-kaito12lhdf0t727kmu4rv5d80ut374v6406mu586mpa",
+      "delegationFee": 1000000,
+      "stakeAmount": 200000000000000000
+    },
+    {
+      "nodeID": "NodeID-2u2AdhwmTZDWfD4C3ppu52uwzcqfgtz9X",
+      "rewardAddress": "A-kaito1xe64srn4qhrqsf6nnn0q2d8ysy7ygk8wn3jnsw",
+      "delegationFee": 1000000,
+      "stakeAmount": 200000000000000000
+    },
+    {
+      "nodeID": "NodeID-C9mbTTgDLwbuYJnKdQAJDwrbSvHKLwctc",
+      "rewardAddress": "A-kaito1az8n2f6dumd6892ly5vrapr8sh9q8r7pgfw5nv",
+      "delegationFee": 1000000,
+      "stakeAmount": 200000000000000000
+    },
+    {
+      "nodeID": "NodeID-7oowrokMRzbUoDRzytLsVhSny3mPTCrJi",
+      "rewardAddress": "A-kaito1vnrpjfurul984gty3st485k5de5hd230kw5s9r",
+      "delegationFee": 1000000,
+      "stakeAmount": 200000000000000000
+    }
+  ],
+  "dChainGenesis": "{\"config\":{\"chainId\":43112,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0,\"ApricotPhase3BlockTimestamp\":0,\"ApricotPhase4BlockTimestamp\":0,\"ApricotPhase5BlockTimestamp\":0,\"ApricotPhasePre6BlockTimestamp\":0,\"ApricotPhase6BlockTimestamp\":0,\"ApricotPhasePost6BlockTimestamp\":0,\"BanffBlockTimestamp\":0,\"CortinaBlockTimestamp\":0,\"DUpgradeBlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"5b9a1ef78f359e73b14142878704ac831e9500a8\":{\"balance\":\"0x295BE96E64066972000000\"},\"070a16d8c598fe8767b2c00ec7bb30dab52dd691\": {\"balance\": \"0x295BE96E64066972000000\"},\"000000000000000000000000000000000000012a\":{\"code\":\"0x6080604052348015600f57600080fd5b5060043610603c5760003560e01c80633fa4f24514604157806360fe47b114605b5780636d4ce63c14606c575b600080fd5b604960005481565b60405190815260200160405180910390f35b606a606636600460a3565b6073565b005b6000546049565b600081815560405182917fca9076777bea707d7602f398fc73932162e8a91d50202b88929c4cd710b6d6cd91a250565b60006020828403121560b457600080fd5b503591905056fea2646970667358221220839347288ae927517f23fab7d640a3e5a0352115658f078553db4ccee124399464736f6c63430008110033\",\"balance\":\"0x0\",\"storage\":{\"0x0000000000000000000000000000000000000000000000000000000000000000\":\"0x000000000000000000000000000000000000000000000000000000000001e240\"}}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+}

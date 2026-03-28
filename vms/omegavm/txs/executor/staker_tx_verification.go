@@ -94,7 +94,7 @@ func verifyAddValidatorTx(
 	duration := tx.Validator.Duration()
 
 	switch {
-	case tx.Validator.Wght < backend.Config.MinValidatorStake:
+	case tx.Validator.Wght < backend.Config.MinValidatorStake():
 		// Ensure validator is staking at least the minimum amount
 		return nil, ErrWeightTooSmall
 
@@ -106,7 +106,7 @@ func verifyAddValidatorTx(
 		// Ensure the validator fee is at least the minimum amount
 		return nil, ErrInsufficientDelegationFee
 
-	case duration < backend.Config.MinValidatorStakeDuration:
+	case duration < backend.Config.MinValidatorStakeDuration():
 		// Ensure staking length is not too short
 		return nil, ErrStakeTooShort
 
@@ -190,7 +190,7 @@ func verifyAddSubnetValidatorTx(
 
 	duration := tx.Validator.Duration()
 	switch {
-	case duration < backend.Config.MinValidatorStakeDuration:
+	case duration < backend.Config.MinValidatorStakeDuration():
 		// Ensure staking length is not too short
 		return ErrStakeTooShort
 
@@ -589,9 +589,9 @@ func getValidatorRules(
 	if subnetID == constants.PrimaryNetworkID {
 		return &addValidatorRules{
 			assetID:           backend.Ctx.DIONEAssetID,
-			minValidatorStake: backend.Config.MinValidatorStake,
+			minValidatorStake: backend.Config.MinValidatorStake(),
 			maxValidatorStake: backend.Config.MaxValidatorStake,
-			minStakeDuration:  backend.Config.MinValidatorStakeDuration,
+			minStakeDuration:  backend.Config.MinValidatorStakeDuration(),
 			maxStakeDuration:  backend.Config.MaxValidatorStakeDuration,
 			minDelegationFee:  backend.Config.MinDelegationFee,
 		}, nil

@@ -322,5 +322,27 @@
       "id": "NodeID-EKzxZW7NbkHpCeknFej9mLmuTJbEy5UPq",
       "ip": "142.93.79.217:9651"
     }
+  ],
+  "kaito": [
+    {
+      "id": "NodeID-DFRpSjRPPByYm2jtX74aCpdrcstAfpAwR",
+      "ip": "127.0.0.1:9651"
+    },
+    {
+      "id": "NodeID-4tGmJnmgLYDq5aL4eYTD94E3Dr637kdtD",
+      "ip": "127.0.0.1:9653"
+    },
+    {
+      "id": "NodeID-2u2AdhwmTZDWfD4C3ppu52uwzcqfgtz9X",
+      "ip": "127.0.0.1:9655"
+    },
+    {
+      "id": "NodeID-C9mbTTgDLwbuYJnKdQAJDwrbSvHKLwctc",
+      "ip": "127.0.0.1:9657"
+    },
+    {
+      "id": "NodeID-7oowrokMRzbUoDRzytLsVhSny3mPTCrJi",
+      "ip": "127.0.0.1:9659"
+    }
   ]
 }

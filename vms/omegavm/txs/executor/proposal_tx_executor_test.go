@@ -35,12 +35,12 @@ func TestProposalTxExecuteAddDelegator(t *testing.T) {
 	// pending validator set with the minimum staking amount
 	addMinStakeValidator := func(target *environment) {
 		tx, err := target.txBuilder.NewAddValidatorTx(
-			target.config.MinValidatorStake, // stake amount
-			newValidatorStartTime,           // start time
-			newValidatorEndTime,             // end time
-			newValidatorID,                  // node ID
-			rewardAddress,                   // Reward Address
-			reward.PercentDenominator,       // Shares
+			target.config.MinValidatorStake(), // stake amount
+			newValidatorStartTime,             // start time
+			newValidatorEndTime,               // end time
+			newValidatorID,                    // node ID
+			rewardAddress,                     // Reward Address
+			reward.PercentDenominator,         // Shares
 			[]*secp256k1.PrivateKey{preFundedKeys[0]},
 			ids.ShortEmpty,
 		)
@@ -362,12 +362,12 @@ func TestProposalTxExecuteAddSubnetValidator(t *testing.T) {
 	dsEndTime := dsStartTime.Add(5 * defaultMinValidatorStakingDuration)
 
 	addDSTx, err := env.txBuilder.NewAddValidatorTx(
-		env.config.MinValidatorStake, // stake amount
-		uint64(dsStartTime.Unix()),   // start time
-		uint64(dsEndTime.Unix()),     // end time
-		pendingDSValidatorID,         // node ID
-		nodeID,                       // reward address
-		reward.PercentDenominator,    // shares
+		env.config.MinValidatorStake(), // stake amount
+		uint64(dsStartTime.Unix()),     // start time
+		uint64(dsEndTime.Unix()),       // end time
+		pendingDSValidatorID,           // node ID
+		nodeID,                         // reward address
+		reward.PercentDenominator,      // shares
 		[]*secp256k1.PrivateKey{preFundedKeys[0]},
 		ids.ShortEmpty,
 	)
@@ -726,7 +726,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 	{
 		// Case: Validator's start time too early
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,
+			env.config.MinValidatorStake(),
 			uint64(defaultValidateStartTime.Unix()),
 			uint64(defaultValidateEndTime.Unix()),
 			nodeID,
@@ -756,7 +756,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 	{
 		// Case: Validator's start time too far in the future
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,
+			env.config.MinValidatorStake(),
 			uint64(defaultValidateStartTime.Add(MaxFutureStartTime).Unix()+1),
 			uint64(defaultValidateStartTime.Add(MaxFutureStartTime).Add(defaultMinValidatorStakingDuration).Unix()+1),
 			nodeID,
@@ -786,7 +786,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 	{
 		// Case: Validator already validating primary network
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,
+			env.config.MinValidatorStake(),
 			uint64(defaultValidateStartTime.Unix())+1,
 			uint64(defaultValidateEndTime.Unix()),
 			ids.NodeID(preFundedKeys[0].Address()),
@@ -817,7 +817,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 		// Case: Validator in pending validator set of primary network
 		startTime := defaultGenesisTime.Add(1 * time.Second)
 		tx, err := env.txBuilder.NewAddValidatorTx(
-			env.config.MinValidatorStake,                                     // stake amount
+			env.config.MinValidatorStake(),                                   // stake amount
 			uint64(startTime.Unix()),                                         // start time
 			uint64(startTime.Add(defaultMinValidatorStakingDuration).Unix()), // end time
 			nodeID,
@@ -859,7 +859,7 @@ func TestProposalTxExecuteAddValidator(t *testing.T) {
 	{
 		// Case: Validator doesn't have enough tokens to cover stake amount
 		tx, err := env.txBuilder.NewAddValidatorTx( // create the tx
-			env.config.MinValidatorStake,
+			env.config.MinValidatorStake(),
 			uint64(defaultValidateStartTime.Unix())+1,
 			uint64(defaultValidateEndTime.Unix()),
 			ids.GenerateTestNodeID(),

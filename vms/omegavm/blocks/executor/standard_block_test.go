@@ -854,5 +854,5 @@ func TestBanffStandardBlockDelegatorStakerWeight(t *testing.T) {
 
 	// Test validator weight after delegation
 	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake(), vdrWeight)
 }

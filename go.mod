@@ -7,9 +7,11 @@ module github.com/DioneProtocol/odysseygo
 // go.mod (here, only major.minor can be specified)
 go 1.20
 
+replace github.com/DioneProtocol/coreth => github.com/lucanali/coreth v0.0.0-20250922103829-ebcaf75f2665
+
 require (
 	github.com/DataDog/zstd v1.5.2
-	github.com/DioneProtocol/coreth v0.0.2
+	github.com/DioneProtocol/coreth v0.0.0-00010101000000-000000000000
 	github.com/DioneProtocol/ledger-odyssey/go v0.0.0-20240716144700-70b2cf851d2f
 	github.com/Microsoft/go-winio v0.5.2
 	github.com/NYTimes/gziphandler v1.1.1
@@ -147,6 +149,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
+	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

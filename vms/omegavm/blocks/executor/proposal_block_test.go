@@ -582,7 +582,7 @@ func TestBanffProposalBlockUpdateStakers(t *testing.T) {
 
 			for _, staker := range test.stakers {
 				tx, err := env.txBuilder.NewAddValidatorTx(
-					env.config.MinValidatorStake,
+					env.config.MinValidatorStake(),
 					uint64(staker.startTime.Unix()),
 					uint64(staker.endTime.Unix()),
 					staker.nodeID,
@@ -1135,7 +1135,7 @@ func TestBanffProposalBlockDelegatorStakerWeight(t *testing.T) {
 
 	// Test validator weight after delegation
 	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake(), vdrWeight)
 }
 
 func TestBanffProposalBlockDelegatorStakers(t *testing.T) {
@@ -1317,5 +1317,5 @@ func TestBanffProposalBlockDelegatorStakers(t *testing.T) {
 
 	// Test validator weight after delegation
 	vdrWeight = primarySet.GetWeight(nodeID)
-	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake, vdrWeight)
+	require.Equal(env.config.MinDelegatorStake+env.config.MinValidatorStake(), vdrWeight)
 }

@@ -23,6 +23,7 @@ const (
 
 	UnitTestID uint32 = 10
 	LocalID    uint32 = 12345
+	KaitoID    uint32 = 123456
 
 	MainnetName  = "mainnet"
 	CascadeName  = "cascade"
@@ -31,6 +32,7 @@ const (
 	TestnetName  = "testnet"
 	UnitTestName = "testing"
 	LocalName    = "local"
+	KaitoName    = "kaito"
 
 	MainnetHRP  = "dione"
 	CascadeHRP  = "cascade"
@@ -39,6 +41,7 @@ const (
 	TestnetHRP  = "testnet"
 	UnitTestHRP = "testing"
 	LocalHRP    = "local"
+	KaitoHRP    = "kaito"
 	FallbackHRP = "custom"
 )
 
@@ -55,6 +58,7 @@ var (
 		TestnetID:  TestnetName,
 		UnitTestID: UnitTestName,
 		LocalID:    LocalName,
+		KaitoID:    KaitoName,
 	}
 	NetworkNameToNetworkID = map[string]uint32{
 		MainnetName:  MainnetID,
@@ -64,6 +68,7 @@ var (
 		TestnetName:  TestnetID,
 		UnitTestName: UnitTestID,
 		LocalName:    LocalID,
+		KaitoName:    KaitoID,
 	}
 
 	NetworkIDToHRP = map[uint32]string{
@@ -74,6 +79,7 @@ var (
 		TestnetID:  TestnetHRP,
 		UnitTestID: UnitTestHRP,
 		LocalID:    LocalHRP,
+		KaitoID:    KaitoHRP,
 	}
 	NetworkHRPToNetworkID = map[string]uint32{
 		MainnetHRP:  MainnetID,
@@ -83,6 +89,7 @@ var (
 		TestnetHRP:  TestnetID,
 		UnitTestHRP: UnitTestID,
 		LocalHRP:    LocalID,
+		KaitoHRP:    KaitoID,
 	}
 	ProductionNetworkIDs = set.Of(MainnetID, TestnetID)
 
